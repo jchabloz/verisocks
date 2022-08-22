@@ -1,0 +1,68 @@
+@startuml verisocks_architecture
+title Verisocks architecture overview
+' footer "Copyright (c) Jérémie Chabloz - 2022"
+
+!include <tupadr3/font-awesome-5/server>
+!include <tupadr3/font-awesome-5/python>
+!include <tupadr3/font-awesome-5/robot>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/cogs>
+!include <tupadr3/font-awesome-5/file_code>
+!include <tupadr3/font-awesome-5/code>
+!include <tupadr3/font-awesome-5/microchip>
+
+skinparam NoteBackgroundColor AliceBlue
+skinparam ComponentStyle rectangle
+
+frame "PLI application" {
+    rectangle "PLI routine" {
+        rectangle "<$server>\nServer" as tcp_server
+    }
+}
+    
+file "<$database>\nConfig" as cfg
+file "<$file_code>\nFirmware" as fw
+
+frame "Icarus simulator" {
+    rectangle "Verilog testbench" as tb {
+        [<$microchip>\nDUT] as dut
+        rectangle "Shell module instance" {
+            [User defined\nsystem task (PLI)] as task
+        }  
+    }
+}
+
+frame "Test framework" as client {
+    [<$python>\nClient] as tcp_client
+    [<$robot>\nTCMS] as tcms
+}
+
+note bottom of tcms
+Test case management system,
+automated or manual, such as
+Robot, pytest, Kiwi, etc.
+endnote
+
+note bottom of tcp_server
+C program using
+BSD socket.
+Only accepts a single
+connection at a time.
+endnote
+
+note top of task
+User-defined task
+called in initial
+block of shell module
+endnote
+
+task <--> dut
+task <-> tcp_server : VPI
+tcp_server <-> tcp_client : TCP/IP
+tcms <-left-> tcp_client
+
+cfg .> dut
+cfg .> tb
+fw .up.> dut
+
+@enduml
