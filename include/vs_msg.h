@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include "cJSON.h"
 
-
 #define VS_MSG_MAX_READ_TRIALS  10u //Defines how many read trials should be attempted
 #define VS_MSG_MAX_WRITE_TRIALS 10u //Defines how many write trials should be attempted
 
@@ -95,7 +94,7 @@ char* vs_msg_create_json_message_from_string(const char *str_message);
  * @warning The caller is responsible to guarantee that at least the 2-bytes
  * pre-header is available and not garbage.
  */
-const size_t vs_msg_read_header_length(const char* message);
+size_t vs_msg_read_header_length(const char* message);
 
 /**
  * @brief Scans a partial or full message to extract the type and length

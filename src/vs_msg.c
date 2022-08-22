@@ -42,7 +42,7 @@ void vs_msg_error(const char *fmt, ...)
 /**************************************************************************//**
 Returns the header length
 ******************************************************************************/
-static const uint16_t get_header_length(const char *str_header)
+static uint16_t get_header_length(const char *str_header)
 {
     /* Get the header as a string and get its length */
     size_t header_length = strlen(str_header);
@@ -142,6 +142,10 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         return NULL;
     }
     char *str_header = cJSON_PrintUnformatted(p_header);
+    if (NULL == str_header) {
+        vs_msg_error("ERROR: Failed to create header string.\n");
+        return NULL;
+    }
     cJSON_Delete(p_header);
 
     /* Calculate pre-header based on the header length */
@@ -157,7 +161,6 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
     char *str_msg = NULL;
     switch (msg_info.type) {
     case VS_MSG_TXT :
-        str_msg = (char *) p_msg;
         break;
     case VS_MSG_TXT_JSON :
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
@@ -223,7 +226,7 @@ char* vs_msg_create_json_message_from_string(const char *str_message)
 /**************************************************************************//**
 * Read header length from pre-header
 ******************************************************************************/
-const size_t vs_msg_read_header_length(const char *message)
+size_t vs_msg_read_header_length(const char *message)
 {
     /* Extract the header length from the pre-header */
     const size_t header_length = (message[0] << 8) + message[1];
