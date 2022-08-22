@@ -1,6 +1,6 @@
-[submodule "cJSON"]
-	path = cJSON
+[submodule "cjson"]
+	path = cjson
 	url = git@github.com:DaveGamble/cJSON.git
-[submodule "Unity"]
-	path = Unity
+[submodule "unity"]
+	path = unity
 	url = git@github.com:ThrowTheSwitch/Unity.git
