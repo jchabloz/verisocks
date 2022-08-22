@@ -1,3 +1,9 @@
+# Project-specific
+out/
+references/
+.vscode/
+
+
 # Prerequisites
 *.d
 
