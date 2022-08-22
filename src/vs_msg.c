@@ -1,10 +1,10 @@
 /**
  * @file vs_msg.c
  * @author jchabloz
- * @brief Verisocks TCP message definition and utilities
+ * @brief Verisocks messages definition and utilities
  * @version 0.1
- * @date 2022-08-06
- * @note Only JSON message content with UTF-8 encoding is supported for now.
+ * @date 2022-08-22
+ * @note Only UTF-8 text encoding is supported for now.
  * 
  */
 
@@ -18,8 +18,9 @@
 /* This constant array of strings defines the values to be used for the
 content-type field of the header depending on the type numerical index as
 defined in the header file vs_msg.h. Update to add types.*/
-const char* __VS_MSG_TYPES[2] = {
-    "text/json",
+const char* __VS_MSG_TYPES[VS_MSG_ENUM_LEN] = {
+    "text/plain",
+    "application/json",
     "application/octet-stream",
 };
 
@@ -54,6 +55,20 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t msg_info)
     }
 
     switch (msg_info.type) {
+    case VS_MSG_TXT :
+        str_msg = (char *) p_msg;
+        msg_info.len = strlen(str_msg) + 1;
+        /* Add content type item */
+        if (NULL == cJSON_AddStringToObject(p_header, "content-type", __VS_MSG_TYPES[VS_MSG_TXT])) {
+            fprintf(stderr, "ERROR: Failed to add string to cJSON object.\n");
+            return NULL;
+        }
+        /* Add content encoding item */
+        if (NULL == cJSON_AddStringToObject(p_header, "charset", "UTF-8")) {
+            fprintf(stderr, "ERROR: Failed to add string to cJSON object.\n");
+            return NULL;
+        }
+        break;
     case VS_MSG_TXT_JSON :
         /* Get the message as a string and get its length, including ending
         null character */
@@ -117,6 +132,10 @@ char* vs_msg_format_message(const void *p_msg, vs_msg_info_t msg_info)
     char *str_msg = NULL;
     switch (msg_info.type)
     {
+    case VS_MSG_TXT :
+        str_msg = (char *) p_msg;
+        msg_info.len = strlen(str_msg) + 1;
+        break;
     case VS_MSG_TXT_JSON :
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
         msg_info.len = strlen(str_msg) + 1;

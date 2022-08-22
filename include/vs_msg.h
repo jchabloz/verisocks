@@ -1,10 +1,10 @@
 /**
  * @file vs_msg.h
  * @author jchabloz
- * @brief Verisocks TCP message definition and utilities
+ * @brief Verisocks messages definition and utilities
  * @version 0.1
  * @date 2022-08-07
- * @note Only JSON message content with UTF-8 encoding is supported for now.
+ * @note Only UTF-8 text encoding is supported for now.
  * 
  * Verisocks TCP socket message format:
  * --------------------------------------------------------------
@@ -20,11 +20,24 @@
 #include <cjson/cJSON.h>
 
 /**
+ * @brief Message content type enumeration
+ */
+enum vs_msg_content_type {
+    VS_MSG_TXT = 0,
+    VS_MSG_TXT_JSON,
+    VS_MSG_BIN,
+    VS_MSG_ENUM_LEN //Don't use as a content type! Used to track number of entries.
+};
+
+extern const char* __VS_MSG_TYPES[VS_MSG_ENUM_LEN];
+#define VS_CMP_TYPE(str, num_type) (strcmp(str, __VS_MSG_TYPES[num_type]) == 0)
+
+/**
  * @brief Message info structure
  * 
  */
 typedef struct vs_msg_info {
-    unsigned short int type; /** Message content type */
+    enum vs_msg_content_type type;
     size_t len; /** Message length */
 } vs_msg_info_t;
 
@@ -32,11 +45,6 @@ typedef struct vs_msg_info {
 #define VS_MSG_MAX_READ_TRIALS 10u /** Defines how many read trials should be attempted*/
 #define VS_MSG_MAX_WRITE_TRIALS 10u /** Defines how many write trials should be attempted*/
 
-#define VS_MSG_TXT_JSON 0
-#define VS_MSG_BIN 1
-
-extern const char* __VS_MSG_TYPES[2];
-#define VS_CMP_TYPE(str, num_type) (strcmp(str, __VS_MSG_TYPES[num_type]) == 0)
 
 /**
  * @brief Returns the pre-header value as the length of the JSON header as an
