@@ -17,7 +17,11 @@
 #define VS_MSG_H
 
 #include <stdint.h>
-#include <cjson/cJSON.h>
+#include "cJSON.h"
+
+
+#define VS_MSG_MAX_READ_TRIALS  10u //Defines how many read trials should be attempted
+#define VS_MSG_MAX_WRITE_TRIALS 10u //Defines how many write trials should be attempted
 
 /**
  * @brief Message content type enumeration
@@ -29,53 +33,37 @@ enum vs_msg_content_type {
     VS_MSG_ENUM_LEN //Don't use as a content type! Used to track number of entries.
 };
 
-extern const char* __VS_MSG_TYPES[VS_MSG_ENUM_LEN];
-#define VS_CMP_TYPE(str, num_type) (strcmp(str, __VS_MSG_TYPES[num_type]) == 0)
+extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
+#define VS_CMP_TYPE(str, num_type) (strcmp(str, VS_MSG_TYPES[num_type]) == 0)
 
 /**
  * @brief Message info structure
- * 
  */
 typedef struct vs_msg_info {
-    enum vs_msg_content_type type;
-    size_t len; /** Message length */
+    enum vs_msg_content_type type; //Content type
+    size_t len; //Message content length
 } vs_msg_info_t;
 
-
-#define VS_MSG_MAX_READ_TRIALS 10u /** Defines how many read trials should be attempted*/
-#define VS_MSG_MAX_WRITE_TRIALS 10u /** Defines how many write trials should be attempted*/
-
-
 /**
- * @brief Returns the pre-header value as the length of the JSON header as an
- * (unformatted) string.
+ * @brief Returns the header for a message.
  * 
- * @param header Pointer to a cJSON struct with the message header.
- * @return uint16_t Header length. If longer than can be contained in a 2-bytes
- * value, returns 0.
+ * @param p_msg Pointer to the message content.
+ * @param p_msg_info Pointer to message info structure. If the message content
+ * type is binary, the len field is mandatory, for a string-based content type,
+ * it can be left uninitialized. For text-based content, the struct is updated
+ * with the correct length value.
+ * @return Pointer to a cJSON struct representing the message header. Returns a
+ * NULL pointer in case of error.
  */
-const uint16_t vs_msg_get_pre_header_value(const cJSON *header);
-
-/**
- * @brief Returns the header for a message with JSON content.
- * 
- * @param msg Pointer the message content. Depending on the type, a pointer to
- * a cJSON struct is expected.
- * @param msg_type Message type (struct vs_msg_info)
- * @return Pointer to a cJSON struct with the message header.
- */
-cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t msg_type);
-
-#define vs_msg_create_header_json(m) vs_msg_create_header(m, (vs_msg_info_t) {VS_MSG_TXT_JSON, 0})
-#define vs_msg_create_header_bin(m,n) vs_msg_create_header(m, (vs_msg_info_t) {VS_MSG_BIN, n})
+cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Returns a fully formatted message as based on a cJSON object content,
  * including header and pre-header.
  * 
- * @param msg Pointer the message content. Depending on the type, a pointer to
+ * @param p_msg Pointer the message content. Depending on the type, a pointer to
  * a cJSON struct is expected.
- * @param msg_type Message type (struct vs_msg_info)
+ * @param msg_info Message information (type and length)
  * @return char* Formatted message string.
  * @warning The returned formatted message includes a 2-byte pre-header
  * corresponding to the length of the header directly represented as a binary
@@ -85,36 +73,39 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t msg_type);
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_format_message(const void *p_msg, vs_msg_info_t msg_type);
+char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
 
 /**
  * @brief Returns a fully formatted message with JSON content, including header
  * and pre-header.
  * 
- * @param msg JSON content as a string. The function checks if the string can
- * be parsed as a valid JSON object.
- * @return char* Formatted message string.
+ * @param str_message JSON content as a string. The function checks if the
+ * string can be parsed as a valid JSON object.
+ * @return char* Formatted message string. Returns NULL if error.
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_format_message_from_string(const char *msg);
+char* vs_msg_create_json_message_from_string(const char *str_message);
 
 /**
  * @brief Scans a partial or full message to get the header length.
  * 
  * @param message Formatted message, including at least the pre-header.
  * @return const size_t Header length as contained in the pre-header.
+ * @warning The caller is responsible to guarantee that at least the 2-bytes
+ * pre-header is available and not garbage.
  */
-const size_t vs_msg_get_header_length(const char* message);
+const size_t vs_msg_read_header_length(const char* message);
 
 /**
- * @brief Scans the message and extract the type and length information.
+ * @brief Scans a partial or full message to extract the type and length
+ * information from the message header.
  * 
  * @param message Formatted message, including at least pre-header and header.
  * @param msg_info Pointer to a vs_msg_info_t structure.
  * @return Returns 0 if successful, -1 in case of error.
  */
-int vs_msg_get_info(const char *message, vs_msg_info_t *msg_info);
+int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans the message and extract its content as a string/byte array.
@@ -124,7 +115,7 @@ int vs_msg_get_info(const char *message, vs_msg_info_t *msg_info);
  * @return String/byte array. Returns a NULL pointer in case of error.
  * @note Returned array allocated dynamically (malloc).
  */
-char* vs_msg_get_content(const char* message, vs_msg_info_t *msg_info);
+char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a message and extract its JSON payload.
@@ -133,7 +124,7 @@ char* vs_msg_get_content(const char* message, vs_msg_info_t *msg_info);
  * @return cJSON* Pointer to a cJSON struct with the message payload. Returns
  * NULL pointer in case of an error.
  */
-cJSON* vs_msg_get_json(const char *message);
+cJSON* vs_msg_read_json(const char *message);
 
 /**
  * @brief Write a formatted message to the given descriptor.
