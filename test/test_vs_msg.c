@@ -3,6 +3,9 @@
 #include "vs_msg.h"
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 
 /* Test messages contents */
 cJSON *p_msg_json;
@@ -12,6 +15,8 @@ const char* str_msg_json_string = "{\"author_name\":\"Chabloz\",\"author_firstna
 const char* str_msg_text = "This is a simple test message";
 const unsigned char msg_bin[6] = {45, 32, 0, 2, 1, 248};
 const size_t msg_bin_len = 6;
+
+static char read_buffer[1024];
 
 void setUp(void)
 {
@@ -134,6 +139,42 @@ void test_vs_msg_create_json_message_from_string(void)
     free(str_msg);
 }
 
+void test_vs_msg_read_write_loopback(void)
+{
+
+    /* Open a file descriptor that will use to mimick the exchanges with a
+    socket when using vs_msg_write() and vs_msg_read() functions. This is not
+    exactly the same and will not be able to simulate incomplete read/writes,
+    but it is a start... */
+    int fd_test = open("./test.txt", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    TEST_ASSERT(fd_test != -1);
+
+    char *str_msg;
+    vs_msg_info_t msg_info;
+    msg_info.type = VS_MSG_TXT_JSON;
+    msg_info.len = 0;
+    str_msg = vs_msg_create_message(p_msg_json, msg_info);
+    TEST_ASSERT_NOT_NULL(str_msg);
+
+    /* Write message to file descriptor */
+    int retval = vs_msg_write(fd_test, str_msg);
+    TEST_ASSERT_EQUAL(0, retval);
+
+    /* Read back message from file descriptor */
+    retval = (int) lseek(fd_test, 0, SEEK_SET); //Reset descriptor position to start of file
+    TEST_ASSERT_EQUAL(0, retval);
+    retval = vs_msg_read(fd_test, read_buffer);
+    TEST_ASSERT_EQUAL(0, retval);
+
+    cJSON *p_msg_read = vs_msg_read_json(read_buffer);
+    TEST_ASSERT_NOT_NULL(p_msg_read);
+    TEST_ASSERT(cJSON_Compare(p_msg_json, p_msg_read, cJSON_True));
+    cJSON_Delete(p_msg_read);
+
+    free(str_msg);
+    close(fd_test);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_vs_msg_create_header_json);
@@ -143,5 +184,6 @@ int main(void) {
     RUN_TEST(test_vs_msg_create_message_text);
     RUN_TEST(test_vs_msg_create_message_bin);
     RUN_TEST(test_vs_msg_create_json_message_from_string);
+    RUN_TEST(test_vs_msg_read_write_loopback);
     return UNITY_END();
 }

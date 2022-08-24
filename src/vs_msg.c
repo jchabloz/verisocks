@@ -379,21 +379,21 @@ int vs_msg_write(int fd, const char *str_msg)
     }
     size_t header_len = vs_msg_read_header_length(str_msg);
     size_t full_len = header_len + msg_info.len + 2;
-    size_t cnt = 0; //written bytes counter
+    size_t write_count = 0; //written bytes counter
     unsigned int trials = VS_MSG_MAX_WRITE_TRIALS;
     ssize_t retval;
 
-    while (cnt < full_len && trials > 0) {
-        retval = write(fd, str_msg + cnt, full_len - cnt);
+    while (write_count < full_len && trials > 0) {
+        retval = write(fd, str_msg + write_count, full_len - write_count);
         if (0 > retval) 
         {
             perror("ERROR: Message cannot be written");
             return -1;
         }
-        cnt += retval;
+        write_count += retval;
         trials--;
     }
-    return full_len - cnt;
+    return full_len - write_count;
 }
 
 /******************************************************************************
@@ -410,48 +410,50 @@ int vs_msg_write(int fd, const char *str_msg)
  */
 static int readn(int fd, size_t len, char *buffer)
 {
-    size_t cnt = 0; //read bytes counter
+    size_t read_count = 0; //read bytes counter
     unsigned int trials = VS_MSG_MAX_READ_TRIALS;
     ssize_t retval;
 
-    while (cnt < len && trials > 0) {
-        retval = read(fd, buffer + cnt, len - cnt);
+    while (read_count < len && trials > 0) {
+        retval = read(fd, buffer + read_count, len - read_count);
         if (0 > retval) 
         {
             perror("ERROR: Cannot read message");
             return -1;
         }
-        cnt += retval;
+        read_count += retval;
         trials --;
     }
-    return len - cnt;
+    return len - read_count;
 }
 
 int vs_msg_read(int fd, char *buffer)
 {
     /* Get pre-header */
     if (0 != readn(fd, 2u, buffer)) {
+        vs_msg_error("ERROR: Could not read pre-header value\n");
         return -1;
     }
     /* Get header length from pre-header */
     size_t header_length = vs_msg_read_header_length(buffer);
     if (1 > header_length) {
-        vs_msg_error("Issue with header length (value %d)\n", (int) header_length);
+        vs_msg_error("ERROR: Issue with header length (value %d)\n", (int) header_length);
         return -1;
     }
     /* Read header */
     if (0 != readn(fd, header_length, buffer + 2)) {
-        vs_msg_error("Issue while reading header\n");
+        vs_msg_error("ERROR: Issue while reading header\n");
         return -1;
     }
     /* Parse header */
     vs_msg_info_t msg_info;
     if (0 > vs_msg_read_info(buffer, &msg_info)) {
+        vs_msg_error("ERROR: Issue while parsing message info\n");
         return -1;
     }
     /* Read message content */
     if (0 != readn(fd, msg_info.len, buffer + 2 + header_length)) {
-        vs_msg_error("Issue while reading message content\n");
+        vs_msg_error("ERROR: Issue while reading message content\n");
         return -1;
     }
     return 0;
