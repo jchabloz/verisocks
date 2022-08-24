@@ -8,12 +8,13 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <cjson/cJSON.h>
 
 #include "vs_server.h"
 
@@ -26,7 +27,7 @@ int vs_server_make_socket(unsigned short num_port)
     /* Create socket descriptor */
     fd_socket = socket(PF_INET, SOCK_STREAM, 0);
     if (fd_socket < 0) {
-        #ifdef VS_SERVER_VERBOSE
+        #ifdef VS_SERVER_DEBUG
         perror("Could not create socket descriptor");
         #endif
         return -1;
@@ -39,7 +40,7 @@ int vs_server_make_socket(unsigned short num_port)
 
     /* Bind socket */
 	if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
-        #ifdef VS_SERVER_VERBOSE
+        #ifdef VS_SERVER_DEBUG
         perror("Could not bind socket");
         #endif
         return -1;
@@ -47,7 +48,7 @@ int vs_server_make_socket(unsigned short num_port)
 
     /* Listen */
     if (listen(fd_socket, VS_MAX_CONNECT_REQUEST) < 0) {
-        #ifdef VS_SERVER_VERBOSE
+        #ifdef VS_SERVER_DEBUG
         perror("Error listening to socket");
         #endif
         return -1;
@@ -74,11 +75,12 @@ static int set_nonblock(int fd_socket, int nonblock)
     } else {
         flags &= ~O_NONBLOCK;
     }
-    if (0 > fnctl(fd_socket, F_SETFL, flags)) {
-        #ifdef VS_SERVER_VERBOSE
+    if (0 > fcntl(fd_socket, F_SETFL, flags)) {
+        #ifdef VS_SERVER_DEBUG
         perror("Issue setting descriptor's file status flags");
         #endif
     }
+    return 0;
 }
 
 /**
@@ -90,9 +92,9 @@ static int set_nonblock(int fd_socket, int nonblock)
  */
 static int is_nonblock(int fd_socket)
 {
-    int flags = fnctl(fd_socket, F_GETFL);
+    int flags = fcntl(fd_socket, F_GETFL);
     if (0 > flags) {
-        #ifdef VS_SERVER_VERBOSE
+        #ifdef VS_SERVER_DEBUG
         perror("Issue getting descriptor's file status flags");
         #endif
         return -1;
@@ -104,7 +106,7 @@ static int is_nonblock(int fd_socket)
     return 0;
 }
 
-int vs_server_accept(int fd_socket, char *hostname)
+int vs_server_accept(int fd_socket, char *hostname, size_t hn_len)
 {
     struct sockaddr_in s_addr;
     socklen_t addr_len;
@@ -113,27 +115,26 @@ int vs_server_accept(int fd_socket, char *hostname)
 
     fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
     if (0 > fd_conn_socket) {
-        #ifdef VS_SERVER_VERBOSE
+        #ifdef VS_SERVER_DEBUG
         perror("Error accepting connection");
         #endif
         return -1;
     }
 
-    host_info = gethostbyaddr(s_addr.sin_addr.s_addr, addr_len, AF_INET);
-    hostname = NULL;
-    if (NULL == host_info || NULL == host_info->h_name) {
-        #ifdef VS_SERVER_VERBOSE
-        fprintf(stderr, "Could not get host info\n");
-        #endif
-    } else {
-        size_t hostname_len = strlen(host_info->h_name);
-        char *str_hostname = malloc(hostname_len + 1);
-        if (NULL != str_hostname) {
-            memcpy(str_hostname, host_info->h_name);
-            hostname = str_hostname;
+    host_info = gethostbyaddr(&s_addr.sin_addr.s_addr, addr_len, AF_INET);
+
+    if (NULL != hostname && 0 < hn_len) {
+        if (NULL == host_info || NULL == host_info->h_name) {
+            #ifdef VS_SERVER_DEBUG
+            fprintf(stderr, "Could not get host info\n");
+            #endif
+        } else {
+            size_t hostname_len = strlen(host_info->h_name);
+            size_t read_len = ((hostname_len + 1) > hn_len) ? hn_len - 1 : hostname_len;
+            memcpy(hostname, host_info->h_name, read_len);
+            hostname[read_len] = '\0';
         }
     }
-
     return fd_conn_socket;
 }
 

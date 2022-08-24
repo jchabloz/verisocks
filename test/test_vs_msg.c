@@ -1,10 +1,10 @@
 
-#include "unity.h"
-#include "vs_msg.h"
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "unity.h"
+#include "vs_msg.h"
 
 
 /* Test messages contents */
@@ -28,6 +28,7 @@ void setUp(void)
 
 void tearDown(void)
 {
+    cJSON_Delete(p_msg_json);
 }
 
 void test_vs_msg_create_header(cJSON* p_header, vs_msg_info_t msg_info,

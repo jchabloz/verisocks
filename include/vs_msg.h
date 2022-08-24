@@ -17,6 +17,7 @@
 #define VS_MSG_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include "cJSON.h"
 
 #define VS_MSG_MAX_READ_TRIALS  10u //Defines how many read trials should be attempted

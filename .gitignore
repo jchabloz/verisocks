@@ -2,7 +2,7 @@
 out/
 references/
 .vscode/
-
+test/build/
 
 # Prerequisites
 *.d
