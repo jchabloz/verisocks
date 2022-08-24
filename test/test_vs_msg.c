@@ -17,6 +17,7 @@ const unsigned char msg_bin[6] = {45, 32, 0, 2, 1, 248};
 const size_t msg_bin_len = 6;
 
 static char read_buffer[1024];
+size_t read_buffer_len = 1024;
 
 void setUp(void)
 {
@@ -141,7 +142,6 @@ void test_vs_msg_create_json_message_from_string(void)
 
 void test_vs_msg_read_write_loopback(void)
 {
-
     /* Open a file descriptor that will use to mimick the exchanges with a
     socket when using vs_msg_write() and vs_msg_read() functions. This is not
     exactly the same and will not be able to simulate incomplete read/writes,
@@ -163,7 +163,7 @@ void test_vs_msg_read_write_loopback(void)
     /* Read back message from file descriptor */
     retval = (int) lseek(fd_test, 0, SEEK_SET); //Reset descriptor position to start of file
     TEST_ASSERT_EQUAL(0, retval);
-    retval = vs_msg_read(fd_test, read_buffer);
+    retval = vs_msg_read(fd_test, read_buffer, read_buffer_len);
     TEST_ASSERT_EQUAL(0, retval);
 
     cJSON *p_msg_read = vs_msg_read_json(read_buffer);

@@ -28,7 +28,7 @@ const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] =
     "application/octet-stream",
 };
 
-void vs_msg_error(const char *fmt, ...)
+static void vs_msg_error(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -37,7 +37,6 @@ void vs_msg_error(const char *fmt, ...)
     #endif
     va_end(args);
 }
-
 
 /**************************************************************************//**
 Returns the header length
@@ -248,7 +247,8 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
     printf("INFO: Found header length = %d\n", (int) header_length);
     #endif
 
-    /* Get the JSON header as a proper, null-terminated string from the message */
+    /* Get the JSON header as a proper, null-terminated string from the message
+    */
     char *str_header = malloc(header_length + 1);
     if (NULL == str_header) {
         #ifdef VS_MSG_DEBUG
@@ -427,8 +427,12 @@ static int readn(int fd, size_t len, char *buffer)
     return len - read_count;
 }
 
-int vs_msg_read(int fd, char *buffer)
+int vs_msg_read(int fd, char *buffer, size_t len)
 {
+    if (3 > len) {
+        vs_msg_error("ERROR: Buffer depth not sufficient (%d)", (int) len);
+        return -1;
+    }
     /* Get pre-header */
     if (0 != readn(fd, 2u, buffer)) {
         vs_msg_error("ERROR: Could not read pre-header value\n");
@@ -437,25 +441,46 @@ int vs_msg_read(int fd, char *buffer)
     /* Get header length from pre-header */
     size_t header_length = vs_msg_read_header_length(buffer);
     if (1 > header_length) {
-        vs_msg_error("ERROR: Issue with header length (value %d)\n", (int) header_length);
+        vs_msg_error("ERROR: Issue with header length (value %d)\n",
+                     (int) header_length);
         return -1;
     }
+
     /* Read header */
-    if (0 != readn(fd, header_length, buffer + 2)) {
+    size_t read_len = header_length;
+    if ((header_length + 2) > len) {
+        read_len = len - 2;
+    }
+    if (0 != readn(fd, read_len, buffer + 2)) {
         vs_msg_error("ERROR: Issue while reading header\n");
         return -1;
     }
+    if ((header_length + 2) > len) {
+        vs_msg_error("ERROR: Buffer depth not sufficient (%d)", (int) len);
+        return -1;
+    }
+
     /* Parse header */
     vs_msg_info_t msg_info;
     if (0 > vs_msg_read_info(buffer, &msg_info)) {
         vs_msg_error("ERROR: Issue while parsing message info\n");
         return -1;
     }
+
     /* Read message content */
-    if (0 != readn(fd, msg_info.len, buffer + 2 + header_length)) {
+    read_len = msg_info.len;
+    if ((msg_info.len + header_length + 2) > len) {
+        read_len = len - header_length - 2;
+    }
+    if (0 != readn(fd, read_len, buffer + 2 + header_length)) {
         vs_msg_error("ERROR: Issue while reading message content\n");
         return -1;
     }
+    if ((msg_info.len + header_length + 2) > len) {
+        vs_msg_error("ERROR: Buffer depth not sufficient (%d)", (int) len);
+        return -1;
+    }
+
     return 0;
 }
 
