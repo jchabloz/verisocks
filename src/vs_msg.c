@@ -8,13 +8,9 @@
  * 
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdarg.h>
 #include "vs_msg.h"
-
 
 /**************************************************************************//**
 This constant array of strings defines the values to be used for the
