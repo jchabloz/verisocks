@@ -105,10 +105,13 @@ int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *
     int fd_conn_socket;
     struct hostent *host_info;
 
+    /* Use select mechanism uniquely to easily implement a timeout - Function
+    will keep being blocking... */
     fd_set set;
     FD_ZERO(&set);
     FD_SET(fd_socket, &set);
 
+    /* If a client attemps a connection, accept it */
     if (0 < select(FD_SETSIZE, &set, NULL, NULL, p_timeout)) {
         fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
         if (0 > fd_conn_socket) {
@@ -117,7 +120,7 @@ int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *
         }
     }
     else {
-        vs_server_error("ERROR: Timed out while waiting for a connection\n");
+        vs_server_error("WARNING: Timed out while waiting for a connection\n");
         return -1;
     }
 

@@ -1,5 +1,4 @@
 
-#include <sys/time.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include "unity.h"
@@ -20,7 +19,7 @@ void test_vs_server_make_socket(void)
     TEST_ASSERT_GREATER_THAN(-1, fd_socket);
 
     struct timeval timeout;
-    timeout.tv_sec = 10;
+    timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
     char str_hostname[64];

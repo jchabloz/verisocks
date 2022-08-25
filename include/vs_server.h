@@ -51,8 +51,10 @@ int vs_server_make_socket(uint16_t num_port);
  * 
  * @param fd_socket Server socket descriptor
  * @param hostname Pointer to a buffer to which the hostname shall be written.
- * @param len Maximum buffer size. If the hostname exceeds the available
- * buffer size, it is truncated accordingly (with added null-termination).
+ * If NULL, hostname collection is not performed.
+ * @param len Maximum buffer size. If the hostname exceeds the available buffer
+ * size, it is truncated accordingly (with added null-termination). If 0,
+ * hostname collection is not performed.
  * @param timeout Timeout
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
