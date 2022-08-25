@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #define VS_MAX_CONNECT_REQUEST 3
 
@@ -33,7 +34,7 @@ int vs_server_is_nonblock(int fd_socket);
  * 
  * @param fd_socket Socket descriptor.
  * @param nonblock If > 0, the socket will be changed to non-blocking, if 0, to blocking.
- * @return Returns -1
+ * @return Returns 0 if successful, -1 in case of error.
  */
 int vs_server_set_nonblock(int fd_socket, int nonblock);
 
@@ -51,9 +52,10 @@ int vs_server_make_socket(uint16_t num_port);
  * @param fd_socket Server socket descriptor
  * @param hostname Pointer to a buffer to which the hostname shall be written.
  * @param len Maximum buffer size. If the hostname exceeds the available
- * buffer size, it is truncated accordingly (with null-termination).
+ * buffer size, it is truncated accordingly (with added null-termination).
+ * @param timeout Timeout
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
-int vs_server_accept(int fd_socket, char *hostname, size_t len);
+int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *timeout);
 
 #endif //VS_SERVER_H

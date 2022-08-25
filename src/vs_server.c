@@ -98,17 +98,26 @@ int vs_server_make_socket(unsigned short num_port)
     return fd_socket;
 }
 
-
-int vs_server_accept(int fd_socket, char *hostname, size_t len)
+int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *p_timeout)
 {
     struct sockaddr_in s_addr;
     socklen_t addr_len;
     int fd_conn_socket;
     struct hostent *host_info;
 
-    fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
-    if (0 > fd_conn_socket) {
-        vs_server_perror("ERROR: Error accepting connection");
+    fd_set set;
+    FD_ZERO(&set);
+    FD_SET(fd_socket, &set);
+
+    if (0 < select(FD_SETSIZE, &set, NULL, NULL, p_timeout)) {
+        fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
+        if (0 > fd_conn_socket) {
+            vs_server_perror("ERROR: Error accepting connection");
+            return -1;
+        }
+    }
+    else {
+        vs_server_error("ERROR: Timed out while waiting for a connection\n");
         return -1;
     }
 
