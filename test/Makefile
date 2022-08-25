@@ -4,6 +4,7 @@ CC = gcc
 CFLAGS += -Wall
 CFLAGS += -Wextra -Wpedantic
 # CFLAGS += -DVS_MSG_DEBUG
+CFLAGS += -DVS_SERVER_DEBUG
 
 BUILDDIR = build
 INCDIRS = -I../include -I../cjson -I../unity/src
