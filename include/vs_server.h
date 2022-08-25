@@ -12,10 +12,30 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #define VS_MAX_CONNECT_REQUEST 3
 
 //#define VS_SERVER_DEBUG
+
+/**
+ * @brief Checks if a socket descriptor is non-blocking.
+ * 
+ * @param fd_socket Socket descriptor to be checked.
+ * @return Returns 1 if non-blocking, 0 otherwise. If -1, this indicates that
+ * there was an error while getting the socket file status flags.
+ */
+int vs_server_is_nonblock(int fd_socket);
+
+/**
+ * @brief Sets the non-blocking behavior of a socket descriptor.
+ * 
+ * @param fd_socket Socket descriptor.
+ * @param nonblock If > 0, the socket will be changed to non-blocking, if 0, to blocking.
+ * @return Returns -1
+ */
+int vs_server_set_nonblock(int fd_socket, int nonblock);
 
 /**
  * @brief Creates and binds a socket to the given localhost port
@@ -30,10 +50,10 @@ int vs_server_make_socket(uint16_t num_port);
  * 
  * @param fd_socket Server socket descriptor
  * @param hostname Pointer to a buffer to which the hostname shall be written.
- * @param hn_len Maximum buffer size. If the hostname exceeds the available
+ * @param len Maximum buffer size. If the hostname exceeds the available
  * buffer size, it is truncated accordingly (with null-termination).
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
-int vs_server_accept(int fd_socket, char *hostname, size_t hn_len);
+int vs_server_accept(int fd_socket, char *hostname, size_t len);
 
 #endif //VS_SERVER_H
