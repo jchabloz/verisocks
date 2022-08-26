@@ -8,7 +8,6 @@ From the folder in question, launch a simple HTTP server using the Python http m
    
 ```sh
 python3 -m http.server
-firefox http://localhost:8000/result.xml
 ```
 
 This is required to avoid cross origin request issue (CORS) that makes any
