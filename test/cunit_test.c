@@ -213,26 +213,20 @@ void test_vs_server_make_socket(void)
     fd_socket = vs_server_make_socket(num_port);
     CU_ASSERT(-1 < fd_socket);
 
-    char str_hostname[64];
-    if (0 > gethostname(str_hostname, 64)) {
-        perror("");
-        exit(EXIT_FAILURE);
-    }
-    else {
-        printf("Server host name: ");
-        puts(str_hostname);
-    }
+    struct sockaddr_in sin;
+    socklen_t len = sizeof(sin);
+    CU_ASSERT(-1 < getsockname(fd_socket, (struct sockaddr *) &sin, &len));
+    CU_ASSERT_EQUAL(ntohs(sin.sin_port), num_port);
 
-    struct hostent *hs;
-    hs = gethostbyname(str_hostname);
-    if (NULL == hs) exit(EXIT_FAILURE);
-    printf("Server address and port: %d.%d.%d.%d:%d\n",
-           hs->h_addr[0],
-           hs->h_addr[1],
-           hs->h_addr[2],
-           hs->h_addr[3],
-           num_port
+    uint32_t s_addr = ntohl(sin.sin_addr.s_addr);
+    printf("\nServer socket address: ");
+    printf("%d.%d.%d.%d\n",
+        (s_addr & 0xff000000) >> 24,
+        (s_addr & 0x00ff0000) >> 16,
+        (s_addr & 0x0000ff00) >> 8,
+        (s_addr & 0x000000ff)
     );
+    printf("Server socket port: %d\n", ntohs(sin.sin_port));
 }
 
 void test_vs_server_accept(void)
@@ -241,7 +235,7 @@ void test_vs_server_accept(void)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    printf("Waiting for a client to connect ...\n");
+    printf("\nWaiting for a client to connect ...\n");
     char hn_buffer[64];
     int fd_client_socket = vs_server_accept(fd_socket, hn_buffer, 64, &timeout);
     if (0 <= fd_client_socket) {
@@ -327,7 +321,7 @@ int main(void)
     CU_basic_run_tests();
 
     /* Run all tests using the automated interface */
-    // CU_automated_run_tests();
+    CU_automated_run_tests();
     // CU_list_tests_to_file();
 
     /* Clean-up */
