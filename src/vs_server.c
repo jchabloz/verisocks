@@ -81,11 +81,12 @@ int vs_server_make_socket(unsigned short num_port)
     /* Socket address */
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = htons(num_port);
-    s_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    // s_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    s_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     /* Bind socket */
 	if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
-        vs_server_perror("ERROR: Could not bind socket");
+        vs_server_perror("ERROR: Could not bind socket to given address");
         return -1;
 	}
 
