@@ -92,13 +92,16 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         /* Add content type item */
         if (NULL == cJSON_AddStringToObject(p_header, "content-type", VS_MSG_TYPES[VS_MSG_TXT_JSON])) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
+            cJSON_free(str_msg);
             return NULL;
         }
         /* Add content encoding item */
         if (NULL == cJSON_AddStringToObject(p_header, "charset", "UTF-8")) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
+            cJSON_free(str_msg);
             return NULL;
         }
+        cJSON_free(str_msg);
         break;
     case VS_MSG_BIN :
         /* Add content type item */
