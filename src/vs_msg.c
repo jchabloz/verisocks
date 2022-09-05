@@ -28,7 +28,7 @@ static void vs_msg_error(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    #ifdef VS_MS_DEBUG
+    #ifdef VS_MSG_DEBUG
     fprintf(stderr, fmt, args);
     #endif
     va_end(args);

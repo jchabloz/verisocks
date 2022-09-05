@@ -27,13 +27,6 @@ static void vs_server_error(const char *fmt, ...)
     va_end(args);
 }
 
-static void vs_server_perror(const char *str_error)
-{
-    #ifdef VS_SERVER_DEBUG
-    perror(str_error);
-    #endif
-}
-
 int vs_server_set_nonblock(int fd_socket, int nonblock)
 {
     int flags = fcntl(fd_socket, F_GETFL);
@@ -46,7 +39,9 @@ int vs_server_set_nonblock(int fd_socket, int nonblock)
         flags &= ~O_NONBLOCK;
     }
     if (0 > fcntl(fd_socket, F_SETFL, flags)) {
-        vs_server_perror("ERROR: Issue setting descriptor's file status flags");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR: Issue setting descriptor's file status flags");
+		#endif
     }
     return 0;
 }
@@ -55,7 +50,9 @@ int vs_server_is_nonblock(int fd_socket)
 {
     int flags = fcntl(fd_socket, F_GETFL);
     if (0 > flags) {
-        vs_server_perror("ERROR: Issue getting descriptor's file status flags");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR: Issue getting descriptor's file status flags");
+		#endif
         return -1;
     }
     flags &= O_NONBLOCK;
@@ -74,7 +71,9 @@ int vs_server_make_socket(uint16_t num_port)
     /* Create socket descriptor */
     fd_socket = socket(PF_INET, SOCK_STREAM, 0);
     if (fd_socket < 0) {
-        vs_server_perror("ERROR: Could not create socket descriptor");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR: Could not create socket descriptor");
+		#endif
         return -1;
     }
 
@@ -86,13 +85,17 @@ int vs_server_make_socket(uint16_t num_port)
 
     /* Bind socket */
 	if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
-        vs_server_perror("ERROR: Could not bind socket to given address");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR: Could not bind socket to given address");
+		#endif
         return -1;
 	}
 
     /* Listen */
     if (listen(fd_socket, VS_MAX_CONNECT_REQUEST) < 0) {
-        vs_server_perror("ERROR: Error listening to socket");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR: Error listening to socket");
+		#endif
         return -1;
     }
 
@@ -115,14 +118,18 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct tim
     /* If a client attempts a connection, accept it */
     int selval = select(FD_SETSIZE, &set, NULL, NULL, p_timeout);
     if (0 > selval) {
-        vs_server_perror("ERROR:");
+    	#ifdef VS_SERVER_DEBUG
+        perror("ERROR:");
+		#endif
     } else if (0 == selval) {
         vs_server_error("WARNING: Timed out while waiting for a connection\n");
         return -1;
     } else {
         fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
         if (0 > fd_conn_socket) {
-            vs_server_perror("ERROR: Error accepting connection");
+    		#ifdef VS_SERVER_DEBUG
+            perror("ERROR: Error accepting connection");
+			#endif
             return -1;
         }
     }
