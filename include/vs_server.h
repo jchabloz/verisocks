@@ -58,6 +58,6 @@ int vs_server_make_socket(uint16_t num_port);
  * @param timeout Timeout
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
-int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *timeout);
+int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct timeval *timeout);
 
 #endif //VS_SERVER_H

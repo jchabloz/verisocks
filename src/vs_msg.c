@@ -61,6 +61,12 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
     cJSON *p_header;
     char *str_msg = NULL;
 
+    /* Sanity checks on parameters */
+    if (NULL == p_msg || NULL == p_msg_info) {
+        vs_msg_error("ERROR: NULL pointer.\n");
+        return NULL;
+    }
+
     /* Create header JSON object, including calculated message length*/
     p_header = cJSON_CreateObject();
     if (NULL == p_header) {
@@ -97,7 +103,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         }
         /* Add content encoding item */
         if (NULL == cJSON_AddStringToObject(p_header, "charset", "UTF-8")) {
-            vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
+            vs_msg_error("ERROR: Failed to adNULLd string to cJSON object.\n");
             cJSON_free(str_msg);
             return NULL;
         }

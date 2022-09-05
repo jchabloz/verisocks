@@ -65,7 +65,7 @@ int vs_server_is_nonblock(int fd_socket)
     return 0;
 }
 
-int vs_server_make_socket(unsigned short num_port)
+int vs_server_make_socket(uint16_t num_port)
 {
 
     int fd_socket;
@@ -99,35 +99,37 @@ int vs_server_make_socket(unsigned short num_port)
     return fd_socket;
 }
 
-int vs_server_accept(int fd_socket, char *hostname, size_t len, struct timeval *p_timeout)
+int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct timeval *p_timeout)
 {
     struct sockaddr_in s_addr;
-    socklen_t addr_len;
-    int fd_conn_socket;
+    socklen_t addr_len = sizeof(s_addr);
+    int fd_conn_socket = -1;
     struct hostent *host_info;
 
-    /* Use select mechanism uniquely to easily implement a timeout - Function
-    will keep being blocking... */
+    /* Use select mechanism uniquely to easily implement a timeout - The
+    vs_server_accept function will keep being blocking until it times out.*/
     fd_set set;
     FD_ZERO(&set);
     FD_SET(fd_socket, &set);
 
-    /* If a client attemps a connection, accept it */
-    if (0 < select(FD_SETSIZE, &set, NULL, NULL, p_timeout)) {
+    /* If a client attempts a connection, accept it */
+    int selval = select(FD_SETSIZE, &set, NULL, NULL, p_timeout);
+    if (0 > selval) {
+        vs_server_perror("ERROR:");
+    } else if (0 == selval) {
+        vs_server_error("WARNING: Timed out while waiting for a connection\n");
+        return -1;
+    } else {
         fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
         if (0 > fd_conn_socket) {
             vs_server_perror("ERROR: Error accepting connection");
             return -1;
         }
     }
-    else {
-        vs_server_error("WARNING: Timed out while waiting for a connection\n");
-        return -1;
-    }
 
-    host_info = gethostbyaddr(&s_addr.sin_addr.s_addr, addr_len, AF_INET);
-
-    if (NULL != hostname && 0 < len) {
+    uint32_t addr = s_addr.sin_addr.s_addr;
+    host_info = gethostbyaddr(&addr, sizeof(addr), AF_INET);
+    if ((NULL != hostname) && (0 < len)) {
         if (NULL == host_info || NULL == host_info->h_name) {
             vs_server_error("WARNING: Could not get host info\n");
         }

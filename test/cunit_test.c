@@ -48,7 +48,8 @@ int clean_suite_vs_msg(void)
 }
 
 void test_vs_msg_create_header(cJSON* p_header, vs_msg_info_t msg_info,
-    enum vs_msg_content_type type, size_t len) {
+    enum vs_msg_content_type type, size_t len)
+{
 
     CU_ASSERT_PTR_NOT_NULL(p_header);
     CU_ASSERT_EQUAL(type, msg_info.type);
@@ -73,6 +74,13 @@ void test_vs_msg_create_header_json(void)
     test_vs_msg_create_header(p_header, msg_info, VS_MSG_TXT_JSON, msg_json_len);
 
     cJSON_Delete(p_header);
+
+    /* Error cases */
+    p_header = vs_msg_create_header(NULL, &msg_info);
+    CU_ASSERT_PTR_NULL(p_header);
+    p_header = vs_msg_create_header(p_msg_json, NULL);
+    CU_ASSERT_PTR_NULL(p_header);
+    p_header = vs_msg_create_header(p_msg_json, NULL);
 }
 
 void test_vs_msg_create_header_text(void)
@@ -192,8 +200,8 @@ void test_vs_msg_read_write_loopback(void)
 /******************************************************************************
 * Test suite - vs_server module
 ******************************************************************************/
-int fd_socket = -1;
-int fd_client_socket = -1;
+static int fd_socket = -1;
+static int fd_client_socket = -1;
 
 int init_suite_vs_server(void)
 {
@@ -235,12 +243,15 @@ void test_vs_server_accept(void)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    printf("\nWaiting for a client to connect ...\n");
+    printf("\nWaiting for a client to connect ... ");
     char hn_buffer[64];
     int fd_client_socket = vs_server_accept(fd_socket, hn_buffer, 64, &timeout);
     if (0 <= fd_client_socket) {
-        puts("Client connected:");
+        puts("Connected to ");
         puts(hn_buffer);
+        puts("\n");
+    } else {
+        puts("Timed out\n");
     }
 }
 
@@ -285,7 +296,10 @@ int main(void)
             test_vs_msg_create_message_text)) ||
         (NULL == CU_add_test(pSuite,
             "Tests creating a message with a binary content",
-            test_vs_msg_create_message_bin))
+            test_vs_msg_create_message_bin)) ||
+        (NULL == CU_add_test(pSuite,
+            "Tests message read-write loopback",
+            test_vs_msg_read_write_loopback))
     ) {
         CU_cleanup_registry();
         return CU_get_error();
