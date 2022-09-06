@@ -1,8 +1,12 @@
 # Project-specific
 out/
+sandbox/
 references/
 .vscode/
 test/build/
+test/*.xml
+*.swp
+tags
 
 # Prerequisites
 *.d
