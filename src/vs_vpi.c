@@ -12,7 +12,9 @@
 #include "vs_vpi.h"
 
 
-/** Error handling function (generic) */
+/**
+ * @brief Error handling function (generic)
+ */
 static void vs_vpi_error(const char *fmt, ...)
 {
     va_list args;
@@ -21,17 +23,19 @@ static void vs_vpi_error(const char *fmt, ...)
     va_end(args);
 }
 
-
-/** Type for a command handler function pointer */
+/**
+ * @brief Type for a command handler function pointer
+ */
 typedef int (*cmd_handler_t)(vs_vpi_data_t*, const cJSON*);
 
-/** Struct type for commands, associating a command name with a command handler
- * function pointer */
+/**
+ * @brief Struct type for commands
+ * Associates a command name with a command handler function pointer
+ */
 typedef struct vs_vpi_cmd {
     cmd_handler_t cmd_handler;  // Pointer to handler function
     const char *cmd_name;       // Command name
 } vs_vpi_cmd_t;
-
 
 /**
  * @brief Helper macro to declare a command handler function
@@ -49,7 +53,8 @@ vs_vpi_data_t *p_data, const cJSON *p_msg)
 
 /* Declare prototypes for command handler functions so that they can be used
  * in the following command table. Commands are implemented at the end of this
- * file.*/
+ * file.
+ */
 VS_VPI_CMD_HANDLER(finish);
 VS_VPI_CMD_HANDLER(set_value);
 VS_VPI_CMD_HANDLER(get_value);
@@ -60,12 +65,13 @@ VS_VPI_CMD_HANDLER(run);
  * @warning The table has to be terminated by a struct vs_vpi_cmd with a NULL
  * cmd_name field.
  */
-static const vs_vpi_cmd_t vs_vpi_cmd_table[] = {
+static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
+{
     VS_VPI_CMD(finish),
     VS_VPI_CMD(set_value),
     VS_VPI_CMD(get_value),
     VS_VPI_CMD(run),
-    (vs_vpi_cmd_t) {NULL, NULL}
+    {NULL, NULL}
 };
 
 /**
@@ -92,7 +98,7 @@ static cmd_handler_t vs_vpi_get_cmd_handler(const char *cmd)
  * @brief Process a command receives as a JSON message content
  * @param p_cmd Pointer to a cJSON struct with the message content. It is
  * expected that the message JSON content contains at least a "command" field.
- * @return int 
+ * @return Integer return value of executed command handler 
  */
 int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
 {
@@ -113,12 +119,14 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
         vs_vpi_error("ERROR: [Verisocks] Command field invalid/not found\n");
         goto error;
     }
+
     /* Get the command as a string */
     char *str_cmd = cJSON_GetStringValue(p_item_cmd);
     if ((NULL == str_cmd) || (strcmp(str_cmd, "") == 0)) {
         vs_vpi_error("ERROR: [Verisocks] Command field NULL or empty\n");
         goto error;
     }
+
     /* Look up command handler */
     cmd_handler_t cmd_handler = vs_vpi_get_cmd_handler(str_cmd);
     if (NULL == cmd_handler) {
