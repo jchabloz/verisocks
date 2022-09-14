@@ -6,6 +6,8 @@ references/
 test/build/
 test/*.xml
 *.swp
+*.gcda
+*.gcno
 tags
 
 # Prerequisites
