@@ -10,7 +10,7 @@
  *****************************************************************************/
 
 #include "vs_vpi.h"
-
+#include <iverilog/vpi_user.h>
 
 /**
  * @brief Error handling function (generic)
@@ -56,6 +56,7 @@ vs_vpi_data_t *p_data, const cJSON *p_msg)
  * file.
  */
 VS_VPI_CMD_HANDLER(finish);
+VS_VPI_CMD_HANDLER(stop);
 VS_VPI_CMD_HANDLER(set_value);
 VS_VPI_CMD_HANDLER(get_value);
 VS_VPI_CMD_HANDLER(run);
@@ -68,6 +69,7 @@ VS_VPI_CMD_HANDLER(run);
 static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
 {
     VS_VPI_CMD(finish),
+    VS_VPI_CMD(stop),
     VS_VPI_CMD(set_value),
     VS_VPI_CMD(get_value),
     VS_VPI_CMD(run),
@@ -113,8 +115,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
     }
 
     /* Get the command field from the JSON message content */
-    cJSON *p_item_cmd =
-        cJSON_GetObjectItem(p_cmd, "command");
+    cJSON *p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
     if (NULL == p_item_cmd) {
         vs_vpi_error("ERROR: [Verisocks] Command field invalid/not found\n");
         goto error;
@@ -159,9 +160,15 @@ VS_VPI_CMD_HANDLER(finish)
 {
     vpi_printf("INFO: [Verisocks] Command \"finish\" received. Terminating simulation...\n");
     vpi_control(vpiFinish);
-    //Other clean-up??
-    // vpi_flush(); //??
-    p_data->state = VS_VPI_STATE_STOPPED;
+    p_data->state = VS_VPI_STATE_FINISHED;
+    return 0;
+}
+
+
+VS_VPI_CMD_HANDLER(stop)
+{
+    vpi_printf("INFO: [Verisocks] Command \"stop\" received. Stopping simulation...\n");
+    vpi_control(vpiStop);
     return 0;
 }
 
@@ -212,6 +219,7 @@ VS_VPI_CMD_HANDLER(set_value)
     p_data->state = VS_VPI_STATE_WAITING;
     return 0;
 
+    /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_ERROR;
     return -1;
@@ -219,10 +227,22 @@ VS_VPI_CMD_HANDLER(set_value)
 
 VS_VPI_CMD_HANDLER(get_value)
 {
+    p_data->state = VS_VPI_STATE_WAITING;
     return 0;
+
+    /* Error handling */
+    // error:
+    p_data->state = VS_VPI_STATE_ERROR;
+    return -1;
 }
 
 VS_VPI_CMD_HANDLER(run)
 {
+    p_data->state = VS_VPI_STATE_WAITING;
     return 0;
+
+    /* Error handling */
+    // error:
+    p_data->state = VS_VPI_STATE_ERROR;
+    return -1;
 }
