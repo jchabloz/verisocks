@@ -80,12 +80,14 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         str_msg = (char *) p_msg;
         p_msg_info->len = strlen(str_msg) + 1;
         /* Add content type item */
-        if (NULL == cJSON_AddStringToObject(p_header, "content-type", VS_MSG_TYPES[VS_MSG_TXT])) {
+        if (NULL == cJSON_AddStringToObject(p_header, "content-type",
+                                            VS_MSG_TYPES[VS_MSG_TXT])) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
             return NULL;
         }
         /* Add content encoding item */
-        if (NULL == cJSON_AddStringToObject(p_header, "charset", "UTF-8")) {
+        if (NULL == cJSON_AddStringToObject(p_header, "content-encoding",
+                                            "UTF-8")) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
             return NULL;
         }
@@ -96,13 +98,15 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
         p_msg_info->len = strlen(str_msg) + 1;
         /* Add content type item */
-        if (NULL == cJSON_AddStringToObject(p_header, "content-type", VS_MSG_TYPES[VS_MSG_TXT_JSON])) {
+        if (NULL == cJSON_AddStringToObject(p_header, "content-type",
+                                            VS_MSG_TYPES[VS_MSG_TXT_JSON])) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
             cJSON_free(str_msg);
             return NULL;
         }
         /* Add content encoding item */
-        if (NULL == cJSON_AddStringToObject(p_header, "charset", "UTF-8")) {
+        if (NULL == cJSON_AddStringToObject(p_header, "content-encoding",
+                                            "UTF-8")) {
             vs_msg_error("ERROR: Failed to adNULLd string to cJSON object.\n");
             cJSON_free(str_msg);
             return NULL;
@@ -111,7 +115,8 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         break;
     case VS_MSG_BIN :
         /* Add content type item */
-        if (NULL == cJSON_AddStringToObject(p_header, "content-type", VS_MSG_TYPES[VS_MSG_BIN])) {
+        if (NULL == cJSON_AddStringToObject(p_header, "content-type",
+                                            VS_MSG_TYPES[VS_MSG_BIN])) {
             vs_msg_error("ERROR: Failed to add string to cJSON object.\n");
             return NULL;
         }
@@ -126,7 +131,8 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         vs_msg_error("ERROR: Message length invalid (< 1)\n");
         return NULL;
     }
-    if (NULL == cJSON_AddNumberToObject(p_header, "content-length", p_msg_info->len)) {
+    if (NULL == cJSON_AddNumberToObject(p_header, "content-length",
+                                        p_msg_info->len)) {
         vs_msg_error("ERROR: Failed to add number to cJSON object.\n");
         return NULL;
     };
