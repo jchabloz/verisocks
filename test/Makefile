@@ -20,11 +20,12 @@ result_file = $(BUILDDIR)/cunit_results.html
 
 tests = cunit_test
 
-all: build run $(result_file)
+all: build run $(result_file) gcov
 
 build: $(addprefix $(BUILDDIR)/,$(tests))
 
 run: build
+	$(RM) *.gcda
 	cd $(BUILDDIR) && $(foreach x,$(tests), valgrind --leak-check=full --log-file=$(x)_valgrind.rpt ./$(x);)
 
 $(result_file): $(xml_file)
@@ -34,10 +35,8 @@ $(BUILDDIR)/%: %.c $(SRC_FILES) $(LIBSRC_FILES)
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ $^ $(CFLAGS) $(INCDIRS) $(LDFLAGS)
 
-%.c.gcov: %.gcda
-	gcov -s ../src $(patsubst %.c.gcov,%.c,$@)
-
-gcov: $(patsubst %.c,%.c.gcov,$(notdir $(SRC_FILES)))
+gcov: $(SRC_FILES)
+	gcov -b -s../src $(notdir $(SRC_FILES))
 
 .PHONY: clean all build run gcov
 
