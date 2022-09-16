@@ -6,9 +6,12 @@ references/
 test/build/
 test/*.xml
 *.swp
+tags
+
+# gcov files
+*.gcov
 *.gcda
 *.gcno
-tags
 
 # Prerequisites
 *.d
