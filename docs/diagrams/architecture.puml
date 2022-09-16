@@ -13,6 +13,7 @@ title Verisocks architecture overview
 
 skinparam NoteBackgroundColor AliceBlue
 skinparam ComponentStyle rectangle
+skinparam DefaultFontName Helvetica
 
 frame "PLI application" {
     rectangle "PLI routine" {
