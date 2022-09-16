@@ -20,17 +20,22 @@ frame "PLI application" {
     }
 }
     
-file "<$database>\nConfig" as cfg
+file "<$database>\nTB\nconfig" as cfg_tb
+file "<$database>\nDUT\nconfig" as cfg_dut
 file "<$file_code>\nFirmware" as fw
+
 
 frame "Icarus simulator" {
     rectangle "Verilog testbench" as tb {
         [<$microchip>\nDUT] as dut
-        rectangle "Shell module instance" {
+        rectangle {
             [User defined\nsystem task (PLI)] as task
         }  
     }
 }
+
+cfg_tb .right.> tb
+cfg_dut .up.> dut
 
 frame "Test framework" as client {
     [<$python>\nClient] as tcp_client
@@ -61,8 +66,6 @@ task <-> tcp_server : VPI
 tcp_server <-> tcp_client : TCP/IP
 tcms <-left-> tcp_client
 
-cfg .> dut
-cfg .> tb
 fw .up.> dut
 
 @enduml
