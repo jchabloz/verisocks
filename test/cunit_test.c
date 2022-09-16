@@ -240,8 +240,8 @@ void test_vs_server_make_socket(void)
 void test_vs_server_accept(void)
 {
     struct timeval timeout;
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 1;
 
     printf("\nWaiting for a client to connect ... ");
     char hn_buffer[64];
