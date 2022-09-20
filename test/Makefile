@@ -25,7 +25,7 @@ all: build run $(result_file) gcov
 build: $(addprefix $(BUILDDIR)/,$(tests))
 
 run: build
-	$(RM) *.gcda
+	@$(RM) *.gcda
 	cd $(BUILDDIR) && $(foreach x,$(tests), valgrind --leak-check=full --log-file=$(x)_valgrind.rpt ./$(x);)
 
 $(result_file): $(xml_file)
@@ -37,6 +37,8 @@ $(BUILDDIR)/%: %.c $(SRC_FILES) $(LIBSRC_FILES)
 
 gcov: $(SRC_FILES)
 	gcov -b -s../src $(notdir $(SRC_FILES))
+	mv *.gcov $(BUILDDIR)/.
+	$(RM) *.gcda
 
 .PHONY: clean all build run gcov
 
