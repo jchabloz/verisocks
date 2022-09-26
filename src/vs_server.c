@@ -19,31 +19,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "vs_logging.h"
 #include "vs_server.h"
-
-static void vs_server_error(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    #ifdef VS_SERVER_DEBUG
-    fprintf(stderr, "ERROR [vs_server]: ");
-    fprintf(stderr, fmt, args);
-    fprintf(stderr, "\n");
-    #endif
-    va_end(args);
-}
-
-static void vs_server_warning(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    #ifdef VS_SERVER_DEBUG
-    fprintf(stderr, "WARNING [vs_server]: ");
-    fprintf(stderr, fmt, args);
-    fprintf(stderr, "\n");
-    #endif
-    va_end(args);
-}
 
 int vs_server_set_nonblock(int fd_socket, int nonblock)
 {
@@ -57,10 +34,8 @@ int vs_server_set_nonblock(int fd_socket, int nonblock)
         flags &= ~O_NONBLOCK;
     }
     if (0 > fcntl(fd_socket, F_SETFL, flags)) {
-    	#ifdef VS_SERVER_DEBUG
-        perror(
-            "ERROR [vs_server]: Issue setting descriptor's file status flags");
-		#endif
+        vs_log_mod_perror("vs_server",
+            "Issue setting descriptor's file status flags");
     }
     return 0;
 }
@@ -69,10 +44,8 @@ int vs_server_is_nonblock(int fd_socket)
 {
     int flags = fcntl(fd_socket, F_GETFL);
     if (0 > flags) {
-    	#ifdef VS_SERVER_DEBUG
-        perror(
-            "ERROR [vs_server]: Issue getting descriptor's file status flags");
-		#endif
+        vs_log_mod_perror("vs_server",
+            "Issue getting descriptor's file status flags");
         return -1;
     }
     flags &= O_NONBLOCK;
@@ -90,9 +63,8 @@ int vs_server_make_socket(uint16_t num_port)
     /* Create socket descriptor */
     fd_socket = socket(PF_INET, SOCK_STREAM, 0);
     if (fd_socket < 0) {
-    	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]: Could not create socket descriptor");
-		#endif
+        vs_log_mod_perror("vs_server",
+            "Could not create socket descriptor");
         return -1;
     }
 
@@ -104,18 +76,15 @@ int vs_server_make_socket(uint16_t num_port)
 
     /* Bind socket */
 	if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
-    	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]: Could not bind socket to given address");
-		#endif
+        vs_log_mod_perror("vs_server",
+            "Could not bind socket to given address");
         close(fd_socket);
         return -1;
 	}
 
     /* Listen */
     if (listen(fd_socket, VS_MAX_CONNECT_REQUEST) < 0) {
-    	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]: Error listening to socket");
-		#endif
+        vs_log_mod_perror("vs_server", "Error listening to socket");
         close(fd_socket);
         return -1;
     }
@@ -140,20 +109,17 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     /* If a client attempts a connection, accept it */
     int selval = select(FD_SETSIZE, &set, NULL, NULL, p_timeout);
     if (0 > selval) {
-    	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]:");
-		#endif
+        vs_log_mod_perror("vs_server", "");
         goto error;
     } else if (0 == selval) {
-        vs_server_error("Timed out while waiting for a connection");
+        vs_log_mod_error("vs_server",
+            "Timed out while waiting for a connection");
         goto error;
     } else {
         fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr,
                                 &addr_len);
         if (0 > fd_conn_socket) {
-    		#ifdef VS_SERVER_DEBUG
-            perror("ERROR [vs_server]: Error accepting connection");
-			#endif
+            vs_log_mod_perror("vs_server", "Error accepting connection");
             goto error;
         }
     }
@@ -162,7 +128,7 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     host_info = gethostbyaddr(&addr, sizeof(addr), AF_INET);
     if ((NULL != hostname) && (0 < len)) {
         if (NULL == host_info || NULL == host_info->h_name) {
-            vs_server_warning("Could not get host info");
+            vs_log_mod_warning("vs_server", "Could not get host info");
         }
         else {
             size_t hostname_len = strlen(host_info->h_name);

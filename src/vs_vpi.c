@@ -11,20 +11,12 @@
 
 #include <string.h>
 #include <iverilog/vpi_user.h>
+
+#include "vs_logging.h"
 #include "vs_msg.h"
 #include "vs_server.h"
 #include "vs_vpi.h"
 
-/**
- * @brief Error handling function (generic)
- */
-static void vs_vpi_error(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    vpi_printf(fmt, args);
-    va_end(args);
-}
 
 /**
  * @brief Type for a command handler function pointer
@@ -109,32 +101,32 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
 {
     /* Sanity check on parameters */
     if (NULL == p_data) {
-        vs_vpi_error("ERROR: [Verisocks] NULL pointer to data");
+        vs_vpi_log_error("NULL pointer to data");
         return -1;
     }
     if (NULL == p_cmd) {
-        vs_vpi_error("ERROR: [Verisocks] NULL pointer to cJSON cmd");
+        vs_vpi_log_error("NULL pointer to cJSON cmd");
         goto error;
     }
 
     /* Get the command field from the JSON message content */
     cJSON *p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
     if (NULL == p_item_cmd) {
-        vs_vpi_error("ERROR: [Verisocks] Command field invalid/not found\n");
+        vs_vpi_log_error("Command field invalid/not found");
         goto error;
     }
 
     /* Get the command as a string */
     char *str_cmd = cJSON_GetStringValue(p_item_cmd);
     if ((NULL == str_cmd) || (strcmp(str_cmd, "") == 0)) {
-        vs_vpi_error("ERROR: [Verisocks] Command field NULL or empty\n");
+        vs_vpi_log_error("Command field NULL or empty");
         goto error;
     }
 
     /* Look up command handler */
     cmd_handler_t cmd_handler = vs_vpi_get_cmd_handler(str_cmd);
     if (NULL == cmd_handler) {
-        vs_vpi_error("ERROR: [Verisocks] Command handler not found\n");
+        vs_vpi_log_error("Command handler not found");
         cJSON_free(str_cmd); //Not sure if needed?
         goto error;
     }
@@ -161,7 +153,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
  *****************************************************************************/
 VS_VPI_CMD_HANDLER(finish)
 {
-    vpi_printf("INFO: [Verisocks] Command \"finish\" received. Terminating simulation...\n");
+    vs_vpi_log_info("Command \"finish\" received. Terminating simulation...");
     vpi_control(vpiFinish);
     p_data->state = VS_VPI_STATE_FINISHED;
     return 0;
@@ -170,7 +162,7 @@ VS_VPI_CMD_HANDLER(finish)
 
 VS_VPI_CMD_HANDLER(stop)
 {
-    vpi_printf("INFO: [Verisocks] Command \"stop\" received. Stopping simulation...\n");
+    vs_vpi_log_info("Command \"stop\" received. Stopping simulation...");
     vpi_control(vpiStop);
     return 0;
 }
@@ -180,7 +172,7 @@ VS_VPI_CMD_HANDLER(set_value)
 {
     /* Check state consistency */
     if (VS_VPI_STATE_PROCESSING != p_data->state) {
-        vs_vpi_error("ERROR: [Verisocks][set_value] Inconsistent state\n");
+        vs_vpi_log_error("[set_value] Inconsistent state");
         goto error;
     }
 
@@ -188,7 +180,7 @@ VS_VPI_CMD_HANDLER(set_value)
     cJSON *p_item_path = cJSON_GetObjectItem(p_msg, "path");
     char *str_path = cJSON_GetStringValue(p_item_path);
     if (NULL == str_path || (strcmp(str_path, "") == 0)) {
-        vs_vpi_error("ERROR: [Verisocks][set_value] Path field empty/not found\n");
+        vs_vpi_log_error("[set_value] Path field empty/not found");
         goto error;
     }
 
@@ -196,7 +188,7 @@ VS_VPI_CMD_HANDLER(set_value)
     cJSON *p_item_type = cJSON_GetObjectItem(p_msg, "type");
     char *str_type = cJSON_GetStringValue(p_item_type);
     if (NULL == str_type || (strcmp(str_path, "") == 0)) {
-        vs_vpi_error("ERROR: [Verisocks][set_value] Type field empty/not found\n");
+        vs_vpi_log_error("[set_value] Type field empty/not found");
         goto error;
     }
 
@@ -215,7 +207,7 @@ VS_VPI_CMD_HANDLER(set_value)
             /* TODO */
             break;
         }
-        vs_vpi_error("ERROR: [Verisocks][set_value] Unknown type\n");
+        vs_vpi_log_error("[set_value] Unknown type");
         goto error;
     } while(0);
 
