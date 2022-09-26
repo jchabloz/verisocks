@@ -46,7 +46,7 @@ frameworks such as [pytest](https://docs.pytest.org) or
 
 Some workaround can be found, such as for example
 [cocotb-test](https://github.com/themperek/cocotb-test) which proposes a
-solution to use pytest with cocotb, but I am not entirely convinced.$
+solution to use pytest with cocotb, but I am not entirely convinced.
 
 I prefer trying another solution (it's more fun anyway); re-write from scratch
 a simple-to-use interface using the standardized *Verilog Procedural Interface
