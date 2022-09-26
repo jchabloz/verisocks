@@ -10,15 +10,9 @@
 #ifndef VS_SERVER_H
 #define VS_SERVER_H
 
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <sys/time.h>
 
 #define VS_MAX_CONNECT_REQUEST 3
-
-//#define VS_SERVER_DEBUG
 
 /**
  * @brief Checks if a socket descriptor is non-blocking.

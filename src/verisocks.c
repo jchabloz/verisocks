@@ -9,8 +9,10 @@
  * 
  */
 
-
+#include <stdlib.h>
+#include <unistd.h>
 #include <netdb.h>
+#include <sys/time.h>
 #include "verisocks.h"
 #include "vs_server.h"
 #include "vs_msg.h"

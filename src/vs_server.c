@@ -7,13 +7,17 @@
  * 
  */
 
-#include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdint.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 #include "vs_server.h"
 

@@ -11,9 +11,6 @@
 #define VS_VPI_H
 
 #include <iverilog/vpi_user.h>
-#include "vs_msg.h"
-#include "vs_server.h"
-
 
 /**
  * @brief Enum state

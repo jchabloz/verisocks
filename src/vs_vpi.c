@@ -9,8 +9,11 @@
  * 
  *****************************************************************************/
 
-#include "vs_vpi.h"
+#include <string.h>
 #include <iverilog/vpi_user.h>
+#include "vs_msg.h"
+#include "vs_server.h"
+#include "vs_vpi.h"
 
 /**
  * @brief Error handling function (generic)
