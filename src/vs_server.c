@@ -22,7 +22,21 @@ static void vs_server_error(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     #ifdef VS_SERVER_DEBUG
+    fprintf(stderr, "ERROR [vs_server]: ");
     fprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    #endif
+    va_end(args);
+}
+
+static void vs_server_warning(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    #ifdef VS_SERVER_DEBUG
+    fprintf(stderr, "WARNING [vs_server]: ");
+    fprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
     #endif
     va_end(args);
 }
@@ -40,7 +54,8 @@ int vs_server_set_nonblock(int fd_socket, int nonblock)
     }
     if (0 > fcntl(fd_socket, F_SETFL, flags)) {
     	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]: Issue setting descriptor's file status flags");
+        perror(
+            "ERROR [vs_server]: Issue setting descriptor's file status flags");
 		#endif
     }
     return 0;
@@ -51,7 +66,8 @@ int vs_server_is_nonblock(int fd_socket)
     int flags = fcntl(fd_socket, F_GETFL);
     if (0 > flags) {
     	#ifdef VS_SERVER_DEBUG
-        perror("ERROR [vs_server]: Issue getting descriptor's file status flags");
+        perror(
+            "ERROR [vs_server]: Issue getting descriptor's file status flags");
 		#endif
         return -1;
     }
@@ -103,7 +119,8 @@ int vs_server_make_socket(uint16_t num_port)
     return fd_socket;
 }
 
-int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct timeval *p_timeout)
+int vs_server_accept(int fd_socket, char *hostname, const size_t len,
+                     struct timeval *p_timeout)
 {
     struct sockaddr_in s_addr;
     socklen_t addr_len = sizeof(s_addr);
@@ -124,10 +141,11 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct tim
 		#endif
         goto error;
     } else if (0 == selval) {
-        vs_server_error("WARNING [vs_server]: Timed out while waiting for a connection\n");
+        vs_server_error("Timed out while waiting for a connection");
         goto error;
     } else {
-        fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr, &addr_len);
+        fd_conn_socket = accept(fd_socket, (struct sockaddr*) &s_addr,
+                                &addr_len);
         if (0 > fd_conn_socket) {
     		#ifdef VS_SERVER_DEBUG
             perror("ERROR [vs_server]: Error accepting connection");
@@ -140,11 +158,12 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct tim
     host_info = gethostbyaddr(&addr, sizeof(addr), AF_INET);
     if ((NULL != hostname) && (0 < len)) {
         if (NULL == host_info || NULL == host_info->h_name) {
-            vs_server_error("WARNING [vs_server]: Could not get host info\n");
+            vs_server_warning("Could not get host info");
         }
         else {
             size_t hostname_len = strlen(host_info->h_name);
-            size_t read_len = ((hostname_len + 1) > len) ? len - 1 : hostname_len;
+            size_t read_len =
+                ((hostname_len + 1) > len) ? len - 1 : hostname_len;
             memcpy(hostname, host_info->h_name, read_len);
             hostname[read_len] = '\0';
         }
