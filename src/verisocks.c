@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include "verisocks.h"
 #include "vs_server.h"
+#include "vs_msg.h"
 #include "vs_vpi.h"
 
 static PLI_INT32 verisocks_main(vpiHandle h_systf);
@@ -37,7 +38,8 @@ void verisocks_register_tf()
 PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
 {
     if (NULL != user_data) {
-        vpi_printf("WARNING: expected NULL pointer (not used)\n");
+        vpi_printf(
+            "WARNING [verisocks]: expected NULL pointer (arg not used)\n");
     }
 
     /* Get handle to system task instance */
@@ -61,8 +63,8 @@ PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
         (tfarg_type != vpiIntegerVar) &&
         (tfarg_type != vpiParameter))
     {
-        vpi_printf("ERROR [verisocks]: $verisocks_init arg must be a constant, a parameter \
-or an integer variable\n");
+        vpi_printf("ERROR [verisocks]: $verisocks_init arg must be a constant, \
+a parameter or an integer variable\n");
         vpi_free_object(arg_iterator);
         goto error;
     }
@@ -72,7 +74,8 @@ or an integer variable\n");
     arg_value.format = vpiIntVal;
     vpi_get_value(h_arg, &arg_value);
     if (vpiIntVal != arg_value.format) {
-        vpi_printf("ERROR [verisocks]: $verisocks_init arg must be an integer\n");
+        vpi_printf(
+            "ERROR [verisocks]: $verisocks_init arg must be an integer\n");
         vpi_free_object(arg_iterator);
         goto error;
     }
@@ -80,7 +83,8 @@ or an integer variable\n");
     /* Check that there is only 1 system task argument */
     h_arg = vpi_scan(arg_iterator);
     if (NULL != h_arg) {
-        vpi_printf("ERROR [verisocks]: $verisocks_init can only have 1 argument\n");
+        vpi_printf(
+            "ERROR [verisocks]: $verisocks_init can only have 1 argument\n");
         vpi_free_object(arg_iterator);
         goto error;
     }
@@ -97,7 +101,7 @@ or an integer variable\n");
 PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 {
     if (NULL != user_data) {
-        vpi_printf("WARNING: expected NULL pointer (not used)\n");
+        vpi_printf("WARNING [verisocks]: expected NULL pointer (not used)\n");
     }
 
     /* Get handle to system task instance */
@@ -130,7 +134,8 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     int fd_socket;
     fd_socket = vs_server_make_socket(num_port);
     if (0 > fd_socket) {
-        vpi_printf("ERROR [verisocks]: Issue making socket at port %d\n", num_port);
+        vpi_printf(
+            "ERROR [verisocks]: Issue making socket at port %d\n", num_port);
         goto error;
     }
 
@@ -139,14 +144,18 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     socklen_t len = sizeof(sin);
     if (0 > getsockname(fd_socket, (struct sockaddr *) &sin, &len)) {
         vpi_printf("ERROR [verisocks]: Issue getting socket address info\n");
-        close(fd_socket);
         goto error;
     }
     uint32_t s_addr = ntohl(sin.sin_addr.s_addr);
-    vpi_printf("****************************************\n");
-    vpi_printf("**          Verisocks server          **\n");
-    vpi_printf("****************************************\n");
-    vpi_printf("INFO  [verisocks]: Address: ");
+
+    vpi_printf("******************************************\n");
+    vpi_printf("*  __   __       _             _         *\n");
+    vpi_printf("*  \\ \\ / /__ _ _(_)___ ___  __| |__ ___  *\n");
+    vpi_printf("*   \\ V / -_) '_| (_-</ _ \\/ _| / /(_-<  *\n");
+    vpi_printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/  *\n");
+    vpi_printf("*                                        *\n");
+    vpi_printf("******************************************\n");
+    vpi_printf("INFO  [verisocks]: Server address: ");
     vpi_printf("%d.%d.%d.%d\n",
         (s_addr & 0xff000000) >> 24u,
         (s_addr & 0x00ff0000) >> 16u,
@@ -166,7 +175,12 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpi_printf("INFO  [verisocks]: Returning control to simulator\n");
     return 0;
 
+    /* Error management */
     error:
+    if (0 <= fd_socket) {
+        close(fd_socket);
+        p_vpi_data->fd_server_socket = -1;
+    }
     vpi_printf("INFO  [verisocks]: Aborting simulation\n");
     vpi_control(vpiFinish, 1);
     free(p_vpi_data);
@@ -175,7 +189,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 
 static PLI_INT32 verisocks_main(vpiHandle h_systf)
 {
-    /* Get user data using the initial system task handle */
+    /* Get user data from the provided system task handle */
     vs_vpi_data_t *p_vpi_data;
     p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
     if (NULL == p_vpi_data) {
@@ -190,9 +204,10 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
     while(1) {
         switch (p_vpi_data->state) {
         case VS_VPI_STATE_CONNECT:
-            timeout.tv_sec = 10;
+            timeout.tv_sec = 120;  //FIXME temporary fixed value
             timeout.tv_usec = 0;
-            vpi_printf("INFO  [verisocks]: Waiting for a client to connect (%ds timeout) ...\n",
+            vpi_printf("INFO  [verisocks]: Waiting for a client to connect \
+(%ds timeout) ...\n",
                 (int) timeout.tv_sec);
             p_vpi_data->fd_client_socket = vs_server_accept(
                 p_vpi_data->fd_server_socket,hostname_buffer,
@@ -203,18 +218,26 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
                 p_vpi_data->state = VS_VPI_STATE_ERROR;
             }
             else {
-                vpi_printf("INFO  [verisocks]: Connected to %s\n", hostname_buffer);
+                vpi_printf("INFO  [verisocks]: Connected to %s\n",
+                           hostname_buffer);
                 p_vpi_data->state = VS_VPI_STATE_WAITING;
             }
             break;
         case VS_VPI_STATE_WAITING:
             /* FIXME: Temporary test code */
-            if (0 < read(p_vpi_data->fd_client_socket, read_buffer, sizeof(read_buffer))) {
+            //if (0 < vs_msg_read(p_vpi_data->fd_client_socket,
+            //                    read_buffer,
+            //                    sizeof(read_buffer))) {
+            //    vpi_printf("%s\n", &read_buffer[2]);
+            //}
+            if (0 < read(p_vpi_data->fd_client_socket,
+                         read_buffer, sizeof(read_buffer))) {
                 vpi_printf("%s\n", read_buffer);
             }
             else {
                 close(p_vpi_data->fd_client_socket);
-                vpi_printf("INFO  [verisocks]: Lost connection. Waiting for a client to (re-)connect ...\n");
+                vpi_printf("INFO  [verisocks]: Lost connection. Waiting for a \
+client to (re-)connect ...\n");
                 p_vpi_data->state = VS_VPI_STATE_CONNECT;
             }
             break;
