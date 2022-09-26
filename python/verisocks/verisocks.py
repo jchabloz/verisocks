@@ -66,13 +66,16 @@ class Verisocks:
             self.sock.setblocking(True)
             self.sock.settimeout(timeout)
         logging.info(f"Attempting connection to {self.address}")
-        try:
-            self.sock.connect(self.address)
-        except Exception:
-            logging.exception("Exception occurred")
-        else:
-            logging.info("Socket connected")
-            self._connected = True
+        self.sock.connect(self.address)
+        logging.info("Socket connected")
+        self._connected = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.close()
+        return False
 
     def close(self):
         logging.info("Closing socket connection")

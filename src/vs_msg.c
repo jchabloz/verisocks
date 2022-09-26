@@ -186,7 +186,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
     char *result = malloc(alloc_size);
 
     vs_log_mod_debug("vs_msg",
-        "Allocated %d bytes in virtual memory for the formatted message\n",
+        "Allocated %d bytes in virtual memory for the formatted message",
         (int) alloc_size);
 
     if (NULL != result) {
@@ -284,7 +284,7 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
     }
     p_msg_info->len = (size_t) p_item_msg_length->valueint;
     vs_log_mod_debug("vs_msg",
-        "Found message length = %d\n", (int) p_msg_info->len);
+        "Found message length = %d", (int) p_msg_info->len);
 
     /* Find the message type */
     cJSON *p_item_msg_type =
@@ -365,7 +365,7 @@ cJSON* vs_msg_read_json(const char* message)
     free(str_msg);
 
     if (NULL == p_obj_msg || cJSON_IsInvalid(p_obj_msg) ) {
-        vs_log_mod_error("vs_msg", "Failed to parse message\n");
+        vs_log_mod_error("vs_msg", "Failed to parse message");
         return NULL;
     }
 
@@ -439,7 +439,8 @@ int vs_msg_read(int fd, char *buffer, size_t len)
     }
     /* Get pre-header */
     if (0 != readn(fd, 2u, buffer)) {
-        vs_log_mod_error("vs_msg", "Could not read pre-header value");
+        vs_log_mod_debug("vs_msg", "Could not read pre-header value. \
+Socket probably disconnected");
         return -1;
     }
     /* Get header length from pre-header */
@@ -449,19 +450,21 @@ int vs_msg_read(int fd, char *buffer, size_t len)
                      (int) header_length);
         return -1;
     }
+    vs_log_mod_debug("vs_msg", "Received message header length: %d",
+        (int) header_length);
 
     /* Read header */
     size_t read_len = header_length;
     if ((header_length + 2) > len) {
         read_len = len - 2;
     }
-    if (0 != readn(fd, read_len, buffer + 2)) {
-        vs_log_mod_error("vs_msg", "Issue while reading header");
-        return -1;
-    }
     if ((header_length + 2) > len) {
         vs_log_mod_error("vs_msg", "Buffer depth not sufficient (%d)",
                      (int) len);
+        return -1;
+    }
+    if (0 != readn(fd, read_len, buffer + 2)) {
+        vs_log_mod_error("vs_msg", "Issue while reading header");
         return -1;
     }
 
@@ -471,23 +474,26 @@ int vs_msg_read(int fd, char *buffer, size_t len)
         vs_log_mod_error("vs_msg", "Issue while parsing message info");
         return -1;
     }
+    vs_log_mod_debug("vs_msg", "Received message type: %s",
+        VS_MSG_TYPES[msg_info.type]);
+    vs_log_mod_debug("vs_msg", "Received message length: %d",
+        (int) msg_info.len);
 
-    /* Read message content */
+    /* Read message content - If longer than buffer depth, truncate it*/
     read_len = msg_info.len;
-    if ((msg_info.len + header_length + 2) > len) {
+    size_t total_len = msg_info.len + header_length + 2;
+    if (total_len > len) {
         read_len = len - header_length - 2;
+        vs_log_mod_warning("vs_msg", "Truncated message content by %d bytes",
+            (int) (total_len - len));
     }
     if (0 != readn(fd, read_len, buffer + 2 + header_length)) {
         vs_log_mod_error("vs_msg", "Issue while reading message content");
         return -1;
     }
-    if ((msg_info.len + header_length + 2) > len) {
-        vs_log_mod_error("vs_msg", "Buffer depth not sufficient (%d)",
-                     (int) len);
-        return -1;
-    }
 
-    return 0;
+    /* Return received message total length */
+    return total_len;
 }
 
 //EOF

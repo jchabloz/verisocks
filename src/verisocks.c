@@ -200,14 +200,15 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
 
     struct timeval timeout;
     char hostname_buffer[128];
-    char read_buffer[1024];
+    char read_buffer[4096];
+    int msg_len;
 
     while(1) {
         switch (p_vpi_data->state) {
         case VS_VPI_STATE_CONNECT:
             timeout.tv_sec = 120;  //FIXME temporary fixed value
             timeout.tv_usec = 0;
-            vs_vpi_log_info("Waiting for a client to connect \
+            vs_vpi_log_debug("Waiting for a client to connect \
 (%ds timeout) ...", (int) timeout.tv_sec);
             p_vpi_data->fd_client_socket = vs_server_accept(
                 p_vpi_data->fd_server_socket,hostname_buffer,
@@ -224,21 +225,27 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
             break;
         case VS_VPI_STATE_WAITING:
             /* FIXME: Temporary test code */
-            //if (0 < vs_msg_read(p_vpi_data->fd_client_socket,
-            //                    read_buffer,
-            //                    sizeof(read_buffer))) {
-            //    vpi_printf("%s\n", &read_buffer[2]);
-            //}
-            if (0 < read(p_vpi_data->fd_client_socket,
-                         read_buffer, sizeof(read_buffer))) {
-                vpi_printf("%s\n", read_buffer);
-            }
-            else {
+            msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
+                                  read_buffer,
+                                  sizeof(read_buffer));
+            if (0 > msg_len) {
                 close(p_vpi_data->fd_client_socket);
                 vs_vpi_log_debug("Lost connection. Waiting for a \
 client to (re-)connect ...");
                 p_vpi_data->state = VS_VPI_STATE_CONNECT;
+                break;
             }
+            if (msg_len >= (int) sizeof(read_buffer)) {
+                read_buffer[sizeof(read_buffer) - 1] = '\0';
+            }
+            else {
+                read_buffer[msg_len] = '\0';
+            }
+            vs_vpi_log_debug("Message: %s", &read_buffer[2]);
+            // if (0 < read(p_vpi_data->fd_client_socket,
+            //              read_buffer, sizeof(read_buffer))) {
+            //     vpi_printf("%s\n", read_buffer);
+            // }
             break;
         case VS_VPI_STATE_PROCESSING:
             //TODO: Process received instruction
