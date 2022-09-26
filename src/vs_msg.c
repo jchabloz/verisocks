@@ -323,18 +323,22 @@ char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
     }
 
     /* Get back message content. Could be either text or binary */
-    char *str_msg = malloc(p_msg_info->len);
+    char *str_msg;
+    if (VS_MSG_TXT == p_msg_info->type || VS_MSG_TXT_JSON == p_msg_info->type) {
+        str_msg = malloc(p_msg_info->len + 1);
+    } else {
+        str_msg = malloc(p_msg_info->len);
+    }
     if (NULL == str_msg) {
         vs_log_mod_perror("vs_msg", "Failed to allocated virtual memory");
         return NULL;
     }
     memcpy(str_msg, message + 2 + header_length, p_msg_info->len);
 
-    /* Normally not required... but let's make that if we expect a string, it
-    is forced to be null-terminated.*/
+    /* Add null-termination */
     if (VS_MSG_TXT == p_msg_info->type || VS_MSG_TXT_JSON == p_msg_info->type)
     {
-        str_msg[p_msg_info->len - 1] = '\0';
+        str_msg[p_msg_info->len] = '\0';
     }
     return str_msg;
 }
@@ -354,10 +358,12 @@ cJSON* vs_msg_read_json(const char* message)
         return NULL;
     }
     if (msg_info.type != VS_MSG_TXT_JSON) {
-        vs_log_mod_error("vs_msg", "Header not consistent with JSON type");
+        vs_log_mod_error("vs_msg",
+            "Header not consistent with JSON content type");
         free(str_msg);
         return NULL;
     } 
+    vs_log_mod_debug("vs_msg", "Message content: %s", str_msg);
 
     /* Parse the message string and return the JSON object if valid */
     cJSON *p_obj_msg;

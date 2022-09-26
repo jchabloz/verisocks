@@ -50,6 +50,7 @@ vs_vpi_data_t *p_data, const cJSON *p_msg)
  * in the following command table. Commands are implemented at the end of this
  * file.
  */
+VS_VPI_CMD_HANDLER(info);
 VS_VPI_CMD_HANDLER(finish);
 VS_VPI_CMD_HANDLER(stop);
 VS_VPI_CMD_HANDLER(set_value);
@@ -63,6 +64,7 @@ VS_VPI_CMD_HANDLER(run);
  */
 static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
 {
+    VS_VPI_CMD(info),
     VS_VPI_CMD(finish),
     VS_VPI_CMD(stop),
     VS_VPI_CMD(set_value),
@@ -151,6 +153,12 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
  * - vs_vpi_data_t *p_data
  * - cJSON *p_msg
  *****************************************************************************/
+VS_VPI_CMD_HANDLER(info)
+{
+    vs_vpi_log_info("Command \"info\" received.");
+    return 0;
+}
+
 VS_VPI_CMD_HANDLER(finish)
 {
     vs_vpi_log_info("Command \"finish\" received. Terminating simulation...");

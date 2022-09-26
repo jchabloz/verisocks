@@ -202,14 +202,19 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
     char hostname_buffer[128];
     char read_buffer[4096];
     int msg_len;
+    cJSON *p_msg;
+    char *str_msg;
 
     while(1) {
         switch (p_vpi_data->state) {
+        /*********************************************************************/
         case VS_VPI_STATE_CONNECT:
+        /*********************************************************************/
             timeout.tv_sec = 120;  //FIXME temporary fixed value
             timeout.tv_usec = 0;
-            vs_vpi_log_debug("Waiting for a client to connect \
-(%ds timeout) ...", (int) timeout.tv_sec);
+            vs_vpi_log_debug(
+                "Waiting for a client to connect (%ds timeout) ...",
+                (int) timeout.tv_sec);
             p_vpi_data->fd_client_socket = vs_server_accept(
                 p_vpi_data->fd_server_socket,hostname_buffer,
                 sizeof(hostname_buffer), &timeout
@@ -223,48 +228,66 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
                 p_vpi_data->state = VS_VPI_STATE_WAITING;
             }
             break;
+        /*********************************************************************/
         case VS_VPI_STATE_WAITING:
+        /*********************************************************************/
             /* FIXME: Temporary test code */
             msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                                   read_buffer,
                                   sizeof(read_buffer));
             if (0 > msg_len) {
                 close(p_vpi_data->fd_client_socket);
-                vs_vpi_log_debug("Lost connection. Waiting for a \
-client to (re-)connect ...");
+                vs_vpi_log_debug(
+                    "Lost connection. Waiting for a client to (re-)connect ..."
+                );
                 p_vpi_data->state = VS_VPI_STATE_CONNECT;
                 break;
             }
             if (msg_len >= (int) sizeof(read_buffer)) {
                 read_buffer[sizeof(read_buffer) - 1] = '\0';
+                vs_vpi_log_warning(
+                    "Received message longer than RX buffer, discarding it"
+                );
+                break;
             }
             else {
                 read_buffer[msg_len] = '\0';
             }
             vs_vpi_log_debug("Message: %s", &read_buffer[2]);
+            p_msg = vs_msg_read_json(read_buffer);
+
             // if (0 < read(p_vpi_data->fd_client_socket,
             //              read_buffer, sizeof(read_buffer))) {
             //     vpi_printf("%s\n", read_buffer);
             // }
             break;
+        /*********************************************************************/
         case VS_VPI_STATE_PROCESSING:
+        /*********************************************************************/
             //TODO: Process received instruction
             //break;
             /* FIXME: Temporary test code */
             return 0;
+        /*********************************************************************/
         case VS_VPI_STATE_SIM_RUNNING:
+        /*********************************************************************/
             /* In this case, we exit the main loop function. Depending on the
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
             return 0;
+        /*********************************************************************/
         case VS_VPI_STATE_FINISHED:
+        /*********************************************************************/
             /* Return control to the simulator */
             return 0;
+        /*********************************************************************/
         case VS_VPI_STATE_START:
         case VS_VPI_STATE_ERROR:
         default:
+        /*********************************************************************/
             p_vpi_data->state = VS_VPI_STATE_ERROR;
+            if (NULL != p_msg) {cJSON_Delete(p_msg);}
             vs_vpi_log_error("State error - Exiting main loop");
             return -1;
         }
