@@ -1,7 +1,7 @@
 /**
  * @file vs_logging.h
  * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
- * @brief Logging utility macros
+ * @brief Verisocks logging macros
  * @version 0.1
  * @date 2022-09-26
  * 
@@ -19,11 +19,12 @@
 #define LEVEL_ERROR 40
 #define LEVEL_CRITICAL 50
 
-/* Define default logging levels */
+/* Define default logging level */
 #ifndef VS_LOG_LEVEL
 #define VS_LOG_LEVEL LEVEL_DEBUG
 #endif
 
+/* Define default VPI logging level */
 #ifndef VS_VPI_LOG_LEVEL
 #define VS_VPI_LOG_LEVEL LEVEL_DEBUG
 #endif
