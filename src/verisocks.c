@@ -202,8 +202,7 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
     char hostname_buffer[128];
     char read_buffer[4096];
     int msg_len;
-    cJSON *p_msg;
-    char *str_msg;
+    cJSON *p_cmd;
 
     while(1) {
         switch (p_vpi_data->state) {
@@ -248,26 +247,36 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
                 vs_vpi_log_warning(
                     "Received message longer than RX buffer, discarding it"
                 );
+                vs_vpi_return(p_vpi_data->fd_client_socket, "error",
+                    "Message too long");
                 break;
             }
             else {
                 read_buffer[msg_len] = '\0';
             }
             vs_vpi_log_debug("Message: %s", &read_buffer[2]);
-            p_msg = vs_msg_read_json(read_buffer);
-
-            // if (0 < read(p_vpi_data->fd_client_socket,
-            //              read_buffer, sizeof(read_buffer))) {
-            //     vpi_printf("%s\n", read_buffer);
-            // }
+            p_cmd = vs_msg_read_json(read_buffer);
+            if (NULL != p_cmd) {
+                p_vpi_data->state = VS_VPI_STATE_PROCESSING;
+                break;
+            }
+            vs_vpi_log_warning(
+                "Received message content cannot be interpreted as a \
+valid JSON content. Discarding it.");
+            vs_vpi_return(p_vpi_data->fd_client_socket, "error",
+                "Invalid message content");
             break;
         /*********************************************************************/
         case VS_VPI_STATE_PROCESSING:
         /*********************************************************************/
-            //TODO: Process received instruction
-            //break;
-            /* FIXME: Temporary test code */
-            return 0;
+            vs_vpi_log_info("Processing received message");
+            vs_vpi_process_command(p_vpi_data, p_cmd);
+
+            vs_vpi_log_info("Getting back to waiting for a new message");
+            if (p_vpi_data->state == VS_VPI_STATE_PROCESSING) {
+                p_vpi_data->state = VS_VPI_STATE_WAITING;
+            }
+            break;
         /*********************************************************************/
         case VS_VPI_STATE_SIM_RUNNING:
         /*********************************************************************/
@@ -275,11 +284,13 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
+            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
             return 0;
         /*********************************************************************/
         case VS_VPI_STATE_FINISHED:
         /*********************************************************************/
             /* Return control to the simulator */
+            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
             return 0;
         /*********************************************************************/
         case VS_VPI_STATE_START:
@@ -287,8 +298,8 @@ static PLI_INT32 verisocks_main(vpiHandle h_systf)
         default:
         /*********************************************************************/
             p_vpi_data->state = VS_VPI_STATE_ERROR;
-            if (NULL != p_msg) {cJSON_Delete(p_msg);}
-            vs_vpi_log_error("State error - Exiting main loop");
+            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
+            vs_vpi_log_error("Exiting main loop (error state)");
             return -1;
         }
     }

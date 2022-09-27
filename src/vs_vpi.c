@@ -9,6 +9,7 @@
  * 
  *****************************************************************************/
 
+#include <stdlib.h>
 #include <string.h>
 #include <iverilog/vpi_user.h>
 
@@ -85,7 +86,7 @@ static cmd_handler_t vs_vpi_get_cmd_handler(const char *cmd)
     const vs_vpi_cmd_t *ptr_cmd = vs_vpi_cmd_table;
 
     while(ptr_cmd->cmd_name != NULL) {
-        if (strcasecmp(ptr_cmd->cmd_name, cmd)) {
+        if (0 == strcasecmp(ptr_cmd->cmd_name, cmd)) {
             return ptr_cmd->cmd_handler;
         }
         ptr_cmd++;
@@ -93,12 +94,6 @@ static cmd_handler_t vs_vpi_get_cmd_handler(const char *cmd)
     return NULL;
 }
 
-/**
- * @brief Process a command receives as a JSON message content
- * @param p_cmd Pointer to a cJSON struct with the message content. It is
- * expected that the message JSON content contains at least a "command" field.
- * @return Integer return value of executed command handler 
- */
 int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
 {
     /* Sanity check on parameters */
@@ -120,29 +115,83 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
 
     /* Get the command as a string */
     char *str_cmd = cJSON_GetStringValue(p_item_cmd);
-    if ((NULL == str_cmd) || (strcmp(str_cmd, "") == 0)) {
-        vs_vpi_log_error("Command field NULL or empty");
+    if (NULL == str_cmd) {
+        vs_vpi_log_error("Command field NULL pointer");
         goto error;
     }
+    if (strcmp(str_cmd, "") == 0) {
+        vs_vpi_log_warning("Command empty");
+        goto warning;
+    }
+    vs_vpi_log_debug("Processing command %s", str_cmd);
 
     /* Look up command handler */
     cmd_handler_t cmd_handler = vs_vpi_get_cmd_handler(str_cmd);
     if (NULL == cmd_handler) {
-        vs_vpi_log_error("Command handler not found");
-        cJSON_free(str_cmd); //Not sure if needed?
+        vs_vpi_log_error("Command handler not found for command %s",
+            str_cmd);
+        goto warning;
+    }
+
+    /* Note: No need to clean-up either str_cmd or p_item_cmd as they are both
+       freed when using cJSON_Delete(p_cmd) from the upper level. Freeing them
+       here would result in an error.
+    */
+
+    /* Execute command handler and forward returned value */
+    return (*cmd_handler)(p_data, p_cmd);
+
+    /* Error handling - Discard and wait for new command */
+    warning:
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command, discarding it");
+    p_data->state = VS_VPI_STATE_WAITING;
+    return -1;
+
+    /* Error handling - Aborting simulation */
+    error:
+    p_data->state = VS_VPI_STATE_ERROR;
+    return -1;
+}
+
+int vs_vpi_return(int fd, const char *str_type, const char *str_value)
+{
+    cJSON *p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        return -1;
+    }
+
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
 
-    /* Clean-up */
-    cJSON_free(str_cmd); //Not sure if needed?
+    if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
 
-    /* Execute command handler and forward returned value */
-    p_data->state = VS_VPI_STATE_PROCESSING;
-    return (*cmd_handler)(p_data, p_cmd);
+    char *str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+    cJSON_Delete(p_msg);
 
-    /* Error handling */
+    int retval;
+    retval = vs_msg_write(fd, str_msg);
+    if (0 > retval) {
+        vs_log_mod_error("vs_vpi", "Error writing return message");
+        free(str_msg);
+        goto error;
+    }
+
+    return 0;
+
     error:
-    p_data->state = VS_VPI_STATE_ERROR;
+    cJSON_Delete(p_msg);
     return -1;
 }
 
@@ -156,7 +205,34 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
 VS_VPI_CMD_HANDLER(info)
 {
     vs_vpi_log_info("Command \"info\" received.");
+
+    /* Get the value from the JSON message content */
+    cJSON *p_item_val = cJSON_GetObjectItem(p_msg, "value");
+    if (NULL == p_item_val) {
+        vs_vpi_log_error("Command field invalid/not found");
+        goto error;
+    }
+
+    /* Get the command as a string */
+    char *str_val = cJSON_GetStringValue(p_item_val);
+    if ((NULL == str_val) || (strcmp(str_val, "") == 0)) {
+        vs_vpi_log_error("Command field NULL or empty");
+        goto error;
+    }
+
+    /* Print info value */
+    vpi_printf("INFO [Verisocks]: received info %s\n", str_val);
+
+    /* Return an acknowledgement return message */
+    vs_vpi_return(p_data->fd_client_socket, "ack", "command received");
+    p_data->state = VS_VPI_STATE_WAITING;
     return 0;
+
+    error:
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command");
+    p_data->state = VS_VPI_STATE_WAITING;
+    return -1;
 }
 
 VS_VPI_CMD_HANDLER(finish)

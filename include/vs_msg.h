@@ -142,7 +142,8 @@ int vs_msg_write(int fd, const char *str_msg);
  * @param len Size of buffer. If the message to read is longer than the buffer,
  * the buffer is filled to its max (without null termination guaranteed!) and
  * the function returns -1.
- * @return Returns 0 if succesful or -1 if an error occurred.
+ * @return Returns message length (total length, not limited to buffer depth)
+ * if successful or -1 if an error occurred.
  */
 int vs_msg_read(int fd, char *buffer, size_t len);
 

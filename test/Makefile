@@ -6,8 +6,7 @@ CFLAGS += -Wextra -Wpedantic
 # CFLAGS += -fprofile-arcs -ftest-coverage
 CFLAGS += --coverage
 CFLAGS += -g -O1
-# CFLAGS += -DVS_MSG_DEBUG
-# CFLAGS += -DVS_SERVER_DEBUG
+CFLAGS += -DVS_LOG_LEVEL=100
 LDFLAGS += -lcunit
 
 BUILDDIR = build

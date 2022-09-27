@@ -6,7 +6,8 @@
  * @date 2022-08-25
  * 
  */
-
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
@@ -80,6 +81,7 @@ void test_vs_msg_create_header_json(void)
     p_header = vs_msg_create_header(p_msg_json, NULL);
     CU_ASSERT_PTR_NULL(p_header);
     p_header = vs_msg_create_header(p_msg_json, NULL);
+    CU_ASSERT_PTR_NULL(p_header);
 }
 
 void test_vs_msg_create_header_text(void)
@@ -106,6 +108,16 @@ void test_vs_msg_create_header_bin(void)
     test_vs_msg_create_header(p_header, msg_info, VS_MSG_BIN, msg_bin_len);
 
     cJSON_Delete(p_header);
+}
+
+void test_vs_msg_create_header_wrong_type(void)
+{
+    cJSON *p_header;
+    vs_msg_info_t msg_info;
+    msg_info.type = VS_MSG_ENUM_LEN + 1;
+    msg_info.len = 0;
+    p_header = vs_msg_create_header(str_msg_json_string, &msg_info);
+    CU_ASSERT_PTR_NULL(p_header);
 }
 
 void test_vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
@@ -185,7 +197,7 @@ void test_vs_msg_read_write_loopback(void)
     retval = (int) lseek(fd_test, 0, SEEK_SET); //Reset descriptor position to start of file
     CU_ASSERT_EQUAL(0, retval);
     retval = vs_msg_read(fd_test, read_buffer, read_buffer_len);
-    CU_ASSERT_EQUAL(0, retval);
+    CU_ASSERT(0 < retval);
 
     cJSON *p_msg_read = vs_msg_read_json(read_buffer);
     CU_ASSERT_PTR_NOT_NULL(p_msg_read);

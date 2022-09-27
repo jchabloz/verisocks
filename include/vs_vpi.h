@@ -37,5 +37,24 @@ typedef struct vs_vpi_data {
 } vs_vpi_data_t;
 
 
+/**
+ * @brief Process a command receives as a JSON message content
+ * 
+ * @param p_cmd Pointer to a cJSON struct with the message content. It is
+ * expected that the message JSON content contains at least a "command" field.
+ * @return Integer return value of executed command handler 
+ */
+int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd);
+
+/**
+ * @brief Return message to client.
+ * 
+ * @param fd I/O descriptor (client)
+ * @param str_type Type
+ * @param str_value Value
+ * @return Returns 0 if successful, -1 if an error occurred
+ */
+int vs_vpi_return(int fd, const char *str_type, const char *str_value);
+
 #endif //VS_VPI_H
 //EOF

@@ -53,6 +53,9 @@ int main(void)
             "Tests creating a JSON header for a binary message content",
             test_vs_msg_create_header_bin)) ||
         (NULL == CU_add_test(pSuite,
+            "Tests creating a JSON header with an invalid type",
+            test_vs_msg_create_header_wrong_type)) ||
+        (NULL == CU_add_test(pSuite,
             "Tests creating a message with a JSON content",
             test_vs_msg_create_message_json)) ||
         (NULL == CU_add_test(pSuite,

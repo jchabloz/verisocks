@@ -78,13 +78,13 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         if (NULL == cJSON_AddStringToObject(p_header, "content-type",
                                             VS_MSG_TYPES[VS_MSG_TXT])) {
             vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
-            return NULL;
+            goto error;
         }
         /* Add content encoding item */
         if (NULL == cJSON_AddStringToObject(p_header, "content-encoding",
                                             "UTF-8")) {
             vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
-            return NULL;
+            goto error;
         }
         break;
     case VS_MSG_TXT_JSON :
@@ -97,15 +97,15 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
                                             VS_MSG_TYPES[VS_MSG_TXT_JSON])) {
             vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
             cJSON_free(str_msg);
-            return NULL;
+            goto error;
         }
         /* Add content encoding item */
         if (NULL == cJSON_AddStringToObject(p_header, "content-encoding",
                                             "UTF-8")) {
             vs_log_mod_error("vs_msg",
-                "Failed to adNULLd string to cJSON object");
+                "Failed to add string to cJSON object");
             cJSON_free(str_msg);
-            return NULL;
+            goto error;
         }
         cJSON_free(str_msg);
         break;
@@ -114,26 +114,30 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         if (NULL == cJSON_AddStringToObject(p_header, "content-type",
                                             VS_MSG_TYPES[VS_MSG_BIN])) {
             vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
-            return NULL;
+            goto error;
         }
         break;
     default:
         vs_log_mod_error("vs_msg", "Message type %d not supported",
             p_msg_info->type);
-        return NULL;
+        goto error;
     }
 
     /* Add message length item */
     if (p_msg_info->len < 1) {
         vs_log_mod_error("vs_msg", "Message length invalid (< 1)");
-        return NULL;
+        goto error;
     }
     if (NULL == cJSON_AddNumberToObject(p_header, "content-length",
                                         p_msg_info->len)) {
         vs_log_mod_error("vs_msg", "Failed to add number to cJSON object");
-        return NULL;
+        goto error;
     };
     return p_header;
+    
+    error:
+    cJSON_Delete(p_header);
+    return NULL;
 }
 
 /**************************************************************************//**
@@ -151,6 +155,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
     char *str_header = cJSON_PrintUnformatted(p_header);
     if (NULL == str_header) {
         vs_log_mod_error("vs_msg", "Failed to create header string");
+        cJSON_Delete(p_header);
         return NULL;
     }
     cJSON_Delete(p_header);
@@ -159,6 +164,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
     uint16_t header_length = get_header_length(str_header);
     if (0 == header_length) {
         vs_log_mod_error("vs_msg", "Pre-header value is 0");
+        cJSON_free(str_header);
         return NULL;
     }
     char pre_header_lsb = header_length & 0xff;
@@ -176,6 +182,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         break;
     default:
         vs_log_mod_error("vs_msg", "Message type not supported");
+        cJSON_free(str_header);
         return NULL;
     }
 
@@ -204,7 +211,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         else
             memcpy(result + 2 + header_length, p_msg, msg_info.len);
     }
-    free(str_header);
+    cJSON_free(str_header);
     if (NULL != str_msg) free(str_msg);
     return result;
 }
