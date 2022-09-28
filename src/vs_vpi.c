@@ -243,14 +243,12 @@ VS_VPI_CMD_HANDLER(finish)
     return 0;
 }
 
-
 VS_VPI_CMD_HANDLER(stop)
 {
     vs_vpi_log_info("Command \"stop\" received. Stopping simulation...");
     vpi_control(vpiStop);
     return 0;
 }
-
 
 VS_VPI_CMD_HANDLER(set_value)
 {

@@ -22,7 +22,7 @@ static char read_buffer[1024];
 size_t read_buffer_len = 1024;
 
 /* Test messages contents */
-const size_t msg_json_len = 47;
+const size_t msg_json_len = 46;
 const size_t msg_json_hdr_len = 66;
 const char* str_msg_json_string = "{\"author_name\":\"Chabloz\",\"author_firstname\":\"Jérémie\"}";
 const char* str_msg_text = "This is a simple test message";

@@ -88,10 +88,10 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         }
         break;
     case VS_MSG_TXT_JSON :
-        /* Get the message as a string and get its length, including ending
+        /* Get the message as a string and get its length, WITHOUT ending
         null character */
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
-        p_msg_info->len = strlen(str_msg) + 1;
+        p_msg_info->len = strlen(str_msg);
         /* Add content type item */
         if (NULL == cJSON_AddStringToObject(p_header, "content-type",
                                             VS_MSG_TYPES[VS_MSG_TXT_JSON])) {

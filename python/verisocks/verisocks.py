@@ -1,6 +1,5 @@
 import socket
 import logging
-import io
 import struct
 import json
 from enum import Enum, auto
@@ -70,25 +69,6 @@ class Verisocks:
         logging.info("Socket connected")
         self._connected = True
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_tb):
-        self.close()
-        return False
-
-    def close(self):
-        logging.info("Closing socket connection")
-        self.sock.close()
-        self.sock = None
-        self._connected = False
-
-    def flush(self):
-        self._rx_buffer = b""
-        self._tx_buffer = b""
-        self._rx_expected = 0
-        self._tx_msg_len = []
-
     def _read(self):
         """Reads from socket to RX buffer (private)
 
@@ -103,6 +83,7 @@ class Verisocks:
             raise ConnectionError
 
     def _write(self, num_bytes, num_trials=10):
+
         """Write TX buffer to socket (private)
 
         Args:
@@ -141,26 +122,7 @@ class Verisocks:
         """
         return json.dumps(obj, ensure_ascii=False).encode(encoding)
 
-    def _json_decode(self, json_bytes, encoding="utf-8"):
-        """Decode JSON bytes to relevant Python object (private)
-
-        Args:
-            json_bytes (bytes): Bytes instance
-            encoding (str): Encoding, default=utf-8
-
-        Returns:
-            obj: Decoded JSON object
-        """
-        # Alternative, simply use
-        # return json.loads(json_bytes.decode(encoding)) ??
-        tiow = io.TextIOWrapper(
-            io.BytesIO(json_bytes), encoding=encoding, newline=""
-        )
-        obj = json.load(tiow)
-        tiow.close()
-        return obj
-
-    def read_pre_header(self):
+    def _read_pre_header(self):
         """Parse RX buffer for pre-header value"""
         if (self._rx_state is not VsRxState.RX_INIT):
             raise ValueError("ERROR: Inconsistent state")
@@ -169,19 +131,21 @@ class Verisocks:
         self._rx_header_len = struct.unpack(
             ">H", self._rx_buffer[:self.PRE_HDR_LEN]
         )[0]
+        logging.debug(f"Header length: {self._rx_header_len}")
         self._rx_buffer = self._rx_buffer[self.PRE_HDR_LEN:]
         self._rx_state = VsRxState.RX_PRE_HDR
 
-    def read_header(self):
+    def _read_header(self):
         """Parse RX buffer for header"""
         if (self._rx_state is not VsRxState.RX_PRE_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
         header_len = self._rx_header_len
         if not (len(self._rx_buffer) >= header_len):
             return
-        self.rx_header = self._json_decode(
-            self._rx_buffer[:header_len], "utf-8"
-        )
+        logging.debug("Header: " +
+                      self._rx_buffer[:header_len].decode("utf-8"))
+        self.rx_header = json.loads(
+            self._rx_buffer[:header_len].decode("utf-8"))
         self._rx_buffer = self._rx_buffer[header_len:]
         header_keys = [
             "content-length",
@@ -193,7 +157,7 @@ class Verisocks:
                 raise ValueError(f"Missing required header field '{k}'.")
         self._rx_state = VsRxState.RX_HDR
 
-    def read_content(self):
+    def _read_content(self):
         """Parse RX buffer for content"""
         if (self._rx_state is not VsRxState.RX_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
@@ -202,14 +166,17 @@ class Verisocks:
             return
         data = self._rx_buffer[:content_len]
         self._rx_buffer = self._rx_buffer[content_len:]
+        logging.debug("Content: " + data.decode("utf-8"))
+        logging.debug("Content: " + repr(data))
 
         # Process content depending on type declared in header
         if (self.rx_header["content-type"] == "text/plain"):
             encoding = self.rx_header["content-encoding"]
-            self.rx_content = self.decode(data, encoding)
+            self.rx_content = data.decode(encoding)
         elif (self.rx_header["content-type"] == "application/json"):
             encoding = self.rx_header["content-encoding"]
-            self.rx_content = self._json_decode(data, encoding)
+            logging.debug(f"Encoding: {encoding}")
+            self.rx_content = json.loads(data.decode(encoding))
         elif (self.rx_header["content-type"] == "application/octet-stream"):
             self.rx_content = data
         else:
@@ -223,7 +190,6 @@ class Verisocks:
             request (dict): Dictionnary with the following keys: "content",
             "type" and "encoding" (unless "type" is "application/octet-stream).
         """
-
         content = request["content"]
         content_type = request["type"]
 
@@ -263,8 +229,14 @@ class Verisocks:
         self._tx_msg_len.append(len(message))
 
     def read(self, num_trials=10):
-        """Proceed to read and scan returned message"""
+        """Proceed to read and scan returned message
 
+        Args:
+            num_trials (int): Maximum number of trials. Default=10.
+
+        Returns:
+            status (bool): True if successful, False if error.
+        """
         if self._rx_expected:
             if not self._connected:
                 self.connect()
@@ -273,18 +245,24 @@ class Verisocks:
             trials = 0
             while (trials < num_trials):
                 if (self._rx_state is VsRxState.RX_INIT):
-                    self.read_pre_header()
+                    self._read_pre_header()
                 if (self._rx_state is VsRxState.RX_PRE_HDR):
-                    self.read_header()
+                    self._read_header()
                 if (self._rx_state is VsRxState.RX_HDR):
-                    self.read_content()
+                    self._read_content()
                 if (self._rx_state is VsRxState.RX_DONE):
                     self._rx_expected -= 1
                     self._rx_state = VsRxState.RX_INIT
+                    logging.info(f"Read procedure successful. \
+Still {self._rx_expected} messages expected.")
                     return True
                 self._read()
                 trials += 1
             self._rx_state = VsRxState.ERROR
+            logging.error("Read procedure unsuccessful")
+            return False
+        else:
+            logging.warning("No expected message. Cancelling read procedure.")
             return False
 
     def write(self, all=True):
@@ -306,5 +284,28 @@ class Verisocks:
                 self._rx_expected += 1
         else:
             logging.warning("TX buffer is empty. No message to transmit")
+
+    def close(self):
+        """Close socket connection"""
+        logging.info("Closing socket connection")
+        self.sock.close()
+        self.sock = None
+        self._connected = False
+
+    def flush(self):
+        """Flush RX and TX buffers"""
+        self._rx_buffer = b""
+        self._tx_buffer = b""
+        self._rx_expected = 0
+        self._tx_msg_len = []
+
+    def __enter__(self):
+        """Context manager - Entry function"""
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        """Context manager - Exit function"""
+        self.close()
+        return False
 
 # EOF
