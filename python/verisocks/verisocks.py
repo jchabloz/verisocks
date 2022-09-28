@@ -131,7 +131,6 @@ class Verisocks:
         self._rx_header_len = struct.unpack(
             ">H", self._rx_buffer[:self.PRE_HDR_LEN]
         )[0]
-        logging.debug(f"Header length: {self._rx_header_len}")
         self._rx_buffer = self._rx_buffer[self.PRE_HDR_LEN:]
         self._rx_state = VsRxState.RX_PRE_HDR
 
@@ -142,7 +141,7 @@ class Verisocks:
         header_len = self._rx_header_len
         if not (len(self._rx_buffer) >= header_len):
             return
-        logging.debug("Header: " +
+        logging.debug("Received message header: " +
                       self._rx_buffer[:header_len].decode("utf-8"))
         self.rx_header = json.loads(
             self._rx_buffer[:header_len].decode("utf-8"))
@@ -166,8 +165,7 @@ class Verisocks:
             return
         data = self._rx_buffer[:content_len]
         self._rx_buffer = self._rx_buffer[content_len:]
-        logging.debug("Content: " + data.decode("utf-8"))
-        logging.debug("Content: " + repr(data))
+        logging.debug("Received message content: " + repr(data))
 
         # Process content depending on type declared in header
         if (self.rx_header["content-type"] == "text/plain"):
@@ -175,7 +173,6 @@ class Verisocks:
             self.rx_content = data.decode(encoding)
         elif (self.rx_header["content-type"] == "application/json"):
             encoding = self.rx_header["content-encoding"]
-            logging.debug(f"Encoding: {encoding}")
             self.rx_content = json.loads(data.decode(encoding))
         elif (self.rx_header["content-type"] == "application/octet-stream"):
             self.rx_content = data
@@ -283,7 +280,8 @@ Still {self._rx_expected} messages expected.")
                 self._write(self._tx_msg_len.pop(0))
                 self._rx_expected += 1
         else:
-            logging.warning("TX buffer is empty. No message to transmit")
+            logging.warning("TX buffer is empty. No message to transmit. \
+Use queue_message().")
 
     def close(self):
         """Close socket connection"""
@@ -294,6 +292,7 @@ Still {self._rx_expected} messages expected.")
 
     def flush(self):
         """Flush RX and TX buffers"""
+        logging.info("Flushing RX and TX buffers")
         self._rx_buffer = b""
         self._tx_buffer = b""
         self._rx_expected = 0
