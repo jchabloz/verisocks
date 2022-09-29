@@ -11,13 +11,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <iverilog/vpi_user.h>
 
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "vs_server.h"
 #include "vs_vpi.h"
-
 
 /**
  * @brief Type for a command handler function pointer
@@ -54,9 +54,8 @@ vs_vpi_data_t *p_data)
 VS_VPI_CMD_HANDLER(info);
 VS_VPI_CMD_HANDLER(finish);
 VS_VPI_CMD_HANDLER(stop);
-VS_VPI_CMD_HANDLER(set_value);
-VS_VPI_CMD_HANDLER(get_value);
 VS_VPI_CMD_HANDLER(run);
+VS_VPI_CMD_HANDLER(get);
 
 /**
  * @brief Table registering the command handlers
@@ -68,9 +67,8 @@ static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
     VS_VPI_CMD(info),
     VS_VPI_CMD(finish),
     VS_VPI_CMD(stop),
-    VS_VPI_CMD(set_value),
-    VS_VPI_CMD(get_value),
     VS_VPI_CMD(run),
+    VS_VPI_CMD(get),
     {NULL, NULL}
 };
 
@@ -176,15 +174,16 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
+        free(str_msg);
         goto error;
     }
     cJSON_Delete(p_msg);
 
     int retval;
     retval = vs_msg_write(fd, str_msg);
+    free(str_msg);
     if (0 > retval) {
         vs_log_mod_error("vs_vpi", "Error writing return message");
-        free(str_msg);
         goto error;
     }
 
@@ -198,9 +197,8 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 /******************************************************************************
  * Command handler functions - Implementation
  * Note: using the helper macro VS_VPI_CMD_HANDLER() makes the following
- * parameters always available:
+ * parameter(s) always available:
  * - vs_vpi_data_t *p_data
- * - cJSON *p_msg
  *****************************************************************************/
 VS_VPI_CMD_HANDLER(info)
 {
@@ -209,28 +207,31 @@ VS_VPI_CMD_HANDLER(info)
     /* Get the value from the JSON message content */
     cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
     if (NULL == p_item_val) {
-        vs_vpi_log_error("Command field invalid/not found");
+        vs_vpi_log_error("Command field \"value\" invalid/not found");
         goto error;
     }
 
-    /* Get the command as a string */
+    /* Get the info command argument as a string */
     char *str_val = cJSON_GetStringValue(p_item_val);
     if ((NULL == str_val) || (strcmp(str_val, "") == 0)) {
-        vs_vpi_log_error("Command field NULL or empty");
+        vs_vpi_log_error("Command field \"value\" NULL or empty");
         goto error;
     }
 
-    /* Print info value */
-    vpi_printf("INFO [Verisocks]: received info %s\n", str_val);
+    /* Print received info value */
+    vpi_printf("INFO [Verisocks]: Received info: %s\n", str_val);
 
-    /* Return an acknowledgement return message */
-    vs_vpi_return(p_data->fd_client_socket, "ack", "command received");
+    /* Return an acknowledgement */
+    vs_vpi_return(p_data->fd_client_socket, "ack", "command info received");
+
+    /* Set state to "waiting next command" */
     p_data->state = VS_VPI_STATE_WAITING;
     return 0;
 
+    /* Error handling */
     error:
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command");
+        "Error processing command info - Discarding");
     p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 }
@@ -238,6 +239,8 @@ VS_VPI_CMD_HANDLER(info)
 VS_VPI_CMD_HANDLER(finish)
 {
     vs_vpi_log_info("Command \"finish\" received. Terminating simulation...");
+    vs_vpi_return(p_data->fd_client_socket, "ack",
+        "Processing finish command - Terminating simulation.");
     vpi_control(vpiFinish);
     p_data->state = VS_VPI_STATE_FINISHED;
     return 0;
@@ -245,72 +248,13 @@ VS_VPI_CMD_HANDLER(finish)
 
 VS_VPI_CMD_HANDLER(stop)
 {
-    vs_vpi_log_info("Command \"stop\" received. Stopping simulation...");
+    vs_vpi_log_info("Command \"stop\" received. Stopping simulation and \
+relaxing control to simulator...");
+    vs_vpi_return(p_data->fd_client_socket, "ack",
+        "Processing stop command - Stopping simulation.");
     vpi_control(vpiStop);
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
     return 0;
-}
-
-VS_VPI_CMD_HANDLER(set_value)
-{
-    /* Check state consistency */
-    if (VS_VPI_STATE_PROCESSING != p_data->state) {
-        vs_vpi_log_error("[set_value] Inconsistent state");
-        goto error;
-    }
-
-    /* Get value path */
-    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    char *str_path = cJSON_GetStringValue(p_item_path);
-    if (NULL == str_path || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("[set_value] Path field empty/not found");
-        goto error;
-    }
-
-    /* Get value type */
-    cJSON *p_item_type = cJSON_GetObjectItem(p_data->p_cmd, "type");
-    char *str_type = cJSON_GetStringValue(p_item_type);
-    if (NULL == str_type || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("[set_value] Type field empty/not found");
-        goto error;
-    }
-
-    /* Get value, depends on type */
-    //cJSON *p_item_value = cJSON_GetObjectItem(p_msg, "value");
-    do {
-        if (strcmp(str_type, "logic") == 0) {
-            /* TODO */
-            break;
-        }
-        if (strcmp(str_type, "logic_array") == 0) {
-            /* TODO */
-            break;
-        }
-        if (strcmp(str_type, "real") == 0) {
-            /* TODO */
-            break;
-        }
-        vs_vpi_log_error("[set_value] Unknown type");
-        goto error;
-    } while(0);
-
-    p_data->state = VS_VPI_STATE_WAITING;
-    return 0;
-
-    /* Error handling */
-    error:
-    p_data->state = VS_VPI_STATE_ERROR;
-    return -1;
-}
-
-VS_VPI_CMD_HANDLER(get_value)
-{
-    p_data->state = VS_VPI_STATE_WAITING;
-    return 0;
-
-    /* Error handling */
-    // error:
-    p_data->state = VS_VPI_STATE_ERROR;
-    return -1;
 }
 
 VS_VPI_CMD_HANDLER(run)
@@ -321,5 +265,117 @@ VS_VPI_CMD_HANDLER(run)
     /* Error handling */
     // error:
     p_data->state = VS_VPI_STATE_ERROR;
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(get)
+{
+    char *str_sel;
+    char *str_msg;
+    cJSON *p_msg;
+
+    /* Get the value from the JSON message content */
+    cJSON *p_item_sel = cJSON_GetObjectItem(p_data->p_cmd, "sel");
+    if (NULL == p_item_sel) {
+        vs_vpi_log_error("Command field \"sel\" invalid/not found");
+        goto error;
+    }
+
+    /* Get the info command argument as a string */
+    str_sel = cJSON_GetStringValue(p_item_sel);
+    if ((NULL == str_sel) || (strcmp(str_sel, "") == 0)) {
+        vs_vpi_log_error("Command field \"sel\" NULL or empty");
+        goto error;
+    }
+    vs_vpi_log_info("Command \"get(sel=%s)\" received.", str_sel);
+
+    /* Create return message object */
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        goto error;
+    }
+
+	PLI_INT32 retval;
+    /* Use "sel" field to choose action */
+    if (strcasecmp("sim_info", str_sel) == 0) {
+        vs_vpi_log_debug("Get simulator info...");
+        s_vpi_vlog_info vlog_info;
+        retval = vpi_get_vlog_info(&vlog_info);
+	    if (0 > retval) {
+            vs_log_mod_error("vs_vpi", "Could not get vlog_info");
+            goto error;
+        }
+        if (NULL == cJSON_AddStringToObject(p_msg, "product",
+                                            vlog_info.product)) {
+            vs_log_mod_error("vs_vpi", "Could not add string to object");
+            goto error;
+        }
+        if (NULL == cJSON_AddStringToObject(p_msg, "version",
+                                            vlog_info.version)) {
+            vs_log_mod_error("vs_vpi", "Could not add string to object");
+            goto error;
+        }
+
+        str_msg = vs_msg_create_message(p_msg,
+            (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        if (NULL == str_msg) {
+            vs_log_mod_error("vs_vpi", "NULL pointer");
+            goto error;
+        }
+
+        retval = (PLI_INT32) vs_msg_write(p_data->fd_client_socket, str_msg);
+        if (0 > retval) {
+            vs_log_mod_error("vs_vpi", "Error writing return message");
+            goto error;
+        }
+    }
+    else if (strcasecmp("sim_time", str_sel) == 0) {
+        vs_vpi_log_debug("Getting simulator time...");
+
+	    s_vpi_time s_time;
+	    s_time.type = vpiSimTime;
+	    vpi_get_time(NULL, &s_time);
+	    PLI_INT32 time_precision = vpi_get(vpiTimePrecision, NULL);
+	    PLI_UINT64 sim_time =
+            (PLI_UINT64) s_time.low + ((PLI_UINT64) s_time.high << 32u);
+	    double sim_time_sec = sim_time * pow(10.0, time_precision);
+    	vs_vpi_log_debug("Sim time: %.3f us\n", sim_time_sec);
+
+        if (NULL == cJSON_AddNumberToObject(p_msg, "sim_time_sec",
+            sim_time_sec)) {
+            vs_log_mod_error("vs_vpi", "Could not add number to object");
+            goto error;
+        }
+        str_msg = vs_msg_create_message(p_msg,
+            (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        if (NULL == str_msg) {
+            vs_log_mod_error("vs_vpi", "NULL pointer");
+            goto error;
+        }
+        retval = (PLI_INT32) vs_msg_write(p_data->fd_client_socket, str_msg);
+        if (0 > retval) {
+            vs_log_mod_error("vs_vpi", "Error writing return message");
+            goto error;
+        }
+    } else {
+        vs_vpi_log_error("Command field \"sel\" value unknown (%s)", str_sel);
+        goto error;
+    }
+
+    /* Normal exit */
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_sel) cJSON_free(str_sel);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return 0;
+
+    /* Error handling */
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_sel) cJSON_free(str_sel);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command get - Discarding");
+    p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 }
