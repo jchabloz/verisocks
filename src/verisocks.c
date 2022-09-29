@@ -275,9 +275,6 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
         vs_vpi_log_error("NULL pointer to user data");
         p_vpi_data->state = VS_VPI_STATE_ERROR;
     }
-    char read_buffer[4096];
-    int msg_len;
-    cJSON *p_cmd;
 
     while(1) {
         switch (p_vpi_data->state) {
@@ -304,16 +301,16 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
-            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
+            if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
             return 0;
         case VS_VPI_STATE_FINISHED:
             /* Return control to the simulator */
-            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
+            if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
             return 0;
         case VS_VPI_STATE_START:
         case VS_VPI_STATE_ERROR:
         default:
-            if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
+            if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
             vs_vpi_log_error("Exiting main loop (error state)");
             return -1;
         }
@@ -359,7 +356,7 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
     char read_buffer[4096];
-    size_t msg_len;
+    int msg_len;
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,
                           sizeof(read_buffer));
