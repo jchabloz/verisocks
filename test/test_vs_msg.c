@@ -80,7 +80,7 @@ void test_vs_msg_create_header_json(void)
     CU_ASSERT_PTR_NULL(p_header);
     p_header = vs_msg_create_header(p_msg_json, NULL);
     CU_ASSERT_PTR_NULL(p_header);
-    p_header = vs_msg_create_header(p_msg_json, NULL);
+    p_header = vs_msg_create_header(NULL, NULL);
     CU_ASSERT_PTR_NULL(p_header);
 }
 

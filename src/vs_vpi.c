@@ -54,6 +54,7 @@ vs_vpi_data_t *p_data)
 VS_VPI_CMD_HANDLER(info);
 VS_VPI_CMD_HANDLER(finish);
 VS_VPI_CMD_HANDLER(stop);
+VS_VPI_CMD_HANDLER(exit);
 VS_VPI_CMD_HANDLER(run);
 VS_VPI_CMD_HANDLER(get);
 
@@ -67,6 +68,7 @@ static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
     VS_VPI_CMD(info),
     VS_VPI_CMD(finish),
     VS_VPI_CMD(stop),
+    VS_VPI_CMD(exit),
     VS_VPI_CMD(run),
     VS_VPI_CMD(get),
     {NULL, NULL}
@@ -154,7 +156,10 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
 
 int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 {
-    cJSON *p_msg = cJSON_CreateObject();
+    cJSON *p_msg;
+    char *str_msg;
+
+    p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
         vs_log_mod_error("vs_vpi", "Could not create cJSON object");
         return -1;
@@ -170,27 +175,27 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
         goto error;
     }
 
-    char *str_msg = vs_msg_create_message(p_msg,
+    str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
-        free(str_msg);
         goto error;
     }
-    cJSON_Delete(p_msg);
 
     int retval;
     retval = vs_msg_write(fd, str_msg);
-    free(str_msg);
     if (0 > retval) {
         vs_log_mod_error("vs_vpi", "Error writing return message");
         goto error;
     }
 
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
     return 0;
 
     error:
-    cJSON_Delete(p_msg);
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
     return -1;
 }
 
@@ -257,6 +262,16 @@ relaxing control to simulator...");
     return 0;
 }
 
+VS_VPI_CMD_HANDLER(exit)
+{
+    vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks and \
+relaxing control to simulator to resume simulation...");
+    vs_vpi_return(p_data->fd_client_socket, "ack",
+        "Processing exit command - Quitting Verisocks.");
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    return 0;
+}
+
 VS_VPI_CMD_HANDLER(run)
 {
     p_data->state = VS_VPI_STATE_WAITING;
@@ -270,7 +285,6 @@ VS_VPI_CMD_HANDLER(run)
 
 VS_VPI_CMD_HANDLER(get)
 {
-    char *str_sel;
     char *str_msg;
     cJSON *p_msg;
 
@@ -282,7 +296,7 @@ VS_VPI_CMD_HANDLER(get)
     }
 
     /* Get the info command argument as a string */
-    str_sel = cJSON_GetStringValue(p_item_sel);
+    char *str_sel = cJSON_GetStringValue(p_item_sel);
     if ((NULL == str_sel) || (strcmp(str_sel, "") == 0)) {
         vs_vpi_log_error("Command field \"sel\" NULL or empty");
         goto error;
@@ -365,17 +379,16 @@ VS_VPI_CMD_HANDLER(get)
 
     /* Normal exit */
     if (NULL != p_msg) cJSON_Delete(p_msg);
-    if (NULL != str_sel) cJSON_free(str_sel);
     if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
     return 0;
 
     /* Error handling */
     error:
     if (NULL != p_msg) cJSON_Delete(p_msg);
-    if (NULL != str_sel) cJSON_free(str_sel);
     if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command get - Discarding");
-    p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 }

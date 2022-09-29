@@ -285,9 +285,9 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             verisocks_main_waiting(p_vpi_data);
             break;
         case VS_VPI_STATE_PROCESSING:
-            vs_vpi_log_info("Processing received message");
+            vs_vpi_log_debug("Processing received message");
             vs_vpi_process_command(p_vpi_data);
-            vs_vpi_log_info("Finished processing command - Back to main loop");
+            vs_vpi_log_debug("Finished processing command - Back to main loop");
 
             /* Fly catch - Normally, the state should be updated in the command
             handler function. We catch a possible error here to avoid an
