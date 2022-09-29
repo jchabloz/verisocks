@@ -22,7 +22,7 @@
 /**
  * @brief Type for a command handler function pointer
  */
-typedef int (*cmd_handler_t)(vs_vpi_data_t*, const cJSON*);
+typedef int (*cmd_handler_t)(vs_vpi_data_t*);
 
 /**
  * @brief Struct type for commands
@@ -38,7 +38,7 @@ typedef struct vs_vpi_cmd {
  * @param cmd Command short name
  */
 #define VS_VPI_CMD_HANDLER(cmd) static int VS_VPI_ ## cmd ## _cmd_handler(\
-vs_vpi_data_t *p_data, const cJSON *p_msg)
+vs_vpi_data_t *p_data)
 
 /**
  * @brief Helper marco to define a command structure with a command name and
@@ -94,30 +94,30 @@ static cmd_handler_t vs_vpi_get_cmd_handler(const char *cmd)
     return NULL;
 }
 
-int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
+int vs_vpi_process_command(vs_vpi_data_t *p_data)
 {
     /* Sanity check on parameters */
     if (NULL == p_data) {
         vs_vpi_log_error("NULL pointer to data");
         return -1;
     }
-    if (NULL == p_cmd) {
+    if (NULL == p_data->p_cmd) {
         vs_vpi_log_error("NULL pointer to cJSON cmd");
         goto error;
     }
 
     /* Get the command field from the JSON message content */
-    cJSON *p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
+    cJSON *p_item_cmd = cJSON_GetObjectItem(p_data->p_cmd, "command");
     if (NULL == p_item_cmd) {
         vs_vpi_log_error("Command field invalid/not found");
-        goto error;
+        goto warning;
     }
 
     /* Get the command as a string */
     char *str_cmd = cJSON_GetStringValue(p_item_cmd);
     if (NULL == str_cmd) {
         vs_vpi_log_error("Command field NULL pointer");
-        goto error;
+        goto warning;
     }
     if (strcmp(str_cmd, "") == 0) {
         vs_vpi_log_warning("Command empty");
@@ -139,12 +139,12 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data, const cJSON *p_cmd)
     */
 
     /* Execute command handler and forward returned value */
-    return (*cmd_handler)(p_data, p_cmd);
+    return (*cmd_handler)(p_data);
 
     /* Error handling - Discard and wait for new command */
     warning:
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command, discarding it");
+        "Error processing command. Discarding.");
     p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 
@@ -207,7 +207,7 @@ VS_VPI_CMD_HANDLER(info)
     vs_vpi_log_info("Command \"info\" received.");
 
     /* Get the value from the JSON message content */
-    cJSON *p_item_val = cJSON_GetObjectItem(p_msg, "value");
+    cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
     if (NULL == p_item_val) {
         vs_vpi_log_error("Command field invalid/not found");
         goto error;
@@ -259,7 +259,7 @@ VS_VPI_CMD_HANDLER(set_value)
     }
 
     /* Get value path */
-    cJSON *p_item_path = cJSON_GetObjectItem(p_msg, "path");
+    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
     char *str_path = cJSON_GetStringValue(p_item_path);
     if (NULL == str_path || (strcmp(str_path, "") == 0)) {
         vs_vpi_log_error("[set_value] Path field empty/not found");
@@ -267,7 +267,7 @@ VS_VPI_CMD_HANDLER(set_value)
     }
 
     /* Get value type */
-    cJSON *p_item_type = cJSON_GetObjectItem(p_msg, "type");
+    cJSON *p_item_type = cJSON_GetObjectItem(p_data->p_cmd, "type");
     char *str_type = cJSON_GetStringValue(p_item_type);
     if (NULL == str_type || (strcmp(str_path, "") == 0)) {
         vs_vpi_log_error("[set_value] Type field empty/not found");

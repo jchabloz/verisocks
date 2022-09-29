@@ -20,8 +20,11 @@
 #include "vs_msg.h"
 #include "vs_vpi.h"
 
-static PLI_INT32 verisocks_main(vpiHandle h_systf);
-
+/* Protoypes for some static functions */
+static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
+static PLI_INT32 verisocks_cb(p_cb_data cb_data);
+static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
+static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data);
 
 void verisocks_register_tf()
 {
@@ -37,6 +40,17 @@ void verisocks_register_tf()
 
     vpi_register_systf(&tf_data);
     return;
+}
+
+void verisocks_register_cb(s_cb_data cb_data)
+{
+    /* Complete callback data definition with callback function */
+    cb_data.cb_rtn = verisocks_cb;
+
+    /* Register callback */
+    vpiHandle h_cb;
+    h_cb = vpi_register_cb(&cb_data);
+    vpi_free_object(h_cb);
 }
 
 PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
@@ -126,10 +140,17 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     /* Create and allocate instance-specific storage */
     vs_vpi_data_t *p_vpi_data;
     p_vpi_data = (vs_vpi_data_t*) malloc(sizeof(vs_vpi_data_t));
+    if (NULL == p_vpi_data) {
+        vs_vpi_log_error("Issue allocating virtual memory");
+        goto error;
+    }
 
+    /* Initialize instance-specific user data */
     p_vpi_data->state = VS_VPI_STATE_START;
+    p_vpi_data->h_systf = h_systf;
     p_vpi_data->fd_server_socket = -1;
     p_vpi_data->fd_client_socket = -1;
+    p_vpi_data->p_cmd = NULL;
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -170,7 +191,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->fd_server_socket = fd_socket;
 
     /* Call verisocks main loop */
-    if (0 > verisocks_main(h_systf)) {
+    if (0 > verisocks_main(p_vpi_data)) {
         goto error;
     }
     vs_vpi_log_info("Returning control to simulator");
@@ -180,128 +201,198 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     error:
     if (0 <= fd_socket) {
         close(fd_socket);
-        p_vpi_data->fd_server_socket = -1;
+        if (NULL != p_vpi_data) {p_vpi_data->fd_server_socket = -1;}
     }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
-    free(p_vpi_data);
+    if (NULL != p_vpi_data) {free(p_vpi_data);}
     return -1;
 }
 
-static PLI_INT32 verisocks_main(vpiHandle h_systf)
+/**
+ * @brief Callback function
+ * 
+ * @param cb_data Pointer to s_cb_data struct
+ * @return Returns 0 if successful, -1 in case of error
+ */
+static PLI_INT32 verisocks_cb(p_cb_data cb_data)
 {
-    /* Get user data from the provided system task handle */
-    vs_vpi_data_t *p_vpi_data;
-    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
-    if (NULL == p_vpi_data) {
-        vpi_printf("ERROR [verisocks]: Could not get user data back\n");
-        p_vpi_data->state = VS_VPI_STATE_ERROR;
+    /* Retrieve initial system task instance handle */
+    vpiHandle h_systf;
+    h_systf = (vpiHandle) cb_data->user_data;
+    if (NULL == h_systf) {
+        vs_vpi_log_error("Could not get systf handle - Aborting callback");
+        goto error;
     }
 
-    struct timeval timeout;
-    char hostname_buffer[128];
+    /* Retrieve stored instance data */
+    vs_vpi_data_t *p_vpi_data;
+    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
+    if (NULL == h_systf) {
+        vs_vpi_log_error("Could not get stored data - Aborting callback");
+        goto error;
+    }
+
+    /* Check state */
+    if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
+        vs_vpi_log_error("Inconsistent state");
+        vs_vpi_return(p_vpi_data->fd_client_socket, "error",
+            "Reached callback with inconsistent state - Aborting");
+        goto error;
+    }
+
+    /* Signalling that the callback function has been reached */
+    vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
+        "Reached callback - Getting back to Verisocks main loop");
+
+    /* Call verisocks main loop */
+    p_vpi_data->state = VS_VPI_STATE_WAITING;
+    if (0 > verisocks_main(p_vpi_data)) {
+        goto error;
+    }
+    vs_vpi_log_info("Returning control to simulator");
+    return 0;
+
+    /* Error management */
+    error:
+    p_vpi_data->state = VS_VPI_STATE_ERROR;
+    if (NULL != p_vpi_data) close(p_vpi_data->fd_server_socket);
+    vs_vpi_log_info("Aborting simulation");
+    vpi_control(vpiFinish, 1);
+    if (NULL != p_vpi_data) free(p_vpi_data);
+    return -1;
+}
+
+/**
+ * @brief State machine main loop
+ * 
+ * @param p_vpi_data 
+ * @return PLI_INT32 
+ */
+static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
+{
+    if (NULL == p_vpi_data) {
+        vs_vpi_log_error("NULL pointer to user data");
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+    }
     char read_buffer[4096];
     int msg_len;
     cJSON *p_cmd;
 
     while(1) {
         switch (p_vpi_data->state) {
-        /*********************************************************************/
         case VS_VPI_STATE_CONNECT:
-        /*********************************************************************/
-            timeout.tv_sec = 120;  //FIXME temporary fixed value
-            timeout.tv_usec = 0;
-            vs_vpi_log_debug(
-                "Waiting for a client to connect (%ds timeout) ...",
-                (int) timeout.tv_sec);
-            p_vpi_data->fd_client_socket = vs_server_accept(
-                p_vpi_data->fd_server_socket,hostname_buffer,
-                sizeof(hostname_buffer), &timeout
-            );
-            if (0 > p_vpi_data->fd_client_socket) {
-                vs_vpi_log_error("Failed to connect");
-                p_vpi_data->state = VS_VPI_STATE_ERROR;
-            }
-            else {
-                vs_vpi_log_info("Connected to %s", hostname_buffer);
-                p_vpi_data->state = VS_VPI_STATE_WAITING;
-            }
+            verisocks_main_connect(p_vpi_data);
             break;
-        /*********************************************************************/
         case VS_VPI_STATE_WAITING:
-        /*********************************************************************/
-            /* FIXME: Temporary test code */
-            msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
-                                  read_buffer,
-                                  sizeof(read_buffer));
-            if (0 > msg_len) {
-                close(p_vpi_data->fd_client_socket);
-                vs_vpi_log_debug(
-                    "Lost connection. Waiting for a client to (re-)connect ..."
-                );
-                p_vpi_data->state = VS_VPI_STATE_CONNECT;
-                break;
-            }
-            if (msg_len >= (int) sizeof(read_buffer)) {
-                read_buffer[sizeof(read_buffer) - 1] = '\0';
-                vs_vpi_log_warning(
-                    "Received message longer than RX buffer, discarding it"
-                );
-                vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-                    "Message too long");
-                break;
-            }
-            else {
-                read_buffer[msg_len] = '\0';
-            }
-            vs_vpi_log_debug("Message: %s", &read_buffer[2]);
-            p_cmd = vs_msg_read_json(read_buffer);
-            if (NULL != p_cmd) {
-                p_vpi_data->state = VS_VPI_STATE_PROCESSING;
-                break;
-            }
-            vs_vpi_log_warning(
-                "Received message content cannot be interpreted as a \
-valid JSON content. Discarding it.");
-            vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-                "Invalid message content");
+            verisocks_main_waiting(p_vpi_data);
             break;
-        /*********************************************************************/
         case VS_VPI_STATE_PROCESSING:
-        /*********************************************************************/
             vs_vpi_log_info("Processing received message");
-            vs_vpi_process_command(p_vpi_data, p_cmd);
-
+            vs_vpi_process_command(p_vpi_data);
             vs_vpi_log_info("Getting back to waiting for a new message");
+
+            /* Fly catch - Normally, the state should be updated in the command
+            handler function. We catch a possible error here to avoid an
+            infinite loop and use the waiting state as a default*/
             if (p_vpi_data->state == VS_VPI_STATE_PROCESSING) {
                 p_vpi_data->state = VS_VPI_STATE_WAITING;
             }
             break;
-        /*********************************************************************/
         case VS_VPI_STATE_SIM_RUNNING:
-        /*********************************************************************/
             /* In this case, we exit the main loop function. Depending on the
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
             if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
             return 0;
-        /*********************************************************************/
         case VS_VPI_STATE_FINISHED:
-        /*********************************************************************/
             /* Return control to the simulator */
             if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
             return 0;
-        /*********************************************************************/
         case VS_VPI_STATE_START:
         case VS_VPI_STATE_ERROR:
         default:
-        /*********************************************************************/
-            p_vpi_data->state = VS_VPI_STATE_ERROR;
             if (NULL != p_cmd) {cJSON_Delete(p_cmd);}
             vs_vpi_log_error("Exiting main loop (error state)");
             return -1;
         }
     }
+    return 0;
+}
+
+/**
+ * @brief Static function to handle VS_VPI_STATE_CONNECT state
+ * 
+ * @param p_vpi_data 
+ * @return PLI_INT32 
+ */
+static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
+{
+    struct timeval timeout;
+    char hostname_buffer[128];
+    timeout.tv_sec = 120;
+    timeout.tv_usec = 0;
+    vs_vpi_log_debug(
+        "Waiting for a client to connect (%ds timeout) ...",
+        (int) timeout.tv_sec);
+    p_vpi_data->fd_client_socket = vs_server_accept(
+        p_vpi_data->fd_server_socket, hostname_buffer,
+        sizeof(hostname_buffer), &timeout
+    );
+    if (0 > p_vpi_data->fd_client_socket) {
+        vs_vpi_log_error("Failed to connect");
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+        return -1;
+    }
+    vs_vpi_log_info("Connected to %s", hostname_buffer);
+    p_vpi_data->state = VS_VPI_STATE_WAITING;
+    return 0;
+}
+
+/**
+ * @brief Static function to handle VS_VPI_STATE_WAITING state
+ * 
+ * @param p_vpi_data 
+ * @return PLI_INT32 
+ */
+static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
+{
+    char read_buffer[4096];
+    size_t msg_len;
+    msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
+                          read_buffer,
+                          sizeof(read_buffer));
+
+    if (0 > msg_len) {
+        close(p_vpi_data->fd_client_socket);
+        vs_vpi_log_debug(
+            "Lost connection. Waiting for a client to (re-)connect ..."
+        );
+        p_vpi_data->state = VS_VPI_STATE_CONNECT;
+        return 0;
+    }
+    if (msg_len >= (int) sizeof(read_buffer)) {
+        read_buffer[sizeof(read_buffer) - 1] = '\0';
+        vs_vpi_log_warning(
+            "Received message longer than RX buffer, discarding it"
+        );
+        vs_vpi_return(p_vpi_data->fd_client_socket, "error",
+            "Message too long - Discarding");
+        return -1;
+    }
+    else {
+        read_buffer[msg_len] = '\0';
+    }
+    vs_vpi_log_debug("Message: %s", &read_buffer[2]);
+    p_vpi_data->p_cmd = vs_msg_read_json(read_buffer);
+    if (NULL != p_vpi_data->p_cmd) {
+        p_vpi_data->state = VS_VPI_STATE_PROCESSING;
+        return 0;
+    }
+    vs_vpi_log_warning("Received message content cannot be interpreted as a \
+valid JSON content. Discarding it.");
+    vs_vpi_return(p_vpi_data->fd_client_socket, "error",
+        "Invalid message content - Discarding");
     return 0;
 }
