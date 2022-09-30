@@ -17,6 +17,7 @@
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "vs_server.h"
+#include "vs_utils.h"
 #include "vs_vpi.h"
 
 /**
@@ -274,6 +275,19 @@ relaxing control to simulator to resume simulation...");
 
 VS_VPI_CMD_HANDLER(run)
 {
+    
+    // s_vpi_time vpi_time;
+
+    // s_cb_data cb_data;
+    // cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    // cb_data.cb_rtn = NULL;
+    // cb_data.reason = cbAtStartOfSimTime;
+    // cb_data.time = &vpi_time;
+    
+    
+    
+    
+    
     p_data->state = VS_VPI_STATE_WAITING;
     return 0;
 
@@ -283,6 +297,9 @@ VS_VPI_CMD_HANDLER(run)
     return -1;
 }
 
+/**
+ * @brief Command handler for function "get"
+ */
 VS_VPI_CMD_HANDLER(get)
 {
     char *str_msg;
@@ -312,7 +329,9 @@ VS_VPI_CMD_HANDLER(get)
 
 	PLI_INT32 retval;
     /* Use "sel" field to choose action */
+    /*************************************************************************/
     if (strcasecmp("sim_info", str_sel) == 0) {
+    /*************************************************************************/
         vs_vpi_log_debug("Get simulator info...");
         s_vpi_vlog_info vlog_info;
         retval = vpi_get_vlog_info(&vlog_info);
@@ -344,16 +363,15 @@ VS_VPI_CMD_HANDLER(get)
             goto error;
         }
     }
+    /*************************************************************************/
     else if (strcasecmp("sim_time", str_sel) == 0) {
+    /*************************************************************************/
         vs_vpi_log_debug("Getting simulator time...");
 
 	    s_vpi_time s_time;
 	    s_time.type = vpiSimTime;
 	    vpi_get_time(NULL, &s_time);
-	    PLI_INT32 time_precision = vpi_get(vpiTimePrecision, NULL);
-	    PLI_UINT64 sim_time =
-            (PLI_UINT64) s_time.low + ((PLI_UINT64) s_time.high << 32u);
-	    double sim_time_sec = sim_time * pow(10.0, time_precision);
+        double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     	vs_vpi_log_debug("Sim time: %.3f us\n", sim_time_sec);
 
         if (NULL == cJSON_AddNumberToObject(p_msg, "sim_time_sec",
@@ -372,7 +390,9 @@ VS_VPI_CMD_HANDLER(get)
             vs_log_mod_error("vs_vpi", "Error writing return message");
             goto error;
         }
+    /*************************************************************************/
     } else {
+    /*************************************************************************/
         vs_vpi_log_error("Command field \"sel\" value unknown (%s)", str_sel);
         goto error;
     }
