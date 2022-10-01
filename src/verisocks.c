@@ -151,6 +151,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->fd_server_socket = -1;
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
+    p_vpi_data->p_cb = NULL;
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -236,27 +237,33 @@ static PLI_INT32 verisocks_cb(p_cb_data cb_data)
     /* Check state */
     if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
         vs_vpi_log_error("Inconsistent state");
-        vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-            "Reached callback with inconsistent state - Aborting");
         goto error;
     }
 
     /* Signalling that the callback function has been reached */
+    vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
+for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
         "Reached callback - Getting back to Verisocks main loop");
 
+    /* Register callback data */
+    p_vpi_data->p_cb = cb_data;
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
     if (0 > verisocks_main(p_vpi_data)) {
         goto error;
     }
+    p_vpi_data->p_cb = NULL;
     vs_vpi_log_info("Returning control to simulator");
     return 0;
 
     /* Error management */
     error:
     p_vpi_data->state = VS_VPI_STATE_ERROR;
-    if (NULL != p_vpi_data) close(p_vpi_data->fd_server_socket);
+	if (0 <= p_vpi_data->fd_server_socket) {
+        close(p_vpi_data->fd_server_socket);
+		p_vpi_data->fd_server_socket = -1;
+	}
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
     if (NULL != p_vpi_data) free(p_vpi_data);

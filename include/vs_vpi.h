@@ -34,7 +34,8 @@ typedef struct vs_vpi_data {
     vpiHandle h_systf;      ///VPI handle for system task instance
     int fd_server_socket;   ///File descriptor for open server socket
     int fd_client_socket;   ///File descriptor for currently open connection
-    cJSON* p_cmd;           ///Pointer to current/latest command
+    cJSON *p_cmd;           ///Pointer to current/latest command
+    s_cb_data *p_cb;        ///Pointer to current callback data struct, if relevant
 } vs_vpi_data_t;
 
 /**

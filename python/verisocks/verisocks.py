@@ -52,7 +52,8 @@ class Verisocks:
 
         # Set up logging
         fmt = '%(levelname)s: %(asctime)s - %(message)s'
-        logging.basicConfig(level=logging.DEBUG, format=fmt)
+        # logging.basicConfig(level=logging.DEBUG, format=fmt)
+        logging.basicConfig(level=logging.INFO, format=fmt)
 
     def connect(self, timeout=120.0):
         """Connect socket
@@ -165,7 +166,7 @@ class Verisocks:
             return
         data = self._rx_buffer[:content_len]
         self._rx_buffer = self._rx_buffer[content_len:]
-        logging.debug("Received message content: " + repr(data))
+        logging.info("Received message content: " + repr(data))
 
         # Process content depending on type declared in header
         if (self.rx_header["content-type"] == "text/plain"):
@@ -224,6 +225,8 @@ class Verisocks:
         message = message_pre_header + message_header + content_bytes
         self._tx_buffer += message
         self._tx_msg_len.append(len(message))
+        logging.debug(f"Queuing message header: {repr(message_header)}")
+        logging.info(f"Queuing message content: {repr(content_bytes)}")
 
     def read(self, num_trials=10):
         """Proceed to read and scan returned message
@@ -250,7 +253,7 @@ class Verisocks:
                 if (self._rx_state is VsRxState.RX_DONE):
                     self._rx_expected -= 1
                     self._rx_state = VsRxState.RX_INIT
-                    logging.info(f"Read procedure successful. \
+                    logging.debug(f"Read procedure successful. \
 Still {self._rx_expected} messages expected.")
                     return True
                 self._read()

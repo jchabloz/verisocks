@@ -16,7 +16,6 @@
 #include "vs_utils.h"
 
 
-
 typedef struct s_vs_time_def {
     int factor;
     char *name;

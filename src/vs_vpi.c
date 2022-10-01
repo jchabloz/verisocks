@@ -20,6 +20,8 @@
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
+extern void verisocks_register_cb(s_cb_data cb_data);
+
 /**
  * @brief Type for a command handler function pointer
  */
@@ -49,7 +51,7 @@ vs_vpi_data_t *p_data)
 #define VS_VPI_CMD(cmd) {VS_VPI_ ## cmd ## _cmd_handler, #cmd}
 
 /* Declare prototypes for command handler functions so that they can be used
- * in the following command table. Commands are implemented at the end of this
+ * in the following command tables. Commands are implemented at the end of this
  * file.
  */
 VS_VPI_CMD_HANDLER(info);
@@ -57,12 +59,16 @@ VS_VPI_CMD_HANDLER(finish);
 VS_VPI_CMD_HANDLER(stop);
 VS_VPI_CMD_HANDLER(exit);
 VS_VPI_CMD_HANDLER(run);
+VS_VPI_CMD_HANDLER(run_for_time);   //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_until_time); //sub-command of "run"
 VS_VPI_CMD_HANDLER(get);
+VS_VPI_CMD_HANDLER(get_sim_info);   //sub-command of "get"
+VS_VPI_CMD_HANDLER(get_sim_time);   //sub-command of "get"
 
 /**
  * @brief Table registering the command handlers
- * @warning The table has to be terminated by a struct vs_vpi_cmd with a NULL
- * cmd_name field.
+ * @warning The table has to be terminated by a struct vs_vpi_cmd with NULL
+ * fields.
  */
 static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
 {
@@ -76,21 +82,45 @@ static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
 };
 
 /**
+ * @brief Table registering the sub-command handlers for the get command
+ * @warning The table has to be terminated by a struct vs_vpi_cmd with NULL
+ * fields.
+ */
+static const vs_vpi_cmd_t vs_vpi_cmd_get_table[] =
+{
+    VS_VPI_CMD(get_sim_info),
+    VS_VPI_CMD(get_sim_time),
+    {NULL, NULL}
+};
+
+/**
+ * @brief Table registering the sub-command handlers for the run command
+ * @warning The table has to be terminated by a struct vs_vpi_cmd with NULL
+ * fields.
+ */
+static const vs_vpi_cmd_t vs_vpi_cmd_run_table[] =
+{
+    VS_VPI_CMD(run_for_time),
+    VS_VPI_CMD(run_until_time),
+    {NULL, NULL}
+};
+
+/**
  * @brief Return a command handler pointer for a given command name (case
- * insensitive)
- * @param cmd Command name
+ * insensitive) and a given command handlers register table.
+ * @param p_cmd_table Pointer to a command handlers register table
+ * @param str_cmd Command name (case-insensitive)
  * @return Command handler function pointer. Returns NULL if the command has no
  * registered handler.
  */
-static cmd_handler_t vs_vpi_get_cmd_handler(const char *cmd)
+static cmd_handler_t vs_vpi_get_cmd_handler(
+    const vs_vpi_cmd_t *p_cmd_table, const char *str_cmd)
 {
-    const vs_vpi_cmd_t *ptr_cmd = vs_vpi_cmd_table;
-
-    while(ptr_cmd->cmd_name != NULL) {
-        if (0 == strcasecmp(ptr_cmd->cmd_name, cmd)) {
-            return ptr_cmd->cmd_handler;
+    while(p_cmd_table->cmd_name != NULL) {
+        if (0 == strcasecmp(p_cmd_table->cmd_name, str_cmd)) {
+            return p_cmd_table->cmd_handler;
         }
-        ptr_cmd++;
+        p_cmd_table++;
     }
     return NULL;
 }
@@ -127,7 +157,8 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
     vs_vpi_log_debug("Processing command %s", str_cmd);
 
     /* Look up command handler */
-    cmd_handler_t cmd_handler = vs_vpi_get_cmd_handler(str_cmd);
+    cmd_handler_t cmd_handler =
+        vs_vpi_get_cmd_handler(vs_vpi_cmd_table, str_cmd);
     if (NULL == cmd_handler) {
         vs_vpi_log_error("Command handler not found for command %s",
             str_cmd);
@@ -201,10 +232,7 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 }
 
 /******************************************************************************
- * Command handler functions - Implementation
- * Note: using the helper macro VS_VPI_CMD_HANDLER() makes the following
- * parameter(s) always available:
- * - vs_vpi_data_t *p_data
+ * Command handler functions definitions
  *****************************************************************************/
 VS_VPI_CMD_HANDLER(info)
 {
@@ -225,7 +253,7 @@ VS_VPI_CMD_HANDLER(info)
     }
 
     /* Print received info value */
-    vpi_printf("INFO [Verisocks]: Received info: %s\n", str_val);
+    vs_vpi_log_info("%s", str_val);
 
     /* Return an acknowledgement */
     vs_vpi_return(p_data->fd_client_socket, "ack", "command info received");
@@ -265,8 +293,7 @@ relaxing control to simulator...");
 
 VS_VPI_CMD_HANDLER(exit)
 {
-    vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks and \
-relaxing control to simulator to resume simulation...");
+    vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks ...");
     vs_vpi_return(p_data->fd_client_socket, "ack",
         "Processing exit command - Quitting Verisocks.");
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -275,36 +302,153 @@ relaxing control to simulator to resume simulation...");
 
 VS_VPI_CMD_HANDLER(run)
 {
-    
-    // s_vpi_time vpi_time;
+    /* Get the callback type (cb_type) field from the JSON message content */
+    cJSON *p_item_cb = cJSON_GetObjectItem(p_data->p_cmd, "cb_type");
+    if (NULL == p_item_cb) {
+        vs_vpi_log_error("Command field \"cb_type\" invalid/not found");
+        goto error;
+    }
+    /* Get the cb_type command argument as a string */
+    char *str_cb = cJSON_GetStringValue(p_item_cb);
+    if ((NULL == str_cb) || (strcmp(str_cb, "") == 0)) {
+        vs_vpi_log_error("Command field \"sel\" NULL or empty");
+        goto error;
+    }
 
-    // s_cb_data cb_data;
-    // cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
-    // cb_data.cb_rtn = NULL;
-    // cb_data.reason = cbAtStartOfSimTime;
-    // cb_data.time = &vpi_time;
-    
-    
-    
-    
-    
-    p_data->state = VS_VPI_STATE_WAITING;
-    return 0;
+    /* Dispatch to sub-command handler */
+    cmd_handler_t cmd_handler;
+    if (strcasecmp("for_time", str_cb) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, "run_for_time");
+    } else if (strcasecmp("until_time", str_cb) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, "run_until_time");
+    } else {
+        cmd_handler = NULL;
+    }
+    if (NULL == cmd_handler) {
+        vs_vpi_log_error("Command handler not found for cb_type=%s", str_cb);
+        goto error;
+    }
+    /* Execute sub-command handler and forward returned value */
+    return (*cmd_handler)(p_data);
 
     /* Error handling */
-    // error:
-    p_data->state = VS_VPI_STATE_ERROR;
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command run - Discarding");
     return -1;
 }
 
-/**
- * @brief Command handler for function "get"
- */
+VS_VPI_CMD_HANDLER(run_for_time)
+{
+    /* Get the time field from the JSON message content */
+    cJSON *p_item_time = cJSON_GetObjectItem(p_data->p_cmd, "time");
+    if (NULL == p_item_time) {
+        vs_vpi_log_error("Command field \"time\" invalid/not found");
+        goto error;
+    }
+    double time_value = cJSON_GetNumberValue(p_item_time);
+    if (time_value <= 0.0) {
+        vs_vpi_log_error("Command field \"time\" <= 0.0");
+        goto error;
+    }
+    cJSON *p_item_unit = cJSON_GetObjectItem(p_data->p_cmd, "time_unit");
+    if (NULL == p_item_unit) {
+        vs_vpi_log_error("Command field \"time_unit\" invalid/not found");
+        goto error;
+    }
+    char *str_time_unit = cJSON_GetStringValue(p_item_unit);
+    if ((NULL == str_time_unit) || (strcmp(str_time_unit, "") == 0)) {
+        vs_vpi_log_error("Command field \"time_unit\" NULL or empty");
+        goto error;
+    }
+    vs_vpi_log_info("Command \"run(cb_type=for_time, time=%f %s)\" received.",
+        time_value, str_time_unit);
+
+    s_vpi_time cb_time = vs_utils_double_to_time(time_value, str_time_unit);
+
+    /* Register callback */
+    s_cb_data cb_data;
+    cb_data.reason = cbAfterDelay;
+    cb_data.time = &cb_time;
+    cb_data.obj = NULL;
+    cb_data.value = NULL;
+    cb_data.index = 0;
+    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    verisocks_register_cb(cb_data);
+
+    /* Return control to simulator */
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    return 0;
+
+    /* Error handling */
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command run - Discarding");
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(run_until_time)
+{
+    /* Get the time field from the JSON message content */
+    cJSON *p_item_time = cJSON_GetObjectItem(p_data->p_cmd, "time");
+    if (NULL == p_item_time) {
+        vs_vpi_log_error("Command field \"time\" invalid/not found");
+        goto error;
+    }
+    double time_value = cJSON_GetNumberValue(p_item_time);
+    cJSON *p_item_unit = cJSON_GetObjectItem(p_data->p_cmd, "time_unit");
+    if (NULL == p_item_unit) {
+        vs_vpi_log_error("Command field \"time_unit\" invalid/not found");
+        goto error;
+    }
+    char *str_time_unit = cJSON_GetStringValue(p_item_unit);
+    if ((NULL == str_time_unit) || (strcmp(str_time_unit, "") == 0)) {
+        vs_vpi_log_error("Command field \"time_unit\" NULL or empty");
+        goto error;
+    }
+
+    vs_vpi_log_info(
+        "Command \"run(cb_type=until_time, time=%f %s)\" received.",
+        time_value, str_time_unit);
+
+    /* Compare wanted time value with current simulation time */
+    double time_sim =
+        vs_utils_time_to_double(*p_data->p_cb->time, str_time_unit);
+    if (time_value <= time_sim) {
+        vs_vpi_log_error("Command field \"time\" <= current simulation time");
+        goto error;
+    }
+
+    s_vpi_time cb_time = vs_utils_double_to_time(time_value, str_time_unit);
+
+    /* Register callback */
+    s_cb_data cb_data;
+    cb_data.reason = cbAtStartOfSimTime;
+    cb_data.time = &cb_time;
+    cb_data.obj = NULL;
+    cb_data.value = NULL;
+    cb_data.index = 0;
+    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    verisocks_register_cb(cb_data);
+
+    /* Return control to simulator */
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    return 0;
+
+    /* Error handling */
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command run - Discarding");
+    return -1;
+}
+
 VS_VPI_CMD_HANDLER(get)
 {
-    char *str_msg;
-    cJSON *p_msg;
-
     /* Get the value from the JSON message content */
     cJSON *p_item_sel = cJSON_GetObjectItem(p_data->p_cmd, "sel");
     if (NULL == p_item_sel) {
@@ -320,6 +464,37 @@ VS_VPI_CMD_HANDLER(get)
     }
     vs_vpi_log_info("Command \"get(sel=%s)\" received.", str_sel);
 
+    /* Dispatch to sub-command handler */
+    cmd_handler_t cmd_handler;
+    if (strcasecmp("sim_info", str_sel) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, "get_sim_info");
+    } else if (strcasecmp("sim_time", str_sel) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, "get_sim_time");
+    } else {
+        cmd_handler = NULL;
+    }
+    if (NULL == cmd_handler) {
+        vs_vpi_log_error("Command handler not found for sel=%s", str_sel);
+        goto error;
+    }
+    /* Execute sub-command handler and forward returned value */
+    return (*cmd_handler)(p_data);
+
+    /* Error handling */
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command get - Discarding");
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(get_sim_info)
+{
+    cJSON *p_msg;
+    char *str_msg;
+
     /* Create return message object */
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
@@ -327,73 +502,30 @@ VS_VPI_CMD_HANDLER(get)
         goto error;
     }
 
-	PLI_INT32 retval;
-    /* Use "sel" field to choose action */
-    /*************************************************************************/
-    if (strcasecmp("sim_info", str_sel) == 0) {
-    /*************************************************************************/
-        vs_vpi_log_debug("Get simulator info...");
-        s_vpi_vlog_info vlog_info;
-        retval = vpi_get_vlog_info(&vlog_info);
-	    if (0 > retval) {
-            vs_log_mod_error("vs_vpi", "Could not get vlog_info");
-            goto error;
-        }
-        if (NULL == cJSON_AddStringToObject(p_msg, "product",
-                                            vlog_info.product)) {
-            vs_log_mod_error("vs_vpi", "Could not add string to object");
-            goto error;
-        }
-        if (NULL == cJSON_AddStringToObject(p_msg, "version",
-                                            vlog_info.version)) {
-            vs_log_mod_error("vs_vpi", "Could not add string to object");
-            goto error;
-        }
-
-        str_msg = vs_msg_create_message(p_msg,
-            (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-        if (NULL == str_msg) {
-            vs_log_mod_error("vs_vpi", "NULL pointer");
-            goto error;
-        }
-
-        retval = (PLI_INT32) vs_msg_write(p_data->fd_client_socket, str_msg);
-        if (0 > retval) {
-            vs_log_mod_error("vs_vpi", "Error writing return message");
-            goto error;
-        }
+    vs_vpi_log_debug("Get simulator info...");
+    s_vpi_vlog_info vlog_info;
+	if (0 > vpi_get_vlog_info(&vlog_info)) {
+        vs_log_mod_error("vs_vpi", "Could not get vlog_info");
+        goto error;
     }
-    /*************************************************************************/
-    else if (strcasecmp("sim_time", str_sel) == 0) {
-    /*************************************************************************/
-        vs_vpi_log_debug("Getting simulator time...");
-
-	    s_vpi_time s_time;
-	    s_time.type = vpiSimTime;
-	    vpi_get_time(NULL, &s_time);
-        double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
-    	vs_vpi_log_debug("Sim time: %.3f us\n", sim_time_sec);
-
-        if (NULL == cJSON_AddNumberToObject(p_msg, "sim_time_sec",
-            sim_time_sec)) {
-            vs_log_mod_error("vs_vpi", "Could not add number to object");
-            goto error;
-        }
-        str_msg = vs_msg_create_message(p_msg,
-            (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-        if (NULL == str_msg) {
-            vs_log_mod_error("vs_vpi", "NULL pointer");
-            goto error;
-        }
-        retval = (PLI_INT32) vs_msg_write(p_data->fd_client_socket, str_msg);
-        if (0 > retval) {
-            vs_log_mod_error("vs_vpi", "Error writing return message");
-            goto error;
-        }
-    /*************************************************************************/
-    } else {
-    /*************************************************************************/
-        vs_vpi_log_error("Command field \"sel\" value unknown (%s)", str_sel);
+    if (NULL == cJSON_AddStringToObject(p_msg, "product",
+                                        vlog_info.product)) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+    if (NULL == cJSON_AddStringToObject(p_msg, "version",
+                                        vlog_info.version)) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+    str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+    if (0 > vs_msg_write(p_data->fd_client_socket, str_msg)) {
+        vs_log_mod_error("vs_vpi", "Error writing return message");
         goto error;
     }
 
@@ -409,6 +541,56 @@ VS_VPI_CMD_HANDLER(get)
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get - Discarding");
+        "Error processing command get(sel=sim_info) - Discarding");
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(get_sim_time)
+{
+    cJSON *p_msg;
+    char *str_msg;
+
+    /* Create return message object */
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        goto error;
+    }
+
+    vs_vpi_log_debug("Getting simulator time...");
+	s_vpi_time s_time;
+	s_time.type = vpiSimTime;
+	vpi_get_time(NULL, &s_time);
+    double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
+    vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
+    if (NULL == cJSON_AddNumberToObject(p_msg, "sim_time_sec",
+        sim_time_sec)) {
+        vs_log_mod_error("vs_vpi", "Could not add number to object");
+        goto error;
+    }
+    str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+    if (0 > vs_msg_write(p_data->fd_client_socket, str_msg)) {
+        vs_log_mod_error("vs_vpi", "Error writing return message");
+        goto error;
+    }
+
+    /* Normal exit */
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
+    return 0;
+
+    /* Error handling */
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command get(sel=sim_time) - Discarding");
     return -1;
 }
