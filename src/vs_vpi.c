@@ -20,10 +20,6 @@
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
-extern void verisocks_register_cb(s_cb_data cb_data);
-extern PLI_INT32 verisocks_cb(p_cb_data cb_data);
-
-
 /**
  * @brief Type for a command handler function pointer
  */
@@ -427,8 +423,10 @@ VS_VPI_CMD_HANDLER(run_until_time)
         time_value, str_time_unit);
 
     /* Compare wanted time value with current simulation time */
-    double time_sim =
-        vs_utils_time_to_double(*p_data->p_cb->time, str_time_unit);
+    s_vpi_time s_time;
+	s_time.type = vpiSimTime;
+	vpi_get_time(NULL, &s_time);
+    double time_sim = vs_utils_time_to_double(s_time, str_time_unit);
     if (time_value <= time_sim) {
         vs_vpi_log_error("Command field \"time\" <= current simulation time");
         goto error;
@@ -462,41 +460,79 @@ VS_VPI_CMD_HANDLER(run_until_time)
 
 VS_VPI_CMD_HANDLER(run_until_change)
 {
-    /* Get the object name from the JSON message content */
-    cJSON *p_item_obj = cJSON_GetObjectItem(p_data->p_cmd, "obj");
-    if (NULL == p_item_obj) {
-        vs_vpi_log_error("Command field \"obj\" invalid/not found");
+    /* Get the object path from the JSON message content */
+    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
+    if (NULL == p_item_path) {
+        vs_vpi_log_error("Command field \"path\" invalid/not found");
         goto error;
     }
-    char *str_obj = cJSON_GetStringValue(p_item_obj);
-    if ((NULL == str_obj) || (strcmp(str_obj, "") == 0)) {
-        vs_vpi_log_error("Command field \"obj\" NULL or empty");
+    char *str_path = cJSON_GetStringValue(p_item_path);
+    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
+        vs_vpi_log_error("Command field \"path\" NULL or empty");
         goto error;
     }
 
     /* Get the value from the JSON message content */
     cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
-    if (NULL == p_item_obj) {
+    if (NULL == p_item_val) {
         vs_vpi_log_error("Command field \"value\" invalid/not found");
         goto error;
     }
     double value = cJSON_GetNumberValue(p_item_val);
+    if (isnan(value)) {
+        vs_vpi_log_error("Command field \"value\" invalid (NaN)");
+        goto error;
+    }
 
-    //TODO
-    //- get value
-    //- register callback
-    //- define how to check the value of the changed object to see if it
-    //  matches with the value that we want.
-    //- define how to un-register callback if only desired once!
+    /* Attempt to get the object handle */
+    vpiHandle h_obj;
+    h_obj = vpi_handle_by_name(str_path, NULL);
+    if (NULL == h_obj) {
+        vs_vpi_log_error("Attempt to get handle to %s unsuccessful", str_path);
+        goto error;
+    }
 
+    /* Store value as user data, depending on desired format */
+    PLI_INT32 format = vs_utils_get_format(h_obj);
+    s_vpi_value target_value;
+    target_value.format = format;
+    if (0 > format) goto error;
+    switch (format) {
+    case vpiIntVal:
+        target_value.value.integer = (PLI_INT32) value;
+        break;
+    case vpiRealVal:
+        target_value.value.real = value;
+        break;
+    default:
+        goto error;
+    }
+    p_data->value = target_value;
+
+    /* Log received command */
     vs_vpi_log_info(
-        "Command \"run(cb_type=until_change, obj=%s, value=%f)\" received.",
-            str_obj, value);
+        "Command \"run(cb_type=until_change, path=%s, value=%f)\" received.",
+            str_path, value);
 
-    //FIXME: temporary code
-    p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "ack",
-        "Finished command run(cb_type=until_change)");
+    /* Register callback */
+    s_vpi_value cb_value;
+    s_vpi_time cb_time;
+    cb_time.type = vpiSimTime;
+    cb_value.format = format;
+
+    s_cb_data cb_data;
+    cb_data.reason = cbValueChange;
+    cb_data.time = &cb_time;
+    cb_data.obj = h_obj;
+    cb_data.value = &cb_value;
+    cb_data.index = 0;
+    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.cb_rtn = verisocks_cb_value_change;
+    vpiHandle h_cb = vpi_register_cb(&cb_data);
+    p_data->h_cb = h_cb;
+
+    /* Return control to simulator */
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
     return 0;
 
     /* Error handling */

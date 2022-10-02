@@ -36,7 +36,8 @@ typedef struct vs_vpi_data {
     int fd_server_socket;   ///File descriptor for open server socket
     int fd_client_socket;   ///File descriptor for currently open connection
     cJSON *p_cmd;           ///Pointer to current/latest command
-    s_cb_data *p_cb;        ///Pointer to current callback data struct, if relevant
+    vpiHandle h_cb;         ///Callback handle (used for value change callback)
+    s_vpi_value value;      ///Value (used for value change callback)
 } vs_vpi_data_t;
 
 /**
@@ -56,6 +57,9 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data);
  * @return Returns 0 if successful, -1 if an error occurred
  */
 int vs_vpi_return(int fd, const char *str_type, const char *str_value);
+
+extern PLI_INT32 verisocks_cb(p_cb_data cb_data);
+extern PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
 
 #endif //VS_VPI_H
 //EOF

@@ -92,60 +92,60 @@ s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit)
     return vpi_time;
 }
 
-// typedef struct s_obj_value {
-//     PLI_INT32 obj_type;
-//     PLI_INT32 format;
-// } obj_value_t;
+typedef struct s_obj_format {
+    PLI_INT32 obj_type;
+    PLI_INT32 format;
+} obj_format_t;
 
-// static const obj_value_t obj_value_format[] = {
-//     {vpiNet,        vpiIntVal},
-//     {vpiReg,        vpiIntVal},
-//     {vpiIntegerVar, vpiIntVal},
-//     {vpiRealVar,    vpiRealVal},
-//     {vpiParameter,  vpiRealVal},
-//     {vpiConstant,   vpiRealVal},
-//     {NULL, NULL}
-// };
+static obj_format_t obj_format_table[] = {
+    {vpiNet,        vpiIntVal},
+    {vpiReg,        vpiIntVal},
+    {vpiIntegerVar, vpiIntVal},
+    {vpiRealVar,    vpiRealVal},
+    {vpiParameter,  vpiRealVal},
+    {vpiConstant,   vpiRealVal},
+    {vpiUndefined,  vpiUndefined} //Mandatory last table item
+};
 
-// static PLI_INT32 vs_utils_get_format(PLI_INT32 obj_type)
-// {
-//     obj_value_t *ptr = &obj_value_format;
-//     while (ptr->format != NULL) {
-//         if (obj_type == ptr->obj_type) {
-//             return ptr->format;
-//         }
-//     }
-//     return -1;
-// }
+PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
+{
+    PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
+    obj_format_t *ptr = obj_format_table;
+    while (ptr->format != vpiUndefined) {
+        if (obj_type == ptr->obj_type) {
+            return ptr->format;
+        }
+        ptr++;
+    }
+    vs_log_mod_error("vs_utils",
+        "Object type %d currently not supported", obj_type);
+    return -1;
+}
 
 PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value)
 {
-    PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
-    switch (obj_type) {
-    case vpiNet:
-        p_value->format = vpiIntVal;
-        break;
-    case vpiReg:
-        p_value->format = vpiIntVal;
-        break;
-    case vpiIntegerVar:
-        p_value->format = vpiIntVal;
-        break;
-    case vpiRealVar:
-        p_value->format = vpiRealVal;
-        break;
-    case vpiParameter:
-        p_value->format = vpiRealVal;
-        break;
-    case vpiConstant:
-        p_value->format = vpiRealVal;
-        break;
-    default:
-        vs_log_mod_error("vs_utils",
-            "Type %d currently not supported", obj_type);
+    PLI_INT32 format = vs_utils_get_format(h_obj);
+    if (0 > format) {
         return -1;
     }
-
+    p_value->format = format;
     vpi_get_value(h_obj, p_value);
     return 0;
+}
+
+PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2) {
+    if (val1.format != val2.format) return 1;
+    switch (val1.format) {
+    case vpiIntVal:
+        if (val1.value.integer == val2.value.integer) return 0;
+        break;
+    case vpiRealVal:
+        if (val1.value.real == val2.value.real) return 0;
+        break;
+    default:
+        vs_log_mod_error("vs_utils", "vs_utils_compare_values, type %d is \
+currently not supported", val1.format);
+        return -1;
+    }
+    return 1;
 }

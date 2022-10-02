@@ -16,6 +16,7 @@
 
 #include "verisocks.h"
 #include "vs_logging.h"
+#include "vs_utils.h"
 #include "vs_server.h"
 #include "vs_msg.h"
 #include "vs_vpi.h"
@@ -134,12 +135,16 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     }
 
     /* Initialize instance-specific user data */
+    s_vpi_value default_value;
+    default_value.format = vpiIntVal;
+    default_value.value.integer = 0;
     p_vpi_data->state = VS_VPI_STATE_START;
     p_vpi_data->h_systf = h_systf;
     p_vpi_data->fd_server_socket = -1;
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
-    p_vpi_data->p_cb = NULL;
+    p_vpi_data->h_cb = 0;
+    p_vpi_data->value = default_value;
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -199,7 +204,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 }
 
 /**
- * @brief Callback function
+ * @brief Callback function - Used for for_time and until_time
  * 
  * @param cb_data Pointer to s_cb_data struct
  * @return Returns 0 if successful, -1 in case of error
@@ -234,14 +239,76 @@ for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
         "Reached callback - Getting back to Verisocks main loop");
 
-    /* Register callback data */
-    p_vpi_data->p_cb = cb_data;
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
     if (0 > verisocks_main(p_vpi_data)) {
         goto error;
     }
-    p_vpi_data->p_cb = NULL;
+    vs_vpi_log_info("Returning control to simulator");
+    return 0;
+
+    /* Error management */
+    error:
+    p_vpi_data->state = VS_VPI_STATE_ERROR;
+	if (0 <= p_vpi_data->fd_server_socket) {
+        close(p_vpi_data->fd_server_socket);
+		p_vpi_data->fd_server_socket = -1;
+	}
+    vs_vpi_log_info("Aborting simulation");
+    vpi_control(vpiFinish, 1);
+    if (NULL != p_vpi_data) free(p_vpi_data);
+    return -1;
+}
+
+/**
+ * @brief Callback function - Used for for_until_change
+ * 
+ * @param cb_data Pointer to s_cb_data struct
+ * @return Returns 0 if successful, -1 in case of error
+ */
+PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
+{
+    /* Retrieve initial system task instance handle */
+    vpiHandle h_systf;
+    h_systf = (vpiHandle) cb_data->user_data;
+    if (NULL == h_systf) {
+        vs_vpi_log_error("Could not get systf handle - Aborting callback");
+        goto error;
+    }
+
+    /* Retrieve stored instance data */
+    vs_vpi_data_t *p_vpi_data;
+    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
+    if (NULL == h_systf) {
+        vs_vpi_log_error("Could not get stored data - Aborting callback");
+        goto error;
+    }
+
+    /* Check state */
+    if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
+        vs_vpi_log_error("Inconsistent state");
+        goto error;
+    }
+
+    /* If the value is not the same, get back to sim until next time */
+    if (vs_utils_compare_values(p_vpi_data->value, *(cb_data->value)) != 0) {
+        return 0;
+    }
+
+    /* Remove callback */
+    vpi_remove_cb(p_vpi_data->h_cb);
+
+    /* Signalling that the callback function has been reached */
+    vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
+for command ...");
+    vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
+        "Reached callback - Getting back to Verisocks main loop");
+
+    /* Call verisocks main loop */
+    p_vpi_data->state = VS_VPI_STATE_WAITING;
+    if (0 > verisocks_main(p_vpi_data)) {
+        goto error;
+    }
     vs_vpi_log_info("Returning control to simulator");
     return 0;
 
@@ -277,6 +344,10 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             verisocks_main_connect(p_vpi_data);
             break;
         case VS_VPI_STATE_WAITING:
+            if (NULL != p_vpi_data->p_cmd) {
+                cJSON_Delete(p_vpi_data->p_cmd);
+                p_vpi_data->p_cmd = NULL;
+            }
             verisocks_main_waiting(p_vpi_data);
             break;
         case VS_VPI_STATE_PROCESSING:
@@ -296,7 +367,6 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
-            if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
             return 0;
         case VS_VPI_STATE_EXIT:
         	if (0 <= p_vpi_data->fd_server_socket) {

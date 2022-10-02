@@ -37,6 +37,35 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
  */
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
 
+/**
+ * @brief Get the Verisocks interface format of choice to represent the value
+ * for a given object.
+ * 
+ * @param h_obj Object handle
+ * @return Format
+ */
+PLI_INT32 vs_utils_get_format(vpiHandle h_obj);
+
+/**
+ * @brief Get the value of an object. Format will be as returned by the
+ * vs_utils_get_format function.
+ * 
+ * @param h_obj Object handle
+ * @param p_value Pointer to an s_vpi_value struct that will be updated with
+ * the value
+ * @return 0 if successful, -1 in case of error.
+ */
 PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value);
+
+/**
+ * @brief Compare two values
+ * 
+ * @warning Currently supports only vpiIntVal and vpiRealVal values
+ * @param val1 First value
+ * @param val2 Second value
+ * @return Returns 0 if val1 and val2 are equivalent, 1 otherwise, -1 if there
+ * is an error (e.g. type not supported)
+ */
+PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2);
 
 #endif //VS_UTILS_H
