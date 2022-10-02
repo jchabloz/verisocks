@@ -21,6 +21,8 @@
 #include "vs_vpi.h"
 
 extern void verisocks_register_cb(s_cb_data cb_data);
+extern PLI_INT32 verisocks_cb(p_cb_data cb_data);
+
 
 /**
  * @brief Type for a command handler function pointer
@@ -61,9 +63,11 @@ VS_VPI_CMD_HANDLER(exit);
 VS_VPI_CMD_HANDLER(run);
 VS_VPI_CMD_HANDLER(run_for_time);   //sub-command of "run"
 VS_VPI_CMD_HANDLER(run_until_time); //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_until_change);  //sub-command of "run"
 VS_VPI_CMD_HANDLER(get);
 VS_VPI_CMD_HANDLER(get_sim_info);   //sub-command of "get"
 VS_VPI_CMD_HANDLER(get_sim_time);   //sub-command of "get"
+VS_VPI_CMD_HANDLER(get_value);      //sub-command of "get"
 
 /**
  * @brief Table registering the command handlers
@@ -90,6 +94,7 @@ static const vs_vpi_cmd_t vs_vpi_cmd_get_table[] =
 {
     VS_VPI_CMD(get_sim_info),
     VS_VPI_CMD(get_sim_time),
+    VS_VPI_CMD(get_value),
     {NULL, NULL}
 };
 
@@ -102,6 +107,7 @@ static const vs_vpi_cmd_t vs_vpi_cmd_run_table[] =
 {
     VS_VPI_CMD(run_for_time),
     VS_VPI_CMD(run_until_time),
+    VS_VPI_CMD(run_until_change),
     {NULL, NULL}
 };
 
@@ -296,7 +302,7 @@ VS_VPI_CMD_HANDLER(exit)
     vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks ...");
     vs_vpi_return(p_data->fd_client_socket, "ack",
         "Processing exit command - Quitting Verisocks.");
-    p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    p_data->state = VS_VPI_STATE_EXIT;
     return 0;
 }
 
@@ -323,6 +329,9 @@ VS_VPI_CMD_HANDLER(run)
     } else if (strcasecmp("until_time", str_cb) == 0) {
         cmd_handler = 
             vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, "run_until_time");
+    } else if (strcasecmp("until_change", str_cb) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, "run_until_change");
     } else {
         cmd_handler = NULL;
     }
@@ -377,7 +386,9 @@ VS_VPI_CMD_HANDLER(run_for_time)
     cb_data.value = NULL;
     cb_data.index = 0;
     cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
-    verisocks_register_cb(cb_data);
+    cb_data.cb_rtn = verisocks_cb;
+    vpiHandle h_cb = vpi_register_cb(&cb_data);
+    vpi_free_object(h_cb);
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -433,10 +444,59 @@ VS_VPI_CMD_HANDLER(run_until_time)
     cb_data.value = NULL;
     cb_data.index = 0;
     cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
-    verisocks_register_cb(cb_data);
+    cb_data.cb_rtn = verisocks_cb;
+    vpiHandle h_cb = vpi_register_cb(&cb_data);
+    vpi_free_object(h_cb);
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    return 0;
+
+    /* Error handling */
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command run - Discarding");
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(run_until_change)
+{
+    /* Get the object name from the JSON message content */
+    cJSON *p_item_obj = cJSON_GetObjectItem(p_data->p_cmd, "obj");
+    if (NULL == p_item_obj) {
+        vs_vpi_log_error("Command field \"obj\" invalid/not found");
+        goto error;
+    }
+    char *str_obj = cJSON_GetStringValue(p_item_obj);
+    if ((NULL == str_obj) || (strcmp(str_obj, "") == 0)) {
+        vs_vpi_log_error("Command field \"obj\" NULL or empty");
+        goto error;
+    }
+
+    /* Get the value from the JSON message content */
+    cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
+    if (NULL == p_item_obj) {
+        vs_vpi_log_error("Command field \"value\" invalid/not found");
+        goto error;
+    }
+    double value = cJSON_GetNumberValue(p_item_val);
+
+    //TODO
+    //- get value
+    //- register callback
+    //- define how to check the value of the changed object to see if it
+    //  matches with the value that we want.
+    //- define how to un-register callback if only desired once!
+
+    vs_vpi_log_info(
+        "Command \"run(cb_type=until_change, obj=%s, value=%f)\" received.",
+            str_obj, value);
+
+    //FIXME: temporary code
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "ack",
+        "Finished command run(cb_type=until_change)");
     return 0;
 
     /* Error handling */
@@ -472,6 +532,9 @@ VS_VPI_CMD_HANDLER(get)
     } else if (strcasecmp("sim_time", str_sel) == 0) {
         cmd_handler = 
             vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, "get_sim_time");
+    } else if (strcasecmp("value", str_sel) == 0) {
+        cmd_handler = 
+            vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, "get_value");
     } else {
         cmd_handler = NULL;
     }
@@ -563,7 +626,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 	vpi_get_time(NULL, &s_time);
     double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
-    if (NULL == cJSON_AddNumberToObject(p_msg, "sim_time_sec",
+    if (NULL == cJSON_AddNumberToObject(p_msg, "time",
         sim_time_sec)) {
         vs_log_mod_error("vs_vpi", "Could not add number to object");
         goto error;
@@ -592,5 +655,101 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command get(sel=sim_time) - Discarding");
+    return -1;
+}
+
+VS_VPI_CMD_HANDLER(get_value)
+{
+    cJSON *p_msg;
+    char *str_msg;
+
+    /* Create return message object */
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        goto error;
+    }
+
+    /* Get the object path from the JSON message content */
+    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
+    if (NULL == p_item_path) {
+        vs_vpi_log_error("Command field \"path\" invalid/not found");
+        goto error;
+    }
+    char *str_path = cJSON_GetStringValue(p_item_path);
+    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
+        vs_vpi_log_error("Command field \"path\" NULL or empty");
+        goto error;
+    }
+    /* Attempt to get the object handle */
+    vpiHandle h_obj;
+    h_obj = vpi_handle_by_name(str_path, NULL);
+    if (NULL == h_obj) {
+        vs_vpi_log_error("Attempt to get handle to %s unsuccessful", str_path);
+        goto error;
+    }
+
+    /* Get object value */
+    s_vpi_value vpi_value;
+    if (0 > vs_utils_get_value(h_obj, &vpi_value)) {
+        goto error;
+    }
+
+    /* Check format */
+    cJSON *p_value;
+    switch (vpi_value.format) {
+    case vpiBinStrVal:
+    case vpiOctStrVal:
+    case vpiDecStrVal:
+    case vpiHexStrVal:
+    case vpiStringVal:
+        p_value = cJSON_AddStringToObject(
+            p_msg, "value", vpi_value.value.str);
+        break;
+    case vpiScalarVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, "value", vpi_value.value.scalar);
+        break;
+    case vpiIntVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, "value", (double) vpi_value.value.integer);
+        break;
+    case vpiRealVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, "value", vpi_value.value.real);
+        break;
+    default:
+        vs_vpi_log_info("Format %d not supported", vpi_value.format);
+        goto error;
+        break;
+    }
+    if (NULL == p_value) {
+        vs_log_mod_error("vs_vpi", "Could not add value to object");
+        goto error;
+    }
+    str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+    if (0 > vs_msg_write(p_data->fd_client_socket, str_msg)) {
+        vs_log_mod_error("vs_vpi", "Error writing return message");
+        goto error;
+    }
+
+    /* Normal exit */
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
+    return 0;
+
+    /* Handle errors */
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command get(sel=value) - Discarding");
     return -1;
 }

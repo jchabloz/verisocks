@@ -91,3 +91,61 @@ s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit)
 
     return vpi_time;
 }
+
+// typedef struct s_obj_value {
+//     PLI_INT32 obj_type;
+//     PLI_INT32 format;
+// } obj_value_t;
+
+// static const obj_value_t obj_value_format[] = {
+//     {vpiNet,        vpiIntVal},
+//     {vpiReg,        vpiIntVal},
+//     {vpiIntegerVar, vpiIntVal},
+//     {vpiRealVar,    vpiRealVal},
+//     {vpiParameter,  vpiRealVal},
+//     {vpiConstant,   vpiRealVal},
+//     {NULL, NULL}
+// };
+
+// static PLI_INT32 vs_utils_get_format(PLI_INT32 obj_type)
+// {
+//     obj_value_t *ptr = &obj_value_format;
+//     while (ptr->format != NULL) {
+//         if (obj_type == ptr->obj_type) {
+//             return ptr->format;
+//         }
+//     }
+//     return -1;
+// }
+
+PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value)
+{
+    PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
+    switch (obj_type) {
+    case vpiNet:
+        p_value->format = vpiIntVal;
+        break;
+    case vpiReg:
+        p_value->format = vpiIntVal;
+        break;
+    case vpiIntegerVar:
+        p_value->format = vpiIntVal;
+        break;
+    case vpiRealVar:
+        p_value->format = vpiRealVal;
+        break;
+    case vpiParameter:
+        p_value->format = vpiRealVal;
+        break;
+    case vpiConstant:
+        p_value->format = vpiRealVal;
+        break;
+    default:
+        vs_log_mod_error("vs_utils",
+            "Type %d currently not supported", obj_type);
+        return -1;
+    }
+
+    vpi_get_value(h_obj, p_value);
+    return 0;
+}

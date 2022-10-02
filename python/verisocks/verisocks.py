@@ -52,7 +52,6 @@ class Verisocks:
 
         # Set up logging
         fmt = '%(levelname)s: %(asctime)s - %(message)s'
-        # logging.basicConfig(level=logging.DEBUG, format=fmt)
         logging.basicConfig(level=logging.INFO, format=fmt)
 
     def connect(self, timeout=120.0):
@@ -166,7 +165,7 @@ class Verisocks:
             return
         data = self._rx_buffer[:content_len]
         self._rx_buffer = self._rx_buffer[content_len:]
-        logging.info("Received message content: " + repr(data))
+        logging.debug("Received message content: " + repr(data))
 
         # Process content depending on type declared in header
         if (self.rx_header["content-type"] == "text/plain"):
@@ -226,7 +225,7 @@ class Verisocks:
         self._tx_buffer += message
         self._tx_msg_len.append(len(message))
         logging.debug(f"Queuing message header: {repr(message_header)}")
-        logging.info(f"Queuing message content: {repr(content_bytes)}")
+        logging.debug(f"Queuing message content: {repr(content_bytes)}")
 
     def read(self, num_trials=10):
         """Proceed to read and scan returned message
@@ -286,6 +285,19 @@ Still {self._rx_expected} messages expected.")
             logging.warning("TX buffer is empty. No message to transmit. \
 Use queue_message().")
 
+    def send_cmd(self, **cmd):
+        """Send a command"""
+        self.queue_message({
+            "type": "application/json",
+            "encoding": "utf-8",
+            "content": cmd
+        })
+        self.write()
+        if (self.read()):
+            return self.rx_content
+        else:
+            return None
+
     def close(self):
         """Close socket connection"""
         logging.info("Closing socket connection")
@@ -295,7 +307,7 @@ Use queue_message().")
 
     def flush(self):
         """Flush RX and TX buffers"""
-        logging.info("Flushing RX and TX buffers")
+        logging.debug("Flushing RX and TX buffers")
         self._rx_buffer = b""
         self._tx_buffer = b""
         self._rx_expected = 0
@@ -303,6 +315,7 @@ Use queue_message().")
 
     def __enter__(self):
         """Context manager - Entry function"""
+        self.connect()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):

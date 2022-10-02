@@ -37,4 +37,6 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
  */
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
 
+PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value);
+
 #endif //VS_UTILS_H

@@ -22,7 +22,6 @@
 
 /* Protoypes for some static functions */
 static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
-static PLI_INT32 verisocks_cb(p_cb_data cb_data);
 static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data);
 
@@ -40,17 +39,6 @@ void verisocks_register_tf()
 
     vpi_register_systf(&tf_data);
     return;
-}
-
-void verisocks_register_cb(s_cb_data cb_data)
-{
-    /* Complete callback data definition with callback function */
-    cb_data.cb_rtn = verisocks_cb;
-
-    /* Register callback */
-    vpiHandle h_cb;
-    h_cb = vpi_register_cb(&cb_data);
-    vpi_free_object(h_cb);
 }
 
 PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
@@ -216,7 +204,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
  * @param cb_data Pointer to s_cb_data struct
  * @return Returns 0 if successful, -1 in case of error
  */
-static PLI_INT32 verisocks_cb(p_cb_data cb_data)
+PLI_INT32 verisocks_cb(p_cb_data cb_data)
 {
     /* Retrieve initial system task instance handle */
     vpiHandle h_systf;
@@ -309,6 +297,14 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
             if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
+            return 0;
+        case VS_VPI_STATE_EXIT:
+        	if (0 <= p_vpi_data->fd_server_socket) {
+                close(p_vpi_data->fd_server_socket);
+    		    p_vpi_data->fd_server_socket = -1;
+            }
+            if (NULL != p_vpi_data->p_cmd) {cJSON_Delete(p_vpi_data->p_cmd);}
+            if (NULL != p_vpi_data) free(p_vpi_data);
             return 0;
         case VS_VPI_STATE_FINISHED:
             /* Return control to the simulator */
