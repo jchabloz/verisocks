@@ -12,7 +12,7 @@
 #include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
 #include "vs_msg.h"
-#include "fff.h"
+
 
 /******************************************************************************
 * Test suite - vs_msg module

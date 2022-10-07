@@ -472,24 +472,27 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
 
-    /* Get the value from the JSON message content */
-    cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
-    if (NULL == p_item_val) {
-        vs_vpi_log_error("Command field \"value\" invalid/not found");
-        goto error;
-    }
-    double value = cJSON_GetNumberValue(p_item_val);
-    if (isnan(value)) {
-        vs_vpi_log_error("Command field \"value\" invalid (NaN)");
-        goto error;
-    }
-
     /* Attempt to get the object handle */
     vpiHandle h_obj;
     h_obj = vpi_handle_by_name(str_path, NULL);
     if (NULL == h_obj) {
         vs_vpi_log_error("Attempt to get handle to %s unsuccessful", str_path);
         goto error;
+    }
+
+    double value;
+    if (vpi_get(vpiType, h_obj) != vpiNamedEvent) {
+        /* Get the value from the JSON message content */
+        cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
+        if (NULL == p_item_val) {
+            vs_vpi_log_error("Command field \"value\" invalid/not found");
+            goto error;
+        }
+        value = cJSON_GetNumberValue(p_item_val);
+        if (isnan(value)) {
+            vs_vpi_log_error("Command field \"value\" invalid (NaN)");
+            goto error;
+        }
     }
 
     /* Store value as user data, depending on desired format */
@@ -503,6 +506,9 @@ VS_VPI_CMD_HANDLER(run_until_change)
         break;
     case vpiRealVal:
         target_value.value.real = value;
+        break;
+    case vpiSuppressVal:
+        target_value.value.real = 0;
         break;
     default:
         goto error;

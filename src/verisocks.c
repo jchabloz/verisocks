@@ -291,8 +291,11 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     }
 
     /* If the value is not the same, get back to sim until next time */
-    if (vs_utils_compare_values(p_vpi_data->value, *(cb_data->value)) != 0) {
-        return 0;
+    if (vpi_get(vpiType, cb_data->obj) != vpiNamedEvent) {
+        if (vs_utils_compare_values(
+            p_vpi_data->value, *(cb_data->value)) != 0) {
+            return 0;
+        }
     }
 
     /* Remove callback */

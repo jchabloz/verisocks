@@ -285,7 +285,7 @@ Still {self._rx_expected} messages expected.")
             logging.warning("TX buffer is empty. No message to transmit. \
 Use queue_message().")
 
-    def send_cmd(self, **cmd):
+    def send(self, **cmd):
         """Send a command"""
         self.queue_message({
             "type": "application/json",
@@ -297,6 +297,9 @@ Use queue_message().")
             return self.rx_content
         else:
             return None
+
+    def send_cmd(self, command, **kwargs):
+        return self.send(command=command, **kwargs)
 
     def close(self):
         """Close socket connection"""

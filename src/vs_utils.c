@@ -104,6 +104,7 @@ static obj_format_t obj_format_table[] = {
     {vpiRealVar,    vpiRealVal},
     {vpiParameter,  vpiRealVal},
     {vpiConstant,   vpiRealVal},
+    {vpiNamedEvent, vpiSuppressVal},
     {vpiUndefined,  vpiUndefined} //Mandatory last table item
 };
 
