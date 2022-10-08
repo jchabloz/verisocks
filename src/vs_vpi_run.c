@@ -28,6 +28,7 @@
 VS_VPI_CMD_HANDLER(run_for_time);   //sub-command of "run"
 VS_VPI_CMD_HANDLER(run_until_time); //sub-command of "run"
 VS_VPI_CMD_HANDLER(run_until_change);  //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_to_next);  //sub-command of "run"
 
 /**
  * @brief Table registering the sub-command handlers for the run command
@@ -39,6 +40,7 @@ const vs_vpi_cmd_t vs_vpi_cmd_run_table[] =
     VS_VPI_CMDKEY(run_for_time, for_time),
     VS_VPI_CMDKEY(run_until_time, until_time),
     VS_VPI_CMDKEY(run_until_change, until_change),
+    VS_VPI_CMDKEY(run_to_next, to_next),
     {NULL, NULL, NULL}
 };
 
@@ -243,4 +245,30 @@ VS_VPI_CMD_HANDLER(run_until_change)
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command run - Discarding");
     return -1;
+}
+
+VS_VPI_CMD_HANDLER(run_to_next)
+{
+    /* Log received command */
+    vs_vpi_log_info(
+        "Command \"run(cb_type=to_next)\" received.");
+
+    /* Register callback */
+    s_vpi_time cb_time;
+    cb_time.type = vpiSimTime;
+
+    s_cb_data cb_data;
+    cb_data.reason = cbNextSimTime;
+    cb_data.time = &cb_time;
+    cb_data.obj = NULL;
+    cb_data.value = NULL;
+    cb_data.index = 0;
+    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.cb_rtn = verisocks_cb;
+    vpiHandle h_cb = vpi_register_cb(&cb_data);
+    p_data->h_cb = h_cb;
+
+    /* Return control to simulator */
+    p_data->state = VS_VPI_STATE_SIM_RUNNING;
+    return 0;
 }
