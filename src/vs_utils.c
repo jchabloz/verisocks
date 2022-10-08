@@ -12,6 +12,7 @@
 #include <math.h>
 #include <string.h>
 #include <iverilog/vpi_user.h>
+#include "cJSON.h"
 #include "vs_logging.h"
 #include "vs_utils.h"
 
@@ -98,14 +99,15 @@ typedef struct s_obj_format {
 } obj_format_t;
 
 static obj_format_t obj_format_table[] = {
-    {vpiNet,        vpiIntVal},
-    {vpiReg,        vpiIntVal},
-    {vpiIntegerVar, vpiIntVal},
-    {vpiRealVar,    vpiRealVal},
-    {vpiParameter,  vpiRealVal},
-    {vpiConstant,   vpiRealVal},
-    {vpiNamedEvent, vpiSuppressVal},
-    {vpiUndefined,  vpiUndefined} //Mandatory last table item
+    {vpiNet,            vpiIntVal},
+    {vpiReg,            vpiIntVal},
+    {vpiIntegerVar,     vpiIntVal},
+    {vpiMemoryWord,     vpiIntVal},
+    {vpiRealVar,        vpiRealVal},
+    {vpiParameter,      vpiRealVal},
+    {vpiConstant,       vpiRealVal},
+    {vpiNamedEvent,     vpiSuppressVal},
+    {vpiUndefined,      vpiUndefined} //Mandatory last table item
 };
 
 PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
@@ -149,4 +151,43 @@ currently not supported", val1.format);
         return -1;
     }
     return 1;
+}
+
+PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key)
+{
+    cJSON *p_value;
+    switch (value.format) {
+    case vpiBinStrVal:
+    case vpiOctStrVal:
+    case vpiDecStrVal:
+    case vpiHexStrVal:
+    case vpiStringVal:
+        p_value = cJSON_AddStringToObject(
+            p_msg, key, value.value.str);
+        break;
+    case vpiScalarVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, key, value.value.scalar);
+        break;
+    case vpiIntVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, key, (double) value.value.integer);
+        break;
+    case vpiRealVal:
+        p_value = cJSON_AddNumberToObject(
+            p_msg, key, value.value.real);
+        break;
+    default:
+        vs_vpi_log_info("Format %d currently not supported", value.format);
+        goto error;
+        break;
+    }
+    if (NULL == p_value) {
+        vs_log_mod_error("vs_vpi", "Could not add value to object");
+        goto error;
+    }
+    return 0;
+
+    error:
+    return -1;
 }

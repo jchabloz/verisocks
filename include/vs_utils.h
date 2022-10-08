@@ -13,6 +13,7 @@
 #define VS_UTILS_H
 
 #include <iverilog/vpi_user.h>
+#include "cJSON.h"
 
 /**
  * @brief Convert VPI time struct to a real (double) value
@@ -67,5 +68,15 @@ PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value);
  * is an error (e.g. type not supported)
  */
 PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2);
+
+/**
+ * @brief Add value to cJSON message object
+ * 
+ * @param value s_vpi_value struct containing format and value to add
+ * @param p_msg Pointer to cJSON struct
+ * @param key Key (string) to use in cJSON struct 
+ * @return Returns 0 if successful, -1 in case of error
+ */
+PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key);
 
 #endif //VS_UTILS_H
