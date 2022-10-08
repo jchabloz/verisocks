@@ -1,4 +1,4 @@
-# Verisocks - *A generic verification interface*
+# Verisocks - *A generic socket interface for Icarus*
 
 [Github](https://github.com/jchabloz/verisocks)
 
