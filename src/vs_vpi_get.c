@@ -54,6 +54,10 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not create cJSON object");
         goto error;
     }
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
 
     vs_vpi_log_debug("Get simulator info...");
     s_vpi_vlog_info vlog_info;
@@ -109,6 +113,10 @@ VS_VPI_CMD_HANDLER(get_sim_time)
         vs_log_mod_error("vs_vpi", "Could not create cJSON object");
         goto error;
     }
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
 
     vs_vpi_log_debug("Getting simulator time...");
 	s_vpi_time s_time;
@@ -116,6 +124,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 	vpi_get_time(NULL, &s_time);
     double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
+
     if (NULL == cJSON_AddNumberToObject(p_msg, "time",
         sim_time_sec)) {
         vs_log_mod_error("vs_vpi", "Could not add number to object");
@@ -157,6 +166,10 @@ VS_VPI_CMD_HANDLER(get_value)
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
         vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        goto error;
+    }
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
 
@@ -260,6 +273,10 @@ VS_VPI_CMD_HANDLER(get_type)
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
         vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        goto error;
+    }
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
 

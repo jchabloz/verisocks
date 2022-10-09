@@ -225,7 +225,7 @@ VS_VPI_CMD_HANDLER(finish)
     vs_vpi_return(p_data->fd_client_socket, "ack",
         "Processing finish command - Terminating simulation.");
     vpi_control(vpiFinish);
-    p_data->state = VS_VPI_STATE_FINISHED;
+    p_data->state = VS_VPI_STATE_EXIT;
     return 0;
 }
 

@@ -23,7 +23,6 @@ typedef enum {
     VS_VPI_STATE_PROCESSING,    ///Processing a command
     VS_VPI_STATE_SIM_RUNNING,   ///Simulation running
     VS_VPI_STATE_EXIT,          ///Exiting Verisocks
-    VS_VPI_STATE_FINISHED,      ///Simulation terminated ($finish equivalent)
     VS_VPI_STATE_ERROR          ///Error state (e.g. timed out while waiting for a connection)
 } vs_vpi_state_t;
 
