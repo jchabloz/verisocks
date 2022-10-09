@@ -3,7 +3,7 @@
 * [x] Add get type
 * [x] Add command to read memory arrays
 * [x] Split `vs_vpi.c` in several files for easier readability.
-* [ ] Manage end of simulation when a message is still expected to be returned.
+* [x] Manage end of simulation when a message is still expected to be returned.
   For example, this could happen due to an error or because the simulation has
   finished while a registered callback condition with the run command has not
   yet been reached.
