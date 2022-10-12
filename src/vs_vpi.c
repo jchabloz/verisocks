@@ -414,6 +414,7 @@ Target path corresponds to a memory array.", str_path);
                 vpi_free_object(mem_iter);
                 goto error;
             }
+        }
 
         vpi_free_object(mem_iter);
         vs_vpi_return(p_data->fd_client_socket, "ack",
