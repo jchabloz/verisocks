@@ -385,7 +385,7 @@ corresponds to a named event.", str_path);
             vs_vpi_log_error("Command field \"value\" invalid/not found");
             goto error;
         }
-        if (cJSON_False == cJSON_IsArray(p_item_val)) {
+        if (!cJSON_IsArray(p_item_val)) {
             vs_vpi_log_error("Command field \"value\" should be an array");
             goto error;
         }
@@ -405,17 +405,16 @@ Target path corresponds to a memory array.", str_path);
             vs_log_mod_error("vs_vpi", "Could not initialize memory iterator");
             goto error;
         }
-        int index = 0;
-        while (index < mem_size) {
-            value = cJSON_GetNumberValue(
-                cJSON_GetArrayItem(p_item_val, index));
+
+        cJSON *iterator;
+        cJSON_ArrayForEach(iterator, p_item_val) {
+            value = cJSON_GetNumberValue(iterator);
             h_mem_word = vpi_scan(mem_iter);
             if (0 > vs_utils_set_value(h_mem_word, value)) {
                 vpi_free_object(mem_iter);
                 goto error;
             }
-            index++;
-        }
+
         vpi_free_object(mem_iter);
         vs_vpi_return(p_data->fd_client_socket, "ack",
             "Processed command \"set\"");

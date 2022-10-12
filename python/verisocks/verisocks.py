@@ -301,6 +301,15 @@ Use queue_message().")
     def send_cmd(self, command, **kwargs):
         return self.send(command=command, **kwargs)
 
+    def run(self, **kwargs):
+        return self.send(command="run", **kwargs)
+
+    def set(self, **kwargs):
+        return self.send(command="set", **kwargs)
+
+    def get(self, **kwargs):
+        return self.send(command="get", **kwargs)
+
     def close(self):
         """Close socket connection"""
         logging.info("Closing socket connection")

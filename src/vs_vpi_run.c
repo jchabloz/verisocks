@@ -67,7 +67,7 @@ VS_VPI_CMD_HANDLER(run_for_time)
         vs_vpi_log_error("Command field \"time_unit\" NULL or empty");
         goto error;
     }
-    vs_vpi_log_info("Command \"run(cb_type=for_time, time=%f %s)\" received.",
+    vs_vpi_log_info("Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, str_time_unit);
 
     s_vpi_time cb_time = vs_utils_double_to_time(time_value, str_time_unit);
@@ -117,7 +117,7 @@ VS_VPI_CMD_HANDLER(run_until_time)
     }
 
     vs_vpi_log_info(
-        "Command \"run(cb_type=until_time, time=%f %s)\" received.",
+        "Command \"run(cb=until_time, time=%f %s)\" received.",
         time_value, str_time_unit);
 
     /* Compare wanted time value with current simulation time */
@@ -192,11 +192,11 @@ VS_VPI_CMD_HANDLER(run_until_change)
             goto error;
         }
         vs_vpi_log_info(
-            "Command \"run(cb_type=until_change, path=%s, value=%f)\" received.",
+            "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
             str_path, value);
     } else {
         vs_vpi_log_info(
-            "Command \"run(cb_type=until_change, path=%s)\" received.",
+            "Command \"run(cb=until_change, path=%s)\" received.",
             str_path);
     }
 
@@ -253,7 +253,7 @@ VS_VPI_CMD_HANDLER(run_to_next)
 {
     /* Log received command */
     vs_vpi_log_info(
-        "Command \"run(cb_type=to_next)\" received.");
+        "Command \"run(cb=to_next)\" received.");
 
     /* Register callback */
     s_vpi_time cb_time;
