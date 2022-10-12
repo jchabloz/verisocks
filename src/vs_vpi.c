@@ -265,16 +265,16 @@ Run command handler
 ******************************************************************************/
 VS_VPI_CMD_HANDLER(run)
 {
-    /* Get the callback type (cb_type) field from the JSON message content */
-    cJSON *p_item_cb = cJSON_GetObjectItem(p_data->p_cmd, "cb_type");
+    /* Get the callback type (cb) field from the JSON message content */
+    cJSON *p_item_cb = cJSON_GetObjectItem(p_data->p_cmd, "cb");
     if (NULL == p_item_cb) {
-        vs_vpi_log_error("Command field \"cb_type\" invalid/not found");
+        vs_vpi_log_error("Command field \"cb\" invalid/not found");
         goto error;
     }
-    /* Get the cb_type command argument as a string */
+    /* Get the cb command argument as a string */
     char *str_cb = cJSON_GetStringValue(p_item_cb);
     if ((NULL == str_cb) || (strcmp(str_cb, "") == 0)) {
-        vs_vpi_log_error("Command field \"sel\" NULL or empty");
+        vs_vpi_log_error("Command field \"cb\" NULL or empty");
         goto error;
     }
 
@@ -282,7 +282,7 @@ VS_VPI_CMD_HANDLER(run)
     cmd_handler_t cmd_handler =
         vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, str_cb);
     if (NULL == cmd_handler) {
-        vs_vpi_log_error("Command handler not found for cb_type=%s", str_cb);
+        vs_vpi_log_error("Command handler not found for cb=%s", str_cb);
         goto error;
     }
 
