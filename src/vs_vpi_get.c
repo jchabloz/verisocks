@@ -184,6 +184,7 @@ VS_VPI_CMD_HANDLER(get_value)
         vs_vpi_log_error("Command field \"path\" NULL or empty");
         goto error;
     }
+
     /* Attempt to get the object handle */
     vpiHandle h_obj;
     h_obj = vpi_handle_by_name(str_path, NULL);

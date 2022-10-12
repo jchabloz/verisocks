@@ -191,6 +191,13 @@ VS_VPI_CMD_HANDLER(run_until_change)
             vs_vpi_log_error("Command field \"value\" invalid (NaN)");
             goto error;
         }
+        vs_vpi_log_info(
+            "Command \"run(cb_type=until_change, path=%s, value=%f)\" received.",
+            str_path, value);
+    } else {
+        vs_vpi_log_info(
+            "Command \"run(cb_type=until_change, path=%s)\" received.",
+            str_path);
     }
 
     /* Store value as user data, depending on desired format */
@@ -212,11 +219,6 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
     p_data->value = target_value;
-
-    /* Log received command */
-    vs_vpi_log_info(
-        "Command \"run(cb_type=until_change, path=%s, value=%f)\" received.",
-            str_path, value);
 
     /* Register callback */
     s_vpi_value cb_value;

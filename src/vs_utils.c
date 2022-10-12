@@ -125,7 +125,7 @@ PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
     return -1;
 }
 
-PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value)
+PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value *p_value)
 {
     PLI_INT32 format = vs_utils_get_format(h_obj);
     if (0 > format) {
@@ -136,7 +136,8 @@ PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value)
     return 0;
 }
 
-PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2) {
+PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2)
+{
     if (val1.format != val2.format) return 1;
     switch (val1.format) {
     case vpiIntVal:
@@ -146,11 +147,35 @@ PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2) {
         if (val1.value.real == val2.value.real) return 0;
         break;
     default:
-        vs_log_mod_error("vs_utils", "vs_utils_compare_values, type %d is \
+        vs_log_mod_error("vs_utils", "vs_utils_compare_values, format %d is \
 currently not supported", val1.format);
         return -1;
     }
     return 1;
+}
+
+PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value)
+{
+    s_vpi_value vpi_value;
+    vpi_value.format = vs_utils_get_format(h_obj);
+    if (0 > vpi_value.format) {
+        return -1;
+    }
+    switch (vpi_value.format) {
+    case vpiIntVal:
+        vpi_value.value.integer = (PLI_INT32) value;
+        break;
+    case vpiRealVal:
+        vpi_value.value.real = value;
+        break;
+    default:
+        vs_log_mod_error("vs_utils", "vs_utils_set_value, format %d is \
+currently not supported", vpi_value.format);
+        return -1;
+    }
+
+    vpi_put_value(h_obj, &vpi_value, NULL, vpiNoDelay);
+    return 0;
 }
 
 PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key)

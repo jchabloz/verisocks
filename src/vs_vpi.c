@@ -31,6 +31,7 @@ VS_VPI_CMD_HANDLER(stop);
 VS_VPI_CMD_HANDLER(exit);
 VS_VPI_CMD_HANDLER(run);
 VS_VPI_CMD_HANDLER(get);
+VS_VPI_CMD_HANDLER(set);
 
 /**
  * @brief Table registering the command handlers
@@ -45,6 +46,7 @@ static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
     VS_VPI_CMD(exit),
     VS_VPI_CMD(run),
     VS_VPI_CMD(get),
+    VS_VPI_CMD(set),
     {NULL, NULL, NULL}
 };
 
@@ -181,8 +183,8 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 }
 
 /******************************************************************************
- * Command handler functions definitions
- *****************************************************************************/
+Info command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(info)
 {
     vs_vpi_log_info("Command \"info\" received.");
@@ -219,6 +221,9 @@ VS_VPI_CMD_HANDLER(info)
     return -1;
 }
 
+/******************************************************************************
+Finish command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(finish)
 {
     vs_vpi_log_info("Command \"finish\" received. Terminating simulation...");
@@ -229,6 +234,9 @@ VS_VPI_CMD_HANDLER(finish)
     return 0;
 }
 
+/******************************************************************************
+Stop command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(stop)
 {
     vs_vpi_log_info("Command \"stop\" received. Stopping simulation and \
@@ -240,6 +248,9 @@ relaxing control to simulator...");
     return 0;
 }
 
+/******************************************************************************
+Exit command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(exit)
 {
     vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks ...");
@@ -249,6 +260,9 @@ VS_VPI_CMD_HANDLER(exit)
     return 0;
 }
 
+/******************************************************************************
+Run command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(run)
 {
     /* Get the callback type (cb_type) field from the JSON message content */
@@ -283,6 +297,9 @@ VS_VPI_CMD_HANDLER(run)
     return -1;
 }
 
+/******************************************************************************
+Get command handler
+******************************************************************************/
 VS_VPI_CMD_HANDLER(get)
 {
     /* Get the value from the JSON message content */
@@ -316,5 +333,121 @@ VS_VPI_CMD_HANDLER(get)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command get - Discarding");
+    return -1;
+}
+
+/******************************************************************************
+Set command handler
+******************************************************************************/
+VS_VPI_CMD_HANDLER(set)
+{
+    /* Get the object path from the JSON message content */
+    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
+    if (NULL == p_item_path) {
+        vs_vpi_log_error("Command field \"path\" invalid/not found");
+        goto error;
+    }
+
+    /* Get the info command argument as a string */
+    char *str_path = cJSON_GetStringValue(p_item_path);
+    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
+        vs_vpi_log_error("Command field \"path\" NULL or empty");
+        goto error;
+    }
+
+    /* Attempt to get the object handle */
+    vpiHandle h_obj;
+    h_obj = vpi_handle_by_name(str_path, NULL);
+    if (NULL == h_obj) {
+        vs_vpi_log_error("Attempt to get handle to %s unsuccessful", str_path);
+        goto error;
+    }
+
+    /* If the object is a named event, there is no need to get a value
+    command argument */
+    if (vpiNamedEvent == vpi_get(vpiType, h_obj)) {
+        vs_vpi_log_info("Command \"set(path=%s)\" received. Target path \
+corresponds to a named event.", str_path);
+        vpi_put_value(h_obj, NULL, NULL, vpiNoDelay);
+        vs_vpi_return(p_data->fd_client_socket, "ack",
+            "Processed command \"set\"");
+        return 0;
+    }
+
+    cJSON *p_item_val;
+    double value;
+
+    /* If the object is a memory array, we expect the value command argument to
+    be a list of values with the same length */
+    if (vpiMemory == vpi_get(vpiType, h_obj)) {
+        p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
+        if (NULL == p_item_val) {
+            vs_vpi_log_error("Command field \"value\" invalid/not found");
+            goto error;
+        }
+        if (cJSON_False == cJSON_IsArray(p_item_val)) {
+            vs_vpi_log_error("Command field \"value\" should be an array");
+            goto error;
+        }
+        PLI_INT32 mem_size = vpi_get(vpiSize, h_obj);
+        if (mem_size != cJSON_GetArraySize(p_item_val)) {
+            vs_vpi_log_error(
+                "Command field \"value\" should be an array of length %d",
+                mem_size);
+            goto error;
+        }
+        vs_vpi_log_info("Command \"set(path=%s, value=[...])\" received. \
+Target path corresponds to a memory array.", str_path);
+        vpiHandle mem_iter;
+        vpiHandle h_mem_word;
+        mem_iter = vpi_iterate(vpiMemoryWord, h_obj);
+        if (NULL == mem_iter) {
+            vs_log_mod_error("vs_vpi", "Could not initialize memory iterator");
+            goto error;
+        }
+        int index = 0;
+        while (index < mem_size) {
+            value = cJSON_GetNumberValue(
+                cJSON_GetArrayItem(p_item_val, index));
+            h_mem_word = vpi_scan(mem_iter);
+            if (0 > vs_utils_set_value(h_mem_word, value)) {
+                vpi_free_object(mem_iter);
+                goto error;
+            }
+            index++;
+        }
+        vpi_free_object(mem_iter);
+        vs_vpi_return(p_data->fd_client_socket, "ack",
+            "Processed command \"set\"");
+        return 0;
+    }
+
+    /* All other object types */
+
+    /* Get the value from the JSON message content */
+    p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
+    if (NULL == p_item_val) {
+        vs_vpi_log_error("Command field \"value\" invalid/not found");
+        goto error;
+    }
+    value = cJSON_GetNumberValue(p_item_val);
+    if (isnan(value)) {
+        vs_vpi_log_error("Command field \"value\" invalid (NaN)");
+        goto error;
+    }
+    vs_vpi_log_info("Command \"set(path=%s, value=%f)\" received.",
+        str_path, value);
+
+    if (0 > vs_utils_set_value(h_obj, value)) goto error;
+
+    vs_vpi_return(p_data->fd_client_socket, "ack",
+        "Processed command \"set\"");
+    return 0;
+
+    /* Error handling */
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command set - Discarding");
     return -1;
 }

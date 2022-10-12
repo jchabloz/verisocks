@@ -70,6 +70,15 @@ PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value);
 PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2);
 
 /**
+ * @brief Set value from a VPI handle and a value
+ * 
+ * @param h_obj VPI object handle
+ * @param value Value
+ * @return 0 if successful, -1 in case of error
+ */
+PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value);
+
+/**
  * @brief Add value to cJSON message object
  * 
  * @param value s_vpi_value struct containing format and value to add
