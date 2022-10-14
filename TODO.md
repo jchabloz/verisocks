@@ -7,10 +7,11 @@
   For example, this could happen due to an error or because the simulation has
   finished while a registered callback condition with the run command has not
   yet been reached.
-* [ ] Add command *set* to be able to force values, supporting the same object
+* [x] Add command *set* to be able to force values, supporting the same object
   types as for the command *get*.
-* [ ] Improve unit test coverage, using mock functions.
+* [ ] Improve unit test coverage, using appropriately mock/fake functions.
 * [ ] Move Python Verisocks class back to `__init__.py`
 * [ ] Add unit tests for Python module
+* [ ] Add functional tests
 * [ ] Create a few examples
 * [ ] Documentation
