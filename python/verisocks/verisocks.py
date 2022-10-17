@@ -6,32 +6,26 @@ from enum import Enum, auto
 
 
 class VsRxState(Enum):
-    """Enum"""
+    """Enumerated states"""
     RX_INIT = auto()     # Starting state
     RX_PRE_HDR = auto()  # RX message pre-header scanned
     RX_HDR = auto()      # RX message header scanned
-    RX_DONE = auto()  # RX message content scanned
+    RX_DONE = auto()     # RX message content scanned
     ERROR = auto()       # Error state
 
 
 class Verisocks:
     """Verisocks class
-
-    Note: The implementation for this class is partially copied from the
-    example code that can be obtained from the realpython.com's tutorial on
-    socket programming. It has been slightly simplified to implement a simpler,
-    blocking behavior, therefore supporting only 1 connection at a time. The
-    socket connection does not need to be absolutely closed with every message.
     """
 
     PRE_HDR_LEN = 2  # Pre-header length in bytes
 
-    def __init__(self, host, port):
+    def __init__(self, host="127.0.0.1", port=5100):
         """Verisocks class constructor
 
         Args:
-            host (str): Host IP address
-            port (int): Port number
+            host (str): Server host IP address, default="127.0.0.1"
+            port (int): Server port number, default=5100
         """
         # Connection address and status
         self._connected = False
@@ -55,7 +49,7 @@ class Verisocks:
         logging.basicConfig(level=logging.INFO, format=fmt)
 
     def connect(self, timeout=120.0):
-        """Connect socket
+        """Connect to server socket
 
         Args:
             timeout (float): Timeout in seconds (default=120.0)
@@ -83,8 +77,7 @@ class Verisocks:
             raise ConnectionError
 
     def _write(self, num_bytes, num_trials=10):
-
-        """Write TX buffer to socket (private)
+        """Write TX buffer to socket (private method)
 
         Args:
             num_bytes (int): Number of bytes to send
@@ -111,7 +104,7 @@ class Verisocks:
             self.close()
 
     def _json_encode(self, obj, encoding="utf-8"):
-        """Encode a JSON object as a bytes object (private)
+        """Encode a JSON object as a bytes object (private method)
 
         Args:
             obj (json): JSON object
@@ -123,7 +116,7 @@ class Verisocks:
         return json.dumps(obj, ensure_ascii=False).encode(encoding)
 
     def _read_pre_header(self):
-        """Parse RX buffer for pre-header value"""
+        """Parse RX buffer for pre-header value (private method)"""
         if (self._rx_state is not VsRxState.RX_INIT):
             raise ValueError("ERROR: Inconsistent state")
         if not (len(self._rx_buffer) >= self.PRE_HDR_LEN):
@@ -135,7 +128,7 @@ class Verisocks:
         self._rx_state = VsRxState.RX_PRE_HDR
 
     def _read_header(self):
-        """Parse RX buffer for header"""
+        """Parse RX buffer for header (private method)"""
         if (self._rx_state is not VsRxState.RX_PRE_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
         header_len = self._rx_header_len
@@ -157,7 +150,7 @@ class Verisocks:
         self._rx_state = VsRxState.RX_HDR
 
     def _read_content(self):
-        """Parse RX buffer for content"""
+        """Parse RX buffer for content (private method)"""
         if (self._rx_state is not VsRxState.RX_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
         content_len = self.rx_header["content-length"]
@@ -181,11 +174,12 @@ class Verisocks:
         self._rx_state = VsRxState.RX_DONE
 
     def queue_message(self, request):
-        """Create message and add it to the TX buffer
+        """Create message and add it to the TX queue buffer
 
         Args:
-            request (dict): Dictionnary with the following keys: "content",
-            "type" and "encoding" (unless "type" is "application/octet-stream).
+            request (dict): Dictionary with the following keys: "content",
+            "type" and "encoding" (unless "type" is "application/octet-stream,
+            in which case the encoding is not applicable).
         """
         content = request["content"]
         content_type = request["type"]
@@ -265,7 +259,7 @@ Still {self._rx_expected} messages expected.")
             return False
 
     def write(self, all=True):
-        """Writes/sends content of the TX buffer to the socket
+        """Writes/sends the current content of the TX buffer to the socket.
 
         Args:
             all (bool): If True (default), sends all queued message. Otherwise,
@@ -286,7 +280,15 @@ Still {self._rx_expected} messages expected.")
 Use queue_message().")
 
     def send(self, **cmd):
-        """Send a command"""
+        """Sends a message with a JSON content.
+
+        Args:
+            **cmd: command content defined as keyword arguments (e.g.
+            cmd="get", sel="sim_info")
+
+        Returns:
+            (JSON object): Content of returned message.
+        """
         self.queue_message({
             "type": "application/json",
             "encoding": "utf-8",
@@ -299,16 +301,75 @@ Use queue_message().")
             return None
 
     def send_cmd(self, command, **kwargs):
+        """Sends a command. Equivalent to send(command=command, ...).
+
+        Args:
+            command (str): Command name (e.g. "get")
+            **kwargs: Command keyword arguments (e.g. sel="sim_info")
+
+        Returns:
+            (JSON object): Content of returned message
+        """
         return self.send(command=command, **kwargs)
 
-    def run(self, **kwargs):
-        return self.send(command="run", **kwargs)
+    def run(self, *, cb, **kwargs):
+        """Sends a "run" command request to the Verisocks server. Equivalent to
+        send_cmd("run", cb=cb, ...). This command gives the focus back to the
+        simulator and lets it run until the specified callback condition is met
+        (see arguments).
 
-    def set(self, **kwargs):
-        return self.send(command="set", **kwargs)
+        Args:
+            * cb (str): Callback type. Can be either:
+                * "for_time": run for a given amount of time
+                * "until_time": run until a specified time
+                * "until_change": run until a specific value changes
+                * "to_next": run until the beginning of the next time step
+            * If cb is "for_time" or "until_time", the following keyword
+            arguments are further expected:
+                * time (float): Time value
+                * time_unit (str): Time unit (s, ms, us, ns, ps or fs). Be
+                  aware that depending on the simulator time resolution, the
+                  provided time value may be truncated.
+            * If cb is "until_change", the following keyword argument(s) are
+              further expected:
+                * path (str): Path to verilog object used for the callback
+                * value (number): Condition on the verilog object's value for
+                  the callback to be executed. This argument is not required if
+                  the path corresponds to a named event.
+            * if cb is "to_next", no further keyword argument is required.
+
+        Returns:
+            (JSON object): Content of returned message
+        """
+        return self.send(command="run", cb=cb, **kwargs)
+
+    def set(self, *, path, **kwargs):
+        """Sends a "set" command request to the Verisocks server. Equivalent to
+        send_cmd("set", ...). This commands sets the value of a verilog object.
+
+        Args:
+            * path (str): Path to the verilog object.
+            * value: Value to be set. If the path corresponds to a verilog
+              named event, this argument is not required. If the path
+              corresponds to a verilog memory array, this argument needs to be
+              provided as an iterable of the same size.
+
+        Returns:
+            (JSON object): Content of returned message
+        """
+        return self.send(command="set", path=path, **kwargs)
 
     def get(self, **kwargs):
         return self.send(command="get", **kwargs)
+
+    def finish(self):
+        return self.send(command="finish")
+
+    def stop(self):
+        return self.send(command="stop")
+
+    def exit(self):
+        return self.send(command="exit")
 
     def close(self):
         """Close socket connection"""

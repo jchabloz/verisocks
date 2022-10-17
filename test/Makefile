@@ -27,8 +27,8 @@ build: $(addprefix $(BUILDDIR)/,$(tests))
 
 run: build
 	cd $(BUILDDIR) && $(foreach x,$(tests), valgrind --leak-check=full --log-file=$(x)_valgrind.rpt ./$(x);)
-	-mv -f *.gcda $(BUILDDIR)
-	-mv -f *.gcno $(BUILDDIR)
+	-mv -u *.gcda $(BUILDDIR)
+	-mv -u *.gcno $(BUILDDIR)
 
 $(result_file): $(xml_file)
 	xsltproc --novalid -o $(result_file) $(xsl_file) $(xml_file)
@@ -40,12 +40,14 @@ $(BUILDDIR)/%: %.c $(SRC_FILES) $(LIBSRC_FILES) $(TEST_SRC_FILES)
 gcov: $(SRC_FILES) $(TEST_SRC_FILES)
 	cd $(BUILDDIR) && gcov -b -s../../src $(notdir $(SRC_FILES))
 
-lcov: $(SRC_FILES) $(TEST_SRC_FILES)
+lcov: run $(BUILDDIR)/lcov/index.html
+
+$(BUILDDIR)/lcov/index.html: $(SRC_FILES) $(TEST_SRC_FILES)
 	cd $(BUILDDIR) && lcov -c -d . -o coverage.info
 	cd $(BUILDDIR) && lcov -r coverage.info -o coverage_filtered.info \
 		'/usr/include/*' \
 		'$(realpath ../cjson)/*'
-	cd $(BUILDDIR) && genhtml coverage_filtered.info
+	cd $(BUILDDIR) && genhtml -o lcov coverage_filtered.info
 
 .PHONY: clean all build run gcov lcov
 
