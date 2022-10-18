@@ -11,20 +11,19 @@ LDFLAGS += -lcunit
 BUILDDIR = build
 INCDIRS = -I../include -I../cjson
 SRC_FILES = ../src/vs_msg.c ../src/vs_server.c
-TEST_SRC_FILES = test_vs_msg.c test_vs_server.c
+TEST_SRC_FILES = src/test_vs_msg.c src/test_vs_server.c
 LIBSRC_FILES = ../cjson/cJSON.c
 
 xml_file = $(BUILDDIR)/CUnitAutomated-Results.xml
 xsl_file = /usr/share/CUnit/CUnit-Run.xsl
 result_file = $(BUILDDIR)/cunit_test_results.html
 
-
 tests = cunit_test
 
 # Intermediate files needed for coverage analysis
-gcno_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcno,$(notdir $(SRC_FILES))))
+gcno_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcno,$(notdir $(SRC_FILES) $(LIBSRC_FILES))))
 gcno_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%.gcno,$(tests)))
-gcda_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcda,$(notdir $(SRC_FILES))))
+gcda_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcda,$(notdir $(SRC_FILES) $(LIBSRC_FILES))))
 gcda_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%.gcda,$(tests)))
 run_rpt_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%_valgrind.rpt,$(tests)))
 
@@ -36,7 +35,7 @@ run: $(run_rpt_files) $(result_file) $(gcno_files) $(gcda_files)
 
 lcov: run $(BUILDDIR)/lcov/index.html
 
-$(BUILDDIR)/%: %.c $(SRC_FILES) $(LIBSRC_FILES) $(TEST_SRC_FILES)
+$(BUILDDIR)/%: src/%.c $(SRC_FILES) $(LIBSRC_FILES) $(TEST_SRC_FILES)
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ $< $(SRC_FILES) $(LIBSRC_FILES) $(CFLAGS) $(INCDIRS) $(LDFLAGS)
 
