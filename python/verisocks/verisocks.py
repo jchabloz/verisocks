@@ -352,23 +352,53 @@ Use queue_message().")
             * value: Value to be set. If the path corresponds to a verilog
               named event, this argument is not required. If the path
               corresponds to a verilog memory array, this argument needs to be
-              provided as an iterable of the same size.
+              provided as a list of the same length.
 
         Returns:
             (JSON object): Content of returned message
         """
         return self.send(command="set", path=path, **kwargs)
 
-    def get(self, **kwargs):
-        return self.send(command="get", **kwargs)
+    def get(self, *, sel, **kwargs):
+        """Sends a "get" command request to the Verisocks server.
+        Equivalent ot send_cmd("get", ...). This commands can be used to obtain
+        different pieces of information from the Verisocks server.
+
+        Args:
+            * sel (str): Selects which is the returned information. Can be
+              either of the following:
+                * "sim_info": Gets the simulator information, returned with the
+                  keywords "product" and "version".
+                * "sim_time": Gets the simulator current time, returned with
+                  the keywords "time", in seconds.
+                * "value": Gets the value for a verilog object.
+                * "type": Gets the VPI type value for a verilog object.
+            * path (str): If sel is "value" or "type", path to the desired
+              verilog object for which the value or type is to be returned.
+
+        Returns:
+            (JSON object): Content of returned message
+        """
+        return self.send(command="get", sel=sel, **kwargs)
 
     def finish(self):
+        """Sends a "finish" command to the Verisocks server that terminates
+        the simulation (and therefore also closes the Verisocks server itself).
+        """
         return self.send(command="finish")
 
     def stop(self):
+        """Sends a "stop" command to the Verisocks server that stops
+        the simulation. The Verisocks server socket is not closed, but the
+        simulation has to be restarted for any new request to be processed.
+        """
         return self.send(command="stop")
 
     def exit(self):
+        """Sends an "exit" command to the Verisocks server that gives back
+        control to the simulator and closes the Verisocks server socket. The
+        simulation runs to its end without having the possibility to take the
+        control back from the simulator anymore."""
         return self.send(command="exit")
 
     def close(self):
@@ -383,7 +413,7 @@ Use queue_message().")
         logging.debug("Flushing RX and TX buffers")
         self._rx_buffer = b""
         self._tx_buffer = b""
-        self._rx_expected = 0
+        # self._rx_expected = 0
         self._tx_msg_len = []
 
     def __enter__(self):
