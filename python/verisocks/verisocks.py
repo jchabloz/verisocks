@@ -14,6 +14,11 @@ class VsRxState(Enum):
     ERROR = auto()       # Error state
 
 
+class VerisocksError(Exception):
+    """Base class for exceptions in Verisocks"""
+    pass
+
+
 class Verisocks:
     """Verisocks class
     """
@@ -296,6 +301,8 @@ Use queue_message().")
         })
         self.write()
         if (self.read()):
+            if self.rx_content["type"] == "error":
+                raise VerisocksError(self.rx_content["value"])
             return self.rx_content
         else:
             return None
