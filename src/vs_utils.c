@@ -1,6 +1,6 @@
 /**
  * @file vs_utils.c
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief Utilities for Verisocks VPI
  * @version 0.1
  * @date 2022-09-30

@@ -1,6 +1,6 @@
 /**
  * @file vs_logging.h
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief Verisocks logging macros
  * @version 0.1
  * @date 2022-09-26

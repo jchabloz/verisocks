@@ -1,6 +1,6 @@
 /**
  * @file verisocks.h
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief Verisocks VPI
  * @version 0.1
  * @date 2022-09-13

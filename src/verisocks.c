@@ -1,6 +1,6 @@
 /**
  * @file verisocks.c
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief 
  * @version 0.1
  * @date 2022-08-27

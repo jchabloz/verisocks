@@ -1,6 +1,6 @@
 /**************************************************************************//**
  * @file vs_vpi_run.c
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief Verisocks VPI functions - sub-commands for command run
  * @version 0.1
  * @date 2022-08-27

@@ -1,6 +1,6 @@
 /**
  * @file verisocks_startup.c
- * @author jchabloz (jeremie.chabloz@a3.epfl.ch)
+ * @author jchabloz
  * @brief VPI boostrap
  * @version 0.1
  * @date 2022-09-13
