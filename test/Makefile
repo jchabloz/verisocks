@@ -3,7 +3,6 @@ SHELL = /usr/bin/bash
 CC = gcc
 CFLAGS += -Wall
 CFLAGS += -Wextra -Wpedantic
-# CFLAGS += -fprofile-arcs -ftest-coverage
 CFLAGS += --coverage
 CFLAGS += -g -O1
 CFLAGS += -DVS_LOG_LEVEL=100
@@ -17,39 +16,47 @@ LIBSRC_FILES = ../cjson/cJSON.c
 
 xml_file = $(BUILDDIR)/CUnitAutomated-Results.xml
 xsl_file = /usr/share/CUnit/CUnit-Run.xsl
-result_file = $(BUILDDIR)/cunit_results.html
+result_file = $(BUILDDIR)/cunit_test_results.html
+
 
 tests = cunit_test
 
-all: build run $(result_file) lcov
+# Intermediate files needed for coverage analysis
+gcno_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcno,$(notdir $(SRC_FILES))))
+gcno_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%.gcno,$(tests)))
+gcda_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcda,$(notdir $(SRC_FILES))))
+gcda_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%.gcda,$(tests)))
+run_rpt_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%_valgrind.rpt,$(tests)))
+
+all: build run lcov
 
 build: $(addprefix $(BUILDDIR)/,$(tests))
 
-run: build
-	cd $(BUILDDIR) && $(foreach x,$(tests), valgrind --leak-check=full --log-file=$(x)_valgrind.rpt ./$(x);)
-	-mv -u *.gcda $(BUILDDIR)
-	-mv -u *.gcno $(BUILDDIR)
+run: $(run_rpt_files) $(result_file) $(gcno_files) $(gcda_files)
 
-$(result_file): $(xml_file)
-	xsltproc --novalid -o $(result_file) $(xsl_file) $(xml_file)
+lcov: run $(BUILDDIR)/lcov/index.html
 
 $(BUILDDIR)/%: %.c $(SRC_FILES) $(LIBSRC_FILES) $(TEST_SRC_FILES)
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ $< $(SRC_FILES) $(LIBSRC_FILES) $(CFLAGS) $(INCDIRS) $(LDFLAGS)
 
-gcov: $(SRC_FILES) $(TEST_SRC_FILES)
-	cd $(BUILDDIR) && gcov -b -s../../src $(notdir $(SRC_FILES))
+$(BUILDDIR)/%_valgrind.rpt: $(BUILDDIR)/%
+	cd $(BUILDDIR) && valgrind --leak-check=full --log-file=$(notdir $@) ./$(notdir $<)
 
-lcov: run $(BUILDDIR)/lcov/index.html
+$(result_file): $(xsl_file) $(xml_file)
+	xsltproc --novalid -o $@ $^
 
-$(BUILDDIR)/lcov/index.html: $(SRC_FILES) $(TEST_SRC_FILES)
+$(gcno_files) $(gcda_files):
+	-mv -u $(notdir $@) $(BUILDDIR)
+
+$(BUILDDIR)/lcov/index.html: $(SRC_FILES) $(TEST_SRC_FILES) $(gcda_files) $(gcno_files)
 	cd $(BUILDDIR) && lcov -c -d . -o coverage.info
 	cd $(BUILDDIR) && lcov -r coverage.info -o coverage_filtered.info \
 		'/usr/include/*' \
 		'$(realpath ../cjson)/*'
 	cd $(BUILDDIR) && genhtml -o lcov coverage_filtered.info
 
-.PHONY: clean all build run gcov lcov
+.PHONY: clean all build run lcov
 
 clean:
 	-$(RM) -r $(BUILDDIR)
