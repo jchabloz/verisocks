@@ -63,10 +63,13 @@ class Verisocks:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setblocking(True)
             self.sock.settimeout(timeout)
-        logging.info(f"Attempting connection to {self.address}")
-        self.sock.connect(self.address)
-        logging.info("Socket connected")
-        self._connected = True
+        if not self._connected:
+            logging.info(f"Attempting connection to {self.address}")
+            self.sock.connect(self.address)
+            logging.info("Socket connected")
+            self._connected = True
+        else:
+            logging.info("Socket already connected")
 
     def _read(self):
         """Reads from socket to RX buffer (private)
