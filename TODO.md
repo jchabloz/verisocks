@@ -10,7 +10,9 @@
 * [x] Add command *set* to be able to force values, supporting the same object
   types as for the command *get*.
 * [ ] Improve unit test coverage, using appropriately mock/fake functions.
-* [ ] Move Python Verisocks class back to `__init__.py`
+* [ ] Add timeout as an (optional) parameter for $verisocks_init()
+* [x] Python packaging config
+* [ ] Move Python Verisocks class back to `__init__.py` (?)
 * [ ] Add unit tests for Python module
 * [ ] Add functional tests
 * [ ] Create a few examples

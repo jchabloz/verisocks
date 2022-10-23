@@ -4,7 +4,7 @@
 
 CUnit: http://cunit.sourceforge.net
 
-I am using the system-installed version.
+I am using the system-installed version (Ubuntu).
 
 ```bash
 sudo apt install libcunit1-dev
@@ -22,4 +22,4 @@ Only the file `fff.h` is copied from the repository
 ## Other tools
 
 * `valgrind`
-* Coverage analysis: `gcov` and `lcov`
+* Coverage analysis: `lcov`

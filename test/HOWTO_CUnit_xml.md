@@ -2,9 +2,11 @@
 
 ## Solution 1: Use local HTTP server
 
-Link the required `.xsl` document(s) from `/usr/share/CUnit` in the same folder as the desired `result.xml` file.
+Link the required `.xsl` document(s) from `/usr/share/CUnit` in the same folder
+as the desired `result.xml` file.
 
-From the folder in question, launch a simple HTTP server using the Python http module:
+From the folder in question, launch a simple HTTP server using the Python http
+module:
    
 ```sh
 python3 -m http.server
