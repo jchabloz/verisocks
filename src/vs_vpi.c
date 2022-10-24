@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 
 #include "vs_logging.h"
 #include "vs_msg.h"

@@ -12,7 +12,7 @@
 #ifndef VS_UTILS_H
 #define VS_UTILS_H
 
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 #include "cJSON.h"
 
 /**

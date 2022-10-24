@@ -10,7 +10,7 @@
  */
 
 #include "verisocks.h"
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 
 void (*vlog_startup_routines[])() =
 {

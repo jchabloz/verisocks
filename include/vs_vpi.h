@@ -10,7 +10,7 @@
 #ifndef VS_VPI_H
 #define VS_VPI_H
 
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 #include "cJSON.h"
 
 /**

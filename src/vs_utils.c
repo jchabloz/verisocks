@@ -11,7 +11,7 @@
 
 #include <math.h>
 #include <string.h>
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 #include "cJSON.h"
 #include "vs_logging.h"
 #include "vs_utils.h"

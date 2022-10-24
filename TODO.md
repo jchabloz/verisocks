@@ -13,7 +13,9 @@
 * [ ] Add timeout as an (optional) parameter for $verisocks_init()
 * [x] Python packaging config
 * [ ] Move Python Verisocks class back to `__init__.py` (?)
-* [ ] Add unit tests for Python module
+* [ ] Add testing for Python module (WIP)
 * [ ] Add functional tests
+* [x] Change makefile and source to cope with a different, more generic
+  installation path for `vpi_user.h`
 * [ ] Create a few examples
 * [ ] Documentation

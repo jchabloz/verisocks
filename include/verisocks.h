@@ -10,7 +10,7 @@
 #ifndef VERISOCKS_H
 #define VERISOCKS_H
 
-#include <iverilog/vpi_user.h>
+#include <vpi_user.h>
 
 /** Callback at (pseudo) compile time for user task verisock_init */
 PLI_INT32 verisocks_init_compiletf(PLI_BYTE8* user_data);

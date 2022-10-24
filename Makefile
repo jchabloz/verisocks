@@ -4,6 +4,7 @@ SHELL = /usr/bin/bash
 
 SRCDIR = .
 BUILDDIR = build
+INCDIRS += /usr/local/include/iverilog
 INCDIRS += $(SRCDIR)/include
 INCDIRS += $(SRCDIR)/cjson
 LIBVPI = $(BUILDDIR)/libvpi.so
