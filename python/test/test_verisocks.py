@@ -86,7 +86,7 @@ def test_connect():
             pass
 
 
-def test_get_siminfo():
+def test_get_sim_info():
     """Tests Verisocks get(sel=sim_info) function"""
     pop = setup_iverilog("test_0.v")
     with Verisocks(HOST, PORT) as vs:
@@ -171,6 +171,7 @@ def test_get_value():
 
 
 def test_run_for_time():
+    """Tests Verisocks run(cb="for_time") function"""
     # Setup
     pop = setup_iverilog("test_0.v")
     with Verisocks(HOST, PORT) as vs:
@@ -228,6 +229,7 @@ def test_run_for_time():
 
 
 def test_run_until_time():
+    """Tests Verisocks run(cb="until_time") function"""
     # Setup
     pop = setup_iverilog("test_0.v")
     with Verisocks(HOST, PORT) as vs:
@@ -271,6 +273,70 @@ def test_run_until_time():
         with pytest.raises(VerisocksError):
             answer = vs.run(cb="until_time", time=0.4e-3, time_unit="s")
             assert answer["type"] == "error"
+
+        # Teardown
+        answer = vs.finish()
+        assert answer["type"] == "ack"
+    retcode = pop.wait(timeout=120)
+    assert retcode == 0
+
+
+def test_run_until_change():
+    """Tests Verisocks run(cb="until_change") function"""
+    # Setup
+    pop = setup_iverilog("test_0.v")
+    with Verisocks(HOST, PORT) as vs:
+
+        answer = vs.run(cb="until_change", path="main.count", value=137)
+        assert answer["type"] == "ack"
+        answer = vs.get(sel="value", path="main.count")
+        assert answer["type"] == "result"
+        assert answer["value"] == 137
+
+        answer = vs.run(cb="until_change", path="main.counter_end")
+        assert answer["type"] == "ack"
+        answer = vs.get(sel="value", path="main.count")
+        assert answer["type"] == "result"
+        assert answer["value"] == 255
+
+        # Teardown
+        answer = vs.finish()
+        assert answer["type"] == "ack"
+    retcode = pop.wait(timeout=120)
+    assert retcode == 0
+
+
+def test_set():
+    """Tests Verisocks set() function"""
+    # Setup
+    pop = setup_iverilog("test_0.v")
+    with Verisocks(HOST, PORT) as vs:
+
+        # Set a reg
+        answer = vs.run(cb="until_time", time=10, time_unit="us")
+        assert answer["type"] == "ack"
+        answer = vs.set(path="main.count", value=125)
+        assert answer["type"] == "ack"
+        answer = vs.get(sel="value", path="main.count")
+        assert answer["type"] == "result"
+        assert answer["value"] == 125
+
+        # Set a memory array
+        answer = vs.set(path="main.count_memory", value=list(range(16)))
+        assert answer["type"] == "ack"
+        answer = vs.get(sel="value", path="main.count_memory")
+        assert answer["type"] == "result"
+        assert answer["value"] == list(range(16))
+
+        answer = vs.set(path="main.count_memory[6]", value=37)
+        assert answer["type"] == "ack"
+        answer = vs.get(sel="value", path="main.count_memory")
+        assert answer["type"] == "result"
+        assert answer["value"][6] == 37
+
+        # Set an event
+        answer = vs.set(path="main.counter_end")
+        assert answer["type"] == "ack"
 
         # Teardown
         answer = vs.finish()
