@@ -7,6 +7,7 @@ BUILDDIR = build
 INCDIRS += /usr/local/include/iverilog
 INCDIRS += $(SRCDIR)/include
 INCDIRS += $(SRCDIR)/cjson
+LIBDIRS += /usr/local/lib
 LIBVPI = $(BUILDDIR)/libvpi.so
 
 CC = /usr/bin/gcc
@@ -19,8 +20,10 @@ CFLAGS += -fPIC
 CFLAGS += -Wall
 CFLAGS += -Wextra -Wpedantic
 CFLAGS += $(addprefix -I,$(INCDIRS))
+CFLAGS += $(addprefix -L,$(LIBDIRS))
 CFLAGS += -DVS_LOG_LEVEL=30
 CFLAGS += -DVS_VPI_LOG_LEVEL=20
+LDFLAGS += -lvpi
 
 VPATH = $(SRCDIR)/cjson $(SRCDIR)/src
 
@@ -40,7 +43,7 @@ OBJS = $(addprefix $(BUILDDIR)/,$(subst .c,.o,$(SRCS)))
 all: $(LIBVPI)
 
 $(LIBVPI): $(OBJS)
-	$(LD) -shared -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(BUILDDIR)
