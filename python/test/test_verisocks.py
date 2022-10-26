@@ -4,6 +4,12 @@ import os.path
 import time
 import shutil
 import pytest
+import logging
+
+# Note
+# To run with coverage, use
+# coverage run --source=../verisocks --branch -m pytest
+# coverage report or coverage html
 
 # Parameters
 HOST = "127.0.0.1"
@@ -18,10 +24,12 @@ sim_info_version = "11.0 (stable)"
 
 @pytest.fixture
 def vs():
+    # Setup
     pop = setup_iverilog("test_0.v")
     _vs = Verisocks(HOST, PORT)
     _vs.connect()
     yield _vs
+    # Teardown
     _vs.finish()
     _vs.close()
     pop.wait(timeout=120)
@@ -66,6 +74,15 @@ def setup_iverilog(src_file):
 def test_connect(vs):
     """Tests simple connection to Icarus simulator with Verisocks server"""
     assert vs._connected
+
+
+def test_already_connected(vs, caplog):
+    caplog.set_level(logging.INFO)
+    caplog.clear()
+    vs.connect()
+    log_record = caplog.record_tuples[0]
+    assert log_record[1] == logging.INFO
+    assert log_record[2] == "Socket already connected"
 
 
 def test_connect_error():
