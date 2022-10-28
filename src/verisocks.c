@@ -57,7 +57,7 @@ PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
     vpiHandle arg_iterator;
     arg_iterator = vpi_iterate(vpiArgument, h_systf);
     if (NULL == arg_iterator) {
-        vs_vpi_log_error("$verisocks_init requires 1 argument");
+        vs_vpi_log_error("$verisocks_init requires at least 1 argument");
         goto error;
     }
 
@@ -70,7 +70,7 @@ PLI_INT32 verisocks_init_compiletf(PLI_BYTE8 *user_data)
         (tfarg_type != vpiIntegerVar) &&
         (tfarg_type != vpiParameter))
     {
-        vs_vpi_log_error("$verisocks_init arg must be a constant, \
+        vs_vpi_log_error("$verisocks_init 1st argument must be a constant, \
 a parameter or an integer variable");
         vpi_free_object(arg_iterator);
         goto error;
@@ -81,17 +81,41 @@ a parameter or an integer variable");
     arg_value.format = vpiIntVal;
     vpi_get_value(h_arg, &arg_value);
     if (vpiIntVal != arg_value.format) {
-        vs_vpi_log_error("$verisocks_init arg must be an integer");
+        vs_vpi_log_error("$verisocks_init 1st argument must be an integer");
         vpi_free_object(arg_iterator);
         goto error;
     }
 
-    /* Check that there is only 1 system task argument */
+    /* Check the second, optional argument */
     h_arg = vpi_scan(arg_iterator);
     if (NULL != h_arg) {
-        vs_vpi_log_error("$verisocks_init supports only 1 argument");
-        vpi_free_object(arg_iterator);
-        goto error;
+        /* Check argument type */
+        tfarg_type = vpi_get(vpiType, h_arg);
+        if ((tfarg_type != vpiConstant) &&
+            (tfarg_type != vpiIntegerVar) &&
+            (tfarg_type != vpiParameter))
+        {
+            vs_vpi_log_error("$verisocks_init 2nd argument must be a \
+constant, a parameter or an integer variable");
+            vpi_free_object(arg_iterator);
+            goto error;
+        }
+        /* Check that the argument can indeed be parsed as an integer */
+        arg_value.format = vpiIntVal;
+        vpi_get_value(h_arg, &arg_value);
+        if (vpiIntVal != arg_value.format) {
+            vs_vpi_log_error(
+                "$verisocks_init 2nd argument must be an integer");
+            vpi_free_object(arg_iterator);
+            goto error;
+        }
+        /* Check that there is no 3rd argument to the system task */
+        h_arg = vpi_scan(arg_iterator);
+        if (NULL != h_arg) {
+            vs_vpi_log_error("$verisocks_init supports at most 2 arguments");
+            vpi_free_object(arg_iterator);
+            goto error;
+        }
     }
 
     /* No errors */
@@ -114,18 +138,27 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpiHandle h_systf;
     h_systf = vpi_handle(vpiSysTfCall, NULL);
 
-    /* Obtain handles to argument */
+    /* Obtain handles to 1st argument */
     vpiHandle arg_iterator;
     vpiHandle h_arg;
     arg_iterator = vpi_iterate(vpiArgument, h_systf);
     h_arg = vpi_scan(arg_iterator);
-    vpi_free_object(arg_iterator);
 
-    /* Get argument value */
-    s_vpi_value num_port_value;
-    num_port_value.format = vpiIntVal;
-    vpi_get_value(h_arg, &num_port_value);
-    uint16_t num_port = (uint16_t) num_port_value.value.integer;
+    /* Get 1st argument value */
+    s_vpi_value s_value;
+    s_value.format = vpiIntVal;
+    vpi_get_value(h_arg, &s_value);
+    uint16_t num_port = (uint16_t) s_value.value.integer;
+
+    /* Obtain handle to 2nd (optional) argument */
+    h_arg = vpi_scan(arg_iterator);
+    PLI_INT32 num_timeout_sec;
+    if (NULL != h_arg) {
+        vpi_get_value(h_arg, &s_value);
+        num_timeout_sec = s_value.value.integer;
+    } else {
+        num_timeout_sec = 120;
+    }
 
     /* Create and allocate instance-specific storage */
     vs_vpi_data_t *p_vpi_data;
@@ -141,6 +174,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     default_value.value.integer = 0;
     p_vpi_data->state = VS_VPI_STATE_START;
     p_vpi_data->h_systf = h_systf;
+    p_vpi_data->timeout_sec = (int) num_timeout_sec;
     p_vpi_data->fd_server_socket = -1;
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
@@ -471,7 +505,7 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
 {
     struct timeval timeout;
     char hostname_buffer[128];
-    timeout.tv_sec = 120;
+    timeout.tv_sec = p_vpi_data->timeout_sec;
     timeout.tv_usec = 0;
     vs_vpi_log_debug(
         "Waiting for a client to connect (%ds timeout) ...",

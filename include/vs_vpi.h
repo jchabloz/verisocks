@@ -32,6 +32,7 @@ typedef enum {
 typedef struct vs_vpi_data {
     vs_vpi_state_t state;   ///Current state
     vpiHandle h_systf;      ///VPI handle for system task instance
+    int timeout_sec;        ///Socket timeout setting in seconds
     int fd_server_socket;   ///File descriptor for open server socket
     int fd_client_socket;   ///File descriptor for currently open connection
     cJSON *p_cmd;           ///Pointer to current/latest command
