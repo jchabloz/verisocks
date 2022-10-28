@@ -10,12 +10,13 @@
 * [x] Add command *set* to be able to force values, supporting the same object
   types as for the command *get*.
 * [ ] Improve unit test coverage, using appropriately mock/fake functions.
-* [ ] Add timeout as an (optional) parameter for $verisocks_init()
+* [x] Add timeout as an (optional) parameter for $verisocks_init()
 * [x] Python packaging config
 * [ ] Move Python Verisocks class back to `__init__.py` (?)
 * [ ] Add testing for Python module (WIP)
-* [ ] Add functional tests
+* [ ] Use autotools or CMake to make compilation portable
 * [x] Change makefile and source to cope with a different, more generic
   installation path for `vpi_user.h`
 * [ ] Create a few examples
 * [ ] Documentation
+* [ ] Include Verisocks
