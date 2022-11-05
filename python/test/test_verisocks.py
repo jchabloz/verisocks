@@ -32,7 +32,7 @@ def vs():
     # Teardown
     _vs.finish()
     _vs.close()
-    pop.wait(timeout=120)
+    pop.wait(timeout=10)
 
 
 def get_abspath(relpath):
@@ -94,7 +94,7 @@ def test_connect_error():
 
 
 def test_get_sim_info(vs):
-    answer = vs.get(sel="sim_info")
+    answer = vs.get("sim_info")
     assert answer["type"] == "result"
     assert answer["product"] == sim_info_product
     assert answer["version"] == sim_info_version
@@ -102,14 +102,14 @@ def test_get_sim_info(vs):
 
 def test_get_sim_time(vs):
     """Tests Verisocks get(sel=sim_time) function"""
-    answer = vs.get(sel="sim_time")
+    answer = vs.get("sim_time")
     assert answer["type"] == "result"
     assert answer["time"] == 0.0
 
-    answer = vs.run(cb="until_time", time=101.3, time_unit="us")
+    answer = vs.run("until_time", time=101.3, time_unit="us")
     assert answer["type"] == "ack"
 
-    answer = vs.get(sel="sim_time")
+    answer = vs.get("sim_time")
     assert answer["type"] == "result"
     assert answer["time"] == 101.3e-6
 
@@ -118,7 +118,7 @@ def test_get_value(vs):
     """Tests Verisocks get(sel="value") function"""
 
     # Get an integer parameter value
-    answer = vs.get(sel="value", path="main.num_port")
+    answer = vs.get("value", path="main.num_port")
     assert answer["type"] == "result"
     assert answer["value"] == 5100
 
@@ -128,7 +128,7 @@ def test_get_value(vs):
     assert answer["value"] == 1.01
 
     # Get a reg value
-    answer = vs.run(cb="for_time", time=100, time_unit="us")
+    answer = vs.run("for_time", time=100, time_unit="us")
     assert answer["type"] == "ack"
     answer = vs.get(sel="value", path="main.clk")
     assert answer["type"] == "result"
@@ -288,3 +288,18 @@ def test_set(vs):
     # Set an event
     answer = vs.set(path="main.counter_end")
     assert answer["type"] == "ack"
+
+
+def test_read_not_expected(vs):
+    # No data expected
+    assert vs.read() is False
+
+
+def test_context_manager():
+    pop = setup_iverilog("test_0.v")
+    with Verisocks(HOST, PORT) as vs:
+        assert vs._connected
+        answer = vs.finish()
+        assert answer["type"] == "ack"
+
+    pop.wait(timeout=10)
