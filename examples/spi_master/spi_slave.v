@@ -53,7 +53,7 @@ module spi_slave(cs_b, mosi, miso, sclk);
             rx_buffer[i] = 8'd0;
             tx_buffer[i] = 8'd0;
         end
-        tx_buffer[0] = 8'hde;
+        tx_buffer[0] = 8'h95;
     end
     endtask
 
@@ -61,6 +61,7 @@ module spi_slave(cs_b, mosi, miso, sclk);
     always @(posedge sclk, posedge cs_b)
     begin
         if (cs_b == 1'b1) begin
+            if (rx_byte_counter >= 7) copy_rx_to_tx();
             rx_bit_counter = 0;
             rx_byte_counter = 0;
         end else begin
@@ -71,9 +72,6 @@ module spi_slave(cs_b, mosi, miso, sclk);
             end else begin
                 rx_bit_counter = 0;
                 rx_byte_counter = rx_byte_counter + 1;
-                if (rx_byte_counter >= 7) begin
-                    copy_rx_to_tx();
-                end
             end
         end
     end
