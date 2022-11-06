@@ -66,13 +66,16 @@ def send_spi(vs, tx_buffer):
 
 
 if __name__ == "__main__":
-    pop = setup_iverilog("spi_master_tb", "spi_master.v", "spi_master_tb.v")
+    pop = setup_iverilog("spi_master_tb",
+                         "spi_master.v",
+                         "spi_slave.v",
+                         "spi_master_tb.v")
     with Verisocks(HOST, PORT) as vs:
         assert vs._connected
 
         vs.run(cb="for_time", time=10, time_unit="us")
 
-        tx = [0, 0, 0, 0, 0, 0, 0]
+        tx = [12, 34, 56, 78, 90, 12, 34]
         rx, counter = send_spi(vs, tx)
         logging.info(f"Content of TX buffer: {tx}")
         logging.info(f"Content of RX buffer: {rx}")
@@ -80,6 +83,7 @@ if __name__ == "__main__":
 
         vs.run(cb="for_time", time=10, time_unit="us")
 
+        tx = [1, 3, 5, 7, 11, 13, 17]
         rx, counter = send_spi(vs, tx)
         logging.info(f"Content of TX buffer: {tx}")
         logging.info(f"Content of RX buffer: {rx}")

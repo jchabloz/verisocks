@@ -16,9 +16,9 @@ Testbench
 *******************************************************************************/
 module spi_master_tb();
 
-    reg miso;
-    wire cs_b, mosi, sclk;
+    wire cs_b, mosi, sclk, miso;
 
+    /* SPI master - unit under test */
     spi_master i_spi_master (
         .cs_b   (cs_b),
         .mosi   (mosi),
@@ -26,11 +26,23 @@ module spi_master_tb();
         .sclk   (sclk)
     );
 
+    /* Simplistic slave implementation */
+    spi_slave i_spi_slave (
+        .cs_b   (cs_b),
+        .mosi   (mosi),
+        .miso   (miso),
+        .sclk   (sclk)
+    );
+
+    /* Initial loop */
     initial begin
         $dumpfile("spi_master_tb.fst");
         $dumpvars(0, spi_master_tb);
-        miso = 1'b0;
+
+        /* Launch Verisocks server after other initialization */
         $verisocks_init(`VS_NUM_PORT, `VS_TIMEOUT);
+
+        /* Make sure that the simulation finishes after a while... */
         #10_000
         $finish(0);
     end
