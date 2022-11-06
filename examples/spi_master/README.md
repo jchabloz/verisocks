@@ -23,8 +23,8 @@ The main point of the example is to demonstrate how to use Verisocks to drive
 an SPI transaction. You will see that this is actually extremely easy. The used principle requires the following components:
 
 1. A verilog task
-2. A verilog named §
-3. A verilog `always` statement triggering the task at the named §
+2. A verilog named event
+3. A verilog `always` statement triggering the task at the named event
 4. Python code setting verilog state variables and triggering the task
 
 In the SPI master model, we have the following task to trigger a transaction:
