@@ -1,0 +1,12 @@
+
+#undef HAVE_VPI_USER_H
+#undef HAVE_IVERILOG_VPI_USER_H
+
+#ifdef HAVE_VPI_USER_H
+#include <vpi_user.h>
+#else
+#ifdef HAVE_IVERILOG_VPI_USER_H
+#include <iverilog/vpi_user.h>
+#endif
+#endif
+
