@@ -30,7 +30,7 @@ frame "Icarus simulator" {
     rectangle "Verilog testbench" as tb {
         [<$microchip>\nDUT] as dut
         rectangle {
-            [User defined\nsystem task (PLI)] as task
+            [User defined\nsystem task (PLI)\n""$verisocks_init()""] as task
         }  
     }
 }

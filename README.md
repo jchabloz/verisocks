@@ -75,7 +75,8 @@ Bonus:
 
 ## Proposed architecture
 
-TODO
+![Verisocks architecture diagram](docs/diagrams/out/verisocks_architecture.svg)
+
 
 ## TCP protocol
 
