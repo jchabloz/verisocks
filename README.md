@@ -55,15 +55,15 @@ easily be extended to any Verilog simulator later) from Python.
 
 ## Requirements
 
-Let's try and draft some requirements for the desired solution I have in mind.
+Let's try and draft some requirements for the solution I have in mind.
 
 * It shall be possible to control the HDL simulator with Python, either
   interactively or with scripts.
 * It shall be possible to easily interface the HDL simulator with any higher
   level testing and/or automation frameworks (e.g. pytest, robot, etc.)
 * Defining tests (stimuli, configuration, etc.) should be done as much as
-  possible from the chosen high-level framework, without requiring any tweaking
-  of the HDL description.
+  possible from the chosen high-level framework, without requiring (too many)
+  tweaking of the HDL description.
 * Assessing test pass/fail criteria (assertions) shall be performed from the
   chosen high-level framework.
 
@@ -75,30 +75,38 @@ Bonus:
 
 ## Proposed architecture
 
-![Verisocks architecture diagram](docs/diagrams/out/verisocks_architecture.svg)
+The diagram in the figure below describes the proposed high-level architecture
+for Verisocks.
 
+![Verisocks architecture diagram](docs/diagrams/out/verisocks_architecture.svg)
 
 ## TCP protocol
 
 ### Message format
 
 The TCP message format follows the proposal for a message format in the
-RealPython tutorial on sockets programming as it seems to be quite reasonable
-and generic. Indeed, it allows to deal easily with variable-length messages
-while making sure that we can easily verify the that the full message has been
-received and/or is not overlapping with the next message.
+[RealPython's guide on sockets
+programming](https://realpython.com/python-sockets/) as it seems to be quite
+reasonable and generic. Indeed, it allows to deal easily with variable-length
+messages while making sure that we can easily verify the that the full message
+has been received and/or is not overlapping with the next message. Moreover,
+while it is not really foreseen at the time to be used in this project, it
+allows to cope with the transmission of binary data.
 
-1. Fixed-length pre-header
+The message format can be summarized as follows:
+
+1. Fixed-length pre-header: Indicates the length in bytes of the following
+   variable-length header.
    * Type: Integer value
    * Encoding: Big endian byte ordering
    * Length: 2 bytes
-2. Variable-length header
-   * Type: Unicode text
+2. Variable-length header: Gives information on the message payload's content.
+   * Type: Unicode text, JSON format
    * Encoding: UTF-8
    * Length: As specified by the integer value in the pre-header
 3. Variable-length payload
    * Type: As specified in the header
-   * Encoding: As specified in the header
+   * Encoding: As specified in the header, only UTF-8 currently supported.
    * Length: As specified in the header
 
 ## References

@@ -14,9 +14,8 @@
 * [x] Python packaging config
 * [ ] Move Python Verisocks class back to `__init__.py` (?)
 * [ ] Add testing for Python module (WIP)
-* [ ] Use autotools or CMake to make compilation portable
+* [ ] Use autotools make compilation better portable
 * [x] Change makefile and source to cope with a different, more generic
   installation path for `vpi_user.h`
-* [ ] Create a few examples
+* [ ] Create a few examples (WIP)
 * [ ] Documentation
-* [ ] Include Verisocks
