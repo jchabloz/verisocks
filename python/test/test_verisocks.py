@@ -14,7 +14,7 @@ import logging
 # Parameters
 HOST = "127.0.0.1"
 PORT = 5100
-LIBVPI = "../../build/libvpi.so"  # Relative path to this file!
+LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 CONNECT_DELAY = 0.01
 
 # Expectations

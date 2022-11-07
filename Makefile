@@ -1,20 +1,19 @@
 #Makefile
 
-SHELL = /usr/bin/bash
+SHELL = /usr/bin/sh
+
+# Edit the following path to vpi_user.h location
+INCDIRS += /usr/local/include/iverilog
+# Edit the following path to libvpi.a
+LIBDIRS += /usr/local/lib
 
 SRCDIR = .
 BUILDDIR = build
-INCDIRS += /usr/local/include/iverilog
 INCDIRS += $(SRCDIR)/include
 INCDIRS += $(SRCDIR)/cjson
-LIBDIRS += /usr/local/lib
-LIBVPI = $(BUILDDIR)/libvpi.so
+LIBVPI = $(BUILDDIR)/verisocks.vpi
 
 CC = /usr/bin/gcc
-IV = iverilog
-IVFLAGS = -Wall
-VVP = vvp
-VVP_EXT_FLAGS = -fst
 
 CFLAGS += -fPIC
 CFLAGS += -Wall
