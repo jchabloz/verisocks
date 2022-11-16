@@ -4,7 +4,8 @@
 AC_PREREQ([2.69])
 AC_INIT([verisocks], [0.0.1])
 AC_CONFIG_SRCDIR([include/vs_msg.h])
-AC_CONFIG_HEADERS([include/config.h])
+AC_CONFIG_HEADERS([include/vpi_config.h])
+AC_CONFIG_FILES([makefile_test])
 
 # Checks for programs.
 AC_PROG_CC
@@ -12,7 +13,8 @@ AC_PROG_CC
 AC_PROG_SED
 
 # Checks for libraries.
-AC_CHECK_LIB([vpi], [__libvpi_c_dummy_function])
+# AC_CHECK_LIB([vpi], [__libvpi_c_dummy_function])
+AC_CHECK_LIB([vpi], [vpi_register_systf])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h limits.h locale.h malloc.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/file.h sys/socket.h sys/time.h unistd.h],,[AC_MSG_ERROR([Required header file missing])])
