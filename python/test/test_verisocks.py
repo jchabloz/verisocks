@@ -5,6 +5,7 @@ import time
 import shutil
 import pytest
 import logging
+import re
 
 # Note
 # To run with coverage, use
@@ -19,7 +20,7 @@ CONNECT_DELAY = 0.01
 
 # Expectations
 sim_info_product = "Icarus Verilog"
-sim_info_version = "11.0 (stable)"
+sim_info_version = "11.0"
 
 
 @pytest.fixture
@@ -97,7 +98,7 @@ def test_get_sim_info(vs):
     answer = vs.get("sim_info")
     assert answer["type"] == "result"
     assert answer["product"] == sim_info_product
-    assert answer["version"] == sim_info_version
+    assert re.match(sim_info_version, answer["version"])
 
 
 def test_get_sim_time(vs):
