@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <vpi_user.h>
 
+#include "vpi_config.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "vs_server.h"

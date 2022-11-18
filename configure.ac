@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT([verisocks], [0.0.1])
 AC_CONFIG_SRCDIR([include/vs_msg.h])
 AC_CONFIG_HEADERS([include/vpi_config.h])
-AC_CONFIG_FILES([makefile_test])
+#AC_CONFIG_FILES([makefile_test])
 
 # Checks for programs.
 AC_PROG_CC

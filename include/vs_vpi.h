@@ -10,7 +10,7 @@
 #ifndef VS_VPI_H
 #define VS_VPI_H
 
-#include <vpi_user.h>
+#include "vpi_config.h"
 #include "cJSON.h"
 
 /**

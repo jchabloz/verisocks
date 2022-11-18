@@ -12,7 +12,7 @@
 #ifndef VS_UTILS_H
 #define VS_UTILS_H
 
-#include <vpi_user.h>
+#include "vpi_config.h"
 #include "cJSON.h"
 
 /**

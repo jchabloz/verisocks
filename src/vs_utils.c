@@ -11,7 +11,8 @@
 
 #include <math.h>
 #include <string.h>
-#include <vpi_user.h>
+
+#include "vpi_config.h"
 #include "cJSON.h"
 #include "vs_logging.h"
 #include "vs_utils.h"

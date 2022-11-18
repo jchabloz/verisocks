@@ -1,11 +1,6 @@
 #Makefile
 
-SHELL = /usr/bin/sh
-
-# Edit the following path to vpi_user.h location
-INCDIRS += /usr/local/include/iverilog
-# Edit the following path to libvpi.a
-LIBDIRS += /usr/local/lib
+SHELL = @SHELL@
 
 SRCDIR = .
 BUILDDIR = build
@@ -13,7 +8,10 @@ INCDIRS += $(SRCDIR)/include
 INCDIRS += $(SRCDIR)/cjson
 LIBVPI = $(BUILDDIR)/verisocks.vpi
 
-CC = /usr/bin/gcc
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
 
 CFLAGS += -fPIC
 CFLAGS += -Wall
@@ -21,7 +19,7 @@ CFLAGS += -Wextra -Wpedantic
 CFLAGS += $(addprefix -I,$(INCDIRS))
 CFLAGS += -DVS_LOG_LEVEL=30
 CFLAGS += -DVS_VPI_LOG_LEVEL=20
-LDFLAGS += $(addprefix -L,$(LIBDIRS))
+LDFLAGS += $(addprefix -L,$(LIBDIRS)) -shared
 
 VPATH = $(SRCDIR)/cjson $(SRCDIR)/src
 
@@ -41,7 +39,7 @@ OBJS = $(addprefix $(BUILDDIR)/,$(subst .c,.o,$(SRCS)))
 all: $(LIBVPI)
 
 $(LIBVPI): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^ -lvpi
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ @LIBS@
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(BUILDDIR)

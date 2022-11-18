@@ -8,6 +8,8 @@ test/*.xml
 *.swp
 *.vvp
 tags
+Makefile
+include/vpi_config.h
 
 # gcov files
 *.gcov
