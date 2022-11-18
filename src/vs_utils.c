@@ -17,6 +17,7 @@
 #include "vs_logging.h"
 #include "vs_utils.h"
 
+#define PLI_UINT64 uint64_t
 
 typedef struct s_vs_time_def {
     int factor;
