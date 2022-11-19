@@ -1,6 +1,6 @@
 @startuml verisocks_architecture
 title Verisocks architecture overview
-' footer "Copyright (c) Jérémie Chabloz - 2022"
+'footer "Copyright (c) Jérémie Chabloz - 2022"
 
 !include <tupadr3/font-awesome-5/server>
 !include <tupadr3/font-awesome-5/python>
@@ -58,8 +58,8 @@ endnote
 
 note top of task
 User-defined task
-called in initial
-block of shell module
+called in an ""initial""
+block
 endnote
 
 task <--> dut
