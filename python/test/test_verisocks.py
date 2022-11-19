@@ -20,7 +20,7 @@ CONNECT_DELAY = 0.01
 
 # Expectations
 sim_info_product = "Icarus Verilog"
-sim_info_version = "1[12].0"
+sim_info_version = r"1[12]\.[0-9]+"
 
 
 @pytest.fixture
