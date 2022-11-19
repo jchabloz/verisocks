@@ -11,6 +11,10 @@ tags
 Makefile
 include/vpi_config.h
 
+# autoconf files
+config.status
+autom4te.cache/
+
 # gcov files
 *.gcov
 *.gcda
