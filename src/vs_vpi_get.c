@@ -46,7 +46,7 @@ const vs_vpi_cmd_t vs_vpi_cmd_get_table[] =
 VS_VPI_CMD_HANDLER(get_sim_info)
 {
     cJSON *p_msg;
-    char *str_msg;
+    char *str_msg = NULL;
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -105,7 +105,7 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 VS_VPI_CMD_HANDLER(get_sim_time)
 {
     cJSON *p_msg;
-    char *str_msg;
+    char *str_msg = NULL;
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -268,7 +268,7 @@ VS_VPI_CMD_HANDLER(get_value)
 VS_VPI_CMD_HANDLER(get_type)
 {
     cJSON *p_msg;
-    char *str_msg;
+    char *str_msg = NULL;
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();

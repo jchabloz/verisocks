@@ -8,7 +8,7 @@ AC_CONFIG_HEADERS([include/vpi_config.h])
 AC_CONFIG_FILES([Makefile])
 
 # Checks for programs.
-${CFLAGS=""}
+# ${CFLAGS=""}
 AC_PROG_CC
 AC_PROG_SED
 

@@ -134,6 +134,8 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
         vs_vpi_log_warning("Expected NULL pointer (not used)");
     }
 
+    int fd_socket = -1;
+
     /* Get handle to system task instance */
     vpiHandle h_systf;
     h_systf = vpi_handle(vpiSysTfCall, NULL);
@@ -183,7 +185,6 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
-    int fd_socket;
     fd_socket = vs_server_make_socket(num_port);
     if (0 > fd_socket) {
         vs_vpi_log_error("Issue making socket at port %d", num_port);
@@ -260,8 +261,10 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
  */
 PLI_INT32 verisocks_cb(p_cb_data cb_data)
 {
-    /* Retrieve initial system task instance handle */
     vpiHandle h_systf;
+    vs_vpi_data_t *p_vpi_data = NULL;
+
+    /* Retrieve initial system task instance handle */
     h_systf = (vpiHandle) cb_data->user_data;
     if (NULL == h_systf) {
         vs_vpi_log_error("Could not get systf handle - Aborting callback");
@@ -269,7 +272,6 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
     }
 
     /* Retrieve stored instance data */
-    vs_vpi_data_t *p_vpi_data;
     p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
     if (NULL == p_vpi_data) {
         vs_vpi_log_error("Could not get stored data - Aborting callback");
@@ -298,14 +300,16 @@ for command ...");
 
     /* Error management */
     error:
-    p_vpi_data->state = VS_VPI_STATE_ERROR;
-	if (0 <= p_vpi_data->fd_server_socket) {
-        close(p_vpi_data->fd_server_socket);
-		p_vpi_data->fd_server_socket = -1;
-	}
+    if (NULL != p_vpi_data) {
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+        if (0 <= p_vpi_data->fd_server_socket) {
+            close(p_vpi_data->fd_server_socket);
+            p_vpi_data->fd_server_socket = -1;
+        }
+        free(p_vpi_data);
+    }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
-    if (NULL != p_vpi_data) free(p_vpi_data);
     return -1;
 }
 
@@ -317,6 +321,8 @@ for command ...");
  */
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
 {
+    vs_vpi_data_t *p_vpi_data = NULL;
+
     /* Retrieve initial system task instance handle */
     vpiHandle h_systf;
     h_systf = (vpiHandle) cb_data->user_data;
@@ -326,7 +332,6 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     }
 
     /* Retrieve stored instance data */
-    vs_vpi_data_t *p_vpi_data;
     p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
     if (NULL == p_vpi_data) {
         vs_vpi_log_error("Could not get stored data - Aborting callback");
@@ -366,14 +371,16 @@ for command ...");
 
     /* Error management */
     error:
-    p_vpi_data->state = VS_VPI_STATE_ERROR;
-	if (0 <= p_vpi_data->fd_server_socket) {
-        close(p_vpi_data->fd_server_socket);
-		p_vpi_data->fd_server_socket = -1;
-	}
+    if (NULL != p_vpi_data) {
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+        if (0 <= p_vpi_data->fd_server_socket) {
+            close(p_vpi_data->fd_server_socket);
+            p_vpi_data->fd_server_socket = -1;
+        }
+        free(p_vpi_data);
+    }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
-    if (NULL != p_vpi_data) free(p_vpi_data);
     return -1;
 }
 

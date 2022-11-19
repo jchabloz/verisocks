@@ -59,7 +59,7 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)
     }
     double time_precision = (double) vpi_get(vpiTimePrecision, NULL);
 
-    double time_value;
+    double time_value = NAN;
     if (vpiSimTime == time.type) {
 	    PLI_UINT64 time_value_int =
             (PLI_UINT64) time.low + ((PLI_UINT64) time.high << 32u);

@@ -178,7 +178,7 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
 
-    double value;
+    double value = NAN;
     if (vpi_get(vpiType, h_obj) != vpiNamedEvent) {
         /* Get the value from the JSON message content */
         cJSON *p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");

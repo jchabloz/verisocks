@@ -140,7 +140,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
 int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 {
     cJSON *p_msg;
-    char *str_msg;
+    char *str_msg = NULL;
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
