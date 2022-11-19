@@ -53,32 +53,72 @@ a simple-to-use interface using the standardized *Verilog Procedural Interface
 (VPI)* to make it possible to control an Icarus simulation (this could normally
 easily be extended to any Verilog simulator later) from Python.
 
-## Requirements
+## Installation
 
-Let's try and draft some requirements for the solution I have in mind.
+Simply run the usual instructions:
 
-* It shall be possible to control the HDL simulator with Python, either
-  interactively or with scripts.
-* It shall be possible to easily interface the HDL simulator with any higher
-  level testing and/or automation frameworks (e.g. pytest, robot, etc.)
-* Defining tests (stimuli, configuration, etc.) should be done as much as
-  possible from the chosen high-level framework, without requiring (too many)
-  tweaking of the HDL description.
-* Assessing test pass/fail criteria (assertions) shall be performed from the
-  chosen high-level framework.
+```sh
+./configure
+make
+```
 
-Bonus:
+Depending on where is your local installation of Icarus, you will have to run
+the `configure` script indicating the path to `vpi_user.h` and `libvpi.a` as
+the script will check for their availability.
 
-* It should be easy to add support for any other high-level (scripting)
-  language.
-* The solution should be compatible with parallel testing.
+For example:
 
-## Proposed architecture
+```sh
+./configure CFLAGS=-I$HOME/local/include LDFLAGS=-L$HOME/local/lib
+make
+```
 
-The diagram in the figure below describes the proposed high-level architecture
-for Verisocks.
+The `make` invocation will compile the VPI module to `build/verisocks.vpi`,
+which can then be used to be loaded when desiring to use Verisocks with `vvp`.
+
+In order to test the installation, make sure to use a Python >=3.4 with pytest
+installed (as usual, best practice would recommend to use a virtual environment)
+
+```sh
+python -m pip install --upgrade pip
+python -m pip install pytest build
+python -m pip install -e ./python
+python -m pytest
+```
+
+## Architecture
+
+The diagram in the figure below describes the high-level architecture for
+Verisocks.
 
 ![Verisocks architecture diagram](docs/diagrams/out/verisocks_architecture.svg)
+
+The verilog testbench has to include a `$verilog_init()` statement, usually at
+the beginning of an `initial` statement (even though it can also be later).
+This statement takes one mandatory argument which is the port number to which
+the server needs to be associated and one optional argument defining the
+timeout in seconds which should apply while waiting for a client connection:
+The default timeout value is 120s (2mn).
+
+```verilog
+$verisocks_init(num_port[, timeout_sec]);
+```
+
+The main working principle for Verisocks is that the focus of the simulation is
+either taken by the simulator, or by Verisocks. While Verisocks has the focus,
+the simulation is stopped and the simulation time does not advance. At this
+point, it is possible to query or force values of the simulator.
+
+In order to advance the simulation, the focus needs to be relaxed to the
+simulator by either completely exiting Verisocks, in which case the simulation
+will run its course until it is finished, or to instruct the simulator to run
+until a certain event or a certain time.
+
+All of the instructions and return messages to and from the simulator are using
+the Verisocks TCP socket and uses the same TCP protocol.
+
+While the documentation is still missing, please refer to the provided examples
+and the [Python client code](python/verisocks/verisocks.py).
 
 ## TCP protocol
 
@@ -109,6 +149,6 @@ The message format can be summarized as follows:
    * Encoding: As specified in the header, only UTF-8 currently supported.
    * Length: As specified in the header
 
-## References
+## Miscellaneous references
 
 1. Ultralightweight JSON parser in ANSI C: https://github.com/DaveGamble/cJSON#readme
