@@ -394,8 +394,11 @@ Use queue_message().")
     def finish(self):
         """Sends a "finish" command to the Verisocks server that terminates
         the simulation (and therefore also closes the Verisocks server itself).
+        The connection is closed as well by the function as a clean-up.
         """
-        return self.send(command="finish")
+        retval = self.send(command="finish")
+        self.close()
+        return retval
 
     def stop(self):
         """Sends a "stop" command to the Verisocks server that stops
@@ -408,15 +411,19 @@ Use queue_message().")
         """Sends an "exit" command to the Verisocks server that gives back
         control to the simulator and closes the Verisocks server socket. The
         simulation runs to its end without having the possibility to take the
-        control back from the simulator anymore."""
-        return self.send(command="exit")
+        control back from the simulator anymore. The connection is closed
+        as well by the function."""
+        retval = self.send(command="exit")
+        self.close()
+        return retval
 
     def close(self):
-        """Close socket connection"""
-        logging.info("Closing socket connection")
-        self.sock.close()
-        self.sock = None
-        self._connected = False
+        """Close socket connection if still open"""
+        if self._connected:
+            logging.info("Closing socket connection")
+            self.sock.close()
+            self.sock = None
+            self._connected = False
 
     def flush(self):
         """Flush RX and TX buffers"""
