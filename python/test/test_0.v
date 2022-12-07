@@ -1,8 +1,12 @@
 `timescale 1us/1ps
 
+`ifndef NUM_PORT
+`define NUM_PORT 5100
+`endif
+
 module main;
 
-parameter integer num_port = 5100;
+parameter integer int_param = 598402;  //Used only for tests
 parameter real fclk = 1.01; //MHz
 
 reg clk;
@@ -25,7 +29,7 @@ end
 initial begin
 
 	$display("INFO [Top]: Initializing Verisocks");
-	$verisocks_init(num_port);
+	$verisocks_init(`NUM_PORT);
 
 	clk = 1'b0;
 	count = 8'd0;

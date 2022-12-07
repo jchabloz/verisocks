@@ -20,7 +20,7 @@ CONNECT_DELAY = 0.01
 
 # Expectations
 sim_info_product = "Icarus Verilog"
-sim_info_version = r"1[12]\.[0-9]+"
+sim_info_version = r"1[0-2]\.[0-9]+"
 
 
 @pytest.fixture
@@ -58,6 +58,7 @@ def setup_iverilog(src_file):
         shutil.which("iverilog"),
         "-o", vvp_file_path,
         "-Wall",
+        f"-DNUM_PORT={PORT}",
         src_file_path
     ]
     subprocess.check_call(cmd)
@@ -119,9 +120,9 @@ def test_get_value(vs):
     """Tests Verisocks get(sel="value") function"""
 
     # Get an integer parameter value
-    answer = vs.get("value", path="main.num_port")
+    answer = vs.get("value", path="main.int_param")
     assert answer["type"] == "result"
-    assert answer["value"] == 5100
+    assert answer["value"] == 598402
 
     # Get a real parameter value
     answer = vs.get(sel="value", path="main.fclk")
