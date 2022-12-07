@@ -19,3 +19,4 @@
   installation path for `vpi_user.h`
 * [ ] Create a few examples (WIP)
 * [ ] Documentation
+* [ ] Attempt to compile Verisocks and run it with Cadence Xcelium
