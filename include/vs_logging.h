@@ -37,7 +37,7 @@
 #define VA_OPT_SUPPORTED VA_OPT_SUPPORTED_I(?)
 
 /******************************************************************************/
-#ifdef VA_OPT_SUPPORTED
+#if VA_OPT_SUPPORTED
 /******************************************************************************/
 /* Generic */
 #define VS_LOG_MODNAME(LEVEL, MODNAME, fmt, ...) \
