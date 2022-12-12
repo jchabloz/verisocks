@@ -322,7 +322,7 @@ Use queue_message().")
         """
         return self.send(command=command, **kwargs)
 
-    def run(self, /, cb, **kwargs):
+    def run(self, cb, **kwargs):
         """Sends a "run" command request to the Verisocks server. Equivalent to
         send_cmd("run", cb=cb, ...). This command gives the focus back to the
         simulator and lets it run until the specified callback condition is met
@@ -353,7 +353,7 @@ Use queue_message().")
         """
         return self.send(command="run", cb=cb, **kwargs)
 
-    def set(self, /, path, **kwargs):
+    def set(self, path, **kwargs):
         """Sends a "set" command request to the Verisocks server. Equivalent to
         send_cmd("set", ...). This commands sets the value of a verilog object.
 
@@ -369,7 +369,7 @@ Use queue_message().")
         """
         return self.send(command="set", path=path, **kwargs)
 
-    def get(self, /, sel, **kwargs):
+    def get(self, sel, **kwargs):
         """Sends a "get" command request to the Verisocks server.
         Equivalent ot send_cmd("get", ...). This commands can be used to obtain
         different pieces of information from the Verisocks server.
