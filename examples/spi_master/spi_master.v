@@ -159,6 +159,9 @@ module spi_master(cs_b, mosi, miso, sclk);
     end
     endtask
 
+    /**************************************************************************
+    Hook for Verisocks to trigger task execution using a named event
+    **************************************************************************/
     always @(start_transaction)
         spi_transmit_buffer(8'd0);
 
