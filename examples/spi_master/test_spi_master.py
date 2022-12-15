@@ -4,6 +4,8 @@ import os.path
 import time
 import shutil
 import logging
+import pytest
+
 
 # Parameters
 HOST = "127.0.0.1"
@@ -106,35 +108,45 @@ def send_spi(vs, tx_buffer):
     return rx_buffer, counter
 
 
-if __name__ == "__main__":
-
+@pytest.fixture
+def vs():
     # Set up Icarus simulation and launch it as a separate process
     pop = setup_iverilog("spi_master_tb",
                          "spi_master.v",
                          "spi_slave.v",
                          "spi_master_tb.v")
-
-    # Start and connect a Verisocks client using the context manager
-    with Verisocks(HOST, PORT) as vs:
-        assert vs._connected
-
-        # Let the simulator run for 10 us
-        vs.run(cb="for_time", time=10, time_unit="us")
-
-        # Trigger an SPI transaction
-        tx = [12, 34, 56, 78, 90, 12, 34]
-        rx, counter = send_spi(vs, tx)
-
-        vs.run(cb="for_time", time=10, time_unit="us")
-        tx = [1, 3, 5, 7, 11, 13, 17]
-        rx, counter = send_spi(vs, tx)
-
-        vs.run(cb="for_time", time=10, time_unit="us")
-        tx = [19, 23, 29, 31, 37, 41, 43]
-        rx, counter = send_spi(vs, tx)
-
-        # Terminate simulation
-        vs.finish()
-
-    # Waits until the Icarus process has finished
+    _vs = Verisocks(HOST, PORT)
+    _vs.connect()
+    yield _vs
+    # Teardown
+    _vs.finish()
+    _vs.close()
     pop.wait(timeout=10)
+
+
+def test_spi_master_simple(vs):
+
+    assert vs._connected
+
+    # Let the simulator run for 10 us
+    answer = vs.run(cb="for_time", time=10, time_unit="us")
+    assert answer["type"] == "ack"
+
+    # Trigger an SPI transaction
+    tx = [12, 34, 56, 78, 90, 12, 34]
+    rx, counter = send_spi(vs, tx)
+    assert counter == 0
+
+    vs.run(cb="for_time", time=10, time_unit="us")
+    tx_previous = tx
+    tx = [1, 3, 5, 7, 11, 13, 17]
+    rx, counter = send_spi(vs, tx)
+    assert rx[1:] == tx_previous
+    assert counter == 1
+
+    vs.run(cb="for_time", time=10, time_unit="us")
+    tx_previous = tx
+    tx = [19, 23, 29, 31, 37, 41, 43]
+    rx, counter = send_spi(vs, tx)
+    assert rx[1:] == tx_previous
+    assert counter == 2
