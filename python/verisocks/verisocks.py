@@ -49,9 +49,9 @@ class Verisocks:
         self._tx_buffer = b""
         self._tx_msg_len = []
 
-        # Set up logging
-        fmt = '%(levelname)s: %(asctime)s - %(message)s'
-        logging.basicConfig(level=logging.INFO, format=fmt)
+        # Set up logging - Should normally not be done here
+        # fmt = '%(levelname)s: %(asctime)s - %(message)s'
+        # logging.basicConfig(level=logging.INFO, format=fmt)
 
     def connect(self, timeout=120.0):
         """Connect to server socket
