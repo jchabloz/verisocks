@@ -9,15 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     name: Builds VPI library
+    
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
+      
     - name: Checkout submodules
-      uses: actions/git-checkout-submodule-action@latest
+      uses: textbook/git-checkout-submodule-action@latest
+      
     - name: Install dependencies
       run: sudo apt install iverilog make
+      
     - name: configure
       run: ./configure
+      
     - name: make
       run: make
