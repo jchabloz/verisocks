@@ -15,9 +15,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
-      
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@2.1.1
+      with:
+          submodules: true
       
     - name: Install dependencies
       run: sudo apt install iverilog make
