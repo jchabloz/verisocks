@@ -13,7 +13,7 @@ jobs:
     steps:
     # - uses: actions/checkout@v3
     - name: Install dependencies
-      run: apt install iverilog
+      run: sudo apt install iverilog
     - name: configure
       run: ./configure
     - name: make
