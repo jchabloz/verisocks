@@ -27,7 +27,7 @@ gcda_files = $(addprefix $(BUILDDIR)/,$(patsubst %.c,%.gcda,$(notdir $(SRC_FILES
 gcda_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%.gcda,$(tests)))
 run_rpt_files += $(addprefix $(BUILDDIR)/,$(patsubst %,%_valgrind.rpt,$(tests)))
 
-all: build run lcov
+all: build run
 
 build: $(addprefix $(BUILDDIR)/,$(tests))
 
