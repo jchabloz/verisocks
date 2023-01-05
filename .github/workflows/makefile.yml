@@ -28,4 +28,4 @@ jobs:
       run: make
       
     - name: cunit test
-      run: cd test & make
+      run: cd test;make
