@@ -9,23 +9,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     name: Builds VPI library
-    
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
       with:
-          submodules: true
-      
+        submodules: true
     - name: Install dependencies
       run: sudo apt install iverilog make libcunit1 libcunit1-dev valgrind lcov xsltproc
-      
     - name: configure
       run: ./configure
-      
-    - name: make
+    - name: Build library
       run: make
-      
-    - name: cunit test
-      run: cd test;make
+    - name: Build and run cunit test
+      run: cd test;make;cd ..
+    - name: Archive cunit test artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: cunit-test-results
+        path: |
+          test/build/CUnitAutomated-Results.xml
+          test/build/cunit_test_results.html
+          test/build/cunit_test_valgrind.rpt

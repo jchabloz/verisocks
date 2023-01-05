@@ -31,7 +31,7 @@ all: build run
 
 build: $(addprefix $(BUILDDIR)/,$(tests))
 
-run: $(run_rpt_files) $(result_file) $(gcno_files) $(gcda_files)
+run: $(run_rpt_files) $(result_file)
 
 lcov: run $(BUILDDIR)/lcov/index.html
 
