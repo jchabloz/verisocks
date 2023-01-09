@@ -20,3 +20,5 @@
 * [ ] Create a few examples (WIP)
 * [ ] Documentation
 * [ ] Attempt to compile Verisocks and run it with Cadence Xcelium
+* [ ] Add support for callbacks on multiple events/value changes in // and also
+  for the possibility to keep the callback enabled after it has triggered.
