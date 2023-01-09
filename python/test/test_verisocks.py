@@ -14,29 +14,30 @@ import socket
 # coverage report or coverage html
 
 
-def find_free_port():
-    with socket.socket() as s:
-        s.bind(('', 0))
-        return s.getsockname()[1]
-
-
 # Parameters
 HOST = socket.gethostbyname("localhost")
-PORT = find_free_port()
-VS_TIMEOUT = 10
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 CONNECT_DELAY = 0.1
+VS_TIMEOUT = 2
+
 
 # Expectations
 sim_info_product = "Icarus Verilog"
 sim_info_version = r"1[0-2]\.[0-9]+"
 
 
+def find_free_port():
+    with socket.socket() as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
+
+
 @pytest.fixture
 def vs():
     # Setup
-    pop = setup_iverilog("test_0.v")
-    _vs = Verisocks(HOST, PORT)
+    port = find_free_port()
+    pop = setup_iverilog(port, "test_0.v")
+    _vs = Verisocks(HOST, port)
     _vs.connect()
     yield _vs
     # Teardown
@@ -49,7 +50,7 @@ def get_abspath(relpath):
     return os.path.join(os.path.dirname(__file__), relpath)
 
 
-def setup_iverilog(src_file):
+def setup_iverilog(port, src_file):
     """Elaborate and run the verilog testbench file provided as an argument
 
     Args:
@@ -67,7 +68,7 @@ def setup_iverilog(src_file):
         shutil.which("iverilog"),
         "-o", vvp_file_path,
         "-Wall",
-        f"-DNUM_PORT={PORT}",
+        f"-DNUM_PORT={port}",
         f"-DVS_TIMEOUT={VS_TIMEOUT}",
         src_file_path
     ]
@@ -99,8 +100,9 @@ def test_already_connected(vs, caplog):
 
 def test_connect_error():
     """Tests trying to connect to a non-running server"""
+    port = find_free_port()
     with pytest.raises(ConnectionRefusedError):
-        vs = Verisocks(HOST, PORT)
+        vs = Verisocks(HOST, port)
         vs.connect()
     vs.close()
 
@@ -308,8 +310,9 @@ def test_read_not_expected(vs):
 
 
 def test_context_manager():
-    pop = setup_iverilog("test_0.v")
-    with Verisocks(HOST, PORT) as vs:
+    port = find_free_port()
+    pop = setup_iverilog(port, "test_0.v")
+    with Verisocks(HOST, port) as vs:
         assert vs._connected
         answer = vs.finish()
         assert answer["type"] == "ack"
