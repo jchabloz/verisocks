@@ -1,4 +1,4 @@
-name: Makefile CI
+name: Builds and test CI
 
 on:
   push:
@@ -23,6 +23,11 @@ jobs:
       run: make
     - name: Build and run cunit test
       run: cd test;make;cd ..
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: libvpi
+        path: build/verisocks.vpi
     - name: Archive cunit test artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -31,3 +36,26 @@ jobs:
           test/build/CUnitAutomated-Results.xml
           test/build/cunit_test_results.html
           test/build/cunit_test_valgrind.rpt
+
+  pytest:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Run pytest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.7"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ./python
+        pip install pytest pytest-cov
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: libvpi
+    - name: Run pytest
+      run: pytest --cov=verisocks
