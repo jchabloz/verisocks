@@ -1,10 +1,11 @@
 name: Builds and test CI
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+on: push
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
 
 jobs:
   build:
@@ -59,7 +60,9 @@ jobs:
       with:
         name: libvpi
     - name: Check verisocks.vpi
-      run: ls -l build/verisocks.vpi
+      run: |
+        ls -l
+        ls -l build
 
 #   - name: Run pytest
 #     run: pytest -x --log-cli-level=INFO --cov=verisocks
