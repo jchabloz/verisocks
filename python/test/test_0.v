@@ -4,6 +4,11 @@
 `define NUM_PORT 5100
 `endif
 
+`ifndef VS_TIMEOUT
+`define VS_TIMEOUT 120
+`endif
+
+
 module main;
 
 parameter integer int_param = 598402;  //Used only for tests
@@ -29,7 +34,7 @@ end
 initial begin
 
 	$display("INFO [Top]: Initializing Verisocks");
-	$verisocks_init(`NUM_PORT);
+	$verisocks_init(`NUM_PORT, `VS_TIMEOUT);
 
 	clk = 1'b0;
 	count = 8'd0;

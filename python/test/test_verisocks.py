@@ -6,15 +6,24 @@ import shutil
 import pytest
 import logging
 import re
+import socket
 
 # Note
 # To run with coverage, use
 # coverage run --source=../verisocks --branch -m pytest
 # coverage report or coverage html
 
+
+def find_free_port():
+    with socket.socket() as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
+
+
 # Parameters
-HOST = "127.0.0.1"
-PORT = 5100
+HOST = socket.gethostbyname("localhost")
+PORT = find_free_port()
+VS_TIMEOUT = 10
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 CONNECT_DELAY = 0.01
 
@@ -59,6 +68,7 @@ def setup_iverilog(src_file):
         "-o", vvp_file_path,
         "-Wall",
         f"-DNUM_PORT={PORT}",
+        f"-DVS_TIMEOUT={VS_TIMEOUT}",
         src_file_path
     ]
     subprocess.check_call(cmd)

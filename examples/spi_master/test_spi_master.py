@@ -5,19 +5,27 @@ import time
 import shutil
 import logging
 import pytest
+import socket
+
+
+def find_free_port():
+    with socket.socket() as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
 
 
 # Parameters
-HOST = "127.0.0.1"
-PORT = 5100
+HOST = socket.gethostbyname("localhost")
+PORT = find_free_port()
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 CONNECT_DELAY = 0.01
+VS_TIMEOUT = 10
 
 
 def get_abspath(relpath):
     """Builds an absolute path from a path which is relative to the current
     file
-    
+
     Args:
         * relpath (str): Relative path
 
@@ -47,6 +55,8 @@ def setup_iverilog(vvp_name, *src_files):
         shutil.which("iverilog"),
         "-o", vvp_file_path,
         "-Wall",
+        f"-DVS_NUM_PORT={PORT}",
+        f"-DVS_TIMEOUT={VS_TIMEOUT}",
         *src_file_paths,
     ]
     subprocess.check_call(cmd)

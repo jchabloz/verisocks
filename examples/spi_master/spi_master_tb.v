@@ -8,8 +8,13 @@ Includes and misc definitions
 *******************************************************************************/
 `timescale 1us/10ps //Time scale definitions
 
+`ifndef VS_NUM_PORT
 `define VS_NUM_PORT 5100
+`endif
+
+`ifndef VS_TIMEOUT
 `define VS_TIMEOUT 120
+`endif
 
 /*******************************************************************************
 Testbench
