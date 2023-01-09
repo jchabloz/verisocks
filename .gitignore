@@ -3,6 +3,7 @@ build/
 sandbox/
 references/
 .vscode/
+.venv/
 test/build/
 test/*.xml
 *.swp
