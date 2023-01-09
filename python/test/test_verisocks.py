@@ -23,9 +23,9 @@ def find_free_port():
 # Parameters
 HOST = socket.gethostbyname("localhost")
 PORT = find_free_port()
-VS_TIMEOUT = 10
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
-CONNECT_DELAY = 0.1
+CONNECT_DELAY = 0.5
+VS_TIMEOUT = 2
 
 # Expectations
 sim_info_product = "Icarus Verilog"
