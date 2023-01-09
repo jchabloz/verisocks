@@ -59,4 +59,9 @@ jobs:
       with:
         name: libvpi
     - name: Run pytest
-      run: pytest --cov=verisocks
+      run: pytest --log-cli-level=INFO --cov=verisocks
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: pytest-log
+        path: pytest.log
