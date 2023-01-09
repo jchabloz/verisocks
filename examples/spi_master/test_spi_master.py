@@ -61,7 +61,8 @@ def setup_iverilog(vvp_name, *src_files):
     ]
     subprocess.check_call(cmd)
     libvpi_path = get_abspath(LIBVPI)
-    cmd = [shutil.which("vvp"), "-m", libvpi_path, vvp_file_path, "-fst"]
+    cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path,
+           vvp_file_path, "-fst"]
     pop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     print(f"Launched Icarus with PID {pop.pid}")
 

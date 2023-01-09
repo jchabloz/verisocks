@@ -42,7 +42,7 @@ def vs():
     # Teardown
     _vs.finish()
     _vs.close()
-    pop.wait(timeout=10)
+    pop.communicate(timeout=10)
 
 
 def get_abspath(relpath):
@@ -73,7 +73,7 @@ def setup_iverilog(src_file):
     ]
     subprocess.check_call(cmd)
     libvpi_path = get_abspath(LIBVPI)
-    cmd = [shutil.which("vvp"), "-m", libvpi_path, vvp_file_path]
+    cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path, vvp_file_path]
     pop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     print(f"Launched Icarus with PID {pop.pid}")
     # Some delay is required for Icarus to launch the Verisocks server before
