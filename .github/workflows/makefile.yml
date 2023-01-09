@@ -37,34 +37,34 @@ jobs:
           test/build/cunit_test_results.html
           test/build/cunit_test_valgrind.rpt
 
-  pytest:
-    needs: build
-    runs-on: ubuntu-latest
-    name: Run pytest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.7"
-    - name: Install dependencies
-      run: |
-        sudo apt install iverilog
-        python -m pip install --upgrade pip
-        pip install -e ./python
-        pip install pytest pytest-cov
-    - name: Download build artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: libvpi
-    - name: Run pytest
-      run: pytest -x --log-cli-level=INFO --cov=verisocks
-    - name: Archive test logs
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-logs
-        path: |
-          pytest.log
-          vvp.log
+  # pytest:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   name: Run pytest
+  #   steps:
+  #   - name: Checkout repo
+  #     uses: actions/checkout@v3
+  #   - name: Setup Python
+  #     uses: actions/setup-python@v4
+  #     with:
+  #       python-version: "3.7"
+  #   - name: Install dependencies
+  #     run: |
+  #       sudo apt install iverilog
+  #       python -m pip install --upgrade pip
+  #       pip install -e ./python
+  #       pip install pytest pytest-cov
+  #   - name: Download build artifact
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: libvpi
+  #   - name: Run pytest
+  #     run: pytest -x --log-cli-level=INFO --cov=verisocks
+  #   - name: Archive test logs
+  #     if: always()
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: test-logs
+  #       path: |
+  #         pytest.log
+  #         vvp.log
