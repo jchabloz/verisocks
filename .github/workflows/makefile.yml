@@ -61,16 +61,16 @@ jobs:
         name: libvpi
     - name: Check verisocks.vpi
       run: |
-        ls -l
-        ls -l build
-
-#   - name: Run pytest
-#     run: pytest -x --log-cli-level=INFO --cov=verisocks
-#   - name: Archive test logs
-#     if: always()
-#     uses: actions/upload-artifact@v3
-#     with:
-#       name: test-logs
-#       path: |
-#         pytest.log
-#         vvp.log
+        ls -l verisocks.vpi
+        mkdir -p build
+        mv verisocks.vpi build/.
+    - name: Run pytest
+      run: pytest -x --log-cli-level=INFO --cov=verisocks
+    - name: Archive test logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-logs
+        path: |
+          pytest.log
+          vvp.log
