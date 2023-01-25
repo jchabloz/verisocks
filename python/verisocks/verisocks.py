@@ -25,17 +25,21 @@ class Verisocks:
 
     PRE_HDR_LEN = 2  # Pre-header length in bytes
 
-    def __init__(self, host="127.0.0.1", port=5100):
+    def __init__(self, host="127.0.0.1", port=5100, timeout=120.0):
         """Verisocks class constructor
 
         Args:
             host (str): Server host IP address, default="127.0.0.1"
             port (int): Server port number, default=5100
+            timeout (float): Socket timeout
         """
         # Connection address and status
         self._connected = False
         self.address = (host, port)
-        self.sock = None
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setblocking(True)
+        if timeout:
+            self.sock.settimeout(timeout)
 
         # RX variables
         self._rx_buffer = b""
@@ -59,10 +63,6 @@ class Verisocks:
         Args:
             timeout (float): Timeout in seconds (default=120.0)
         """
-        if not self.sock:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setblocking(True)
-            self.sock.settimeout(timeout)
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
             self.sock.connect(self.address)
@@ -71,13 +71,15 @@ class Verisocks:
         else:
             logging.info("Socket already connected")
 
-    def _read(self):
+    def _read(self, timeout=None):
         """Reads from socket to RX buffer (private)
 
         Raises:
             ConnectionError if no data is received (most likely the socket is
             closed).
         """
+        if timeout:
+            self.sock.settimeout(timeout)
         data = self.sock.recv(4096)
         if data:
             self._rx_buffer += data
@@ -229,7 +231,7 @@ class Verisocks:
         logging.debug(f"Queuing message header: {repr(message_header)}")
         logging.debug(f"Queuing message content: {repr(content_bytes)}")
 
-    def read(self, num_trials=10):
+    def read(self, num_trials=10, timeout=None):
         """Proceed to read and scan returned message
 
         Args:
@@ -242,7 +244,7 @@ class Verisocks:
             if not self._connected:
                 self.connect()
             if not self._rx_buffer:
-                self._read()
+                self._read(timeout)
             trials = 0
             while (trials < num_trials):
                 if (self._rx_state is VsRxState.RX_INIT):
@@ -257,7 +259,7 @@ class Verisocks:
                     logging.debug(f"Read procedure successful. \
 Still {self._rx_expected} messages expected.")
                     return True
-                self._read()
+                self._read(timeout)
                 trials += 1
             self._rx_state = VsRxState.ERROR
             logging.error("Read procedure unsuccessful")
@@ -303,7 +305,13 @@ Use queue_message().")
             "content": cmd
         })
         self.write()
-        if (self.read()):
+
+        if "timeout" in cmd:
+            timeout = cmd.pop("timeout")
+        else:
+            timeout = None
+
+        if (self.read(10, timeout)):
             if self.rx_content["type"] == "error":
                 raise VerisocksError(self.rx_content["value"])
             return self.rx_content
