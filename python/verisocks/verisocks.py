@@ -24,6 +24,7 @@ class Verisocks:
     """
 
     PRE_HDR_LEN = 2  # Pre-header length in bytes
+    READ_BUFFER_LEN = 4096
 
     def __init__(self, host="127.0.0.1", port=5100, timeout=120.0):
         """Verisocks class constructor
@@ -31,14 +32,22 @@ class Verisocks:
         Args:
             host (str): Server host IP address, default="127.0.0.1"
             port (int): Server port number, default=5100
-            timeout (float): Socket timeout
+            timeout (float): Socket timeout (base value),
+                             in seconds (default=120)
+
+        Note: For certain methods, a specific timeout value can be passed as
+        argument. If a value other than None is provided, the socket timeout
+        will temporarily be modified and restored to the timeout base value
+        defined here.
         """
         # Connection address and status
         self._connected = False
         self.address = (host, port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setblocking(True)
+        self._timeout = None
         if timeout:
+            self._timeout = timeout
             self.sock.settimeout(timeout)
 
         # RX variables
@@ -53,15 +62,8 @@ class Verisocks:
         self._tx_buffer = b""
         self._tx_msg_len = []
 
-        # Set up logging - Should normally not be done here
-        # fmt = '%(levelname)s: %(asctime)s - %(message)s'
-        # logging.basicConfig(level=logging.INFO, format=fmt)
-
-    def connect(self, timeout=120.0):
+    def connect(self):
         """Connect to server socket
-
-        Args:
-            timeout (float): Timeout in seconds (default=120.0)
         """
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
@@ -74,17 +76,23 @@ class Verisocks:
     def _read(self, timeout=None):
         """Reads from socket to RX buffer (private)
 
+        Args:
+            timeout (float): Timeout in seconds (default=None). If None, the
+            base value as defined within the class constructor applies.
+
         Raises:
             ConnectionError if no data is received (most likely the socket is
             closed).
         """
         if timeout:
             self.sock.settimeout(timeout)
-        data = self.sock.recv(4096)
+        data = self.sock.recv(self.READ_BUFFER_LEN)
         if data:
             self._rx_buffer += data
         else:
             raise ConnectionError
+        if timeout:
+            self.sock.settimeout(self._timeout)
 
     def _write(self, num_bytes, num_trials=10):
         """Write TX buffer to socket (private method)
@@ -236,6 +244,8 @@ class Verisocks:
 
         Args:
             num_trials (int): Maximum number of trials. Default=10.
+            timeout (float): Timeout in seconds (default=None). If None, the
+            base value as defined within the class constructor applies.
 
         Returns:
             status (bool): True if successful, False if error.
@@ -294,7 +304,9 @@ Use queue_message().")
 
         Args:
             **cmd: command content defined as keyword arguments (e.g.
-            cmd="get", sel="sim_info")
+            cmd="get", sel="sim_info"). If 'timeout' is provided as a keyword
+            argument, it is used as the socket timeout configuration value in
+            seconds for the duration of the sent command execution.
 
         Returns:
             (JSON object): Content of returned message.
