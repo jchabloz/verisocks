@@ -229,7 +229,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     cb_data.obj = NULL;
     cb_data.value = NULL;
     cb_data.index = 0;
-    cb_data.user_data = (PLI_BYTE8*) p_vpi_data->h_systf;
+    cb_data.user_data = (PLI_BYTE8*) p_vpi_data;
     cb_data.cb_rtn = verisocks_cb_exit;
     vpiHandle h_cb_eos = vpi_register_cb(&cb_data);
     vpi_free_object(h_cb_eos);
@@ -261,18 +261,9 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
  */
 PLI_INT32 verisocks_cb(p_cb_data cb_data)
 {
-    vpiHandle h_systf;
+    /* Retrieve stored user data */
     vs_vpi_data_t *p_vpi_data = NULL;
-
-    /* Retrieve initial system task instance handle */
-    h_systf = (vpiHandle) cb_data->user_data;
-    if (NULL == h_systf) {
-        vs_vpi_log_error("Could not get systf handle - Aborting callback");
-        goto error;
-    }
-
-    /* Retrieve stored instance data */
-    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
+    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
     if (NULL == p_vpi_data) {
         vs_vpi_log_error("Could not get stored data - Aborting callback");
         goto error;
@@ -321,18 +312,9 @@ for command ...");
  */
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
 {
+    /* Retrieve stored user data */
     vs_vpi_data_t *p_vpi_data = NULL;
-
-    /* Retrieve initial system task instance handle */
-    vpiHandle h_systf;
-    h_systf = (vpiHandle) cb_data->user_data;
-    if (NULL == h_systf) {
-        vs_vpi_log_error("Could not get systf handle - Aborting callback");
-        goto error;
-    }
-
-    /* Retrieve stored instance data */
-    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
+    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
     if (NULL == p_vpi_data) {
         vs_vpi_log_error("Could not get stored data - Aborting callback");
         goto error;
@@ -340,7 +322,7 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
 
     /* Check state */
     if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
-        vs_vpi_log_error("Inconsistent state");
+        vs_vpi_log_error("Inconsistent state - Aborting callback");
         goto error;
     }
 
@@ -388,17 +370,9 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
 {
     vs_vpi_log_debug("Reached exit callback (error or end-of-sim)");
 
-    /* Retrieve initial system task instance handle */
-    vpiHandle h_systf;
-    h_systf = (vpiHandle) cb_data->user_data;
-    if (NULL == h_systf) {
-        vs_vpi_log_error("Could not get systf handle - Aborting callback");
-        return -1;
-    }
-
     /* Retrieve stored instance data */
-    vs_vpi_data_t *p_vpi_data;
-    p_vpi_data = (vs_vpi_data_t*) vpi_get_userdata(h_systf);
+    vs_vpi_data_t *p_vpi_data = NULL;
+    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
     if (NULL == p_vpi_data) {
         vs_vpi_log_error("Could not get stored data - Aborting callback");
         return -1;
@@ -419,6 +393,7 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     if (NULL != p_vpi_data->p_cmd) {
         cJSON_Delete(p_vpi_data->p_cmd);
         p_vpi_data->p_cmd = NULL;
+        free(p_vpi_data);
     }
     return 0;
 }
@@ -475,10 +450,6 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
                 cJSON_Delete(p_vpi_data->p_cmd);
                 p_vpi_data->p_cmd = NULL;
             }
-            // if (NULL != p_vpi_data) {
-            //     free(p_vpi_data);
-            //     p_vpi_data = NULL;
-            // }
             return 0;
         case VS_VPI_STATE_START:
         case VS_VPI_STATE_ERROR:
@@ -492,10 +463,6 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
                 cJSON_Delete(p_vpi_data->p_cmd);
                 p_vpi_data->p_cmd = NULL;
             }
-            // if (NULL != p_vpi_data) {
-            //     free(p_vpi_data);
-            //     p_vpi_data = NULL;
-            // }
             return -1;
         }
     }

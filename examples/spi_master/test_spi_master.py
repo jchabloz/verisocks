@@ -63,7 +63,11 @@ def setup_iverilog(vvp_name, *src_files):
     libvpi_path = get_abspath(LIBVPI)
     cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path,
            vvp_file_path, "-fst"]
-    pop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pop = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
     print(f"Launched Icarus with PID {pop.pid}")
 
     # Some delay is required for Icarus to launch the Verisocks server before
@@ -85,7 +89,7 @@ def send_spi(vs, tx_buffer):
         * rx_buffer: Content of the SPI slave RX buffer that was received
                      during the transaction.
     """
-
+    logging.info(f"Sending SPI transaction")
     # Set the TX buffer simulation variable with the desired content
     vs.set(path="spi_master_tb.i_spi_master.tx_buffer",
            value=tx_buffer)
@@ -130,9 +134,12 @@ def vs():
     _vs.connect()
     yield _vs
     # Teardown
-    _vs.finish()
+    try:
+        _vs.finish()
+    except ConnectionError:
+        logging.warning("Connection error - Finish command not possible")
     _vs.close()
-    pop.wait(timeout=10)
+    pop.communicate(timeout=10)
 
 
 def test_spi_master_simple(vs):
@@ -161,3 +168,4 @@ def test_spi_master_simple(vs):
     rx, counter = send_spi(vs, tx)
     assert rx[1:] == tx_previous
     assert counter == 2
+

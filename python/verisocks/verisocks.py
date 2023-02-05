@@ -311,17 +311,18 @@ Use queue_message().")
         Returns:
             (JSON object): Content of returned message.
         """
+
+        if "timeout" in cmd:
+            timeout = cmd.pop("timeout")
+        else:
+            timeout = None
+
         self.queue_message({
             "type": "application/json",
             "encoding": "utf-8",
             "content": cmd
         })
         self.write()
-
-        if "timeout" in cmd:
-            timeout = cmd.pop("timeout")
-        else:
-            timeout = None
 
         if (self.read(10, timeout)):
             if self.rx_content["type"] == "error":
@@ -411,21 +412,21 @@ Use queue_message().")
         """
         return self.send(command="get", sel=sel, **kwargs)
 
-    def finish(self):
+    def finish(self, timeout=None):
         """Sends a "finish" command to the Verisocks server that terminates
         the simulation (and therefore also closes the Verisocks server itself).
         The connection is closed as well by the function as a clean-up.
         """
-        retval = self.send(command="finish")
+        retval = self.send(command="finish", timeout=timeout)
         self.close()
         return retval
 
-    def stop(self):
+    def stop(self, timeout=None):
         """Sends a "stop" command to the Verisocks server that stops
         the simulation. The Verisocks server socket is not closed, but the
         simulation has to be restarted for any new request to be processed.
         """
-        return self.send(command="stop")
+        return self.send(command="stop", timeout=timeout)
 
     def exit(self):
         """Sends an "exit" command to the Verisocks server that gives back

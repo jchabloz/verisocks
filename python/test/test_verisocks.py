@@ -41,7 +41,10 @@ def vs():
     _vs.connect()
     yield _vs
     # Teardown
-    _vs.finish()
+    try:
+        _vs.finish()
+    except ConnectionError:
+        logging.warning("Connection error - Cannot send finish command")
     _vs.close()
     pop.communicate(timeout=10)
 
@@ -307,6 +310,11 @@ def test_set(vs):
 def test_read_not_expected(vs):
     # No data expected
     assert vs.read() is False
+
+
+def test_sim_finishes(vs):
+    with pytest.raises(VerisocksError):
+        answer = vs.run(cb="until_time", time=1200, time_unit="us")
 
 
 def test_context_manager():
