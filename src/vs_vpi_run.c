@@ -25,10 +25,10 @@
  * in the following command tables. Commands are implemented at the end of this
  * file.
  */
-VS_VPI_CMD_HANDLER(run_for_time);   //sub-command of "run"
-VS_VPI_CMD_HANDLER(run_until_time); //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_for_time);      //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_until_time);    //sub-command of "run"
 VS_VPI_CMD_HANDLER(run_until_change);  //sub-command of "run"
-VS_VPI_CMD_HANDLER(run_to_next);  //sub-command of "run"
+VS_VPI_CMD_HANDLER(run_to_next);       //sub-command of "run"
 
 /**
  * @brief Table registering the sub-command handlers for the run command
@@ -79,10 +79,15 @@ VS_VPI_CMD_HANDLER(run_for_time)
     cb_data.obj = NULL;
     cb_data.value = NULL;
     cb_data.index = 0;
-    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.user_data = (PLI_BYTE8*) p_data;
     cb_data.cb_rtn = verisocks_cb;
     vpiHandle h_cb = vpi_register_cb(&cb_data);
+    if (NULL == h_cb) {
+        vs_vpi_log_error("Could not register callback");
+        goto error;
+    }
     vpi_free_object(h_cb);
+    p_data->h_cb = NULL;
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -91,6 +96,8 @@ VS_VPI_CMD_HANDLER(run_for_time)
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_log_warning(
+        "Error processing command run(for_time) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command run - Discarding");
     return -1;
@@ -139,10 +146,15 @@ VS_VPI_CMD_HANDLER(run_until_time)
     cb_data.obj = NULL;
     cb_data.value = NULL;
     cb_data.index = 0;
-    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.user_data = (PLI_BYTE8*) p_data;
     cb_data.cb_rtn = verisocks_cb;
     vpiHandle h_cb = vpi_register_cb(&cb_data);
+    if (NULL == h_cb) {
+        vs_vpi_log_error("Could not register callback");
+        goto error;
+    }
     vpi_free_object(h_cb);
+    p_data->h_cb = NULL;
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -151,6 +163,8 @@ VS_VPI_CMD_HANDLER(run_until_time)
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_log_warning(
+        "Error processing command run(until_time) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command run - Discarding");
     return -1;
@@ -232,9 +246,13 @@ VS_VPI_CMD_HANDLER(run_until_change)
     cb_data.obj = h_obj;
     cb_data.value = &cb_value;
     cb_data.index = 0;
-    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.user_data = (PLI_BYTE8*) p_data;
     cb_data.cb_rtn = verisocks_cb_value_change;
     vpiHandle h_cb = vpi_register_cb(&cb_data);
+    if (NULL == h_cb) {
+        vs_vpi_log_error("Could not register callback");
+        goto error;
+    }
     p_data->h_cb = h_cb;
 
     /* Return control to simulator */
@@ -244,6 +262,8 @@ VS_VPI_CMD_HANDLER(run_until_change)
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_log_warning(
+        "Error processing command run(until_change) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
         "Error processing command run - Discarding");
     return -1;
@@ -265,12 +285,25 @@ VS_VPI_CMD_HANDLER(run_to_next)
     cb_data.obj = NULL;
     cb_data.value = NULL;
     cb_data.index = 0;
-    cb_data.user_data = (PLI_BYTE8*) p_data->h_systf;
+    cb_data.user_data = (PLI_BYTE8*) p_data;
     cb_data.cb_rtn = verisocks_cb;
     vpiHandle h_cb = vpi_register_cb(&cb_data);
-    p_data->h_cb = h_cb;
+    if (NULL == h_cb) {
+        vs_vpi_log_error("Could not register callback");
+        goto error;
+    }
+    vpi_free_object(h_cb);
+    p_data->h_cb = NULL;
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
     return 0;
+
+    error:
+    p_data->state = VS_VPI_STATE_WAITING;
+    vs_vpi_log_warning(
+        "Error processing command run(to_next) - Discarding");
+    vs_vpi_return(p_data->fd_client_socket, "error",
+        "Error processing command run - Discarding");
+    return -1;
 }
