@@ -9,10 +9,11 @@
   yet been reached.
 * [x] Add command *set* to be able to force values, supporting the same object
   types as for the command *get*.
-* [ ] Improve unit test coverage, using appropriately mock/fake functions.
+* [ ] Improve unit test coverage, using appropriately mock/fake functions
+  (using `fff.h`?).
 * [x] Add timeout as an (optional) parameter for $verisocks_init()
 * [x] Python packaging config
-* [ ] Move Python Verisocks class back to `__init__.py` (?)
+* [ ] ~~Move Python Verisocks class back to `__init__.py`~~
 * [x] Add testing for Python module
 * [x] Use autotools make compilation better portable
 * [x] Change makefile and source to cope with a different, more generic
@@ -22,3 +23,4 @@
 * [ ] Attempt to compile Verisocks and run it with Cadence Xcelium
 * [ ] Add support for callbacks on multiple events/value changes in // and also
   for the possibility to keep the callback enabled after it has triggered.
+* [ ] Port for usage with Verilator. This won't be such an easy feat...
