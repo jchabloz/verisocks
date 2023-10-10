@@ -78,7 +78,8 @@ def setup_iverilog(port, src_file):
     subprocess.check_call(cmd)
     libvpi_path = get_abspath(LIBVPI)
     cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path, vvp_file_path]
-    pop = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pop = subprocess.Popen(
+        cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print(f"Launched Icarus with PID {pop.pid}")
     # Some delay is required for Icarus to launch the Verisocks server before
     # being able to connect - Please adjust CONNECT_DELAY if required.
@@ -314,7 +315,7 @@ def test_read_not_expected(vs):
 
 def test_sim_finishes(vs):
     with pytest.raises(VerisocksError):
-        answer = vs.run(cb="until_time", time=1200, time_unit="us")
+        _ = vs.run(cb="until_time", time=1200, time_unit="us")
 
 
 def test_context_manager():
