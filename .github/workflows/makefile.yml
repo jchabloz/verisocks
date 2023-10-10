@@ -16,7 +16,7 @@ jobs:
       with:
         submodules: true
     - name: Install dependencies
-      run: sudo apt install iverilog make libcunit1 libcunit1-dev valgrind lcov xsltproc
+      run: sudo apt-get update;sudo apt install iverilog make libcunit1 libcunit1-dev valgrind lcov xsltproc
     - name: configure
       run: ./configure
     - name: Build library
