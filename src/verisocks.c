@@ -249,7 +249,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
-    if (NULL != p_vpi_data) {free(p_vpi_data);}
+    //if (NULL != p_vpi_data) {free(p_vpi_data);}  //Will be freed in cb_exit
     return -1;
 }
 
@@ -297,7 +297,7 @@ for command ...");
             close(p_vpi_data->fd_server_socket);
             p_vpi_data->fd_server_socket = -1;
         }
-        free(p_vpi_data);
+        //free(p_vpi_data);  //Will be freed in exit callback handler
     }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
@@ -359,7 +359,7 @@ for command ...");
             close(p_vpi_data->fd_server_socket);
             p_vpi_data->fd_server_socket = -1;
         }
-        free(p_vpi_data);
+        //free(p_vpi_data);  //Will be freed in exit callback handler
     }
     vs_vpi_log_info("Aborting simulation");
     vpi_control(vpiFinish, 1);
@@ -393,7 +393,7 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     if (NULL != p_vpi_data->p_cmd) {
         cJSON_Delete(p_vpi_data->p_cmd);
         p_vpi_data->p_cmd = NULL;
-        free(p_vpi_data);
+        //free(p_vpi_data);  //Will be freed in exit callback handler
     }
     return 0;
 }
