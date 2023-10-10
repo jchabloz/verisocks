@@ -4,7 +4,7 @@
  * @brief Verisocks TCP server
  * @version 0.1
  * @date 2022-08-17
- * 
+ *
  */
 
 #include <stdarg.h>
@@ -99,6 +99,7 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     socklen_t addr_len = sizeof(s_addr);
     int fd_conn_socket = -1;
     struct hostent *host_info;
+    uint32_t addr;
 
     /* Use select mechanism uniquely to easily implement a timeout - The
     vs_server_accept function will keep being blocking until it times out.*/
@@ -124,7 +125,7 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
         }
     }
 
-    uint32_t addr = s_addr.sin_addr.s_addr;
+    addr = s_addr.sin_addr.s_addr;
     host_info = gethostbyaddr(&addr, sizeof(addr), AF_INET);
     if ((NULL != hostname) && (0 < len)) {
         if (NULL == host_info || NULL == host_info->h_name) {

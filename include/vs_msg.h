@@ -18,6 +18,10 @@
 
 #include "cJSON.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define VS_MSG_MAX_READ_TRIALS  10u //Defines how many read trials should be attempted
 #define VS_MSG_MAX_WRITE_TRIALS 10u //Defines how many write trials should be attempted
 
@@ -146,6 +150,10 @@ int vs_msg_write(int fd, const char *str_msg);
  * if successful or -1 if an error occurred.
  */
 int vs_msg_read(int fd, char *buffer, size_t len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //VS_MSG_H
 //EOF

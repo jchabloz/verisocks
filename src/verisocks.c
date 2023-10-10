@@ -130,6 +130,10 @@ constant, a parameter or an integer variable");
 
 PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 {
+    vpiHandle h_cb_eos;
+    uint32_t s_addr;
+    socklen_t len;
+
     if (NULL != user_data) {
         vs_vpi_log_warning("Expected NULL pointer (not used)");
     }
@@ -193,12 +197,12 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 
     /* Get and display socket address */
     struct sockaddr_in sin;
-    socklen_t len = sizeof(sin);
+    len = sizeof(sin);
     if (0 > getsockname(fd_socket, (struct sockaddr *) &sin, &len)) {
         vs_vpi_log_error("Issue getting socket address info");
         goto error;
     }
-    uint32_t s_addr = ntohl(sin.sin_addr.s_addr);
+    s_addr = ntohl(sin.sin_addr.s_addr);
 
     vpi_printf("******************************************\n");
     vpi_printf("*  __   __       _             _         *\n");
@@ -231,7 +235,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     cb_data.index = 0;
     cb_data.user_data = (PLI_BYTE8*) p_vpi_data;
     cb_data.cb_rtn = verisocks_cb_exit;
-    vpiHandle h_cb_eos = vpi_register_cb(&cb_data);
+    h_cb_eos = vpi_register_cb(&cb_data);
     vpi_free_object(h_cb_eos);
 
     /* Call verisocks main loop */

@@ -15,6 +15,10 @@
 #include "vpi_config.h"
 #include "cJSON.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Convert VPI time struct to a real (double) value
  * 
@@ -87,5 +91,14 @@ PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value);
  * @return Returns 0 if successful, -1 in case of error
  */
 PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key);
+
+typedef struct s_vs_time_def {
+    int factor;
+    const char *name;
+} vs_time_def_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //VS_UTILS_H

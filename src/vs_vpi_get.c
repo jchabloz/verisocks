@@ -1,12 +1,12 @@
 /**************************************************************************//**
  * @file vs_vpi.c
  * @author jchabloz
- * @brief Verisocks VPI functions 
+ * @brief Verisocks VPI functions
  * @version 0.1
  * @date 2022-08-27
- * 
+ *
  * @copyright Copyright (c) Jérémie Chabloz, 2022
- * 
+ *
  *****************************************************************************/
 
 #include <stdlib.h>
@@ -75,8 +75,14 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
+    #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
+
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -106,6 +112,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 {
     cJSON *p_msg;
     char *str_msg = NULL;
+    double sim_time_sec;
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -122,7 +129,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 	s_vpi_time s_time;
 	s_time.type = vpiSimTime;
 	vpi_get_time(NULL, &s_time);
-    double sim_time_sec = vs_utils_time_to_double(s_time, NULL);
+    sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
 
     if (NULL == cJSON_AddNumberToObject(p_msg, "time",
@@ -130,8 +137,13 @@ VS_VPI_CMD_HANDLER(get_sim_time)
         vs_log_mod_error("vs_vpi", "Could not add number to object");
         goto error;
     }
+    #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -160,7 +172,9 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 VS_VPI_CMD_HANDLER(get_value)
 {
     cJSON *p_msg;
+    cJSON *p_item_path;
     char *str_msg = NULL;
+    char *str_path;
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -174,12 +188,12 @@ VS_VPI_CMD_HANDLER(get_value)
     }
 
     /* Get the object path from the JSON message content */
-    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
+    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
     if (NULL == p_item_path) {
         vs_vpi_log_error("Command field \"path\" invalid/not found");
         goto error;
     }
-    char *str_path = cJSON_GetStringValue(p_item_path);
+    str_path = cJSON_GetStringValue(p_item_path);
     if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
         vs_vpi_log_error("Command field \"path\" NULL or empty");
         goto error;
@@ -238,8 +252,13 @@ VS_VPI_CMD_HANDLER(get_value)
     }
 
     /* Create message */
+    #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -268,6 +287,8 @@ VS_VPI_CMD_HANDLER(get_value)
 VS_VPI_CMD_HANDLER(get_type)
 {
     cJSON *p_msg;
+    cJSON *p_item_path;
+    char *str_path;
     char *str_msg = NULL;
 
     /* Create return message object */
@@ -282,12 +303,12 @@ VS_VPI_CMD_HANDLER(get_type)
     }
 
     /* Get the object path from the JSON message content */
-    cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
+    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
     if (NULL == p_item_path) {
         vs_vpi_log_error("Command field \"path\" invalid/not found");
         goto error;
     }
-    char *str_path = cJSON_GetStringValue(p_item_path);
+    str_path = cJSON_GetStringValue(p_item_path);
     if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
         vs_vpi_log_error("Command field \"path\" NULL or empty");
         goto error;
@@ -306,8 +327,13 @@ VS_VPI_CMD_HANDLER(get_type)
         goto error;
     }
 
+    #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;

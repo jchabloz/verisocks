@@ -12,6 +12,10 @@
 
 #include "vpi_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Callback at (pseudo) compile time for user task verisock_init */
 PLI_INT32 verisocks_init_compiletf(PLI_BYTE8* user_data);
 
@@ -25,6 +29,10 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data);
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
 
 void verisocks_register_tf();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //VS_VPI_H
 //EOF

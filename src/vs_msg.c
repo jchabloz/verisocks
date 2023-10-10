@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2022-08-22
  * @note Only UTF-8 text encoding is supported for now.
- * 
+ *
  */
 
 #include <stdint.h>
@@ -22,7 +22,7 @@ This constant array of strings defines the values to be used for the
 content-type field of the header depending on the type numerical index as
 defined in the header file vs_msg.h. Update to add types.
 ******************************************************************************/
-const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] = 
+const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] =
 {
     "text/plain",
     "application/json",
@@ -134,7 +134,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         goto error;
     };
     return p_header;
-    
+
     error:
     cJSON_Delete(p_header);
     return NULL;
@@ -190,7 +190,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
     /* The full size for the message is the sum of the header and message
     lengths + 2 (2 bytes for the pre-header */
     size_t alloc_size = header_length + msg_info.len + 2;
-    char *result = malloc(alloc_size);
+    char *result = (char*) malloc(alloc_size);
 
     vs_log_mod_debug("vs_msg",
         "Allocated %d bytes in virtual memory for the formatted message",
@@ -230,8 +230,13 @@ char* vs_msg_create_json_message_from_string(const char *str_message)
     }
 
     /* If valid, pass the created object to the existing function */
+    #ifndef __cplusplus
     char *str_msg = vs_msg_create_message(p_obj_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    char *str_msg = vs_msg_create_message(p_obj_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
 
     /* Clean up */
     cJSON_Delete(p_obj_msg);
@@ -265,7 +270,7 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
 
     /* Get the JSON header as a proper, null-terminated string from the message
     */
-    char *str_header = malloc(header_length + 1);
+    char *str_header = (char*) malloc(header_length + 1);
     if (NULL == str_header) {
         vs_log_mod_perror("vs_msg",
             "ERROR [vs_msg]: malloc could not allocate memory!");
@@ -332,9 +337,9 @@ char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
     /* Get back message content. Could be either text or binary */
     char *str_msg;
     if (VS_MSG_TXT == p_msg_info->type || VS_MSG_TXT_JSON == p_msg_info->type) {
-        str_msg = malloc(p_msg_info->len + 1);
+        str_msg = (char*) malloc(p_msg_info->len + 1);
     } else {
-        str_msg = malloc(p_msg_info->len);
+        str_msg = (char*) malloc(p_msg_info->len);
     }
     if (NULL == str_msg) {
         vs_log_mod_perror("vs_msg", "Failed to allocated virtual memory");
@@ -369,7 +374,7 @@ cJSON* vs_msg_read_json(const char* message)
             "Header not consistent with JSON content type");
         free(str_msg);
         return NULL;
-    } 
+    }
     vs_log_mod_debug("vs_msg", "Message content: %s", str_msg);
 
     /* Parse the message string and return the JSON object if valid */
@@ -418,7 +423,7 @@ int vs_msg_write(int fd, const char *str_msg)
  *****************************************************************************/
 /**
  * @brief Helper function - Reads n bytes from descriptor to buffer
- * 
+ *
  * @param fd I/O descriptor to be read from
  * @param len Number of bytes to be read
  * @param buffer Pointer to read buffer

@@ -13,6 +13,10 @@
 #include "vpi_config.h"
 #include "cJSON.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Enum state
  */
@@ -111,6 +115,10 @@ cmd_handler_t vs_vpi_get_cmd_handler(
 
 extern const vs_vpi_cmd_t vs_vpi_cmd_get_table[];
 extern const vs_vpi_cmd_t vs_vpi_cmd_run_table[];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //VS_VPI_H
 //EOF

@@ -1,12 +1,12 @@
 /**************************************************************************//**
  * @file vs_vpi.c
  * @author jchabloz
- * @brief Verisocks VPI functions 
+ * @brief Verisocks VPI functions
  * @version 0.1
  * @date 2022-08-27
- * 
+ *
  * @copyright Copyright (c) Jérémie Chabloz, 2022
- * 
+ *
  *****************************************************************************/
 
 #include <stdlib.h>
@@ -78,6 +78,10 @@ cmd_handler_t vs_vpi_get_cmd_handler(
 
 int vs_vpi_process_command(vs_vpi_data_t *p_data)
 {
+    cmd_handler_t cmd_handler;
+    char *str_cmd;
+    cJSON *p_item_cmd;
+
     /* Sanity check on parameters */
     if (NULL == p_data) {
         vs_vpi_log_error("NULL pointer to data");
@@ -89,14 +93,14 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
     }
 
     /* Get the command field from the JSON message content */
-    cJSON *p_item_cmd = cJSON_GetObjectItem(p_data->p_cmd, "command");
+    p_item_cmd = cJSON_GetObjectItem(p_data->p_cmd, "command");
     if (NULL == p_item_cmd) {
         vs_vpi_log_error("Command field invalid/not found");
         goto warning;
     }
 
     /* Get the command as a string */
-    char *str_cmd = cJSON_GetStringValue(p_item_cmd);
+    str_cmd = cJSON_GetStringValue(p_item_cmd);
     if (NULL == str_cmd) {
         vs_vpi_log_error("Command field NULL pointer");
         goto warning;
@@ -108,7 +112,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
     vs_vpi_log_debug("Processing command %s", str_cmd);
 
     /* Look up command handler */
-    cmd_handler_t cmd_handler =
+    cmd_handler =
         vs_vpi_get_cmd_handler(vs_vpi_cmd_table, str_cmd);
     if (NULL == cmd_handler) {
         vs_vpi_log_error("Command handler not found for command %s",
@@ -158,8 +162,13 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
         goto error;
     }
 
+    #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -187,6 +196,7 @@ Info command handler
 ******************************************************************************/
 VS_VPI_CMD_HANDLER(info)
 {
+    char *str_val;
     vs_vpi_log_info("Command \"info\" received.");
 
     /* Get the value from the JSON message content */
@@ -197,7 +207,7 @@ VS_VPI_CMD_HANDLER(info)
     }
 
     /* Get the info command argument as a string */
-    char *str_val = cJSON_GetStringValue(p_item_val);
+    str_val = cJSON_GetStringValue(p_item_val);
     if ((NULL == str_val) || (strcmp(str_val, "") == 0)) {
         vs_vpi_log_error("Command field \"value\" NULL or empty");
         goto error;
@@ -265,6 +275,9 @@ Run command handler
 ******************************************************************************/
 VS_VPI_CMD_HANDLER(run)
 {
+    char *str_cb;
+    cmd_handler_t cmd_handler;
+
     /* Get the callback type (cb) field from the JSON message content */
     cJSON *p_item_cb = cJSON_GetObjectItem(p_data->p_cmd, "cb");
     if (NULL == p_item_cb) {
@@ -272,15 +285,14 @@ VS_VPI_CMD_HANDLER(run)
         goto error;
     }
     /* Get the cb command argument as a string */
-    char *str_cb = cJSON_GetStringValue(p_item_cb);
+    str_cb = cJSON_GetStringValue(p_item_cb);
     if ((NULL == str_cb) || (strcmp(str_cb, "") == 0)) {
         vs_vpi_log_error("Command field \"cb\" NULL or empty");
         goto error;
     }
 
     /* Look up sub-command handler */
-    cmd_handler_t cmd_handler =
-        vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, str_cb);
+    cmd_handler = vs_vpi_get_cmd_handler(vs_vpi_cmd_run_table, str_cb);
     if (NULL == cmd_handler) {
         vs_vpi_log_error("Command handler not found for cb=%s", str_cb);
         goto error;
@@ -302,6 +314,9 @@ Get command handler
 ******************************************************************************/
 VS_VPI_CMD_HANDLER(get)
 {
+    char *str_sel;
+    cmd_handler_t cmd_handler;
+
     /* Get the value from the JSON message content */
     cJSON *p_item_sel = cJSON_GetObjectItem(p_data->p_cmd, "sel");
     if (NULL == p_item_sel) {
@@ -310,7 +325,7 @@ VS_VPI_CMD_HANDLER(get)
     }
 
     /* Get the info command argument as a string */
-    char *str_sel = cJSON_GetStringValue(p_item_sel);
+    str_sel = cJSON_GetStringValue(p_item_sel);
     if ((NULL == str_sel) || (strcmp(str_sel, "") == 0)) {
         vs_vpi_log_error("Command field \"sel\" NULL or empty");
         goto error;
@@ -318,8 +333,7 @@ VS_VPI_CMD_HANDLER(get)
     vs_vpi_log_info("Command \"get(sel=%s)\" received.", str_sel);
 
     /* Look up sub-command handler */
-    cmd_handler_t cmd_handler =
-        vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, str_sel);
+    cmd_handler = vs_vpi_get_cmd_handler(vs_vpi_cmd_get_table, str_sel);
     if (NULL == cmd_handler) {
         vs_vpi_log_error("Command handler not found for sel=%s", str_sel);
         goto error;
@@ -341,6 +355,8 @@ Set command handler
 ******************************************************************************/
 VS_VPI_CMD_HANDLER(set)
 {
+    char *str_path;
+
     /* Get the object path from the JSON message content */
     cJSON *p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
     if (NULL == p_item_path) {
@@ -349,7 +365,7 @@ VS_VPI_CMD_HANDLER(set)
     }
 
     /* Get the info command argument as a string */
-    char *str_path = cJSON_GetStringValue(p_item_path);
+    str_path = cJSON_GetStringValue(p_item_path);
     if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
         vs_vpi_log_error("Command field \"path\" NULL or empty");
         goto error;

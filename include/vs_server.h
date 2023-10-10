@@ -12,6 +12,10 @@
 
 #include <sys/time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define VS_MAX_CONNECT_REQUEST 3
 
 /**
@@ -53,5 +57,9 @@ int vs_server_make_socket(uint16_t num_port);
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
 int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct timeval *timeout);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //VS_SERVER_H

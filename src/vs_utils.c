@@ -21,10 +21,6 @@
 #define PLI_UINT64 uint64_t
 #endif
 
-typedef struct s_vs_time_def {
-    int factor;
-    char *name;
-} vs_time_def_t;
 
 static const vs_time_def_t TIME_DEF_TABLE[] = {
     {0, "s"},
