@@ -236,7 +236,8 @@ class Verisocks:
         message = message_pre_header + message_header + content_bytes
         self._tx_buffer += message
         self._tx_msg_len.append(len(message))
-        logging.debug(f"Queuing message header: {repr(message_header)}")
+        logging.debug(f"Queuing message header (length {len(message_header)})\
+: {repr(message_header)}")
         logging.debug(f"Queuing message content: {repr(content_bytes)}")
 
     def read(self, num_trials=10, timeout=None):
