@@ -309,11 +309,16 @@ def test_set(vs):
 
 
 def test_read_not_expected(vs):
-    # No data expected
+    """Tests what happens when a read function is requested while there are no
+    messages expected.
+    """
     assert vs.read() is False
 
 
 def test_sim_finishes(vs):
+    """Tests the case where the Icarus simulation runs out before the specified
+    callback event occurs
+    """
     with pytest.raises(VerisocksError):
         _ = vs.run(cb="until_time", time=1200, time_unit="us")
 
