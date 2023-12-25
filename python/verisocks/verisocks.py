@@ -6,7 +6,16 @@ from enum import Enum, auto
 
 
 class VsRxState(Enum):
-    """Enumerated states"""
+    """Enumerated states for the RX state machine
+
+    Possible values are:
+
+        - ``RX_INIT``: Starting state
+        - ``RX_PRE_HDR``: RX message pre-header has been scanned
+        - ``RX_HDR``: RX message header has been scanned
+        - ``RX_DONE``: RX message content has been scanned
+        - ``ERROR``: Error state
+    """
     RX_INIT = auto()     # Starting state
     RX_PRE_HDR = auto()  # RX message pre-header scanned
     RX_HDR = auto()      # RX message header scanned
@@ -20,7 +29,19 @@ class VerisocksError(Exception):
 
 
 class Verisocks:
-    """Verisocks class
+    """Verisocks client class.
+
+    Args:
+        host (str): Server host IP address, default="127.0.0.1"
+        port (int): Server port number, default=5100
+        timeout (float): Socket timeout (base value),
+                            in seconds (default=120)
+
+    Note:
+        For certain methods, a specific timeout value can be passed as
+        argument. If a value (other than ``None``) is provided, the socket
+        timeout will be modified only temprorarily and then restored to the
+        timeout value provided as argument at the class instantiation.
     """
 
     PRE_HDR_LEN = 2  # Pre-header length in bytes
@@ -28,17 +49,6 @@ class Verisocks:
 
     def __init__(self, host="127.0.0.1", port=5100, timeout=120.0):
         """Verisocks class constructor
-
-        Args:
-            host (str): Server host IP address, default="127.0.0.1"
-            port (int): Server port number, default=5100
-            timeout (float): Socket timeout (base value),
-                             in seconds (default=120)
-
-        Note: For certain methods, a specific timeout value can be passed as
-        argument. If a value other than None is provided, the socket timeout
-        will temporarily be modified and restored to the timeout base value
-        defined here.
         """
         # Connection address and status
         self._connected = False
@@ -63,7 +73,9 @@ class Verisocks:
         self._tx_msg_len = []
 
     def connect(self):
-        """Connect to server socket
+        """Connect to server socket.
+
+        If the client is already connected to a server socket, nothing happens.
         """
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
@@ -74,7 +86,7 @@ class Verisocks:
             logging.info("Socket already connected")
 
     def _read(self, timeout=None):
-        """Reads from socket to RX buffer (private)
+        """Reads from socket to RX buffer (private).
 
         Args:
             timeout (float): Timeout in seconds (default=None). If None, the
@@ -134,7 +146,8 @@ class Verisocks:
         return json.dumps(obj, ensure_ascii=False).encode(encoding)
 
     def _read_pre_header(self):
-        """Parse RX buffer for pre-header value (private method)"""
+        """Parse RX buffer for pre-header value (private method).
+        """
         if (self._rx_state is not VsRxState.RX_INIT):
             raise ValueError("ERROR: Inconsistent state")
         if not (len(self._rx_buffer) >= self.PRE_HDR_LEN):
@@ -146,7 +159,8 @@ class Verisocks:
         self._rx_state = VsRxState.RX_PRE_HDR
 
     def _read_header(self):
-        """Parse RX buffer for header (private method)"""
+        """Parse RX buffer for header (private method).
+        """
         if (self._rx_state is not VsRxState.RX_PRE_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
         header_len = self._rx_header_len
@@ -168,7 +182,8 @@ class Verisocks:
         self._rx_state = VsRxState.RX_HDR
 
     def _read_content(self):
-        """Parse RX buffer for content (private method)"""
+        """Parse RX buffer for content (private method).
+        """
         if (self._rx_state is not VsRxState.RX_HDR):
             raise RuntimeError("ERROR: Inconsistent state")
         content_len = self.rx_header["content-length"]
@@ -192,12 +207,13 @@ class Verisocks:
         self._rx_state = VsRxState.RX_DONE
 
     def queue_message(self, request):
-        """Create message and add it to the TX queue buffer
+        """Create message and add it to the TX queue buffer.
 
         Args:
-            request (dict): Dictionary with the following keys: "content",
-            "type" and "encoding" (unless "type" is "application/octet-stream,
-            in which case the encoding is not applicable).
+            request (dict): Dictionary with the following keys: ``"content"``,
+                ``"type"`` and ``"encoding"`` (unless ``"type"`` is
+                ``"application/octet-stream"``, in which case the encoding is
+                not applicable).
         """
         content = request["content"]
         content_type = request["type"]
@@ -241,15 +257,15 @@ class Verisocks:
         logging.debug(f"Queuing message content: {repr(content_bytes)}")
 
     def read(self, num_trials=10, timeout=None):
-        """Proceed to read and scan returned message
+        """Proceed to read and scan returned TCP messages
 
         Args:
             num_trials (int): Maximum number of trials. Default=10.
             timeout (float): Timeout in seconds (default=None). If None, the
-            base value as defined within the class constructor applies.
+                base value as defined within the class constructor applies.
 
         Returns:
-            status (bool): True if successful, False if error.
+            bool: Status. ``True`` if successful, ``False`` if error.
         """
         if self._rx_expected:
             if not self._connected:
@@ -284,7 +300,7 @@ Still {self._rx_expected} messages expected.")
 
         Args:
             all (bool): If True (default), sends all queued message. Otherwise,
-            it only sends the oldest queued message in the buffer.
+                it only sends the oldest queued message in the buffer.
         """
         if self._tx_buffer:  # Check that the TX buffer is not empty
             if not self._connected:
@@ -305,12 +321,13 @@ Use queue_message().")
 
         Args:
             **cmd: command content defined as keyword arguments (e.g.
-            cmd="get", sel="sim_info"). If 'timeout' is provided as a keyword
-            argument, it is used as the socket timeout configuration value in
-            seconds for the duration of the sent command execution.
+                ``cmd="get"``, ``sel="sim_info"``). If ``timeout`` is provided
+                as a keyword argument, it is used as the socket timeout
+                configuration value in seconds for the duration of the sent
+                command execution.
 
         Returns:
-            (JSON object): Content of returned message.
+            JSON object: Content of returned message.
         """
 
         if "timeout" in cmd:
@@ -333,88 +350,110 @@ Use queue_message().")
             return None
 
     def send_cmd(self, command, **kwargs):
-        """Sends a command. Equivalent to send(command=command, ...).
+        """Sends a command. Equivalent to :code:`send(command=command, ...)`.
 
         Args:
-            command (str): Command name (e.g. "get")
-            **kwargs: Command keyword arguments (e.g. sel="sim_info")
+            command (str): Command name (e.g. ``"get"``)
+            **kwargs: Command keyword arguments (e.g. ``sel="sim_info"``)
 
         Returns:
-            (JSON object): Content of returned message
+            JSON object: Content of returned message
         """
         return self.send(command=command, **kwargs)
 
     def run(self, cb, **kwargs):
-        """Sends a "run" command request to the Verisocks server. Equivalent to
-        send_cmd("run", cb=cb, ...). This command gives the focus back to the
-        simulator and lets it run until the specified callback condition is met
-        (see arguments).
+        """Sends a "run" command request to the Verisocks server.
+
+        Equivalent to :code:`send_cmd("run", cb=cb, ...)`. This command gives
+        the focus back to the simulator and lets it run until the specified
+        callback condition is met (see arguments).
 
         Args:
-            * cb (str): Callback type. Can be either:
-                * "for_time": run for a given amount of time
-                * "until_time": run until a specified time
-                * "until_change": run until a specific value changes
-                * "to_next": run until the beginning of the next time step
-            * If cb is "for_time" or "until_time", the following keyword
-            arguments are further expected:
-                * time (float): Time value
-                * time_unit (str): Time unit (s, ms, us, ns, ps or fs). Be
-                  aware that depending on the simulator time resolution, the
-                  provided time value may be truncated.
-            * If cb is "until_change", the following keyword argument(s) are
-              further expected:
-                * path (str): Path to verilog object used for the callback
-                * value (number): Condition on the verilog object's value for
-                  the callback to be executed. This argument is not required if
-                  the path corresponds to a named event.
-            * if cb is "to_next", no further keyword argument is required.
+            cb (str): Callback type.
 
         Returns:
-            (JSON object): Content of returned message
+            JSON object: Content of returned message
+
+        Note:
+            The parameter `cb` can be either:
+
+                * ``"for_time"``: run for a given amount of time
+                * ``"until_time"``: run until a specified time
+                * ``"until_change"``: run until a specific value changes
+                * ``"to_next"``: run until the beginning of the next time step
+
+            If `cb` is ``"for_time"`` or ``"until_time"``, the following
+            keyword arguments are further expected:
+
+            * **time** (float): Time value
+            * **time_unit** (str): Time unit (s, ms, us, ns, ps or fs). Be
+              aware that depending on the simulator time resolution, the
+              provided time value may be truncated.
+
+            If `cb` is ``"until_change"``, the following keyword argument(s)
+            are further expected:
+
+                * **path** (str): Path to verilog object used for the callback
+                * **value** (number): Condition on the verilog object's
+                  value for the callback to be executed. This argument is not
+                  required if the path corresponds to a named event.
+
+            If `cb` is ``"to_next"``, no further keyword argument is required.
         """
+
         return self.send(command="run", cb=cb, **kwargs)
 
     def set(self, path, **kwargs):
-        """Sends a "set" command request to the Verisocks server. Equivalent to
-        send_cmd("set", ...). This commands sets the value of a verilog object.
+        """Sends a "set" command request to the Verisocks server.
+
+        Equivalent to :code:`send_cmd("set", path=path, **kwargs)`. This
+        commands sets the value of a verilog object as defined by its path.
 
         Args:
-            * path (str): Path to the verilog object.
-            * value: Value to be set. If the path corresponds to a verilog
-              named event, this argument is not required. If the path
-              corresponds to a verilog memory array, this argument needs to be
-              provided as a list of the same length.
+            path (str): Path to the verilog object.
+
+        Keyword Arguments:
+            value (int, list): Value to be set. If the path corresponds to a
+                verilog named event, this argument is not required. If the path
+                corresponds to a verilog memory array, this argument needs to
+                be provided as a list of the same length.
 
         Returns:
-            (JSON object): Content of returned message
+            JSON object: Content of returned message
         """
         return self.send(command="set", path=path, **kwargs)
 
-    def get(self, sel, **kwargs):
-        """Sends a "get" command request to the Verisocks server.
-        Equivalent ot send_cmd("get", ...). This commands can be used to obtain
-        different pieces of information from the Verisocks server.
+    def get(self, sel, path=""):
+        """Sends a :code:`"get"` command request to the Verisocks server.
+
+        Equivalent to :code:`send_cmd("get", ...)`. This commands can be
+        used to obtain different pieces of information from the Verisocks
+        server.
 
         Args:
-            * sel (str): Selects which is the returned information. Can be
-              either of the following:
-                * "sim_info": Gets the simulator information, returned with the
-                  keywords "product" and "version".
-                * "sim_time": Gets the simulator current time, returned with
-                  the keywords "time", in seconds.
-                * "value": Gets the value for a verilog object.
-                * "type": Gets the VPI type value for a verilog object.
-            * path (str): If sel is "value" or "type", path to the desired
-              verilog object for which the value or type is to be returned.
+            sel (str): Selects which is the returned information.
+            path (str): If `sel` is ``"value"`` or ``"type"``, path to the
+                desired verilog object for which the value or type is to be
+                returned.
+
+        Note:
+            The argument `sel` can take the following values:
+
+            * ``"sim_info"``: Gets the simulator information,
+              returned with the keywords :code:`"product"` and
+              :code:`"version"`.
+            * ``"sim_time"``: Gets the simulator current time, returned
+              with the keywords :code:`"time"`, in seconds.
+            * ``"value"``: Gets the value for a verilog object.
+            * ``"type"``: Gets the VPI type value for a verilog object.
 
         Returns:
-            (JSON object): Content of returned message
+            JSON object: Content of returned message
         """
-        return self.send(command="get", sel=sel, **kwargs)
+        return self.send(command="get", sel=sel, path=path)
 
     def finish(self, timeout=None):
-        """Sends a "finish" command to the Verisocks server that terminates
+        """Sends a ``"finish"`` command to the Verisocks server that terminates
         the simulation (and therefore also closes the Verisocks server itself).
         The connection is closed as well by the function as a clean-up.
         """
@@ -423,14 +462,20 @@ Use queue_message().")
         return retval
 
     def stop(self, timeout=None):
-        """Sends a "stop" command to the Verisocks server that stops
-        the simulation. The Verisocks server socket is not closed, but the
-        simulation has to be restarted for any new request to be processed.
+        """Sends a ``"stop"`` command to the Verisocks server.
+
+        The ``"stop"`` command stops the simulation. The Verisocks server
+        socket is not closed, but the simulation has to be restarted for any
+        new request to be processed.
+
+        Args:
+            timeout (int, None): Timeout in seconds to apply for the execution
+                of the command.
         """
         return self.send(command="stop", timeout=timeout)
 
     def exit(self):
-        """Sends an "exit" command to the Verisocks server that gives back
+        """Sends an ``"exit"`` command to the Verisocks server that gives back
         control to the simulator and closes the Verisocks server socket. The
         simulation runs to its end without having the possibility to take the
         control back from the simulator anymore. The connection is closed
@@ -440,7 +485,7 @@ Use queue_message().")
         return retval
 
     def close(self):
-        """Close socket connection if still open"""
+        """Close socket connection if still open."""
         if self._connected:
             logging.info("Closing socket connection")
             self.sock.close()
@@ -448,7 +493,7 @@ Use queue_message().")
             self._connected = False
 
     def flush(self):
-        """Flush RX and TX buffers"""
+        """Flush RX and TX buffers."""
         logging.debug("Flushing RX and TX buffers")
         self._rx_buffer = b""
         self._tx_buffer = b""
