@@ -206,7 +206,7 @@ class Verisocks:
             raise ValueError("Value for 'content-type' not recognized")
         self._rx_state = VsRxState.RX_DONE
 
-    def queue_message(self, request):
+    def _queue_message(self, request):
         """Create message and add it to the TX queue buffer.
 
         Args:
@@ -313,8 +313,7 @@ Still {self._rx_expected} messages expected.")
                 self._write(self._tx_msg_len.pop(0))
                 self._rx_expected += 1
         else:
-            logging.warning("TX buffer is empty. No message to transmit. \
-Use queue_message().")
+            logging.warning("TX buffer is empty. No message to transmit.")
 
     def send(self, **cmd):
         """Sends a message with a JSON content.
@@ -335,7 +334,7 @@ Use queue_message().")
         else:
             timeout = None
 
-        self.queue_message({
+        self._queue_message({
             "type": "application/json",
             "encoding": "utf-8",
             "content": cmd
