@@ -20,7 +20,9 @@
   installation path for `vpi_user.h`
 * [ ] Create a few examples (WIP)
 * [ ] Documentation
-* [ ] Attempt to compile Verisocks and run it with Cadence Xcelium
+* [ ] Attempt to compile Verisocks and run it with Cadence Xcelium (WIP)
 * [ ] Add support for callbacks on multiple events/value changes in // and also
   for the possibility to keep the callback enabled after it has triggered.
 * [ ] Port for usage with Verilator. This won't be such an easy feat...
+* [ ] Add a `"context"` field to the JSON message which is sent by
+  `vs_vpi_return()` function.
