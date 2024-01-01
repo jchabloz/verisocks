@@ -376,10 +376,10 @@ Still {self._rx_expected} messages expected.")
         Note:
             The parameter `cb` can be either:
 
-                * ``"for_time"``: run for a given amount of time
-                * ``"until_time"``: run until a specified time
-                * ``"until_change"``: run until a specific value changes
-                * ``"to_next"``: run until the beginning of the next time step
+            * ``"for_time"``: run for a given amount of time
+            * ``"until_time"``: run until a specified time
+            * ``"until_change"``: run until a specific value changes
+            * ``"to_next"``: run until the beginning of the next time step
 
             If `cb` is ``"for_time"`` or ``"until_time"``, the following
             keyword arguments are further expected:
@@ -392,10 +392,10 @@ Still {self._rx_expected} messages expected.")
             If `cb` is ``"until_change"``, the following keyword argument(s)
             are further expected:
 
-                * **path** (str): Path to verilog object used for the callback
-                * **value** (number): Condition on the verilog object's
-                  value for the callback to be executed. This argument is not
-                  required if the path corresponds to a named event.
+            * **path** (str): Path to verilog object used for the callback
+            * **value** (number): Condition on the verilog object's
+              value for the callback to be executed. This argument is not
+              required if the path corresponds to a named event.
 
             If `cb` is ``"to_next"``, no further keyword argument is required.
         """
