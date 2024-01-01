@@ -170,6 +170,40 @@ def test_get_value(vs):
         assert answer["type"] == "error"
 
 
+def test_get_type(vs):
+    """Tests Verisocks get(sel="type") function"""
+
+    # Get an integer parameter type
+    answer = vs.get("type", path="main.int_param")
+    assert answer["type"] == "result"
+    assert answer["vpi_type"] == 41  # vpiParameter (see vpi_user.h)
+
+    # Get a real parameter type
+    answer = vs.get(sel="type", path="main.fclk")
+    assert answer["type"] == "result"
+    assert answer["vpi_type"] == 41  # vpiParameter (see vpi_user.h)
+
+    # Get a reg type
+    answer = vs.get(sel="type", path="main.clk")
+    assert answer["type"] == "result"
+    assert answer["vpi_type"] == 48  # vpiReg (see vpi_user.h)
+
+    # Get a reg[] type
+    answer = vs.get(sel="type", path="main.count")
+    assert answer["type"] == "result"
+    assert answer["vpi_type"] == 48  # vpiReg (see vpi_user.h)
+
+    # Get a memory array type
+    answer = vs.get(sel="type", path="main.count_memory")
+    assert answer["type"] == "result"
+    assert answer["vpi_type"] == 29  # vpiMemory (see vpi_user.h)
+
+    # Error case: wrong path
+    with pytest.raises(VerisocksError):
+        answer = vs.get(sel="type", path="wrong_path")
+        assert answer["type"] == "error"
+
+
 def test_run_for_time(vs):
     """Tests Verisocks run(cb="for_time") function"""
 
