@@ -322,7 +322,7 @@ VS_VPI_CMD_HANDLER(get_type)
     }
 
     if (NULL == cJSON_AddNumberToObject(
-            p_msg, "type", vpi_get(vpiType, h_obj))) {
+            p_msg, "vpi_type", vpi_get(vpiType, h_obj))) {
         vs_log_mod_error("vs_vpi", "Could not add value to object");
         goto error;
     }
