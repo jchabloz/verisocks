@@ -12,4 +12,4 @@ version numbering system follows the `semantic versioning
 1.0.0 - 2024-mm-dd
 ******************
 
-* First official release
+* First released, working version
