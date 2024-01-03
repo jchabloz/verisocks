@@ -2,8 +2,7 @@ name: Build docs
 
 on:
   workflow_dispatch:
-
-  # push:
+  push:
   #  branches: ["main"]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
