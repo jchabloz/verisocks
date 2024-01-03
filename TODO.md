@@ -19,7 +19,7 @@
 * [x] Change makefile and source to cope with a different, more generic
   installation path for `vpi_user.h`
 * [ ] Create a few examples (WIP)
-* [ ] Documentation
+* [ ] Documentation (WIP)
 * [ ] Attempt to compile Verisocks and run it with Cadence Xcelium (WIP)
 * [ ] Add support for callbacks on multiple events/value changes in // and also
   for the possibility to keep the callback enabled after it has triggered.
