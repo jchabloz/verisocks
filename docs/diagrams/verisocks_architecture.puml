@@ -1,6 +1,6 @@
 @startuml verisocks_architecture
-title Verisocks architecture overview
-'footer "Copyright (c) Jérémie Chabloz - 2022"
+' title Verisocks architecture overview
+' footer "Copyright (c) Jérémie Chabloz - 2022"
 
 !include <tupadr3/font-awesome-5/server>
 !include <tupadr3/font-awesome-5/python>
@@ -31,7 +31,7 @@ frame "Icarus simulator" {
         [<$microchip>\nDUT] as dut
         rectangle {
             [User defined\nsystem task (PLI)\n""$verisocks_init()""] as task
-        }  
+        }
     }
 }
 
@@ -40,7 +40,7 @@ cfg_dut .up.> dut
 
 frame "Test framework" as client {
     [<$python>\nClient] as tcp_client
-    [<$robot>\nTCMS] as tcms
+    [<$robot>\nTest\nframework] as tcms
 }
 
 note bottom of tcms

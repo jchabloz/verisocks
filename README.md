@@ -94,7 +94,7 @@ python -m pytest
 The diagram in the figure below describes the high-level architecture for
 Verisocks.
 
-![Verisocks architecture diagram](docs/diagrams/out/verisocks_architecture.svg)
+![Verisocks architecture diagram](docs/_static/diagrams/verisocks_architecture.svg)
 
 The verilog testbench has to include a `$verilog_init()` statement, usually at
 the beginning of an `initial` statement (even though it can also be later).
