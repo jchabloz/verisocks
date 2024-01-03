@@ -1,0 +1,74 @@
+@startuml verisocks_exec_focus
+' footer "Copyright (c) Jérémie Chabloz - 2022"
+
+skinparam NoteBackgroundColor AliceBlue
+skinparam DefaultFontName Helvetica
+
+participant Client as cl
+participant Verisocks as vs
+participant Simulator as sim
+
+activate sim #IndianRed
+activate cl #LightGrey
+note over sim: Simulation start
+|||
+sim -> vs : ""$verisocks_init()""
+note left
+When the system task
+""$verisocks_init()"" is called
+for the first time, the focus is
+passed to the Verisocks PLI
+application.
+end note
+deactivate sim
+activate vs #IndianRed
+cl -> vs: Connection request
+cl <-- vs: Connection confirmed
+|||
+cl -> vs : TCP command
+note right
+When Verisocks has the execution
+focus, several commands can be
+requested from the TCP client.
+end note
+vs -> sim : VPI command/action
+vs <-- sim : VPI response
+cl <-- vs : TCP response
+...
+cl -> vs : TCP command """run"""
+note right
+When a """run""" command is
+executed, the focus shifts back to
+the simulator, which restarts the
+simulation.
+end note
+vs -> sim : VPI command """run"""
+deactivate vs
+activate sim #IndianRed
+|||
+...
+sim -> vs : Registered callback
+note left
+When the simulation reaches a
+pre-defined condition, the focus
+shifts back to Verisocks by mean
+of a callback function.
+end note
+deactivate sim
+activate vs #IndianRed
+cl <-- vs : TCP response
+|||
+cl -> vs : TCP command """exit"""
+note right
+An """exit""" Verisocks command
+relaxes the full control to the
+simulator, closes the TCP socket
+and exits Verisocks.
+end note
+vs -> sim : 
+destroy vs
+activate sim #IndianRed
+|||
+...
+|||
+@enduml
