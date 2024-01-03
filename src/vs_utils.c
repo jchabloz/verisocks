@@ -11,6 +11,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "vpi_config.h"
 #include "cJSON.h"
