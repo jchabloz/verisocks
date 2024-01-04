@@ -9,7 +9,7 @@ version numbering system follows the `semantic versioning
 <https://semver.org/>`_ principles.
 
 
-1.0.0 - 2024-mm-dd
+1.0.0 - 2024-01-04
 ******************
 
 * First released, working version
