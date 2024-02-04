@@ -30,21 +30,21 @@ def _format_path(cwd, path):
 
 
 def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
-              ivl_exec=None, ivl_args=[], vvp_exec=None, vvp_args=[],
-              capture_output=True):
+              vvp_logpath="vvp.log", ivl_exec=None, ivl_args=[], vvp_exec=None,
+              vvp_args=[], vvp_postargs=[], capture_output=True):
     """Set up Icarus simulation by elaborating the design with :code:`iverilog`
     and launching the simulation with :code:`vvp`.
 
     Args:
         cwd (str): Reference path to be used for all paths provided as relative
             paths. Default = "."
-        vpi_libpath (str): Path to the compiled Verisocks VPI library (absolute
-            path).
+        vpi_libpath (str): Path to the compiled Verisocks VPI library.
         src_files (str): Paths to all (verilog) source files to use for the
             simulation. All files have to be added as separate arguments.
         vvp_filepath (str): Path to the elaborated VVP file (iverilog output).
-            If None (default), the sim.vvp will be used. The path is relative
-            to the current directory.
+            If None (default), "sim.vvp" will be used.
+        vvp_logpath (str): Path to a simulation logfile. Default="vvp.log". If
+            None, no logfile shall be created.
         ivl_exec (str): Path to :code:`iverilog` executable (absolute path). If
             None (default), it is assumed to be defined in the system path.
         ivl_args (list(str)): Arguments to :code:`iverilog` executable.
@@ -52,8 +52,11 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         vvp_exec (str): Path to :code:`vvp` executable (absolute path). If None
             (default), it is assumed to be defined in the system path.
         vvp_args (list(str)): Arguments to :code:`vvp` executable. Default=[].
-        capture_output (bool): Defines if stdout and stderr output are
-            "captured" (i.e. not visible).
+        vvp_postargs (list(str)): (Post-)arguments to :code:`vvp` executable.
+            Default=[]. In order to dump waveforms to an FST file, this should
+            be configured as ["-fst"].
+        capture_output (bool): Defines if stdout and stderr output
+            are "captured" (i.e. not visible).
 
     Returns:
         subprocess.Popen
@@ -95,13 +98,16 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
     else:
         vvp_cmd = [shutil.which("vvp")]
 
+    if vvp_logpath:
+        vvp_cmd += ["-l" + _format_path(cwd, vvp_logpath)]
+
     vvp_cmd += [
-        "-lvvp.log",
         "-m", vpi_libpath,
         *vvp_args,
         vvp_outfile,
-        "-fst"
+        *vvp_postargs
     ]
+    print(vvp_cmd)
 
     if capture_output:
         pop = subprocess.Popen(
