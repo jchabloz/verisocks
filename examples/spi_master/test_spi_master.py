@@ -58,6 +58,7 @@ def setup_iverilog(vvp_name, *src_files):
         "-Wall",
         f"-DVS_NUM_PORT={PORT}",
         f"-DVS_TIMEOUT={VS_TIMEOUT}",
+        "-DDUMP_FILE=\"spi_master_tb.fst\"",
         *src_file_paths,
     ]
     subprocess.check_call(cmd)
