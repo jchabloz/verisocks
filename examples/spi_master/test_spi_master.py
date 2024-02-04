@@ -175,9 +175,13 @@ def test_spi_master_simple(vs):
 
 if __name__ == "__main__":
 
-    str_port = input("Port number: ")
-
-    with Verisocks(HOST, int(str_port)) as vs_cli:
+    setup_iverilog(
+        "spi_master_tb",
+        "spi_master.v",
+        "spi_slave.v",
+        "spi_master_tb.v"
+    )
+    with Verisocks(HOST, PORT) as vs_cli:
         vs_cli.connect()
         test_spi_master_simple(vs_cli)
         vs_cli.finish()
