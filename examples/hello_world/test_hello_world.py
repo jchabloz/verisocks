@@ -44,12 +44,12 @@ def vs():
 def test_hello_world(vs):
 
     assert vs._connected
-    answer = vs.send_cmd("get", sel="sim_info")
+    answer = vs.get("sim_info")
     assert answer['type'] == "result"
     print(f"Simulator: {answer['product']}")
     print(f"Version: {answer['version']}")
 
-    answer = vs.send_cmd("info", value="Hello World!")
+    answer = vs.info("Hello World!")
     assert answer['type'] == "ack"
 
 

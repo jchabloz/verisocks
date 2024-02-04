@@ -14,6 +14,9 @@ version numbering system follows the `semantic versioning
 
 * Added :py:mod:`verisocks.utils` Python utilitary functions, including
   documentation.
+* Added :py:meth:`Verisocks.info() <verisocks.verisocks.Verisocks.info>` method
+  as a shortcut to implement the TCP protocol :keyword:`info
+  <sec_tcp_cmd_info>` command.
 * Corrected *SPI master* example for standalone execution.
 * Added a minimalistic *Hello world* example, working both for standalone
   execution or with pytest.

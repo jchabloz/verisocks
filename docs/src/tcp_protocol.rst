@@ -149,6 +149,9 @@ arbitrary text is then printed out to the VPI standard output.
   * :json:`"type": "ack"` (acknowledgement)
   * :json:`"value": "command info received"`
 
+With the provided Python client reference implementation, the method
+:py:meth:`Verisocks.info() <verisocks.verisocks.Verisocks.info>`
+corresponds to this command.
 
 .. _sec_tcp_cmd_finish:
 
