@@ -66,3 +66,21 @@ def send_spi(vs, tx_buffer):
     rx_buffer = answer['value']
     return rx_buffer, counter
 ```
+
+## Running the example
+
+This example can be run by directly executing the Python file or by using
+[`pytest`](https://docs.pytest.org).
+
+### Standalone execution
+
+Simply run the test script:
+```sh
+python test_spi_master.py
+```
+
+### Using pytest
+
+If you already have it installed, simply run `pytest` from within the SPI
+master example directory or from a parent directory.
+Otherwise, follow [installation instruction](https://docs.pytest.org/en/latest/getting-started.html#install-pytest). 
