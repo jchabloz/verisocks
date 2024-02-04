@@ -361,7 +361,8 @@ Still {self._rx_expected} messages expected.")
         return self.send(command=command, **kwargs)
 
     def run(self, cb, **kwargs):
-        """Sends a "run" command request to the Verisocks server.
+        """Sends a :keyword:`run <sec_tcp_cmd_run>` command request to the
+        Verisocks server.
 
         Equivalent to :code:`send_cmd("run", cb=cb, ...)`. This command gives
         the focus back to the simulator and lets it run until the specified
@@ -403,7 +404,8 @@ Still {self._rx_expected} messages expected.")
         return self.send(command="run", cb=cb, **kwargs)
 
     def set(self, path, **kwargs):
-        """Sends a "set" command request to the Verisocks server.
+        """Sends a :keyword:`set <sec_tcp_cmd_set>` command request to the
+        Verisocks server.
 
         Equivalent to :code:`send_cmd("set", path=path, **kwargs)`. This
         commands sets the value of a verilog object as defined by its path.
@@ -422,8 +424,26 @@ Still {self._rx_expected} messages expected.")
         """
         return self.send(command="set", path=path, **kwargs)
 
+    def info(self, value):
+        """Sends an :keyword:`info <sec_tcp_cmd_info>` command to the Verisocks
+        server.
+
+        This is a shortcut function, which is equivalent to
+        :code:`send_cmd("info", ...)`. This command is used to send any text to
+        the Verisocks server, which will then be streamed out to the VPI
+        standard output.
+
+        Args:
+            value (str): Text to be sent to the VPI stdout
+
+        Returns:
+            JSON object: Content of returned message
+        """
+        return self.send(command="info", value=value)
+
     def get(self, sel, path=""):
-        """Sends a :code:`"get"` command request to the Verisocks server.
+        """Sends a :keyword:`get <sec_tcp_cmd_get>` command request to the
+        Verisocks server.
 
         Equivalent to :code:`send_cmd("get", ...)`. This commands can be
         used to obtain different pieces of information from the Verisocks
@@ -452,16 +472,18 @@ Still {self._rx_expected} messages expected.")
         return self.send(command="get", sel=sel, path=path)
 
     def finish(self, timeout=None):
-        """Sends a ``"finish"`` command to the Verisocks server that terminates
-        the simulation (and therefore also closes the Verisocks server itself).
-        The connection is closed as well by the function as a clean-up.
+        """Sends a :keyword:`finish <sec_tcp_cmd_finish>` command to the
+        Verisocks server that terminates the simulation (and therefore also
+        closes the Verisocks server itself). The connection is closed as well
+        by the function as a clean-up.
         """
         retval = self.send(command="finish", timeout=timeout)
         self.close()
         return retval
 
     def stop(self, timeout=None):
-        """Sends a ``"stop"`` command to the Verisocks server.
+        """Sends a :keyword:`stop <sec_tcp_cmd_stop>` command to the Verisocks
+        server.
 
         The ``"stop"`` command stops the simulation. The Verisocks server
         socket is not closed, but the simulation has to be restarted for any
@@ -474,11 +496,11 @@ Still {self._rx_expected} messages expected.")
         return self.send(command="stop", timeout=timeout)
 
     def exit(self):
-        """Sends an ``"exit"`` command to the Verisocks server that gives back
-        control to the simulator and closes the Verisocks server socket. The
-        simulation runs to its end without having the possibility to take the
-        control back from the simulator anymore. The connection is closed
-        as well by the function."""
+        """Sends an :keyword:`exit <sec_tcp_cmd_exit>` command to the Verisocks
+        server that gives back control to the simulator and closes the
+        Verisocks server socket. The simulation runs to its end without having
+        the possibility to take the control back from the simulator anymore.
+        The connection is closed as well by the function."""
         retval = self.send(command="exit")
         self.close()
         return retval
