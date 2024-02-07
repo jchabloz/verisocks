@@ -9,7 +9,7 @@
 project = 'Verisocks'
 copyright = '2023, Jérémie Chabloz'
 author = 'Jérémie Chabloz'
-version = '1.1.0-pre'
+version = '1.1.0'
 release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
