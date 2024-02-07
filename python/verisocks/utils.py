@@ -120,7 +120,6 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         vvp_outfile,
         *vvp_postargs
     ]
-    print(vvp_cmd)
 
     if capture_output:
         pop = subprocess.Popen(
