@@ -9,8 +9,8 @@ version numbering system follows the `semantic versioning
 <https://semver.org/>`_ principles.
 
 
-1.1.0 - Ongoing
-***************
+1.1.0 - 2024-02-07
+******************
 
 * Added :py:mod:`verisocks.utils` Python utilitary functions, including
   documentation.
