@@ -30,14 +30,15 @@ def _format_path(cwd, path):
 
 
 def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
-              vvp_logpath="vvp.log", ivl_exec=None, ivl_args=[], vvp_exec=None,
-              vvp_args=[], vvp_postargs=[], capture_output=True):
+              vvp_logpath="vvp.log", ivl_exec=None, ivl_args=None,
+              vvp_exec=None, vvp_args=None, vvp_postargs=None,
+              capture_output=True):
     """Set up Icarus simulation by elaborating the design with :code:`iverilog`
     and launching the simulation with :code:`vvp`.
 
     Args:
         cwd (str): Reference path to be used for all paths provided as relative
-            paths. Default = "."
+            paths.
         vpi_libpath (str): Path to the compiled Verisocks VPI library.
         src_files (str): Paths to all (verilog) source files to use for the
             simulation. All files have to be added as separate arguments.
@@ -47,14 +48,13 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
             None, no logfile shall be created.
         ivl_exec (str): Path to :code:`iverilog` executable (absolute path). If
             None (default), it is assumed to be defined in the system path.
-        ivl_args (list(str)): Arguments to :code:`iverilog` executable.
-            Default=[] (no extra arguments).
+        ivl_args (str, list(str)): Arguments to :code:`iverilog` executable.
         vvp_exec (str): Path to :code:`vvp` executable (absolute path). If None
             (default), it is assumed to be defined in the system path.
-        vvp_args (list(str)): Arguments to :code:`vvp` executable. Default=[].
-        vvp_postargs (list(str)): (Post-)arguments to :code:`vvp` executable.
-            Default=[]. In order to dump waveforms to an FST file, this should
-            be configured as ["-fst"].
+        vvp_args (list(str)): Arguments to :code:`vvp` executable.
+        vvp_postargs (str, list(str)): (Post-)arguments to :code:`vvp`
+            executable. In order to dump waveforms to an FST file, this should
+            be configured as "-fst".
         capture_output (bool): Defines if stdout and stderr output
             are "captured" (i.e. not visible).
 
@@ -84,6 +84,11 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
     else:
         ivl_cmd = [shutil.which("iverilog")]
 
+    if ivl_args is None:
+        ivl_args = []
+    elif isinstance(ivl_args, str):
+        ivl_args = [ivl_args]
+
     ivl_cmd += [
         "-o", vvp_outfile,
         "-Wall",
@@ -100,6 +105,14 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
 
     if vvp_logpath:
         vvp_cmd += ["-l" + _format_path(cwd, vvp_logpath)]
+    if vvp_args is None:
+        vvp_args = []
+    elif isinstance(vvp_args, str):
+        vvp_args = [vvp_args]
+    if vvp_postargs is None:
+        vvp_postargs = []
+    elif isinstance(vvp_postargs, str):
+        vvp_postargs = [vvp_postargs]
 
     vvp_cmd += [
         "-m", vpi_libpath,
