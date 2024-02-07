@@ -111,6 +111,12 @@ def test_connect_error():
     vs.close()
 
 
+def test_info(vs):
+    """Tests the info command"""
+    answer = vs.info("This is a test")
+    assert answer["type"] == "ack"
+
+
 def test_get_sim_info(vs):
     answer = vs.get("sim_info")
     assert answer["type"] == "result"

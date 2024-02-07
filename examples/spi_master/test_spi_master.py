@@ -1,18 +1,11 @@
 from verisocks.verisocks import Verisocks
-import subprocess
+from verisocks.utils import setup_sim, find_free_port
 import os.path
 import time
-import shutil
 import logging
 import pytest
 import socket
 import random
-
-
-def find_free_port():
-    with socket.socket() as s:
-        s.bind(('', 0))
-        return s.getsockname()[1]
 
 
 # Parameters
@@ -21,61 +14,22 @@ PORT = find_free_port()
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 CONNECT_DELAY = 0.01
 VS_TIMEOUT = 10
+SRC = ["spi_master.v", "spi_slave.v", "spi_master_tb.v"]
 
 
-def get_abspath(relpath):
-    """Builds an absolute path from a path which is relative to the current
-    file
-
-    Args:
-        * relpath (str): Relative path
-
-    Returns:
-        * abspath (str): Absolute path
-    """
-    return os.path.join(os.path.dirname(__file__), relpath)
-
-
-def setup_iverilog(vvp_name, *src_files):
-    """Elaborate and run the verilog testbench file provided as an argument
-
-    Args:
-        * src_file (str): Path to source file
-
-    Returns:
-        * pop: Popen instance for spawned process
-    """
-    src_file_paths = []
-    for src_file in src_files:
-        src_file_path = get_abspath(src_file)
-        if not os.path.isfile(src_file_path):
-            raise FileNotFoundError
-        src_file_paths.append(src_file_path)
-    vvp_file_path = get_abspath(vvp_name)
-    cmd = [
-        shutil.which("iverilog"),
-        "-o", vvp_file_path,
-        "-Wall",
-        f"-DVS_NUM_PORT={PORT}",
-        f"-DVS_TIMEOUT={VS_TIMEOUT}",
-        *src_file_paths,
-    ]
-    subprocess.check_call(cmd)
-    libvpi_path = get_abspath(LIBVPI)
-    cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path,
-           vvp_file_path, "-fst"]
-    pop = subprocess.Popen(
-        cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+def setup_test():
+    setup_sim(
+        LIBVPI,
+        *SRC,
+        cwd=os.path.dirname(__file__),
+        vvp_filepath="spi_master_tb",
+        ivl_args=[
+            f"-DVS_NUM_PORT={PORT}",
+            f"-DVS_TIMEOUT={VS_TIMEOUT}",
+            "-DDUMP_FILE=\"spi_master_tb.fst\""
+        ]
     )
-    print(f"Launched Icarus with PID {pop.pid}")
-
-    # Some delay is required for Icarus to launch the Verisocks server before
-    # being able to connect - Please adjust CONNECT_DELAY if required.
     time.sleep(CONNECT_DELAY)
-
-    return pop
 
 
 def send_spi(vs, tx_buffer):
@@ -128,10 +82,7 @@ def send_spi(vs, tx_buffer):
 @pytest.fixture
 def vs():
     # Set up Icarus simulation and launch it as a separate process
-    pop = setup_iverilog("spi_master_tb",
-                         "spi_master.v",
-                         "spi_slave.v",
-                         "spi_master_tb.v")
+    setup_test()
     _vs = Verisocks(HOST, PORT)
     _vs.connect()
     yield _vs
@@ -141,7 +92,6 @@ def vs():
     except ConnectionError:
         logging.warning("Connection error - Finish command not possible")
     _vs.close()
-    pop.communicate(timeout=10)
 
 
 def get_random_tx_buffer():
@@ -175,9 +125,6 @@ def test_spi_master_simple(vs):
 
 if __name__ == "__main__":
 
-    str_port = input("Port number: ")
-
-    with Verisocks(HOST, int(str_port)) as vs_cli:
-        vs_cli.connect()
+    setup_test()
+    with Verisocks(HOST, PORT) as vs_cli:
         test_spi_master_simple(vs_cli)
-        vs_cli.finish()

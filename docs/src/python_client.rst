@@ -42,3 +42,13 @@ Python client API documentation
 .. automodule:: verisocks.verisocks
     :members:
 
+
+Miscellaneous utilitaries
+*************************
+
+The module :py:mod:`verisocks.utils` is a collection of miscellaneous
+utilitaries and helper functions to ease setting up simulations using
+Verisocks.
+
+.. automodule:: verisocks.utils
+    :members:
