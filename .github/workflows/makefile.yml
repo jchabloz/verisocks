@@ -12,7 +12,7 @@ jobs:
     name: Builds VPI library
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: true
     - name: Install dependencies
@@ -24,12 +24,12 @@ jobs:
     - name: Build and run cunit test
       run: cd test;make;cd ..
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libvpi
         path: build/verisocks.vpi
     - name: Archive cunit test artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cunit-test-results
         path: |
@@ -43,9 +43,9 @@ jobs:
     name: Run pytest
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.7"
     - name: Install dependencies
@@ -55,7 +55,7 @@ jobs:
         pip install -e ./python
         pip install pytest pytest-cov
     - name: Download build artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libvpi
     - name: Check verisocks.vpi
@@ -67,7 +67,7 @@ jobs:
       run: pytest -x --log-cli-level=INFO --cov=verisocks
     - name: Archive test logs
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-logs
         path: |
