@@ -1,0 +1,32 @@
+name: Test building docs
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+    paths:
+      - 'docs/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build documentation
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ./python
+        pip install sphinx sphinx-rtd-theme myst-parser
+    - name: Render
+      run: |
+        sphinx-build -M html ./docs ./docs/_build
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "./docs/_build/html"
