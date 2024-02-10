@@ -318,12 +318,13 @@ Still {self._rx_expected} messages expected.")
     def send(self, **cmd):
         """Sends a message with a JSON content.
 
-        Args:
-            **cmd: command content defined as keyword arguments (e.g.
-                ``cmd="get"``, ``sel="sim_info"``). If ``timeout`` is provided
-                as a keyword argument, it is used as the socket timeout
-                configuration value in seconds for the duration of the sent
-                command execution.
+        This command will accept and use any command content defined as keyword
+        arguments (e.g. ``cmd="get"``, ``sel="sim_info"``). This content will
+        directly be used as the sent TCP command content.
+
+        Keyword Arguments:
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
 
         Returns:
             JSON object: Content of returned message.
@@ -355,6 +356,10 @@ Still {self._rx_expected} messages expected.")
             command (str): Command name (e.g. ``"get"``)
             **kwargs: Command keyword arguments (e.g. ``sel="sim_info"``)
 
+        Keyword Arguments:
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
         Returns:
             JSON object: Content of returned message
         """
@@ -370,6 +375,10 @@ Still {self._rx_expected} messages expected.")
 
         Args:
             cb (str): Callback type.
+
+        Keyword Arguments:
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
 
         Returns:
             JSON object: Content of returned message
@@ -418,6 +427,8 @@ Still {self._rx_expected} messages expected.")
                 verilog named event, this argument is not required. If the path
                 corresponds to a verilog memory array, this argument needs to
                 be provided as a list of the same length.
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
 
         Returns:
             JSON object: Content of returned message
