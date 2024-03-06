@@ -87,8 +87,8 @@ class Verisocks:
             delay (float): Delay to be applied prior each connection trial
 
         Raises:
-            ConnectionError if all the successive connection trials are
-            unsucessful
+            ConnectionError: All the successive connection trials have been
+                unsucessful
         """
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
@@ -116,8 +116,8 @@ class Verisocks:
             base value as defined within the class constructor applies.
 
         Raises:
-            ConnectionError if no data is received (most likely the socket is
-            closed).
+            ConnectionError: no data is received (most likely the socket is
+                closed).
         """
         if timeout:
             self.sock.settimeout(timeout)
@@ -136,8 +136,8 @@ class Verisocks:
             num_bytes (int): Number of bytes to send
 
         Raises:
-            ConnectionError if no data is written (most likely the socket is
-            closed).
+            ConnectionError: no data is written (most likely the socket is
+                closed).
         """
         sent = 0
         trials = 0
