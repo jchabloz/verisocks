@@ -1,7 +1,6 @@
 from verisocks.verisocks import Verisocks, VerisocksError
 import subprocess
 import os.path
-import time
 import shutil
 import pytest
 import logging
@@ -17,7 +16,6 @@ import socket
 # Parameters
 HOST = socket.gethostbyname("localhost")
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
-CONNECT_DELAY = 0.1
 VS_TIMEOUT = 2
 
 
@@ -81,10 +79,6 @@ def setup_iverilog(port, src_file):
     pop = subprocess.Popen(
         cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print(f"Launched Icarus with PID {pop.pid}")
-    # Some delay is required for Icarus to launch the Verisocks server before
-    # being able to connect - Please adjust CONNECT_DELAY if required.
-
-    time.sleep(CONNECT_DELAY)
     return pop
 
 
@@ -105,9 +99,9 @@ def test_already_connected(vs, caplog):
 def test_connect_error():
     """Tests trying to connect to a non-running server"""
     port = find_free_port()
-    with pytest.raises(ConnectionRefusedError):
+    with pytest.raises(ConnectionError):
         vs = Verisocks(HOST, port)
-        vs.connect()
+        vs.connect(trials=1)
     vs.close()
 
 

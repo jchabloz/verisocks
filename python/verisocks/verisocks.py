@@ -3,6 +3,7 @@ import logging
 import struct
 import json
 from enum import Enum, auto
+from time import sleep
 
 
 class VsRxState(Enum):
@@ -72,16 +73,38 @@ class Verisocks:
         self._tx_buffer = b""
         self._tx_msg_len = []
 
-    def connect(self):
+    def connect(self, trials=10, delay=0.05):
         """Connect to server socket.
 
         If the client is already connected to a server socket, nothing happens.
+        Otherwise, the client attempts to connect to the server as defined by
+        the address and port provided to the class constructor. The method will
+        apply a delay prior each connection trial and will retry a number of
+        times if unsuccessful.
+
+        Args:
+            trials (int): Maximum number of connection trials
+            delay (float): Delay to be applied prior each connection trial
+
+        Raises:
+            ConnectionError if all the successive connection trials are
+            unsucessful
         """
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
-            self.sock.connect(self.address)
-            logging.info("Socket connected")
-            self._connected = True
+            trial = 0
+            while trial < trials:
+                try:
+                    sleep(delay)
+                    self.sock.connect(self.address)
+                    logging.info(f"Socket connected after {trial + 1} trials")
+                    self._connected = True
+                    break
+                except ConnectionError:
+                    trial += 1
+            if trial >= trials:
+                raise ConnectionError(
+                    f"Connection unsucessful after {trial} trials")
         else:
             logging.info("Socket already connected")
 
