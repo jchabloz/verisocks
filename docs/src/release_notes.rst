@@ -8,6 +8,14 @@ Releases of documentation and code are using the same version numbers. The
 version numbering system follows the `semantic versioning
 <https://semver.org/>`_ principles.
 
+1.1.1 - Ongoing
+***************
+
+* Modified :py:meth:`Verisocks.connect()
+  <verisocks.verisocks.Verisocks.connect>` method to include multiple, delayed
+  connection trials. Examples and test have been simplified accordingly.
+* Added correct management of system call interrupts while waiting on client
+  connection in the server code.
 
 1.1.0 - 2024-02-07
 ******************
