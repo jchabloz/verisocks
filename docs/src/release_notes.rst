@@ -11,11 +11,15 @@ version numbering system follows the `semantic versioning
 1.1.1 - Ongoing
 ***************
 
-* Modified :py:meth:`Verisocks.connect()
-  <verisocks.verisocks.Verisocks.connect>` method to include multiple, delayed
-  connection trials. Examples and test have been simplified accordingly.
+* Modified :py:class:`Verisocks<verisocks.verisocks.Verisocks>` constructor and
+  :py:meth:`Verisocks.connect() <verisocks.verisocks.Verisocks.connect>` method
+  to include arguments for multiple, delayed connection trials. Examples and
+  test have been simplified accordingly.
 * Added correct management of system call interrupts while waiting on client
-  connection in the server code.
+  connection in the server code (see
+  https://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html
+  for details).
+* Added section :ref:`sec_alternative_simulators`.
 
 1.1.0 - 2024-02-07
 ******************
