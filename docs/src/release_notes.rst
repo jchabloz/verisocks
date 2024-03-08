@@ -8,7 +8,7 @@ Releases of documentation and code are using the same version numbers. The
 version numbering system follows the `semantic versioning
 <https://semver.org/>`_ principles.
 
-1.1.1 - Ongoing
+1.2.0 - Ongoing
 ***************
 
 * Modified :py:class:`Verisocks<verisocks.verisocks.Verisocks>` constructor and
