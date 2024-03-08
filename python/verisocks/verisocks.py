@@ -37,6 +37,16 @@ class Verisocks:
         port (int): Server port number, default=5100
         timeout (float): Socket timeout (base value),
                             in seconds (default=120)
+        connect_trials (int): Number of consecutive connections to be attempted
+            when the method
+            :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
+            being used. This value can be overriden by the method's own
+            ``trials`` argument.
+        connect_delay (float): Delay to be applied before attempting a new
+            connection trial when the method
+            :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
+            being used. This value can be overriden by the method's own
+            ``delay`` argument.
 
     Note:
         For certain methods, a specific timeout value can be passed as
@@ -48,7 +58,8 @@ class Verisocks:
     PRE_HDR_LEN = 2  # Pre-header length in bytes
     READ_BUFFER_LEN = 4096
 
-    def __init__(self, host="127.0.0.1", port=5100, timeout=120.0):
+    def __init__(self, host="127.0.0.1", port=5100, timeout=120.0,
+                 connect_trials=10, connect_delay=0.05):
         """Verisocks class constructor
         """
         # Connection address and status
@@ -60,6 +71,8 @@ class Verisocks:
         if timeout:
             self._timeout = timeout
             self.sock.settimeout(timeout)
+        self.connect_trials = connect_trials
+        self.connect_delay = connect_delay
 
         # RX variables
         self._rx_buffer = b""
@@ -73,7 +86,7 @@ class Verisocks:
         self._tx_buffer = b""
         self._tx_msg_len = []
 
-    def connect(self, trials=10, delay=0.05):
+    def connect(self, trials=None, delay=None):
         """Connect to server socket.
 
         If the client is already connected to a server socket, nothing happens.
@@ -83,24 +96,34 @@ class Verisocks:
         times if unsuccessful.
 
         Args:
-            trials (int): Maximum number of connection trials
-            delay (float): Delay to be applied prior each connection trial
+            trials (int): Maximum number of connection trials to be attempted.
+                If None, the value of the ``connect_trials`` argument passed to
+                the constructor is being used.
+            delay (float): Delay to be applied prior each connection trial. If
+                None, the value of the ``connect_delay`` argument passed to the
+                constructor is being used.
 
         Raises:
             ConnectionError: All the successive connection trials have been
                 unsucessful
         """
+
+        if trials is None:
+            trials = self.connect_trials
+        if delay is None:
+            delay = self.connect_delay
+
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
             trial = 0
             while trial < trials:
                 try:
-                    sleep(delay)
                     self.sock.connect(self.address)
                     logging.info(f"Socket connected after {trial + 1} trials")
                     self._connected = True
                     break
                 except ConnectionError:
+                    sleep(delay)
                     trial += 1
             if trial >= trials:
                 raise ConnectionError(
