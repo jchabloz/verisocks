@@ -7,6 +7,7 @@ BUILDDIR = build
 INCDIRS += $(SRCDIR)/include
 INCDIRS += $(SRCDIR)/cjson
 LIBVPI = $(BUILDDIR)/verisocks.vpi
+DOCSDIR = docs
 
 CC = @CC@
 CFLAGS = @CFLAGS@
@@ -45,7 +46,10 @@ $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
-.PHONY: clean all
+.PHONY: clean all docs
+
+docs:
+	$(MAKE) -C $(DOCSDIR) html
 
 clean:
 	-$(RM) $(OBJS)
