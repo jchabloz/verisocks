@@ -30,8 +30,18 @@ def _format_path(cwd, path):
 
 
 def run_setup_cmds(elab_cmd, sim_cmd, capture_output=True):
-    """
+    """Run simulation setup commands.
+
+    This command is e.g. used by :py:meth:`setup_sim` with elaboration and
+    simulation commands formatted according to the provided arguments.
+
     Args:
+        elab_cmd (list): Elaboration command. It has to be provided as a list
+            of command and arguments (see subprocess documentation). If None,
+            this step is skipped.
+        sim_cmd (list): Simulation command. It has to be provided as a list
+            of command and arguments (see subprocess documentation). This
+            command is mandatory and cannot be None.
         capture_output (bool): Defines if stdout and stderr output
             are "captured" (i.e. not visible).
 
@@ -41,6 +51,9 @@ def run_setup_cmds(elab_cmd, sim_cmd, capture_output=True):
 
     if elab_cmd:
         subprocess.check_call(elab_cmd)
+
+    if sim_cmd is None:
+        raise ValueError("Simulation command and arguments is mandatory")
 
     if capture_output:
         pop = subprocess.Popen(
