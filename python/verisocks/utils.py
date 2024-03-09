@@ -29,6 +29,32 @@ def _format_path(cwd, path):
     return os.path.abspath(os.path.join(cwd, path))
 
 
+def run_setup_cmds(elab_cmd, sim_cmd, capture_output=True):
+    """
+    Args:
+        capture_output (bool): Defines if stdout and stderr output
+            are "captured" (i.e. not visible).
+
+    Returns:
+        subprocess.Popen
+    """
+
+    if elab_cmd:
+        subprocess.check_call(elab_cmd)
+
+    if capture_output:
+        pop = subprocess.Popen(
+            sim_cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    else:
+        pop = subprocess.Popen(sim_cmd)
+
+    logging.info(f"Launched Icarus with PID {pop.pid}")
+    return pop
+
+
 def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
               vvp_logpath="vvp.log", ivl_exec=None, ivl_args=None,
               vvp_exec=None, vvp_args=None, vvp_postargs=None,
@@ -37,11 +63,11 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
     and launching the simulation with :code:`vvp`.
 
     Args:
-        cwd (str): Reference path to be used for all paths provided as relative
-            paths.
         vpi_libpath (str): Path to the compiled Verisocks VPI library.
         src_files (str): Paths to all (verilog) source files to use for the
             simulation. All files have to be added as separate arguments.
+        cwd (str): Reference path to be used for all paths provided as relative
+            paths.
         vvp_filepath (str): Path to the elaborated VVP file (iverilog output).
             If None (default), "sim.vvp" will be used.
         vvp_logpath (str): Path to a simulation logfile. Default="vvp.log". If
@@ -95,7 +121,6 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         *ivl_args,
         *src_file_paths
     ]
-    subprocess.check_call(ivl_cmd)
 
     # Simulation with vvp
     if vvp_exec:
@@ -121,14 +146,5 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         *vvp_postargs
     ]
 
-    if capture_output:
-        pop = subprocess.Popen(
-            vvp_cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-    else:
-        pop = subprocess.Popen(vvp_cmd)
-
-    logging.info(f"Launched Icarus with PID {pop.pid}")
+    pop = run_setup_cmds(ivl_cmd, vvp_cmd, capture_output)
     return pop
