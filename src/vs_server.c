@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include "vs_logging.h"
 #include "vs_server.h"
@@ -100,6 +101,7 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     int fd_conn_socket = -1;
     struct hostent *host_info;
     uint32_t addr;
+    int selval;
 
     /* Use select mechanism uniquely to easily implement a timeout - The
     vs_server_accept function will keep being blocking until it times out.*/
@@ -108,7 +110,9 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     FD_SET(fd_socket, &set);
 
     /* If a client attempts a connection, accept it */
-    int selval = select(FD_SETSIZE, &set, NULL, NULL, p_timeout);
+    do
+        selval = select(FD_SETSIZE, &set, NULL, NULL, p_timeout);
+    while (0 > selval && EINTR == errno);
     if (0 > selval) {
         vs_log_mod_perror("vs_server", "");
         goto error;

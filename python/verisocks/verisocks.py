@@ -3,6 +3,7 @@ import logging
 import struct
 import json
 from enum import Enum, auto
+from time import sleep
 
 
 class VsRxState(Enum):
@@ -36,6 +37,16 @@ class Verisocks:
         port (int): Server port number, default=5100
         timeout (float): Socket timeout (base value),
                             in seconds (default=120)
+        connect_trials (int): Number of consecutive connections to be attempted
+            when the method
+            :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
+            being used. This value can be overriden by the method's own
+            ``trials`` argument.
+        connect_delay (float): Delay to be applied before attempting a new
+            connection trial when the method
+            :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
+            being used. This value can be overriden by the method's own
+            ``delay`` argument.
 
     Note:
         For certain methods, a specific timeout value can be passed as
@@ -47,7 +58,8 @@ class Verisocks:
     PRE_HDR_LEN = 2  # Pre-header length in bytes
     READ_BUFFER_LEN = 4096
 
-    def __init__(self, host="127.0.0.1", port=5100, timeout=120.0):
+    def __init__(self, host="127.0.0.1", port=5100, timeout=120.0,
+                 connect_trials=10, connect_delay=0.05):
         """Verisocks class constructor
         """
         # Connection address and status
@@ -59,6 +71,8 @@ class Verisocks:
         if timeout:
             self._timeout = timeout
             self.sock.settimeout(timeout)
+        self.connect_trials = connect_trials
+        self.connect_delay = connect_delay
 
         # RX variables
         self._rx_buffer = b""
@@ -72,16 +86,48 @@ class Verisocks:
         self._tx_buffer = b""
         self._tx_msg_len = []
 
-    def connect(self):
+    def connect(self, trials=None, delay=None):
         """Connect to server socket.
 
         If the client is already connected to a server socket, nothing happens.
+        Otherwise, the client attempts to connect to the server as defined by
+        the address and port provided to the class constructor. The method will
+        apply a delay prior each connection trial and will retry a number of
+        times if unsuccessful.
+
+        Args:
+            trials (int): Maximum number of connection trials to be attempted.
+                If None, the value of the ``connect_trials`` argument passed to
+                the constructor is being used.
+            delay (float): Delay to be applied prior each connection trial. If
+                None, the value of the ``connect_delay`` argument passed to the
+                constructor is being used.
+
+        Raises:
+            ConnectionError: All the successive connection trials have been
+                unsucessful
         """
+
+        if trials is None:
+            trials = self.connect_trials
+        if delay is None:
+            delay = self.connect_delay
+
         if not self._connected:
             logging.info(f"Attempting connection to {self.address}")
-            self.sock.connect(self.address)
-            logging.info("Socket connected")
-            self._connected = True
+            trial = 0
+            while trial < trials:
+                try:
+                    self.sock.connect(self.address)
+                    logging.info(f"Socket connected after {trial + 1} trials")
+                    self._connected = True
+                    break
+                except ConnectionError:
+                    sleep(delay)
+                    trial += 1
+            if trial >= trials:
+                raise ConnectionError(
+                    f"Connection unsucessful after {trial} trials")
         else:
             logging.info("Socket already connected")
 
@@ -93,8 +139,8 @@ class Verisocks:
             base value as defined within the class constructor applies.
 
         Raises:
-            ConnectionError if no data is received (most likely the socket is
-            closed).
+            ConnectionError: no data is received (most likely the socket is
+                closed).
         """
         if timeout:
             self.sock.settimeout(timeout)
@@ -113,8 +159,8 @@ class Verisocks:
             num_bytes (int): Number of bytes to send
 
         Raises:
-            ConnectionError if no data is written (most likely the socket is
-            closed).
+            ConnectionError: no data is written (most likely the socket is
+                closed).
         """
         sent = 0
         trials = 0

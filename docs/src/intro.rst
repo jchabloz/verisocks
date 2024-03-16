@@ -21,7 +21,7 @@ to trying and compile Verisocks:
   packaged version provided with your favorite distro.
 * GCC C or C++ compiler
 
-.. note:: 
+.. note::
 
     Older GCC versions will most likely complain about the variadic macros used
     for logging purposes. These warnings can normally be safely ignored...
@@ -68,6 +68,11 @@ not to impact your system's Python packages.
 
     pip install <path to your verisocks folder>/python
 
+.. note::
+
+  The main advantage of Verisock's socket interface is its versatility. The
+  Python client provided with the code can serve as a reference implementation
+  that can easily be replicated in any language with an API for TCP sockets.
 
 Run the examples
 ----------------
@@ -138,12 +143,23 @@ have to typically be:
   variable rising edge),
 * etc...
 
+.. _sec_alternative_simulators:
+
+Alternative simulators
+**********************
+
+While the Verisocks PLI application has been developed targeting specifically
+Icarus as a verilog simulator, there is no known reason that it would not be
+working as well with any other simulator that is supporting the VPI normative
+interface (as defined in `IEEE Std 1364
+<https://ieeexplore.ieee.org/document/1620780>`_ and `IEEE Std 1800
+<https://ieeexplore.ieee.org/document/10458102>`_), including mainstream
+commercial simulators.
+
 .. note::
-
-    Note that while the Verisocks PLI application has been developed targeting
-    specifically Icarus as a verilog simulator, there is no known reason that
-    it would not be working as well with any other simulator that is supporting
-    the VPI interface standard, including mainstream commercial simulators. I
-    will gladly accept any contribution that may confirm or infirm this
-    statement...
-
+    I will gladly accept any contribution to test Verisocks with other
+    simulators.
+    As of now, I have only successfully tested it with Cadence's XCelium 64
+    29.03. As soon as I get more material, I will make a short tutorial for it.
+    My next target will be Tachyon's CVC. If anybody is able to test it with
+    QuestaSim...

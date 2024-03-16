@@ -42,12 +42,12 @@ module spi_master(cs_b, mosi, miso, sclk);
     reg cs_b, mosi, sclk;
     reg [7:0] tx_buffer [6:0];
     reg [7:0] rx_buffer [7:0];
-    reg [7:0] tx_crc, rx_crc;
+    reg [7:0] rx_crc;
     reg [255:0] ascii_cmd_id;
     reg [255:0] ascii_ret_id;
     reg rx_crc_error;
-	event start_transaction;
-	event end_transaction;
+    event start_transaction;
+    event end_transaction;
     integer transaction_counter;
 
     /**************************************************************************
@@ -128,8 +128,8 @@ module spi_master(cs_b, mosi, miso, sclk);
     begin
         if (tx_mask[7] == 0) begin
             rx_crc_error = 1'b0;
-            crc = 8'hff; //Initialize CRC with correct seed
-            rx_crc = 8'hff;
+            crc = CRC_SEED; //Initialize CRC with correct seed
+            rx_crc = CRC_SEED;
         end
         for (i = 0; i < 7; i = i + 1) begin
             if (tx_mask[7 - i] == 0) begin
@@ -159,11 +159,43 @@ module spi_master(cs_b, mosi, miso, sclk);
     end
     endtask
 
+    task init_tx_buffer;
+        integer i;
+    begin
+        for (i=0; i < 7; i = i + 1) begin
+            tx_buffer[i] = 8'd0;
+        end
+    end
+    endtask
+
     /**************************************************************************
     Hook for Verisocks to trigger task execution using a named event
     **************************************************************************/
     always @(start_transaction)
         spi_transmit_buffer(8'd0);
+
+    /**************************************************************************
+    Hook for Verilator - A public task (as declared using the verilator public
+    comment is used here. It could also have been exported as a DPI method,
+    which would make it also compatible with other simulators, however, passing
+    arguments gets more complex. Another alternative would have been to declare
+    the start_transaction and tx_buffer variables as public (I tested, this
+    works fine), but such a task makes for a better, more readable,
+    encapsulation.
+    **************************************************************************/
+    `ifdef VERILATOR
+    task trigger_transaction;
+        /*verilator public*/
+        input [7:0] tx_val [6:0];
+        integer i;
+    begin
+        for (i=0; i < 7; i = i + 1) begin
+            tx_buffer[i] = tx_val[i];
+        end
+        ->start_transaction;
+    end
+    endtask
+    `endif
 
     /**************************************************************************
     Initial
@@ -175,7 +207,8 @@ module spi_master(cs_b, mosi, miso, sclk);
         ascii_cmd_id = "N/A";
         ascii_ret_id = "N/A";
         rx_crc_error = 1'b0;
-        transaction_counter = 1'b0;
+        transaction_counter = 0;
+        init_tx_buffer();
     end
 
 endmodule

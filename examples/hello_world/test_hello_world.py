@@ -1,7 +1,6 @@
 from verisocks.verisocks import Verisocks
 from verisocks.utils import setup_sim, find_free_port
 import socket
-import time
 import pytest
 import logging
 import os.path
@@ -11,7 +10,6 @@ HOST = socket.gethostbyname("localhost")
 PORT = find_free_port()
 VS_TIMEOUT = 10
 LIBVPI = "../../build/verisocks.vpi"
-CONNECT_DELAY = 0.1
 
 
 def setup_test():
@@ -24,7 +22,6 @@ def setup_test():
             f"-DVS_TIMEOUT={VS_TIMEOUT}"
         ]
     )
-    time.sleep(CONNECT_DELAY)
 
 
 @pytest.fixture

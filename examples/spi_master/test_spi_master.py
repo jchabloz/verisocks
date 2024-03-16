@@ -1,7 +1,6 @@
 from verisocks.verisocks import Verisocks
 from verisocks.utils import setup_sim, find_free_port
 import os.path
-import time
 import logging
 import pytest
 import socket
@@ -12,7 +11,6 @@ import random
 HOST = socket.gethostbyname("localhost")
 PORT = find_free_port()
 LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
-CONNECT_DELAY = 0.01
 VS_TIMEOUT = 10
 SRC = ["spi_master.v", "spi_slave.v", "spi_master_tb.v"]
 
@@ -29,7 +27,6 @@ def setup_test():
             "-DDUMP_FILE=\"spi_master_tb.fst\""
         ]
     )
-    time.sleep(CONNECT_DELAY)
 
 
 def send_spi(vs, tx_buffer):
