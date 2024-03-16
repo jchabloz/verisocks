@@ -1,1 +1,711 @@
-<?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="684px" preserveAspectRatio="none" style="width:897px;height:684px;background:#FFFFFF;" version="1.1" viewBox="0 0 897 684" width="897px" zoomAndPan="magnify"><defs/><g><!--cluster PLI application--><g id="cluster_PLI application"><rect fill="none" height="202" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="149" x="438" y="140.5"/><path d="M561,140.5 L561,149.7969 L551,159.7969 L438,159.7969 " fill="none" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Helvetica" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="113" x="441" y="154.4951">PLI application</text></g><!--cluster PLI routine--><g id="cluster_PLI routine"><rect fill="none" height="135" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="101" x="462" y="183.5"/><text fill="#000000" font-family="Helvetica" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="85" x="470" y="198.4951">PLI routine</text></g><!--cluster Icarus simulator--><g id="cluster_Icarus simulator"><rect fill="none" height="421.5" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="324" x="90" y="108"/><path d="M226,108 L226,117.2969 L216,127.2969 L90,127.2969 " fill="none" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Helvetica" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="126" x="93" y="121.9951">Icarus simulator</text></g><!--cluster tb--><g id="cluster_tb"><rect fill="none" height="338.5" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="260" x="122" y="159"/><text fill="#000000" font-family="Helvetica" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="141" x="181.5" y="173.9951">Verilog testbench</text></g><g id="cluster_##11"><rect fill="none" height="101" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="188" x="162" y="210"/></g><!--cluster client--><g id="cluster_client"><rect fill="none" height="152" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:1.0;" width="227" x="611" y="175"/><path d="M747,175 L747,184.2969 L737,194.2969 L611,194.2969 " fill="none" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Helvetica" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="126" x="614" y="188.9951">Test framework</text></g><!--entity tcp_server--><g id="elem_tcp_server"><rect fill="#F1F1F1" height="84.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="68" x="478" y="218.5"/><image height="48" width="48" x="488" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABaklEQVR4Xu2YwW2EMBBF3QIlUAIlIKUBSqAESuCWKyVQAiVwz4USKIEKHP2D0eA/0V6yynwphyft/rW18+UZj+10XVdShgQ1SFCDBDVIOM/z4ziOz4jUsZKBvu9zSik067pm18A4jjQ4KsgSMtB1HQ2Mil2F20DbtjTw3TRNk5dlydu2ZZu+yAZo0zTRHBDGAIIv/w9gCJlgNS+1wxjY9/3LBosYhmF4GIDJel4YAzZYpEzR7Zbp1WYYA6CkTa1Dw2+1DlwDCj2gYFPvNmCXMDJ1kd8fAJyh6pGbEZnn+RE8GVCEBDUeX6RTSL6I5bdR+Ub2FwaQ114Kl6MEzv1eXGEMyB/m5I/Try402DbrOcA14BVSVFwD3lJFxb3UQ1ToBT8+q1gj9YNSFOpYXQNqkCC9AtI1IL8LyfeBiJ34/2nx3cifRl/dB4BXm2EMgF+7kSn0gIJ7J5Z/lQDS70KqkKAGCWqQoAYJanwD4kCpAOYmP2IAAAAASUVORK5CYII=" y="228.5"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="44" x="488" y="289.4951">Server</text></g><!--entity dut--><g id="elem_dut"><rect fill="#F1F1F1" height="84.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="68" x="222" y="389.5"/><image height="48" width="48" x="232" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2ZwY2DMBBFaSElpARKiLQNpARKoITc9koJlJASct8LJVBCKmD1VxrkzPcQW4QdI3F4Ehk5zDywx4RUz+ez2jMU2BsUeEfXddPlcpnO5/NHaZpmGobhW+d7BwWWuF6vU1VVm/J4PH503iUoYNH3PSXbAtwNnXsJClj8x9UXcqYSBSww73Wirbjf78l3gQIWh0AGqwTwZbRKYRzHLy8Bq5aogAw+nU4vJ5O25iGgc2Kv0CKzANqXPhEoSUBASyeB2+32Z1jyHcBnvWPTGoAIer4gg/XJtkQErFpCSMDCQyAFClgcAhmsEsCixSoXPPcBXYuu9UVABut2WlIXatuWROYDXbhQkoAQ3QdgF/tCSQK4yIiFP3poTomI4LkPWLWEkICFh0AKFLA4BDJYJYC+j0UieApgzsdqiQpI4bqdltSF8HCnReYDXbhQkoAQ3QfwnF3XNQ0uSQAXGTUu7gMQCV/5eQpYtYSQgIWHQAoUsDgEMlgtgP4rSMxDAK09VospgEG6E3kuYp0T74S0yHygCxdKEhCi+wAG63dCoDQB1BiuEZpTIiJ4CuBdUKyWEBKw8BBIgQIWh0AGuxeIzXULCljgB7ZOtBWxPzIsKGCBk+pEW4AnUJ17CQosgVsb2ys+RW7xgAIpYJGF7yw/gX5ESIUCe4MCe+MXXfqBkpEkdGIAAAAASUVORK5CYII=" y="399.5"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="30" x="232" y="460.4951">DUT</text></g><!--entity task--><g id="elem_task"><rect fill="#F1F1F1" height="68.8906" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="156" x="178" y="226"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="88" x="188" y="248.9951">User defined</text><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="116" x="188" y="265.292">system task (PLI)</text><text fill="#000000" font-family="monospace" font-size="14" lengthAdjust="spacing" textLength="136" x="188" y="281.5889">$verisocks_init()</text></g><!--entity tcp_client--><g id="elem_tcp_client"><rect fill="#F1F1F1" height="84.2969" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="68" x="627" y="218.5"/><image height="48" width="48" x="637" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgUlEQVR4Xu2Yy83iQBCEnQIhEAIhIG0ChEAIhMBtr4RACITAfS+EQAhE4FUh9a9R1Ty6/VqNtIdPQmXTrp5Xtz18Pp+hZ0ToDRF6Q4TeEGEJ3u/3L/B6vX7bb75nKUSYwv1+H8/n87jf78dhGIrg+ul0Gh+Px8gxpiJCBBjZ7XZi1MPxeByXmBkRvODhZgZJYGSjyRwOh9kzIYIXLBszYiOJNc8mW8xdTiJ4ud1uXwNY16kenYXL5fJvErherz8mMBvQLKkI2PwcO4IIXtIE5vA/ARa8YMNi6dSAOTbMbJLA8/n8g/WNUY+As54NM5YAx7d91UKEFBhvVde5WAK50wsaPLAvVwL4Iwdcg1oCgI9pRgRj7ZE3WgkALCn2V00A1ZGDrIUVsloCtZZDBICgHGQtsHm/RjLXUkqNnwgAGXOAtYAxz4yXeiYRvmImwBrY6HsGrLQPRNgiARwQds57ih0oFTwR0j7fA0YPZtLXxxr2HBzTnpE38L7BXrMJfMVMgBy2BLA+8QAY8lA7cUosnoCtSe8SmIt7CYFWEcMI4r4p/f9UbLYZEUBrVG00WokuCfYY+ywm0BpZb/FZCpvxHCL8XMgEMrZOoPbeLIJRaye2TqDURlQTAKVzessESpvXlQBAALxZpee4VVF+WA6uAV68nyBFiMBmc3AlzsFxI4gQgc1OheNGECECG5kKx40gQgQ20gLnOfYU9lDaD3HcCCJEYIMt0p4+LZYcN4IIEaKtRC4BnDgcN4IIEVotRw77cGVLyPsBq4QIUWCGTXppFSkPIkwBnWKrgzUw8ri31F1GEWEu9h0VvRSqKcziN7SlTKeI0Bsi9IYIvSFCb4jQG38BnI1qU7mI2QYAAAAASUVORK5CYII=" y="228.5"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="39" x="637" y="289.4951">Client</text></g><!--entity tcms--><g id="elem_tcms"><rect fill="#F1F1F1" height="100.5938" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="92" x="730" y="210"/><image height="48" width="48" x="740" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2YwY3CMBBF0wIlUAIlIG0DlEAJKYHbXimBEiiBOxdKoIRUkNVfyZH3f9uZCDvSaHN4IvqMPfMTx2PohmHoPCOCN0TwhgjeEMEbInhDhFq83++v6/U63u/3kb+riQg1QPG73W7suu6Xvu+bmRChBrfbbSoewAzH1EKEGmDpbAaMiFCDzcACRCiBl/N4PP4prhYweT6fR+xgnLeECDlOp5MkbQGMPB6PJ+fPIUKKy+UiiVoCE9YnIUIKTrAG1uYnAoOjAE++BofDoY4B7qprsd/vfRuwbr0iMK4MvF6vbxQMcD1nAOsU7whirTuVdUxsINSUOppPF1woJk/pcQLe6rgDM6m7mjMRx8Y6v9zTBb6IA+cMoLFxMTDEcTHotDwGT4LjQM4AiJ/ENBHe+jhozgCOFNZiAinT6LocB0oGUNPHBgCvSctxg48JubPVKgYAikbX5PElLGNWM9CKzcBm4EP+n4GljQxgJ0FcIMyBz1hH3NwYZrGBOAmwGOCjRJiDO27coXkMYnleUDIQzzFNBHCWwYQgNKmSAZjEmEBoSrirsY643BjLEwg14QaFQ2bSQIqSgZakDn4pRGDcG3D/mxjgbnCC1oRNZA4RUqy9jKw/6IEIObCUcjtGTZb+vSiCBSRoAeexIII3RPCGCN4QwRsieEMEb/wAT/1ne8YdymkAAAAASUVORK5CYII=" y="220"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="31" x="740" y="280.9951">Test</text><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="72" x="740" y="297.292">framework</text></g><!--entity cfg_tb--><g id="elem_cfg_tb"><path d="M6,212.5 L6,308.0938 A2.5,2.5 0 0 0 8.5,310.5938 L71.5,310.5938 A2.5,2.5 0 0 0 74,308.0938 L74,220 L64,210 L8.5,210 A2.5,2.5 0 0 0 6,212.5 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><path d="M64,210 L64,217.5 A2.5,2.5 0 0 0 66.5,220 L74,220 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><image height="48" width="48" x="16" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII=" y="220"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="19" x="16" y="280.9951">TB</text><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="42" x="16" y="297.292">config</text></g><!--entity cfg_dut--><g id="elem_cfg_dut"><path d="M167,579 L167,674.5938 A2.5,2.5 0 0 0 169.5,677.0938 L232.5,677.0938 A2.5,2.5 0 0 0 235,674.5938 L235,586.5 L225,576.5 L169.5,576.5 A2.5,2.5 0 0 0 167,579 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><path d="M225,576.5 L225,584 A2.5,2.5 0 0 0 227.5,586.5 L235,586.5 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><image height="48" width="48" x="177" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII=" y="586.5"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="30" x="177" y="647.4951">DUT</text><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="42" x="177" y="663.792">config</text></g><!--entity fw--><g id="elem_fw"><path d="M270,587.5 L270,666.7969 A2.5,2.5 0 0 0 272.5,669.2969 L349.5,669.2969 A2.5,2.5 0 0 0 352,666.7969 L352,595 L342,585 L272.5,585 A2.5,2.5 0 0 0 270,587.5 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><path d="M342,585 L342,592.5 A2.5,2.5 0 0 0 344.5,595 L352,595 " fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/><image height="48" width="48" x="280" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACfElEQVR4Xu2YvZEiMRhESYEQCIEQqLoECIEQCAHvXEIgBELAP4cQCIEIuGpDW32vBfODGJarNZ5BS2i6ZzSfNJpdr9fZJxPCpxEC2e/3t+VyeVssFk+x2+1uZcz1en0Tl8vlF683lBCc0+n0Zzab3Vqw3W6/AuiGSFOwZ0OE4Oju08hYagHEsyFCcKYIIJ4JEYIzVQAxNkQIzpQBxJgQIThTBxBDQ4TgvCOAGBIiBOddAUTfECE47wwgVqvV13/uEYLzqgAyNp/Pe0FPJATnVQFaEoLTMoCmDcdvQQhOywBCU+dwOAyCnkgIrwwwBnoiIfwEaAw9kRB+AlTQqkqtL/REQmgdoJRPbQvGjEdPJITWAbiAsb0LeiIhOC0C6Lu6jKe6zvYu6ImE4DwbgHuZzWYTfbqgJxKC0yeA5rjmd82cjk58PAWSrnHP5/Pv8vsR9ERCcLoCcH8jw97uW4FyROPnQ31C0BMJwXkUoLZXlznv4x8kpe14PP7zP/V5VGZ5DRKCcy9Azbyqjffh0/GPGG7SFOLeRw6vQ0JwagE4r0Vt/vtUkUG2s7wK3Rj2Yx8SgsMArCqCd76g+V363CuftSfBPrweCcFhAKG7zX58eRmU7eItT6BQm0b+JBiSlUbjevuk70Ch9iLXKg1PuL9FFSqw0pSp4hrfEa4Dj8xzrBohOF0BRFmJi1E+mZrBb7MS1/D5XasqQ6EnEoIzJoCXzzH/J/REQnCGGtB08f/XyuJQ6ImE4AwNoDntixPbx0BPJARnaACn9vKOgZ5ICK0CtIKeSAj/VYB7m7ApoScSgqM63mexeRXcU9UIoYb2Lzw1fjV+mvGIED6NED6Nv4OAtZ3fPf9FAAAAAElFTkSuQmCC" y="595"/><text fill="#000000" font-family="Helvetica" font-size="14" lengthAdjust="spacing" textLength="62" x="280" y="655.9951">Firmware</text></g><g id="elem_GMN20"><path d="M662,404 L662,459.3984 A0,0 0 0 0 662,459.3984 L890,459.3984 A0,0 0 0 0 890,459.3984 L890,414 L880,404 L780,404 L776,311.29 L772,404 L662,404 A0,0 0 0 0 662,404 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><path d="M880,404 L880,414 L890,414 L880,404 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="207" x="668" y="421.0669">Test case management system,</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="197" x="668" y="436.1997">automated or manual, such as</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="148" x="668" y="451.3325">Robot, pytest, Kiwi, etc.</text></g><g id="elem_GMN23"><path d="M433.5,396 L433.5,466.5313 A0,0 0 0 0 433.5,466.5313 L590.5,466.5313 A0,0 0 0 0 590.5,466.5313 L590.5,406 L580.5,396 L516,396 L512,302.84 L508,396 L433.5,396 A0,0 0 0 0 433.5,396 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><path d="M580.5,396 L580.5,406 L590.5,406 L580.5,396 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="106" x="439.5" y="413.0669">C program using</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="78" x="439.5" y="428.1997">BSD socket.</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="135" x="439.5" y="443.3325">Only accepts a single</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="136" x="439.5" y="458.4653">connection at a time.</text></g><g id="elem_GMN26"><path d="M179.5,6 L179.5,61.3984 A0,0 0 0 0 179.5,61.3984 L252,61.3984 L256,225.89 L260,61.3984 L332.5,61.3984 A0,0 0 0 0 332.5,61.3984 L332.5,16 L322.5,6 L179.5,6 A0,0 0 0 0 179.5,6 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><path d="M322.5,6 L322.5,16 L332.5,16 L322.5,6 " fill="#F0F8FF" style="stroke:#181818;stroke-width:0.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="113" x="185.5" y="23.0669">User-defined task</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="72" x="185.5" y="38.1997">called in an</text><text fill="#000000" font-family="monospace" font-size="13" lengthAdjust="spacing" textLength="56" x="261.5" y="38.1997">initial</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="33" x="185.5" y="53.3325">block</text></g><!--link cfg_tb to tb--><g id="link_cfg_tb_tb"><path d="M74.1,260.5 C83.345,260.5 92.59,260.5 101.8338,260.5 C106.4556,260.5 111.0772,260.5 115.6983,260.5 C116.8536,260.5 118.0088,260.5 119.164,260.5 C119.7416,260.5 120.3192,260.5 120.8968,260.5 C121.1856,260.5 121.4744,260.5 121.7632,260.5 C121.8354,260.5 115.9076,260.5 115.9798,260.5 " fill="none" id="cfg_tb-to-tb" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="121.9798,260.5,112.9798,256.5,116.9798,260.5,112.9798,264.5,121.9798,260.5" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link dut to cfg_dut--><g id="link_dut_cfg_dut"><path d="M242.6985,479.3111 C234.1485,509.3711 224.15,544.55 215.09,576.44 " fill="none" id="dut-backto-cfg_dut" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="244.34,473.54,238.0304,481.1023,242.9721,478.3492,245.7252,483.291,244.34,473.54" style="stroke:#181818;stroke-width:1.0;"/></g><!--link task to dut--><g id="link_task_dut"><path d="M256,301.29 C256,328.36 256,354.44 256,383.3 " fill="none" id="task-dut" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="256,295.29,252,304.29,256,300.29,260,304.29,256,295.29" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="256,389.3,260,380.3,256,384.3,252,380.3,256,389.3" style="stroke:#181818;stroke-width:1.0;"/></g><!--link task to tcp_server--><g id="link_task_tcp_server"><path d="M340.2,260.5 C388.28,260.5 435.47,260.5 471.97,260.5 " fill="none" id="task-tcp_server" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="334.2,260.5,343.2,264.5,339.2,260.5,343.2,256.5,334.2,260.5" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="477.97,260.5,468.97,256.5,472.97,260.5,468.97,264.5,477.97,260.5" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="20" x="396" y="253.5669">VPI</text></g><!--link tcp_server to tcp_client--><g id="link_tcp_server_tcp_client"><path d="M552.18,260.5 C576.41,260.5 596.78,260.5 620.98,260.5 " fill="none" id="tcp_server-tcp_client" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="546.18,260.5,555.18,264.5,551.18,260.5,555.18,256.5,546.18,260.5" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="626.98,260.5,617.98,256.5,621.98,260.5,617.98,264.5,626.98,260.5" style="stroke:#181818;stroke-width:1.0;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacing" textLength="39" x="567" y="253.5669">TCP/IP</text></g><!--link tcp_client to tcms--><g id="link_tcp_client_tcms"><path d="M701.14,260.5 C712.72,260.5 712.3,260.5 723.88,260.5 " fill="none" id="tcp_client-tcms" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="695.14,260.5,704.14,264.5,700.14,260.5,704.14,256.5,695.14,260.5" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="729.88,260.5,720.88,256.5,724.88,260.5,720.88,264.5,729.88,260.5" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link dut to fw--><g id="link_dut_fw"><path d="M269.302,479.3109 C278.612,512.0309 289.94,551.89 299.26,584.69 " fill="none" id="dut-backto-fw" style="stroke:#181818;stroke-width:1.0;stroke-dasharray:7.0,7.0;"/><polygon fill="#181818" points="267.66,473.54,266.2758,483.2911,269.0284,478.3491,273.9703,481.1017,267.66,473.54" style="stroke:#181818;stroke-width:1.0;"/></g><!--SRC=[ZLJRQXin47tNLqoNG1AmdPBIbs0CjKEeszAQnibB7OoidLqBQwL5chLnIpuetv4VwsZNjoQ1sY_UdJawCtEEPa-1D1c4U_GwEBK88BsQQq95bKTmI_HBZIjn2fbpX1wIWIlNNkTpWZDr3b-Ud_ppKw4H1dCvC-utjE7o_ULb8iGxRPMfKeGkLQLC_OUBp5bgonK6Ls3xuqLWRlIz_mFBDSsTFGBetSpH4RXKafp9W4T0bSl34R1C6vmgbnv7UHIiqCexzgBi2H4MsfRIomA-imjzgHQvTvLD1yuu3v-CLjWt5HxW1guedKLBjxHcVpqRAcrk3Y7NcCdAq0sN_IuBXCzebaXQII4o7mF9wDiGP5aolIJjR09_1F1lHzOWk1FI5hVP5uZkoSRdYRsj7nAG0KYLqoPUdtaKZ_M_Y3h6Cpk79dRSdrZbRARp-gJAyYdDtW9UturV8TEATj2zHnDxetsnaXvhOBOIkv67IlegGD15PIGv_yRCSLUCou4mq0ojcZSJpGxc_zKzsTjNT_OGCR6RrnBjZzL7xrWNI35ZITE93Uj0M039i80pLljyOfFaPBbTrwcscixEawJcZwWTsUDEMT5e1frwRpizxbLin85ELN8WDhPLOCnZGVsySdxHA6aqtwHDeppRPY4dTb0d7hQEDhWjgjb6Df099tR7k44N8NPc-Je3myWLuB8cN3UWs5Cef9Kv5h5seqDBo8gXaZ05llYShwHfGQZKd5d5prYn1TmUKxJWgrxf5Y2fZa2Rnb9l5DpTmm6KtkLnCQgWRIxwjzSGDKRgY1_Mh44gXINn5n9YdbU9xvfb5tapG1A7IHVuiXIviguJdOdEjZVEDX4bZU5dpGGMaYIQgQL94i6VKhNOKzNsTzljngdDM- -WUxY2-z5G70Is-OrtLp0UZ2w68n4bvgJ1ZFv1iF-hWzlm5m00]--></g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   contentStyleType="text/css"
+   height="684px"
+   preserveAspectRatio="none"
+   style="width:897px;height:684px;background:#FFFFFF00;"
+   version="1.1"
+   viewBox="0 0 897 684"
+   width="897px"
+   zoomAndPan="magnify"
+   id="svg41"
+   sodipodi:docname="verisocks_architecture.svg"
+   inkscape:version="1.3.1 (9b9bdc1480, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview41"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.92530658"
+     inkscape:cx="448.5"
+     inkscape:cy="341.50843"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg41" />
+  <defs
+     id="defs1" />
+  <rect
+     fill="none"
+     height="202"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="149"
+     x="438"
+     y="140.5"
+     id="rect1" />
+  <path
+     d="m 561,140.5 v 9.2969 l -10,10 H 438"
+     fill="none"
+     style="stroke:#181818;stroke-width:1"
+     id="path1" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     font-weight="bold"
+     lengthAdjust="spacing"
+     textLength="113"
+     x="441"
+     y="154.4951"
+     id="text1">PLI application</text>
+  <g
+     id="cluster_PLI routine">
+    <rect
+       fill="none"
+       height="135"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:1"
+       width="101"
+       x="462"
+       y="183.5"
+       id="rect2" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       font-weight="bold"
+       lengthAdjust="spacing"
+       textLength="85"
+       x="470"
+       y="198.4951"
+       id="text2">PLI routine</text>
+  </g>
+  <rect
+     fill="none"
+     height="421.5"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="324"
+     x="90"
+     y="108"
+     id="rect3" />
+  <path
+     d="m 226,108 v 9.2969 l -10,10 H 90"
+     fill="none"
+     style="stroke:#181818;stroke-width:1"
+     id="path3" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     font-weight="bold"
+     lengthAdjust="spacing"
+     textLength="126"
+     x="93"
+     y="121.9951"
+     id="text3">Icarus simulator</text>
+  <g
+     id="cluster_tb">
+    <rect
+       fill="none"
+       height="338.5"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:1"
+       width="260"
+       x="122"
+       y="159"
+       id="rect4" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       font-weight="bold"
+       lengthAdjust="spacing"
+       textLength="141"
+       x="181.5"
+       y="173.9951"
+       id="text4">Verilog testbench</text>
+  </g>
+  <g
+     id="cluster_##11">
+    <rect
+       fill="none"
+       height="101"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:1"
+       width="188"
+       x="162"
+       y="210"
+       id="rect5" />
+  </g>
+  <rect
+     fill="none"
+     height="152"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="227"
+     x="611"
+     y="175"
+     id="rect6" />
+  <path
+     d="m 747,175 v 9.2969 l -10,10 H 611"
+     fill="none"
+     style="stroke:#181818;stroke-width:1"
+     id="path6" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     font-weight="bold"
+     lengthAdjust="spacing"
+     textLength="126"
+     x="614"
+     y="188.9951"
+     id="text6">Test framework</text>
+  <g
+     id="elem_tcp_server">
+    <rect
+       fill="#f1f1f1"
+       height="84.296898"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:0.5"
+       width="68"
+       x="478"
+       y="218.5"
+       id="rect7" />
+    <image
+       height="48"
+       width="48"
+       x="488"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABaklEQVR4Xu2YwW2EMBBF3QIlUAIlIKUBSqAESuCWKyVQAiVwz4USKIEKHP2D0eA/0V6yynwphyft/rW18+UZj+10XVdShgQ1SFCDBDVIOM/z4ziOz4jUsZKBvu9zSik067pm18A4jjQ4KsgSMtB1HQ2Mil2F20DbtjTw3TRNk5dlydu2ZZu+yAZo0zTRHBDGAIIv/w9gCJlgNS+1wxjY9/3LBosYhmF4GIDJel4YAzZYpEzR7Zbp1WYYA6CkTa1Dw2+1DlwDCj2gYFPvNmCXMDJ1kd8fAJyh6pGbEZnn+RE8GVCEBDUeX6RTSL6I5bdR+Ub2FwaQ114Kl6MEzv1eXGEMyB/m5I/Try402DbrOcA14BVSVFwD3lJFxb3UQ1ToBT8+q1gj9YNSFOpYXQNqkCC9AtI1IL8LyfeBiJ34/2nx3cifRl/dB4BXm2EMgF+7kSn0gIJ7J5Z/lQDS70KqkKAGCWqQoAYJanwD4kCpAOYmP2IAAAAASUVORK5CYII="
+       y="228.5"
+       id="image7" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="44"
+       x="488"
+       y="289.49509"
+       id="text7">Server</text>
+  </g>
+  <g
+     id="elem_dut">
+    <rect
+       fill="#f1f1f1"
+       height="84.296898"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:0.5"
+       width="68"
+       x="222"
+       y="389.5"
+       id="rect8" />
+    <image
+       height="48"
+       width="48"
+       x="232"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2ZwY2DMBBFaSElpARKiLQNpARKoITc9koJlJASct8LJVBCKmD1VxrkzPcQW4QdI3F4Ehk5zDywx4RUz+ez2jMU2BsUeEfXddPlcpnO5/NHaZpmGobhW+d7BwWWuF6vU1VVm/J4PH503iUoYNH3PSXbAtwNnXsJClj8x9UXcqYSBSww73Wirbjf78l3gQIWh0AGqwTwZbRKYRzHLy8Bq5aogAw+nU4vJ5O25iGgc2Kv0CKzANqXPhEoSUBASyeB2+32Z1jyHcBnvWPTGoAIer4gg/XJtkQErFpCSMDCQyAFClgcAhmsEsCixSoXPPcBXYuu9UVABut2WlIXatuWROYDXbhQkoAQ3QdgF/tCSQK4yIiFP3poTomI4LkPWLWEkICFh0AKFLA4BDJYJYC+j0UieApgzsdqiQpI4bqdltSF8HCnReYDXbhQkoAQ3QfwnF3XNQ0uSQAXGTUu7gMQCV/5eQpYtYSQgIWHQAoUsDgEMlgtgP4rSMxDAK09VospgEG6E3kuYp0T74S0yHygCxdKEhCi+wAG63dCoDQB1BiuEZpTIiJ4CuBdUKyWEBKw8BBIgQIWh0AGuxeIzXULCljgB7ZOtBWxPzIsKGCBk+pEW4AnUJ17CQosgVsb2ys+RW7xgAIpYJGF7yw/gX5ESIUCe4MCe+MXXfqBkpEkdGIAAAAASUVORK5CYII="
+       y="399.5"
+       id="image8" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="30"
+       x="232"
+       y="460.49509"
+       id="text8">DUT</text>
+  </g>
+  <g
+     id="elem_task">
+    <rect
+       fill="#f1f1f1"
+       height="68.890602"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:0.5"
+       width="156"
+       x="178"
+       y="226"
+       id="rect9" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="88"
+       x="188"
+       y="248.9951"
+       id="text9">User defined</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="116"
+       x="188"
+       y="265.29199"
+       id="text10">system task (PLI)</text>
+    <text
+       fill="#000000"
+       font-family="monospace"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="136"
+       x="188"
+       y="281.5889"
+       id="text11">$verisocks_init()</text>
+  </g>
+  <g
+     id="elem_tcp_client">
+    <rect
+       fill="#f1f1f1"
+       height="84.296898"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:0.5"
+       width="68"
+       x="627"
+       y="218.5"
+       id="rect11" />
+    <image
+       height="48"
+       width="48"
+       x="637"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgUlEQVR4Xu2Yy83iQBCEnQIhEAIhIG0ChEAIhMBtr4RACITAfS+EQAhE4FUh9a9R1Ty6/VqNtIdPQmXTrp5Xtz18Pp+hZ0ToDRF6Q4TeEGEJ3u/3L/B6vX7bb75nKUSYwv1+H8/n87jf78dhGIrg+ul0Gh+Px8gxpiJCBBjZ7XZi1MPxeByXmBkRvODhZgZJYGSjyRwOh9kzIYIXLBszYiOJNc8mW8xdTiJ4ud1uXwNY16kenYXL5fJvErherz8mMBvQLKkI2PwcO4IIXtIE5vA/ARa8YMNi6dSAOTbMbJLA8/n8g/WNUY+As54NM5YAx7d91UKEFBhvVde5WAK50wsaPLAvVwL4Iwdcg1oCgI9pRgRj7ZE3WgkALCn2V00A1ZGDrIUVsloCtZZDBICgHGQtsHm/RjLXUkqNnwgAGXOAtYAxz4yXeiYRvmImwBrY6HsGrLQPRNgiARwQds57ih0oFTwR0j7fA0YPZtLXxxr2HBzTnpE38L7BXrMJfMVMgBy2BLA+8QAY8lA7cUosnoCtSe8SmIt7CYFWEcMI4r4p/f9UbLYZEUBrVG00WokuCfYY+ywm0BpZb/FZCpvxHCL8XMgEMrZOoPbeLIJRaye2TqDURlQTAKVzessESpvXlQBAALxZpee4VVF+WA6uAV68nyBFiMBmc3AlzsFxI4gQgc1OheNGECECG5kKx40gQgQ20gLnOfYU9lDaD3HcCCJEYIMt0p4+LZYcN4IIEaKtRC4BnDgcN4IIEVotRw77cGVLyPsBq4QIUWCGTXppFSkPIkwBnWKrgzUw8ri31F1GEWEu9h0VvRSqKcziN7SlTKeI0Bsi9IYIvSFCb4jQG38BnI1qU7mI2QYAAAAASUVORK5CYII="
+       y="228.5"
+       id="image11" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="39"
+       x="637"
+       y="289.49509"
+       id="text12">Client</text>
+  </g>
+  <g
+     id="elem_tcms">
+    <rect
+       fill="#f1f1f1"
+       height="100.5938"
+       rx="2.5"
+       ry="2.5"
+       style="stroke:#181818;stroke-width:0.5"
+       width="92"
+       x="730"
+       y="210"
+       id="rect12" />
+    <image
+       height="48"
+       width="48"
+       x="740"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2YwY3CMBBF0wIlUAIlIG0DlEAJKYHbXimBEiiBOxdKoIRUkNVfyZH3f9uZCDvSaHN4IvqMPfMTx2PohmHoPCOCN0TwhgjeEMEbInhDhFq83++v6/U63u/3kb+riQg1QPG73W7suu6Xvu+bmRChBrfbbSoewAzH1EKEGmDpbAaMiFCDzcACRCiBl/N4PP4prhYweT6fR+xgnLeECDlOp5MkbQGMPB6PJ+fPIUKKy+UiiVoCE9YnIUIKTrAG1uYnAoOjAE++BofDoY4B7qprsd/vfRuwbr0iMK4MvF6vbxQMcD1nAOsU7whirTuVdUxsINSUOppPF1woJk/pcQLe6rgDM6m7mjMRx8Y6v9zTBb6IA+cMoLFxMTDEcTHotDwGT4LjQM4AiJ/ENBHe+jhozgCOFNZiAinT6LocB0oGUNPHBgCvSctxg48JubPVKgYAikbX5PElLGNWM9CKzcBm4EP+n4GljQxgJ0FcIMyBz1hH3NwYZrGBOAmwGOCjRJiDO27coXkMYnleUDIQzzFNBHCWwYQgNKmSAZjEmEBoSrirsY643BjLEwg14QaFQ2bSQIqSgZakDn4pRGDcG3D/mxjgbnCC1oRNZA4RUqy9jKw/6IEIObCUcjtGTZb+vSiCBSRoAeexIII3RPCGCN4QwRsieEMEb/wAT/1ne8YdymkAAAAASUVORK5CYII="
+       y="220"
+       id="image12" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="31"
+       x="740"
+       y="280.99509"
+       id="text13">Test</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="72"
+       x="740"
+       y="297.29199"
+       id="text14">framework</text>
+  </g>
+  <g
+     id="elem_cfg_tb">
+    <path
+       d="m 6,212.5 v 95.5938 a 2.5,2.5 0 0 0 2.5,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 220 L 64,210 H 8.5 A 2.5,2.5 0 0 0 6,212.5"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path14" />
+    <path
+       d="m 64,210 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 H 74"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path15" />
+    <image
+       height="48"
+       width="48"
+       x="16"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII="
+       y="220"
+       id="image15" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="19"
+       x="16"
+       y="280.99509"
+       id="text15">TB</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="42"
+       x="16"
+       y="297.29199"
+       id="text16">config</text>
+  </g>
+  <g
+     id="elem_cfg_dut">
+    <path
+       d="m 167,579 v 95.5938 a 2.5,2.5 0 0 0 2.5,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 586.5 l -10,-10 H 169.5 A 2.5,2.5 0 0 0 167,579"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path16" />
+    <path
+       d="m 225,576.5 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path17" />
+    <image
+       height="48"
+       width="48"
+       x="177"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII="
+       y="586.5"
+       id="image17" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="30"
+       x="177"
+       y="647.49512"
+       id="text17">DUT</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="42"
+       x="177"
+       y="663.79199"
+       id="text18">config</text>
+  </g>
+  <g
+     id="elem_fw">
+    <path
+       d="m 270,587.5 v 79.2969 a 2.5,2.5 0 0 0 2.5,2.5 h 77 a 2.5,2.5 0 0 0 2.5,-2.5 V 595 l -10,-10 h -69.5 a 2.5,2.5 0 0 0 -2.5,2.5"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path18" />
+    <path
+       d="m 342,585 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
+       fill="#f1f1f1"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path19" />
+    <image
+       height="48"
+       width="48"
+       x="280"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACfElEQVR4Xu2YvZEiMRhESYEQCIEQqLoECIEQCAHvXEIgBELAP4cQCIEIuGpDW32vBfODGJarNZ5BS2i6ZzSfNJpdr9fZJxPCpxEC2e/3t+VyeVssFk+x2+1uZcz1en0Tl8vlF683lBCc0+n0Zzab3Vqw3W6/AuiGSFOwZ0OE4Oju08hYagHEsyFCcKYIIJ4JEYIzVQAxNkQIzpQBxJgQIThTBxBDQ4TgvCOAGBIiBOddAUTfECE47wwgVqvV13/uEYLzqgAyNp/Pe0FPJATnVQFaEoLTMoCmDcdvQQhOywBCU+dwOAyCnkgIrwwwBnoiIfwEaAw9kRB+AlTQqkqtL/REQmgdoJRPbQvGjEdPJITWAbiAsb0LeiIhOC0C6Lu6jKe6zvYu6ImE4DwbgHuZzWYTfbqgJxKC0yeA5rjmd82cjk58PAWSrnHP5/Pv8vsR9ERCcLoCcH8jw97uW4FyROPnQ31C0BMJwXkUoLZXlznv4x8kpe14PP7zP/V5VGZ5DRKCcy9Azbyqjffh0/GPGG7SFOLeRw6vQ0JwagE4r0Vt/vtUkUG2s7wK3Rj2Yx8SgsMArCqCd76g+V363CuftSfBPrweCcFhAKG7zX58eRmU7eItT6BQm0b+JBiSlUbjevuk70Ch9iLXKg1PuL9FFSqw0pSp4hrfEa4Dj8xzrBohOF0BRFmJi1E+mZrBb7MS1/D5XasqQ6EnEoIzJoCXzzH/J/REQnCGGtB08f/XyuJQ6ImE4AwNoDntixPbx0BPJARnaACn9vKOgZ5ICK0CtIKeSAj/VYB7m7ApoScSgqM63mexeRXcU9UIoYb2Lzw1fjV+mvGIED6NED6Nv4OAtZ3fPf9FAAAAAElFTkSuQmCC"
+       y="595"
+       id="image19" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="14px"
+       lengthAdjust="spacing"
+       textLength="62"
+       x="280"
+       y="655.99512"
+       id="text19">Firmware</text>
+  </g>
+  <g
+     id="elem_GMN20">
+    <path
+       d="m 662,404 v 55.3984 H 890 V 414 L 880,404 H 780 L 776,311.29 772,404 H 662"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path20" />
+    <path
+       d="m 880,404 v 10 h 10 l -10,-10"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path21" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="207"
+       x="668"
+       y="421.06689"
+       id="text21">Test case management system,</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="197"
+       x="668"
+       y="436.19971"
+       id="text22">automated or manual, such as</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="148"
+       x="668"
+       y="451.33249"
+       id="text23">Robot, pytest, Kiwi, etc.</text>
+  </g>
+  <g
+     id="elem_GMN23">
+    <path
+       d="m 433.5,396 v 70.5313 h 157 V 406 l -10,-10 H 516 l -4,-93.16 -4,93.16 h -74.5"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path23" />
+    <path
+       d="m 580.5,396 v 10 h 10 l -10,-10"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path24" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="106"
+       x="439.5"
+       y="413.06689"
+       id="text24">C program using</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="78"
+       x="439.5"
+       y="428.19971"
+       id="text25">BSD socket.</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="135"
+       x="439.5"
+       y="443.33249"
+       id="text26">Only accepts a single</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="136"
+       x="439.5"
+       y="458.4653"
+       id="text27">connection at a time.</text>
+  </g>
+  <g
+     id="elem_GMN26">
+    <path
+       d="M 179.5,6 V 61.3984 H 252 l 4,164.4916 4,-164.4916 h 72.5 V 16 l -10,-10 h -143"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path27" />
+    <path
+       d="m 322.5,6 v 10 h 10 l -10,-10"
+       fill="#f0f8ff"
+       style="stroke:#181818;stroke-width:0.5"
+       id="path28" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="113"
+       x="185.5"
+       y="23.0669"
+       id="text28">User-defined task</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="72"
+       x="185.5"
+       y="38.199699"
+       id="text29">called in an</text>
+    <text
+       fill="#000000"
+       font-family="monospace"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="56"
+       x="261.5"
+       y="38.199699"
+       id="text30">initial</text>
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="33"
+       x="185.5"
+       y="53.3325"
+       id="text31">block</text>
+  </g>
+  <g
+     id="link_cfg_tb_tb">
+    <path
+       d="m 74.1,260.5 c 9.245,0 18.49,0 27.7338,0 4.6218,0 9.2434,0 13.8645,0 1.1553,0 2.3105,0 3.4657,0 0.5776,0 1.1552,0 1.7328,0 0.2888,0 0.5776,0 0.8664,0 0.0722,0 -5.8556,0 -5.7834,0"
+       fill="none"
+       id="cfg_tb-to-tb"
+       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+    <polygon
+       fill="#181818"
+       points="116.9798,260.5 112.9798,264.5 121.9798,260.5 112.9798,256.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon31" />
+  </g>
+  <g
+     id="link_dut_cfg_dut">
+    <path
+       d="M 242.6985,479.3111 C 234.1485,509.3711 224.15,544.55 215.09,576.44"
+       fill="none"
+       id="dut-backto-cfg_dut"
+       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+    <polygon
+       fill="#181818"
+       points="242.9721,478.3492 245.7252,483.291 244.34,473.54 238.0304,481.1023 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon32" />
+  </g>
+  <g
+     id="link_task_dut">
+    <path
+       d="m 256,301.29 c 0,27.07 0,53.15 0,82.01"
+       fill="none"
+       id="task-dut"
+       style="stroke:#181818;stroke-width:1" />
+    <polygon
+       fill="#181818"
+       points="256,300.29 260,304.29 256,295.29 252,304.29 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon33" />
+    <polygon
+       fill="#181818"
+       points="256,384.3 252,380.3 256,389.3 260,380.3 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon34" />
+  </g>
+  <g
+     id="link_task_tcp_server">
+    <path
+       d="m 340.2,260.5 c 48.08,0 95.27,0 131.77,0"
+       fill="none"
+       id="task-tcp_server"
+       style="stroke:#181818;stroke-width:1" />
+    <polygon
+       fill="#181818"
+       points="339.2,260.5 343.2,256.5 334.2,260.5 343.2,264.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon35" />
+    <polygon
+       fill="#181818"
+       points="472.97,260.5 468.97,264.5 477.97,260.5 468.97,256.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon36" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="20"
+       x="396"
+       y="253.56689"
+       id="text36">VPI</text>
+  </g>
+  <g
+     id="link_tcp_server_tcp_client">
+    <path
+       d="m 552.18,260.5 c 24.23,0 44.6,0 68.8,0"
+       fill="none"
+       id="tcp_server-tcp_client"
+       style="stroke:#181818;stroke-width:1" />
+    <polygon
+       fill="#181818"
+       points="551.18,260.5 555.18,256.5 546.18,260.5 555.18,264.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon37" />
+    <polygon
+       fill="#181818"
+       points="621.98,260.5 617.98,264.5 626.98,260.5 617.98,256.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon38" />
+    <text
+       fill="#000000"
+       font-family="Helvetica"
+       font-size="13px"
+       lengthAdjust="spacing"
+       textLength="39"
+       x="567"
+       y="253.56689"
+       id="text38">TCP/IP</text>
+  </g>
+  <g
+     id="link_tcp_client_tcms">
+    <path
+       d="m 701.14,260.5 c 11.58,0 11.16,0 22.74,0"
+       fill="none"
+       id="tcp_client-tcms"
+       style="stroke:#181818;stroke-width:1" />
+    <polygon
+       fill="#181818"
+       points="700.14,260.5 704.14,256.5 695.14,260.5 704.14,264.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon39" />
+    <polygon
+       fill="#181818"
+       points="724.88,260.5 720.88,264.5 729.88,260.5 720.88,256.5 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon40" />
+  </g>
+  <g
+     id="link_dut_fw">
+    <path
+       d="m 269.302,479.3109 c 9.31,32.72 20.638,72.5791 29.958,105.3791"
+       fill="none"
+       id="dut-backto-fw"
+       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+    <polygon
+       fill="#181818"
+       points="269.0284,478.3491 273.9703,481.1017 267.66,473.54 266.2758,483.2911 "
+       style="stroke:#181818;stroke-width:1"
+       id="polygon41" />
+  </g>
+</svg>
