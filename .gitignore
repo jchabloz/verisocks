@@ -12,6 +12,8 @@ tags
 Makefile
 include/vpi_config.h
 *.fst
+obj_dir/
+cvcsim
 
 # autoconf files
 config.status
