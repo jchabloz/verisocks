@@ -20,6 +20,8 @@ version numbering system follows the `semantic versioning
   https://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html
   for details).
 * Added section :ref:`sec_alternative_simulators`.
+* Added method :py:meth:`verisocks.utils.setup_sim_run` to simplify foreseen
+  support for alternative simulators.
 
 1.1.0 - 2024-02-07
 ******************

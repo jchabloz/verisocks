@@ -29,7 +29,7 @@ def _format_path(cwd, path):
     return os.path.abspath(os.path.join(cwd, path))
 
 
-def run_setup_cmds(elab_cmd, sim_cmd, capture_output=True):
+def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
     """Run simulation setup commands.
 
     This command is e.g. used by :py:meth:`setup_sim` with elaboration and
@@ -73,7 +73,8 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
               vvp_exec=None, vvp_args=None, vvp_postargs=None,
               capture_output=True):
     """Set up Icarus simulation by elaborating the design with :code:`iverilog`
-    and launching the simulation with :code:`vvp`.
+    and launching the simulation with :code:`vvp`. Uses
+    :py:meth:`setup_sim_run` to run the concatenated commands and arguments.
 
     Args:
         vpi_libpath (str): Path to the compiled Verisocks VPI library.
@@ -159,5 +160,5 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         *vvp_postargs
     ]
 
-    pop = run_setup_cmds(ivl_cmd, vvp_cmd, capture_output)
+    pop = setup_sim_run(ivl_cmd, vvp_cmd, capture_output)
     return pop
