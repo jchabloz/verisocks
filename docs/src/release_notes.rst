@@ -8,8 +8,8 @@ Releases of documentation and code are using the same version numbers. The
 version numbering system follows the `semantic versioning
 <https://semver.org/>`_ principles.
 
-1.2.0 - Ongoing
-***************
+1.2.0 - 2024-03-16
+******************
 
 * Modified :py:class:`Verisocks<verisocks.verisocks.Verisocks>` constructor and
   :py:meth:`Verisocks.connect() <verisocks.verisocks.Verisocks.connect>` method
