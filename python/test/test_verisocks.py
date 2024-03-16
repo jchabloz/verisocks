@@ -1,7 +1,6 @@
 from verisocks.verisocks import Verisocks, VerisocksError
-import subprocess
+from verisocks.utils import setup_sim, find_free_port
 import os.path
-import shutil
 import pytest
 import logging
 import re
@@ -24,17 +23,24 @@ sim_info_product = "Icarus Verilog"
 sim_info_version = r"1[0-2]\.[0-9]+"
 
 
-def find_free_port():
-    with socket.socket() as s:
-        s.bind(('', 0))
-        return s.getsockname()[1]
+def setup_test(port):
+    pop = setup_sim(
+        LIBVPI,
+        "test_0.v",
+        cwd=os.path.dirname(__file__),
+        ivl_args=[
+            f"-DNUM_PORT={port}",
+            f"-DVS_TIMEOUT={VS_TIMEOUT}"
+        ]
+    )
+    return pop
 
 
 @pytest.fixture
 def vs():
     # Setup
     port = find_free_port()
-    pop = setup_iverilog(port, "test_0.v")
+    pop = setup_test(port)
     _vs = Verisocks(HOST, port)
     _vs.connect()
     yield _vs
@@ -45,41 +51,6 @@ def vs():
         logging.warning("Connection error - Cannot send finish command")
     _vs.close()
     pop.communicate(timeout=10)
-
-
-def get_abspath(relpath):
-    return os.path.join(os.path.dirname(__file__), relpath)
-
-
-def setup_iverilog(port, src_file):
-    """Elaborate and run the verilog testbench file provided as an argument
-
-    Args:
-        * src_file (str): Path to source file
-
-    Returns:
-        * pop: Popen instance for spawned process
-    """
-    src_file_path = get_abspath(src_file)
-    if not os.path.isfile(src_file_path):
-        raise FileNotFoundError
-    src_name = os.path.splitext(os.path.basename(src_file))[0]
-    vvp_file_path = get_abspath(f"{src_name}.vvp")
-    cmd = [
-        shutil.which("iverilog"),
-        "-o", vvp_file_path,
-        "-Wall",
-        f"-DNUM_PORT={port}",
-        f"-DVS_TIMEOUT={VS_TIMEOUT}",
-        src_file_path
-    ]
-    subprocess.check_call(cmd)
-    libvpi_path = get_abspath(LIBVPI)
-    cmd = [shutil.which("vvp"), "-lvvp.log", "-m", libvpi_path, vvp_file_path]
-    pop = subprocess.Popen(
-        cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    print(f"Launched Icarus with PID {pop.pid}")
-    return pop
 
 
 def test_connect(vs):
@@ -357,9 +328,17 @@ def test_sim_finishes(vs):
         _ = vs.run(cb="until_time", time=1200, time_unit="us")
 
 
+def test_exit():
+    port = find_free_port()
+    setup_test(port)
+    with Verisocks(HOST, port) as vs:
+        answer = vs.exit()
+        assert answer["type"] == "ack"
+
+
 def test_context_manager():
     port = find_free_port()
-    pop = setup_iverilog(port, "test_0.v")
+    pop = setup_test(port)
     with Verisocks(HOST, port) as vs:
         assert vs._connected
         answer = vs.finish()
