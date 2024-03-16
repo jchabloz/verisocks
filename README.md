@@ -1,7 +1,9 @@
 
 # Verisocks - *A generic socket interface for Icarus*
 
-[![Builds and test CI](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml)
+[![Builds and test CI badge](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml)
+[![Builds and deploy docs CI badge](https://github.com/jchabloz/verisocks/actions/workflows/builddocs.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/builddocs.yml)
+
 
 Repository: [**github.com/jchabloz/verisocks**](https://github.com/jchabloz/verisocks)<br>
 Documentation: [**jchabloz.github.io/verisocks**](https://jchabloz.github.io/verisocks/)
