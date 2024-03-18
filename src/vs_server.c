@@ -1,11 +1,32 @@
-/**
- * @file vs_server.c
- * @author jchabloz
- * @brief Verisocks TCP server
- * @version 0.1
- * @date 2022-08-17
- *
- */
+/**************************************************************************//**
+@file vs_server.c
+@author jchabloz
+@brief Verisocks TCP server
+@date 2022-08-17
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -76,12 +97,12 @@ int vs_server_make_socket(uint16_t num_port)
     s_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     /* Bind socket */
-	if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
+    if (bind(fd_socket, (struct sockaddr *) &s_addr , sizeof(s_addr)) < 0) {
         vs_log_mod_perror("vs_server",
             "Could not bind socket to given address");
         close(fd_socket);
         return -1;
-	}
+    }
 
     /* Listen */
     if (listen(fd_socket, VS_MAX_CONNECT_REQUEST) < 0) {

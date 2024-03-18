@@ -1,13 +1,31 @@
-/**
- * @file verisocks.c
- * @author jchabloz
- * @brief 
- * @version 0.1
- * @date 2022-08-27
- * 
- * @copyright Copyright (c) 2022
- * 
- */
+/**************************************************************************//**
+@file verisocks.c
+@author jchabloz
+@date 2022-08-27
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -259,7 +277,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
 
 /**
  * @brief Callback function - Used for for_time and until_time
- * 
+ *
  * @param cb_data Pointer to s_cb_data struct
  * @return Returns 0 if successful, -1 in case of error
  */
@@ -310,7 +328,7 @@ for command ...");
 
 /**
  * @brief Callback function - Used for for_until_change
- * 
+ *
  * @param cb_data Pointer to s_cb_data struct
  * @return Returns 0 if successful, -1 in case of error
  */
@@ -404,9 +422,9 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
 
 /**
  * @brief State machine main loop
- * 
- * @param p_vpi_data 
- * @return PLI_INT32 
+ *
+ * @param p_vpi_data
+ * @return PLI_INT32
  */
 static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
 {
@@ -446,9 +464,9 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             to VS_VPI_STATE_WAITING.*/
             return 0;
         case VS_VPI_STATE_EXIT:
-        	if (0 <= p_vpi_data->fd_server_socket) {
+            if (0 <= p_vpi_data->fd_server_socket) {
                 close(p_vpi_data->fd_server_socket);
-    		    p_vpi_data->fd_server_socket = -1;
+                p_vpi_data->fd_server_socket = -1;
             }
             if (NULL != p_vpi_data->p_cmd) {
                 cJSON_Delete(p_vpi_data->p_cmd);
@@ -459,9 +477,9 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
         case VS_VPI_STATE_ERROR:
         default:
             vs_vpi_log_error("Exiting main loop (error state)");
-        	if (0 <= p_vpi_data->fd_server_socket) {
+            if (0 <= p_vpi_data->fd_server_socket) {
                 close(p_vpi_data->fd_server_socket);
-    		    p_vpi_data->fd_server_socket = -1;
+                p_vpi_data->fd_server_socket = -1;
             }
             if (NULL != p_vpi_data->p_cmd) {
                 cJSON_Delete(p_vpi_data->p_cmd);
@@ -475,9 +493,9 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
 
 /**
  * @brief Static function to handle VS_VPI_STATE_CONNECT state
- * 
- * @param p_vpi_data 
- * @return PLI_INT32 
+ *
+ * @param p_vpi_data
+ * @return PLI_INT32
  */
 static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
 {
@@ -504,9 +522,9 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
 
 /**
  * @brief Static function to handle VS_VPI_STATE_WAITING state
- * 
- * @param p_vpi_data 
- * @return PLI_INT32 
+ *
+ * @param p_vpi_data
+ * @return PLI_INT32
  */
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {

@@ -1,10 +1,9 @@
-/**
+/**************************************************************************//**
 @file vs_logging_no_va.h
 @author jchabloz
 @brief Verisocks logging macros for C preprocessor without VA_OPT support
 @date 2024-03-17
-*/
-
+******************************************************************************/
 /*
 MIT License
 

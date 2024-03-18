@@ -1,13 +1,32 @@
-/**
- * @file vs_utils.c
- * @author jchabloz
- * @brief Utilities for Verisocks VPI
- * @version 0.1
- * @date 2022-09-30
- * 
- * @copyright Copyright (c) 2022
- * 
- */
+/**************************************************************************//**
+@file vs_utils.c
+@author jchabloz
+@brief Utilities for Verisocks VPI
+@date 2022-09-30
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <math.h>
 #include <string.h>
@@ -58,7 +77,7 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)
 
     double time_value = NAN;
     if (vpiSimTime == time.type) {
-	    PLI_UINT64 time_value_int =
+        PLI_UINT64 time_value_int =
             (PLI_UINT64) time.low + ((PLI_UINT64) time.high << 32u);
         time_value =
             time_value_int * pow(10.0, time_precision - time_factor);
