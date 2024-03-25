@@ -31,8 +31,6 @@ SOFTWARE.
 #ifndef VS_LOGGING_H
 #define VS_LOGGING_H
 
-#include <stdio.h>
-
 /* Define logging levels values */
 #define LEVEL_DEBUG 10
 #define LEVEL_INFO 20

@@ -31,6 +31,8 @@ SOFTWARE.
 #ifndef VS_LOGGING_VA_H
 #define VS_LOGGING_VA_H
 
+#include <stdio.h>
+
 /* Generic */
 #define VS_LOG_MODNAME(LEVEL, MODNAME, fmt, ...) \
     fprintf(stderr, LEVEL " [" MODNAME "]: " \
