@@ -50,25 +50,36 @@ template <class T> void VslInteg<T>::run() {
             break;
         case VSL_STATE_WAITING:
             main_wait();
+            break;
         case VSL_STATE_PROCESSING:
             main_process();
+            if (_state == VSL_STATE_PROCESSING) {
+                _state = VSL_STATE_WAITING;
+            }
+            break;
         case VSL_STATE_SIM_RUNNING:
+            main_run();
+            break;
         case VSL_STATE_EXIT:
-
+            if (0 <= fd_server_socket) {
+                close(fd_server_socket);
+                fd_server_socket = -1;
+                _is_connected = false;
+            }
+            return;
         case VSL_STATE_ERROR:
         default:
             vs_log_error("Exiting Verisocks main loop (error state)");
             if (0 <= fd_server_socket) {
                 close(fd_server_socket);
                 fd_server_socket = -1;
-                is_connected = false;
+                _is_connected = false;
             }
             return;
         } //switch (_state)
     }
     return;
 }
-
 
 
 template <class T> void VslInteg<T>::main_init() {
@@ -81,7 +92,6 @@ template <class T> void VslInteg<T>::main_init() {
     }
 
     /* Create server socket */
-    num_timeout_sec = timeout;
     fd_server_socket = vs_server_make_socket(num_port);
     if (0 > fd_server_socket) {
         vs_log_error("Issue making socket at port %d", num_port);
@@ -113,6 +123,18 @@ template <class T> void VslInteg<T>::main_init() {
     return;
 }
 
+
+template <class T> void VslInteg<T>::main_connect() {
+}
+
+template <class T> void VslInteg<T>::main_wait() {
+}
+
+template <class T> void VslInteg<T>::main_process() {
+}
+
+template <class T> void VslInteg<T>::main_run() {
+}
 
 
 

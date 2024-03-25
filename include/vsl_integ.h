@@ -66,6 +66,7 @@ private:
     void main_connect();
     void main_wait();
     void main_process();
+    void main_run();
 };
 
 
