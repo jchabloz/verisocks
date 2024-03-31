@@ -155,6 +155,16 @@ cJSON* vs_msg_read_json(const char *message);
 int vs_msg_write(int fd, const char *str_msg);
 
 /**
+ * @brief Return message to client.
+ *
+ * @param fd I/O descriptor (client)
+ * @param str_type Type
+ * @param str_value Value
+ * @return Returns 0 if successful, -1 if an error occurred
+ */
+int vs_msg_return(int fd, const char *str_type, const char *str_value);
+
+/**
  * @brief Reads formatted message from the given descriptor.
  *
  * @param fd I/O descriptor

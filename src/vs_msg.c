@@ -439,6 +439,59 @@ int vs_msg_write(int fd, const char *str_msg)
     return full_len - write_count;
 }
 
+/**************************************************************************//**
+ * Writes message to I/O (file) descriptor
+ *****************************************************************************/
+int vs_msg_return(int fd, const char *str_type, const char *str_value)
+{
+    cJSON *p_msg;
+    char *str_msg = NULL;
+
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_msg", "Could not create cJSON object");
+        return -1;
+    }
+
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
+        vs_log_mod_error("vs_msg", "Could not add string to object");
+        goto error;
+    }
+
+    if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
+        vs_log_mod_error("vs_msg", "Could not add string to object");
+        goto error;
+    }
+
+    #ifndef __cplusplus
+    str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+
+    int retval;
+    retval = vs_msg_write(fd, str_msg);
+    if (0 > retval) {
+        vs_log_mod_error("vs_msg", "Error writing return message");
+        goto error;
+    }
+
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return 0;
+
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return -1;
+}
+
 /******************************************************************************
  * Read messages
  *****************************************************************************/
