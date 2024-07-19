@@ -33,6 +33,7 @@ SOFTWARE.
 #define VS_MSG_H
 
 #include "cJSON.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

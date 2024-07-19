@@ -32,6 +32,8 @@ SOFTWARE.
 #define VS_SERVER_H
 
 #include <sys/time.h>
+#include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,7 +79,8 @@ int vs_server_make_socket(uint16_t num_port);
  * @param timeout Timeout
  * @return Returns the descriptor for the new connection, -1 in case of error.
  */
-int vs_server_accept(int fd_socket, char *hostname, const size_t len, struct timeval *timeout);
+int vs_server_accept(
+    int fd_socket, char *hostname, const size_t len, struct timeval *timeout);
 
 #ifdef __cplusplus
 }
