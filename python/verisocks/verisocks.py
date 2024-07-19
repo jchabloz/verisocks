@@ -114,6 +114,12 @@ class Verisocks:
             delay = self.connect_delay
 
         if not self._connected:
+
+            if self.sock is None:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.setblocking(True)
+                self.sock.settimeout(self._timeout)
+
             logging.info(f"Attempting connection to {self.address}")
             trial = 0
             while trial < trials:
