@@ -40,13 +40,13 @@ module spi_master(cs_b, mosi, miso, sclk);
     Variables
     **************************************************************************/
     reg cs_b, mosi, sclk;
-    reg [7:0] tx_buffer [6:0];
-    reg [7:0] rx_buffer [7:0];
+    reg [7:0] tx_buffer [6:0] /*verilator public*/;
+    reg [7:0] rx_buffer [7:0] /*verilator public*/;
     reg [7:0] rx_crc;
     reg [255:0] ascii_cmd_id;
     reg [255:0] ascii_ret_id;
     reg rx_crc_error;
-    event start_transaction;
+    event start_transaction /*verilator public*/;
     event end_transaction;
     integer transaction_counter;
 
