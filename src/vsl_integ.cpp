@@ -1,43 +1,77 @@
+/*
+MIT License
 
-#include <cstdlib>
-#include <cstdio>
-#include <type_traits>
-//#include <unistd.h>
-//#include <netdb.h>
-//#include <sys/time.h>
+Copyright (c) 2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 
 #include "vsl_integ.h"
-#include "verilated.h"
+
+//#include "verilated.h"
+//#include "verilated_vpi.h"
 #include "vs_server.h"
 #include "vs_logging.h"
+#include "vs_msg.h"
+//#include "cJSON.h"
 
+// #include <cstdlib>
+// #include <cstdio>
+//#include <type_traits>
+#include <unistd.h>
+#include <netdb.h>
+//#include <sys/time.h>
 
 namespace vsl{
 
-template <class T> VslInteg<T>::VslInteg(T* const _p_model__, const int port, const int timeout) {
-    static_assert(std::is_base_of<VerilatedModel, T>::value,
-        "Expected a Verilated model for type");
+/* Constructor */
+VslInteg::VslInteg(const int port, const int timeout) {
+    num_port = port;
+    num_timeout_sec = timeout;
+}
+/*
+template<class T> VslInteg::VslInteg(T* const _p_model__, const int port,
+  const int timeout) {
+    // static_assert(std::is_base_of<VerilatedModel, T>::value,
+    //     "Expected a Verilated model for type");
     p_model = _p_model__;
     num_port = port;
     num_timeout_sec = timeout;
 }
+*/
 
-
-template <class T> VslInteg<T>::~VslInteg() {
-    if (0 <= fd_server_socket) close(fd_server_socket);
-    if (NULL != p_cmd) cJSON_Delete(p_cmd);
+/* Destructor */
+VslInteg::~VslInteg() {
+    if (0 < fd_server_socket) close(fd_server_socket);
+    if (nullptr != p_cmd) cJSON_Delete(p_cmd);
 }
 
 
-template <class T> void VslInteg<T>::run() {
+void VslInteg::run() {
     printf("******************************************\n");
     printf("*  __   __       _             _         *\n");
     printf("*  \\ \\ / /__ _ _(_)___ ___  __| |__ ___  *\n");
     printf("*   \\ V / -_) '_| (_-</ _ \\/ _| / /(_-<  *\n");
     printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/  *\n");
     printf("*                                        *\n");
-    printf("*   For Verilator                        *\n");
-    printf("*   (c) 2022-2024 Jérémie Chabloz        *\n");
+    printf("*  For Verilator integration             *\n");
     printf("******************************************\n");
 
     while(true) {
@@ -58,7 +92,7 @@ template <class T> void VslInteg<T>::run() {
             }
             break;
         case VSL_STATE_SIM_RUNNING:
-            main_run();
+            main_sim();
             break;
         case VSL_STATE_EXIT:
             if (0 <= fd_server_socket) {
@@ -69,7 +103,8 @@ template <class T> void VslInteg<T>::run() {
             return;
         case VSL_STATE_ERROR:
         default:
-            vs_log_error("Exiting Verisocks main loop (error state)");
+            vs_log_mod_error("vsl",
+                "Exiting Verisocks main loop (error state)");
             if (0 <= fd_server_socket) {
                 close(fd_server_socket);
                 fd_server_socket = -1;
@@ -82,11 +117,11 @@ template <class T> void VslInteg<T>::run() {
 }
 
 
-template <class T> void VslInteg<T>::main_init() {
-   
+void VslInteg::main_init() {
+
     /* Check state consistency */
     if (_state != VSL_STATE_INIT) {
-        vs_log_error("Wrong state in init function %d", _state);
+        vs_log_mod_error("vsl", "Wrong state in init function %d", _state);
         _state = VSL_STATE_ERROR;
         return;
     }
@@ -94,7 +129,7 @@ template <class T> void VslInteg<T>::main_init() {
     /* Create server socket */
     fd_server_socket = vs_server_make_socket(num_port);
     if (0 > fd_server_socket) {
-        vs_log_error("Issue making socket at port %d", num_port);
+        vs_log_mod_error("vsl", "Issue making socket at port %d", num_port);
         _state = VSL_STATE_ERROR;
         return;
     }
@@ -103,20 +138,20 @@ template <class T> void VslInteg<T>::main_init() {
     struct sockaddr_in sin;
     socklen_t len = sizeof(sin);
     if (0 > getsockname(fd_server_socket, (struct sockaddr *) &sin, &len)) {
-        vs_log_error("Issue getting socket address info");
+        vs_log_mod_error("vsl", "Issue getting socket address info");
         _state = VSL_STATE_ERROR;
         return;
     }
     uint32_t s_addr = ntohl(sin.sin_addr.s_addr);
 
     /* Logs server address and port number */
-    vs_log_info("Server address: %d.%d.%d.%d",
+    vs_log_mod_info("vsl", "Server address: %d.%d.%d.%d",
         (s_addr & 0xff000000) >> 24u,
         (s_addr & 0x00ff0000) >> 16u,
         (s_addr & 0x0000ff00) >> 8u,
         (s_addr & 0x000000ff)
     );
-    vs_log_info("Port: %d", ntohs(sin.sin_port));
+    vs_log_mod_info("vsl", "Port: %d", ntohs(sin.sin_port));
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -124,21 +159,87 @@ template <class T> void VslInteg<T>::main_init() {
 }
 
 
-template <class T> void VslInteg<T>::main_connect() {
+void VslInteg::main_connect() {
+    char hostname_buffer[128];
+    struct timeval timeout;
+    timeout.tv_sec = num_timeout_sec;
+    timeout.tv_usec = 0;
+
+    vs_log_mod_debug(
+        "vsl",
+        "Waiting for a client to connect (%ds timeout) ...",
+        (int) timeout.tv_sec);
+    fd_client_socket = vs_server_accept(
+        fd_server_socket, hostname_buffer, sizeof(hostname_buffer), &timeout);
+    if (0 > fd_client_socket) {
+        vs_log_mod_error("vsl", "Failed to connect");
+        _state = VSL_STATE_ERROR;
+        return;
+    }
+    vs_log_mod_info("vsl", "Connected to %s", hostname_buffer);
+    _state = VSL_STATE_WAITING;
+    return;
 }
 
-template <class T> void VslInteg<T>::main_wait() {
+
+void VslInteg::main_wait() {
+    char read_buffer[4096];
+    int msg_len;
+    msg_len = vs_msg_read(fd_client_socket,
+                          read_buffer,
+                          sizeof(read_buffer));
+    if (0 > msg_len) {
+        close(fd_client_socket);
+        vs_log_mod_debug(
+            "vsl",
+            "Lost connection. Waiting for a client to (re-)connect ..."
+        );
+        _state = VSL_STATE_CONNECT;
+        return;
+    }
+    if (msg_len >= (int) sizeof(read_buffer)) {
+        read_buffer[sizeof(read_buffer) - 1] = '\0';
+        vs_log_mod_warning(
+            "vsl",
+            "Received message longer than RX buffer, discarding it"
+        );
+        vs_msg_return(fd_client_socket, "error",
+            "Message too long - Discarding");
+        return;
+    }
+    else {
+        read_buffer[msg_len] = '\0';
+    }
+    vs_log_mod_debug("vsl", "Message: %s", &read_buffer[2]);
+    p_cmd = vs_msg_read_json(read_buffer);
+    if (nullptr != p_cmd) {
+        _state = VSL_STATE_PROCESSING;
+        return;
+    }
+    vs_log_mod_warning(
+        "vsl",
+        "Received message content cannot be interpreted as a valid JSON \
+content. Discarding it."
+    );
+    vs_msg_return(fd_client_socket, "error",
+        "Invalid message content - Discarding");
+    return;
 }
 
-template <class T> void VslInteg<T>::main_process() {
+
+void VslInteg::main_process() {
+    vs_log_mod_info("vsl", "Processing command"); 
+    //TODO
+    vs_msg_return(fd_client_socket, "info", "Command processing not yet implemented");
+    _state = VSL_STATE_WAITING;
 }
 
-template <class T> void VslInteg<T>::main_run() {
+
+void VslInteg::main_sim() {
+    vs_log_mod_info("vsl", "Simulation ongoing"); 
+    //TODO
 }
-
-
 
 } //namespace vsl
 
-int main() { } //Temporary for compilation
 //EOF

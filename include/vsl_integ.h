@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2024 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,10 +25,10 @@ SOFTWARE.
 #ifndef VSL_INTEG_H
 #define VSL_INTEG_H
 
-#include <memory>
 #include "cJSON.h"
 #include "verilated.h"
 
+#include <memory>
 
 namespace vsl{
 
@@ -43,18 +43,21 @@ typedef enum {
 } vsl_state_t;
 
 
-template <class T> class VslInteg {
+class VslInteg {
 
 public:
-    VslInteg(T* const model, const int port=5100, const int timeout=120);
+    //VslInteg(VerilatedModel* const model, const int port=5100, const int timeout=120);
+    VslInteg(const int port=5100, const int timeout=120);
     ~VslInteg();
-    
+
     void run();
 
 private:
+
+    //VerilatedModel* p_model; //Pointer to VerilatedModel derived class
+
     vsl_state_t _state {VSL_STATE_INIT}; //Verisocks state
-    T* p_model; //Pointer to VerilatedModel derived class
-    cJSON* p_cmd; //Pointer to current/latest command
+    cJSON* p_cmd {nullptr}; //Pointer to current/latest command
 
     int num_port {5100}; // Port number
     int num_timeout_sec {120}; //Timeout, in seconds
@@ -66,57 +69,34 @@ private:
     void main_connect();
     void main_wait();
     void main_process();
-    void main_run();
+    void main_sim();
+
 };
-
-
-/*Use a collection of type map associate key and command handler function
- * pointers together*/
-
-/*
-What do we need to have here and in the accompanying .cc file?
-
-* One class that:
-    * encapsulates the top-level state machine for the Verisocks Verilator
-      integration
-    * members
-        * Verilator context (pointer)
-        * simulation/verisocks state
-        * server socket current timeout setting
-        * descriptor for server socket
-        * descriptor for the currently connected client socket
-        * pointer to current/latest received command (CJSON*)
-    * methods:
-        * Constructor
-        * Destructor
-        * main Verisocks loop (state machine)
-
-* Command handler function table
-* Command handler sub-functions table(s)
-* One class or struct that represents signals that can be used in
-  Verisocks commands. Maybe this class already exists and is defined in
-  verilated.h.
-* Find a way to register callbacks - either based on simulation time or based
-  on signal values
-
-
-
-* One enumeration that defines a type to support the different possible states
-  of the top-level state machine
-*/
 
 
 
 /**
  * @brief Type for a command handler function pointer
  */
-typedef int (*vsl_cmd_handler_t)(void);
+typedef void (*vsl_cmd_handler_t)(void);
+
+/**
+ * @brief Struct type for commands
+ * Associates a command name with a command handler function pointer
+ */
+typedef struct vsl_cmd {
+    vsl_cmd_handler_t cmd_handler;  // Pointer to handler function
+    const char *cmd_name;           // Command name
+    const char *cmd_key;            // Command key if not cmd_name, NULL otherwise
+} vsl_cmd_t;
+
+
 
 /**
  * @brief Helper macro to declare a command handler function
  * @param cmd Command short name
  */
-#define VSL_CMD_HANDLER(cmd) static int VSL_ ## cmd ## _cmd_handler()
+#define VSL_CMD_HANDLER(cmd) static void VSL_ ## cmd ## _cmd_handler()
 
 /**
  * @brief Helper marco to define a command structure with a command name and
