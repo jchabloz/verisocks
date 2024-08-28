@@ -171,4 +171,25 @@ int vs_server_accept(int fd_socket, char *hostname, const size_t len,
     return -1;
 }
 
+void vs_server_close_socket(int fd_socket)
+{
+    close(fd_socket);
+}
+
+vs_sock_addr_t vs_server_get_address(int fd_socket)
+{
+    struct sockaddr_in sin;
+    socklen_t len = sizeof(sin);
+    if (0 > getsockname(fd_socket, (struct sockaddr *) &sin, &len)) {
+        vs_log_mod_error("vs_server", "Issue getting socket address info");
+        vs_sock_addr_t socket_address = {0, 0};
+        return socket_address;
+    }
+    vs_sock_addr_t socket_address = {
+        ntohl(sin.sin_addr.s_addr),
+        ntohs(sin.sin_port)
+    };
+    return socket_address;
+}
+
 //EOF

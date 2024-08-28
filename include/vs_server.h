@@ -41,6 +41,12 @@ extern "C" {
 
 #define VS_MAX_CONNECT_REQUEST 3
 
+typedef struct {
+    uint32_t address;
+    uint32_t port;
+} vs_sock_addr_t;
+
+
 /**
  * @brief Checks if a socket descriptor is non-blocking.
  *
@@ -54,7 +60,8 @@ int vs_server_is_nonblock(int fd_socket);
  * @brief Sets the non-blocking behavior of a socket descriptor.
  *
  * @param fd_socket Socket descriptor.
- * @param nonblock If > 0, the socket will be changed to non-blocking, if 0, to blocking.
+ * @param nonblock If > 0, the socket will be changed to non-blocking, if 0, to
+ * blocking.
  * @return Returns 0 if successful, -1 in case of error.
  */
 int vs_server_set_nonblock(int fd_socket, int nonblock);
@@ -81,6 +88,21 @@ int vs_server_make_socket(uint16_t num_port);
  */
 int vs_server_accept(
     int fd_socket, char *hostname, const size_t len, struct timeval *timeout);
+
+/**
+ * @brief Closes the server socket
+ * 
+ * @param fd_socket Socket descriptor
+ */
+void vs_server_close_socket(int fd_socket);
+
+/**
+ * @brief Return the server socket address
+ * 
+ * @param fd_socket Socket descriptor
+ * @return uint32_t 32-bit address number
+ */
+vs_sock_addr_t vs_server_get_address(int fd_socket);
 
 #ifdef __cplusplus
 }

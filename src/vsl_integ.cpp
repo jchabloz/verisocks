@@ -30,14 +30,7 @@ SOFTWARE.
 #include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
-//#include "cJSON.h"
-
-// #include <cstdlib>
-// #include <cstdio>
-//#include <type_traits>
-#include <unistd.h>
-#include <netdb.h>
-//#include <sys/time.h>
+#include "cJSON.h"
 
 namespace vsl{
 
@@ -59,8 +52,8 @@ template<class T> VslInteg::VslInteg(T* const _p_model__, const int port,
 
 /* Destructor */
 VslInteg::~VslInteg() {
-    if (0 < fd_server_socket) close(fd_server_socket);
-    if (nullptr != p_cmd) cJSON_Delete(p_cmd);
+    if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
+    if (nullptr != p_cmd) cJSON_Delete(p_cmd.get());
 }
 
 
@@ -96,7 +89,7 @@ void VslInteg::run() {
             break;
         case VSL_STATE_EXIT:
             if (0 <= fd_server_socket) {
-                close(fd_server_socket);
+                vs_server_close_socket(fd_server_socket);
                 fd_server_socket = -1;
                 _is_connected = false;
             }
@@ -106,7 +99,7 @@ void VslInteg::run() {
             vs_log_mod_error("vsl",
                 "Exiting Verisocks main loop (error state)");
             if (0 <= fd_server_socket) {
-                close(fd_server_socket);
+                vs_server_close_socket(fd_server_socket);
                 fd_server_socket = -1;
                 _is_connected = false;
             }
@@ -135,23 +128,16 @@ void VslInteg::main_init() {
     }
 
     /* Get server socket address */
-    struct sockaddr_in sin;
-    socklen_t len = sizeof(sin);
-    if (0 > getsockname(fd_server_socket, (struct sockaddr *) &sin, &len)) {
-        vs_log_mod_error("vsl", "Issue getting socket address info");
-        _state = VSL_STATE_ERROR;
-        return;
-    }
-    uint32_t s_addr = ntohl(sin.sin_addr.s_addr);
+    vs_sock_addr_t socket_address = vs_server_get_address(fd_server_socket);
 
     /* Logs server address and port number */
     vs_log_mod_info("vsl", "Server address: %d.%d.%d.%d",
-        (s_addr & 0xff000000) >> 24u,
-        (s_addr & 0x00ff0000) >> 16u,
-        (s_addr & 0x0000ff00) >> 8u,
-        (s_addr & 0x000000ff)
+        (socket_address.address & 0xff000000) >> 24u,
+        (socket_address.address & 0x00ff0000) >> 16u,
+        (socket_address.address & 0x0000ff00) >> 8u,
+        (socket_address.address & 0x000000ff)
     );
-    vs_log_mod_info("vsl", "Port: %d", ntohs(sin.sin_port));
+    vs_log_mod_info("vsl", "Port: %d", socket_address.port);
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -184,12 +170,12 @@ void VslInteg::main_connect() {
 
 void VslInteg::main_wait() {
     char read_buffer[4096];
-    int msg_len;
+    size_t msg_len;
     msg_len = vs_msg_read(fd_client_socket,
                           read_buffer,
                           sizeof(read_buffer));
     if (0 > msg_len) {
-        close(fd_client_socket);
+        vs_server_close_socket(fd_client_socket);
         vs_log_mod_debug(
             "vsl",
             "Lost connection. Waiting for a client to (re-)connect ..."
@@ -197,7 +183,7 @@ void VslInteg::main_wait() {
         _state = VSL_STATE_CONNECT;
         return;
     }
-    if (msg_len >= (int) sizeof(read_buffer)) {
+    if (msg_len >= sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
         vs_log_mod_warning(
             "vsl",
@@ -211,7 +197,7 @@ void VslInteg::main_wait() {
         read_buffer[msg_len] = '\0';
     }
     vs_log_mod_debug("vsl", "Message: %s", &read_buffer[2]);
-    p_cmd = vs_msg_read_json(read_buffer);
+    p_cmd.reset(vs_msg_read_json(read_buffer));
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;

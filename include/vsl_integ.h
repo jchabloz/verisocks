@@ -26,21 +26,22 @@ SOFTWARE.
 #define VSL_INTEG_H
 
 #include "cJSON.h"
-#include "verilated.h"
+//#include "verilated.h"
 
 #include <memory>
 
 namespace vsl{
 
-typedef enum {
+// typedef enum {
+enum VslState {
     VSL_STATE_INIT,        ///Initial state, Verisocks server socket not initialized
     VSL_STATE_CONNECT,     ///Socket created, bound to address, waiting for connection
     VSL_STATE_WAITING,     ///Connected and waiting to receive next command
     VSL_STATE_PROCESSING,  ///Processing a command
     VSL_STATE_SIM_RUNNING, ///Simulation running
     VSL_STATE_EXIT,        ///Exiting Verisocks
-    VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
-} vsl_state_t;
+    VSL_STATE_ERROR};        ///Error state (e.g. timed out while waiting for a connection)
+// } VslState;
 
 
 class VslInteg {
@@ -56,8 +57,9 @@ private:
 
     //VerilatedModel* p_model; //Pointer to VerilatedModel derived class
 
-    vsl_state_t _state {VSL_STATE_INIT}; //Verisocks state
-    cJSON* p_cmd {nullptr}; //Pointer to current/latest command
+    VslState _state {VSL_STATE_INIT}; //Verisocks state
+    std::unique_ptr<cJSON> p_cmd {nullptr};
+    //cJSON* p_cmd {nullptr}; //Pointer to current/latest command
 
     int num_port {5100}; // Port number
     int num_timeout_sec {120}; //Timeout, in seconds
