@@ -39,23 +39,7 @@ SOFTWARE.
  * @brief Helper macro to declare a command handler function
  * @param cmd Command short name
  */
-#define VSL_CMD_HANDLER(cmd) void VSL_ ## cmd ## _cmd_handler()
-#define VSL_INTEG_CMD_HANDLER(cmd) void VslInteg::VSL_ ## cmd ## _cmd_handler()
-
-/**
- * @brief Helper marco to define a command structure with a command name and
- * associated command handler function pointer.
- * @param cmd Command short name
- */
-#define VSL_CMD(cmd) {#cmd, VSL_ ## cmd ## _cmd_handler()}
-
-/**
- * @brief Helper macro to define a command structure with a command name and
- * associated command handler function pointer.
- * @param cmd Command short name
- * @param key Command selection key
- */
-#define VSL_CMDKEY(cmd, key) {VSL_ ## cmd ## _cmd_handler, #cmd, #key}
+#define VSL_CMD_HANDLER(cmd) void VSL_ ## cmd ## _cmd_handler(VslInteg& vx)
 
 
 namespace vsl{
@@ -68,12 +52,9 @@ enum VslState {
     VSL_STATE_PROCESSING,  ///Processing a command
     VSL_STATE_SIM_RUNNING, ///Simulation running
     VSL_STATE_EXIT,        ///Exiting Verisocks
-    VSL_STATE_ERROR};      ///Error state (e.g. timed out while waiting for a connection)
-// } VslState;
+    VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
+};
 
-
-// using vsl_cmd_handler_t = std::function<void()>;
-// typedef void (*vsl_cmd_handler_t)(VslInteg&);
 
 class VslInteg {
 
@@ -85,11 +66,7 @@ public:
     void run();
 
 private:
-
-    //VerilatedModel* p_model; //Pointer to VerilatedModel derived class
-
     VslState _state {VSL_STATE_INIT}; //Verisocks state
-    //std::unique_ptr<cJSON> p_cmd {nullptr}; //Pointer to current/latest command
     cJSON* p_cmd {nullptr}; //Pointer to current/latest command
     std::unordered_map<std::string, void (*)(VslInteg&)> cmd_handlers_map {};
 
@@ -105,7 +82,8 @@ private:
     void main_process();
     void main_sim();
 
-    friend void VSL_info_cmd_handler(VslInteg&);
+    friend VSL_CMD_HANDLER(info);
+    // friend void VSL_info_cmd_handler(VslInteg&);
 
     // VSL_CMD_HANDLER(info);
     // VSL_CMD_HANDLER(finish);

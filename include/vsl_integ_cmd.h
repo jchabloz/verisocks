@@ -29,7 +29,7 @@ SOFTWARE.
 
 namespace vsl {
 
-void VSL_info_cmd_handler(VslInteg& vx);
+VSL_CMD_HANDLER(info);
 
 } //namespace vsl
 

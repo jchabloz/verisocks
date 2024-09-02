@@ -9,7 +9,7 @@
 
 namespace vsl {
 
-void VSL_info_cmd_handler(VslInteg& vx) {
+VSL_CMD_HANDLER(info) {
     char *str_val;
 
     vs_log_mod_info("vsl", "Command \"info\" received");
