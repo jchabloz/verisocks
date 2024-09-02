@@ -198,6 +198,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         break;
     case VS_MSG_TXT_JSON :
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
+        vs_log_mod_debug("vs_msg", "Preparing message: %s", str_msg);
         break;
     case VS_MSG_BIN :
         break;
