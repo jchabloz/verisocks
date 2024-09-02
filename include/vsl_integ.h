@@ -28,7 +28,35 @@ SOFTWARE.
 #include "cJSON.h"
 //#include "verilated.h"
 
+#include <functional>
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <map>
+
+
+/**
+ * @brief Helper macro to declare a command handler function
+ * @param cmd Command short name
+ */
+#define VSL_CMD_HANDLER(cmd) void VSL_ ## cmd ## _cmd_handler()
+#define VSL_INTEG_CMD_HANDLER(cmd) void VslInteg::VSL_ ## cmd ## _cmd_handler()
+
+/**
+ * @brief Helper marco to define a command structure with a command name and
+ * associated command handler function pointer.
+ * @param cmd Command short name
+ */
+#define VSL_CMD(cmd) {#cmd, VSL_ ## cmd ## _cmd_handler()}
+
+/**
+ * @brief Helper macro to define a command structure with a command name and
+ * associated command handler function pointer.
+ * @param cmd Command short name
+ * @param key Command selection key
+ */
+#define VSL_CMDKEY(cmd, key) {VSL_ ## cmd ## _cmd_handler, #cmd, #key}
+
 
 namespace vsl{
 
@@ -40,9 +68,12 @@ enum VslState {
     VSL_STATE_PROCESSING,  ///Processing a command
     VSL_STATE_SIM_RUNNING, ///Simulation running
     VSL_STATE_EXIT,        ///Exiting Verisocks
-    VSL_STATE_ERROR};        ///Error state (e.g. timed out while waiting for a connection)
+    VSL_STATE_ERROR};      ///Error state (e.g. timed out while waiting for a connection)
 // } VslState;
 
+
+// using vsl_cmd_handler_t = std::function<void()>;
+// typedef void (*vsl_cmd_handler_t)(VslInteg&);
 
 class VslInteg {
 
@@ -58,8 +89,9 @@ private:
     //VerilatedModel* p_model; //Pointer to VerilatedModel derived class
 
     VslState _state {VSL_STATE_INIT}; //Verisocks state
-    std::unique_ptr<cJSON> p_cmd {nullptr};
-    //cJSON* p_cmd {nullptr}; //Pointer to current/latest command
+    //std::unique_ptr<cJSON> p_cmd {nullptr}; //Pointer to current/latest command
+    cJSON* p_cmd {nullptr}; //Pointer to current/latest command
+    std::unordered_map<std::string, void (*)(VslInteg&)> cmd_handlers_map {};
 
     int num_port {5100}; // Port number
     int num_timeout_sec {120}; //Timeout, in seconds
@@ -73,47 +105,33 @@ private:
     void main_process();
     void main_sim();
 
+    friend void VSL_info_cmd_handler(VslInteg&);
+
+    // VSL_CMD_HANDLER(info);
+    // VSL_CMD_HANDLER(finish);
+    // VSL_CMD_HANDLER(stop);
+    // VSL_CMD_HANDLER(exit);
+    // VSL_CMD_HANDLER(run);
+    // VSL_CMD_HANDLER(get);
+    // VSL_CMD_HANDLER(set);
 };
 
-
+// void VSL_info_cmd_handler(VslInteg&);
 
 /**
  * @brief Type for a command handler function pointer
  */
-typedef void (*vsl_cmd_handler_t)(void);
+// typedef void (*vsl_cmd_handler_t)(void);
 
 /**
  * @brief Struct type for commands
  * Associates a command name with a command handler function pointer
  */
-typedef struct vsl_cmd {
-    vsl_cmd_handler_t cmd_handler;  // Pointer to handler function
-    const char *cmd_name;           // Command name
-    const char *cmd_key;            // Command key if not cmd_name, NULL otherwise
-} vsl_cmd_t;
-
-
-
-/**
- * @brief Helper macro to declare a command handler function
- * @param cmd Command short name
- */
-#define VSL_CMD_HANDLER(cmd) static void VSL_ ## cmd ## _cmd_handler()
-
-/**
- * @brief Helper marco to define a command structure with a command name and
- * associated command handler function pointer.
- * @param cmd Command short name
- */
-#define VSL_CMD(cmd) {VSL_ ## cmd ## _cmd_handler, #cmd, NULL}
-
-/**
- * @brief Helper macro to define a command structure with a command name and
- * associated command handler function pointer.
- * @param cmd Command short name
- * @param key Command selection key
- */
-#define VSL_CMDKEY(cmd, key) {VSL_ ## cmd ## _cmd_handler, #cmd, #key}
+// typedef struct vsl_cmd {
+//     vsl_cmd_handler_t cmd_handler;  // Pointer to handler function
+//     const char *cmd_name;           // Command name
+//     const char *cmd_key;            // Command key if not cmd_name, NULL otherwise
+// } vsl_cmd_t;
 
 
 } //namespace vsl

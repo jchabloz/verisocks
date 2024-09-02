@@ -22,15 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 #include "vsl_integ.h"
 
-//#include "verilated.h"
-//#include "verilated_vpi.h"
+#include "vsl_integ_cmd.h"
 #include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "cJSON.h"
+
+#include <string>
+
+//#include "verilated.h"
+//#include "verilated_vpi.h"
 
 namespace vsl{
 
@@ -38,22 +41,16 @@ namespace vsl{
 VslInteg::VslInteg(const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
+    cmd_handlers_map["info"] = VSL_info_cmd_handler;
+    return;
 }
-/*
-template<class T> VslInteg::VslInteg(T* const _p_model__, const int port,
-  const int timeout) {
-    // static_assert(std::is_base_of<VerilatedModel, T>::value,
-    //     "Expected a Verilated model for type");
-    p_model = _p_model__;
-    num_port = port;
-    num_timeout_sec = timeout;
-}
-*/
+
 
 /* Destructor */
 VslInteg::~VslInteg() {
     if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
-    if (nullptr != p_cmd) cJSON_Delete(p_cmd.get());
+    if (nullptr != p_cmd) cJSON_Delete(p_cmd);
+    return;
 }
 
 
@@ -64,7 +61,8 @@ void VslInteg::run() {
     printf("*   \\ V / -_) '_| (_-</ _ \\/ _| / /(_-<  *\n");
     printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/  *\n");
     printf("*                                        *\n");
-    printf("*  For Verilator integration             *\n");
+    printf("*         Verilator integration          *\n");
+    printf("*   Copyright (c) 2024 Jérémie Chabloz   *\n");
     printf("******************************************\n");
 
     while(true) {
@@ -170,12 +168,13 @@ void VslInteg::main_connect() {
 
 void VslInteg::main_wait() {
     char read_buffer[4096];
-    size_t msg_len;
+    int msg_len;
     msg_len = vs_msg_read(fd_client_socket,
                           read_buffer,
                           sizeof(read_buffer));
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
+        fd_client_socket = -1;
         vs_log_mod_debug(
             "vsl",
             "Lost connection. Waiting for a client to (re-)connect ..."
@@ -183,7 +182,7 @@ void VslInteg::main_wait() {
         _state = VSL_STATE_CONNECT;
         return;
     }
-    if (msg_len >= sizeof(read_buffer)) {
+    if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
         vs_log_mod_warning(
             "vsl",
@@ -197,7 +196,10 @@ void VslInteg::main_wait() {
         read_buffer[msg_len] = '\0';
     }
     vs_log_mod_debug("vsl", "Message: %s", &read_buffer[2]);
-    p_cmd.reset(vs_msg_read_json(read_buffer));
+    if (nullptr != p_cmd) {
+        cJSON_Delete(p_cmd);
+    }
+    p_cmd = vs_msg_read_json(read_buffer);
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;
@@ -214,16 +216,51 @@ content. Discarding it."
 
 
 void VslInteg::main_process() {
-    vs_log_mod_info("vsl", "Processing command"); 
-    //TODO
-    vs_msg_return(fd_client_socket, "info", "Command processing not yet implemented");
+    std::string str_cmd;
+    cJSON *p_item_cmd;
+
+    /* Get the command field from the JSON message content */
+    p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
+    if (nullptr == p_item_cmd) {
+        vs_log_mod_error("vsl", "Command field invalid/not found");
+        vs_msg_return(fd_client_socket, "error",
+            "Error processing command. Discarding.");
+        _state = VSL_STATE_WAITING;
+        return;
+    }
+
+    /* Get the command as a string */
+    str_cmd = std::string(cJSON_GetStringValue(p_item_cmd));
+    if (str_cmd.empty() == true) {
+        vs_log_mod_error("vsl", "Command field empty/null");
+        vs_msg_return(fd_client_socket, "error",
+            "Error processing command. Discarding.");
+        _state = VSL_STATE_WAITING;
+        return;
+    }
+    vs_log_mod_debug("vsl", "Processing command %s", str_cmd.c_str());
+
+    /* Look up command handler */
+    auto search = cmd_handlers_map.find(str_cmd);
+    if (search != cmd_handlers_map.end()) {
+        cmd_handlers_map[str_cmd](*this);
+        _state = VSL_STATE_WAITING;
+        return;
+    }
+
+    vs_log_mod_error("vsl", "Handler for command %s not found",
+        str_cmd.c_str());
+    vs_msg_return(fd_client_socket, "error",
+        "Could not find handler for command. Discarding.");
     _state = VSL_STATE_WAITING;
+    return;
 }
 
 
 void VslInteg::main_sim() {
     vs_log_mod_info("vsl", "Simulation ongoing"); 
-    //TODO
+    //TODO - implement Verilator simulation code
+    return;
 }
 
 } //namespace vsl
