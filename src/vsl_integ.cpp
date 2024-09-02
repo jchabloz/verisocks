@@ -41,7 +41,13 @@ namespace vsl{
 VslInteg::VslInteg(const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
-    cmd_handlers_map["info"] = VSL_info_cmd_handler;
+    VSL_CMD_HANDLER_MAP(info);
+    //VSL_CMD_HANDLER_MAP(finish);
+    //VSL_CMD_HANDLER_MAP(stop);
+    //VSL_CMD_HANDLER_MAP(exit);
+    //VSL_CMD_HANDLER_MAP(run);
+    //VSL_CMD_HANDLER_MAP(get);
+    //VSL_CMD_HANDLER_MAP(set);
     return;
 }
 

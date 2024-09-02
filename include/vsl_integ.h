@@ -42,6 +42,15 @@ SOFTWARE.
 #define VSL_CMD_HANDLER(cmd) void VSL_ ## cmd ## _cmd_handler(VslInteg& vx)
 
 
+/**
+ * @brief Helper macro to add a command handler function to the command handler
+ * map
+ * @param cmd Command short name
+ */
+#define VSL_CMD_HANDLER_MAP(cmd) cmd_handlers_map[#cmd] = \
+    VSL_ ## cmd ## _cmd_handler
+
+
 namespace vsl{
 
 // typedef enum {
@@ -83,15 +92,12 @@ private:
     void main_sim();
 
     friend VSL_CMD_HANDLER(info);
-    // friend void VSL_info_cmd_handler(VslInteg&);
-
-    // VSL_CMD_HANDLER(info);
-    // VSL_CMD_HANDLER(finish);
-    // VSL_CMD_HANDLER(stop);
-    // VSL_CMD_HANDLER(exit);
-    // VSL_CMD_HANDLER(run);
-    // VSL_CMD_HANDLER(get);
-    // VSL_CMD_HANDLER(set);
+    // friend VSL_CMD_HANDLER(finish);
+    // friend VSL_CMD_HANDLER(stop);
+    // friend VSL_CMD_HANDLER(exit);
+    // friend VSL_CMD_HANDLER(run);
+    // friend VSL_CMD_HANDLER(get);
+    // friend VSL_CMD_HANDLER(set);
 };
 
 // void VSL_info_cmd_handler(VslInteg&);

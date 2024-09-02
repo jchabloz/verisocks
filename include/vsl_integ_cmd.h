@@ -30,6 +30,12 @@ SOFTWARE.
 namespace vsl {
 
 VSL_CMD_HANDLER(info);
+//VSL_CMD_HANDLER(finish);
+//VSL_CMD_HANDLER(stop);
+//VSL_CMD_HANDLER(exit);
+//VSL_CMD_HANDLER(run);
+//VSL_CMD_HANDLER(get);
+//VSL_CMD_HANDLER(set);
 
 } //namespace vsl
 
