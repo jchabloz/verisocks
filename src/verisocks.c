@@ -555,6 +555,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
         read_buffer[msg_len] = '\0';
     }
     vs_vpi_log_debug("Message: %s", &read_buffer[2]);
+    if (NULL != p_vpi_data->p_cmd) cJSON_Delete(p_vpi_data->p_cmd);
     p_vpi_data->p_cmd = vs_msg_read_json(read_buffer);
     if (NULL != p_vpi_data->p_cmd) {
         p_vpi_data->state = VS_VPI_STATE_PROCESSING;
