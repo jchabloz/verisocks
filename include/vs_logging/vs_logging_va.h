@@ -31,7 +31,11 @@ SOFTWARE.
 #ifndef VS_LOGGING_VA_H
 #define VS_LOGGING_VA_H
 
+#ifdef __cplusplus
+#include <cstdio>
+#else
 #include <stdio.h>
+#endif
 
 /* Generic */
 #define VS_LOG_MODNAME(LEVEL, MODNAME, fmt, ...) \
