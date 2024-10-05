@@ -25,7 +25,6 @@ SOFTWARE.
 #ifndef VSL_INTEG_HPP
 #define VSL_INTEG_HPP
 
-
 #include "cJSON.h"
 #include "vs_server.h"
 #include "vs_logging.h"
@@ -34,7 +33,6 @@ SOFTWARE.
 
 #include <cstdio>
 #include <functional>
-// #include <memory>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -108,7 +106,7 @@ private:
     */
     static void VSL_CMD_HANDLER(info);
     static void VSL_CMD_HANDLER(get);
-    // static void VSL_CMD_HANDLER(get_sim_info);
+    static void VSL_CMD_HANDLER(get_sim_info);
     // static void VSL_CMD_HANDLER(get_sim_time);
     // static void VSL_CMD_HANDLER(get_value);
     // static void VSL_CMD_HANDLER(get_type);
@@ -141,6 +139,7 @@ VslInteg<T>::VslInteg(const T* p_model, const int port, const int timeout) {
     // Add command handlers functions to the map
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
+    sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
     return;
 }
 
@@ -362,7 +361,7 @@ void VslInteg<T>::main_process() {
     }
     vs_log_mod_debug("vsl", "Processing command %s", str_cmd.c_str());
 
-    /* Look up command handler */
+    /* Look up and execute command handler */
     auto search = cmd_handlers_map.find(str_cmd);
     if (search != cmd_handlers_map.end()) {
         cmd_handlers_map[str_cmd](*this);
@@ -388,94 +387,9 @@ void VslInteg<T>::main_sim() {
     return;
 }
 
-/******************************************************************************
-Info command handler
-******************************************************************************/
-template<typename T>
-void VslInteg<T>::VSL_CMD_HANDLER(info) {
-    char *str_val;
-
-    vs_log_mod_info("vsl", "Command \"info\" received");
-
-    auto handle_error = [&vx]()
-    {
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command info - Discarding");
-        vx._state = VSL_STATE_WAITING;
-    };
-
-    /* Get the value from the JSON message content */
-    cJSON *p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
-    if (nullptr == p_item_val) {
-        vs_log_mod_error("vsl", "Command field \"value\" invalid/not found");
-        handle_error();
-        return;
-    }
-
-    /* Get the info command argument */
-    str_val = cJSON_GetStringValue(p_item_val);
-    if ((nullptr == str_val) || std::string(str_val).empty()) {
-        vs_log_mod_error("vsl", "Command field \"value\" NULL or empty");
-        handle_error();
-        return;
-    }
-
-    /* Print received info value */
-    vs_log_info("%s", str_val);
-
-    /* Return an acknowledgement */
-    vs_msg_return(vx.fd_client_socket, "ack", "command info received");
-
-    /* Set state to "waiting next command" */
-    vx._state = VSL_STATE_WAITING;
-    return;
-}
-
-/******************************************************************************
-Get command handler
-******************************************************************************/
-template<typename T>
-void VslInteg<T>::VSL_CMD_HANDLER(get) {
-    char *str_sel;
-
-    auto handle_error = [&vx]() {
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get - Discarding");
-        vx._state = VSL_STATE_WAITING;
-    };
-
-    /* Get the value from the JSON message content */
-    cJSON *p_item_sel = cJSON_GetObjectItem(vx.p_cmd, "sel");
-    if (nullptr == p_item_sel) {
-        vs_log_mod_error("vsl", "Command field \"sel\" invalid/not found");
-        handle_error();
-        return;
-    }
-
-    /* Get the info command argument as a string */
-    str_sel = cJSON_GetStringValue(p_item_sel);
-    if ((nullptr == str_sel) || std::string(str_sel).empty()) {
-        vs_log_mod_error("vsl", "Command field \"sel\" NULL or empty");
-        handle_error();
-        return;
-    }
-    vs_log_mod_info("vsl", "Command \"get(sel=%s)\" received.", str_sel);
-
-    /* Execute sub-command handler */
-    std::string sel_key = "get_";
-    sel_key.append(str_sel);
-
-
-
-    //TODO
-
-    /* Set state to "waiting next command" */
-    vx._state = VSL_STATE_WAITING;
-    return;
-}
-
-
 } //namespace vsl
 
-#endif //VS_VLINTEG_HPP
+#include "vsl_integ_cmd.hpp"
+
+#endif //VSL_INTEG_HPP
 //EOF
