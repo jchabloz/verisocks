@@ -3,12 +3,12 @@ MIT License
 
 Copyright (c) 2024 Jérémie Chabloz
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -107,7 +107,7 @@ private:
     static void VSL_CMD_HANDLER(info);
     static void VSL_CMD_HANDLER(get);
     static void VSL_CMD_HANDLER(get_sim_info);
-    // static void VSL_CMD_HANDLER(get_sim_time);
+    static void VSL_CMD_HANDLER(get_sim_time);
     // static void VSL_CMD_HANDLER(get_value);
     // static void VSL_CMD_HANDLER(get_type);
     // static void VSL_CMD_HANDLER(finish);
@@ -140,6 +140,7 @@ VslInteg<T>::VslInteg(const T* p_model, const int port, const int timeout) {
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
     sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
+    sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
     return;
 }
 
@@ -390,6 +391,7 @@ void VslInteg<T>::main_sim() {
 } //namespace vsl
 
 #include "vsl_integ_cmd.hpp"
+#include "vsl_integ_cmd_get.hpp"
 
 #endif //VSL_INTEG_HPP
 //EOF
