@@ -186,11 +186,12 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
         return;
     }
 
+    /* Get simulator time in seconds from Verilator context */
     vs_log_mod_debug("vsl", "Getting simulator time...");
     auto time = vx.p_context->time();
     auto timeprecision = vx.p_context->timeprecision();
     double sim_time_sec = time * std::pow(10.0, timeprecision);
-    vs_log_mod_debug("vsl", "Sim time: %.6f us", sim_time_sec*1.0e6);
+    vs_log_mod_debug("vsl", "Sim time: %.6e s", sim_time_sec);
 
     if (nullptr == cJSON_AddNumberToObject(p_msg, "time",
         sim_time_sec)) {

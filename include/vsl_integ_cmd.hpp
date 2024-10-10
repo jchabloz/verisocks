@@ -81,6 +81,19 @@ void VslInteg<T>::VSL_CMD_HANDLER(info) {
     return;
 }
 
+/******************************************************************************
+Exit command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(exit) {
+    vs_log_mod_info(
+        "vsl", "Command \"exit\" received. Quitting Verisocks ...");
+    vs_msg_return(vx.fd_client_socket, "ack",
+        "Processing exit command - Quitting Verisocks.");
+    vx._state = VSL_STATE_EXIT;
+    return;
+}
+
 } //namespace vsl
 
 #endif //VSL_INTEG_CMD_HPP

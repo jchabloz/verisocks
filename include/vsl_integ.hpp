@@ -112,7 +112,7 @@ private:
     // static void VSL_CMD_HANDLER(get_type);
     // static void VSL_CMD_HANDLER(finish);
     // static void VSL_CMD_HANDLER(stop);
-    // static void VSL_CMD_HANDLER(exit);
+    static void VSL_CMD_HANDLER(exit);
     // static void VSL_CMD_HANDLER(run);
     // static void VSL_CMD_HANDLER(run_for_time);
     // static void VSL_CMD_HANDLER(run_until_time);
@@ -139,6 +139,7 @@ VslInteg<T>::VslInteg(const T* p_model, const int port, const int timeout) {
     // Add command handlers functions to the map
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
+    cmd_handlers_map["exit"] = VSL_CMD_HANDLER_NAME(exit);
     sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
     sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
     return;
@@ -366,10 +367,10 @@ void VslInteg<T>::main_process() {
     auto search = cmd_handlers_map.find(str_cmd);
     if (search != cmd_handlers_map.end()) {
         cmd_handlers_map[str_cmd](*this);
-        _state = VSL_STATE_WAITING;
         return;
     }
 
+    /* Handle case for which the command handler is not found */
     vs_log_mod_error("vsl", "Handler for command %s not found",
         str_cmd.c_str());
     vs_msg_return(fd_client_socket, "error",
