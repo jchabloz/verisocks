@@ -90,6 +90,48 @@ void VslInteg<T>::VSL_CMD_HANDLER(exit) {
         "vsl", "Command \"exit\" received. Quitting Verisocks ...");
     vs_msg_return(vx.fd_client_socket, "ack",
         "Processing exit command - Quitting Verisocks.");
+
+    /* Simulate until $finish */
+    while (!vx.p_context->gotFinish()) {
+        vx.p_model->eval();
+        if (!vx.p_model->eventsPending()) break;
+        vx.p_context->time(vx.p_model->nextTimeSlot());
+    }
+
+    if (!vx.p_context->gotFinish()) {
+        vs_log_mod_debug("vsl", "Exiting without $finish; no events left");
+    }
+    vx.p_model->final();
+    vx._state = VSL_STATE_EXIT;
+    return;
+}
+
+/******************************************************************************
+Stop command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(stop) {
+    vs_log_mod_info(
+        "vsl", "Command \"stop\" received");
+    vs_msg_return(vx.fd_client_socket, "ack",
+        "Processing stop command - Simulation stopped/paused");
+
+    vx._state = VSL_STATE_WAITING;
+    return;
+}
+
+/******************************************************************************
+Finish command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(finish) {
+    vs_log_mod_info(
+        "vsl", "Command \"finish\" received. Terminating simulation...");
+    vs_msg_return(vx.fd_client_socket, "ack",
+        "Processing finish command - Terminating simulation.");
+
+    vx.p_context->gotFinish(true);
+    vx.p_model->final();
     vx._state = VSL_STATE_EXIT;
     return;
 }

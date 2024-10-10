@@ -63,7 +63,7 @@ template<typename T>
 class VslInteg {
 
 public:
-    VslInteg(const T* p_model, const int port=5100, const int timeout=120);
+    VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
     void run();
@@ -80,8 +80,10 @@ private:
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
 
-    const T* p_model; //Pointer to verilated model instance
-    const VerilatedContext* p_context; //Pointer to Verilator context
+    // const T* p_model; //Pointer to verilated model instance
+    // const VerilatedContext* p_context; //Pointer to Verilator context
+    T* p_model; //Pointer to verilated model instance
+    VerilatedContext* p_context; //Pointer to Verilator context
     int num_port {5100}; //Port number
     int num_timeout_sec {120}; //Timeout, in seconds
     int fd_server_socket {-1}; //File descriptor, server socket
@@ -110,8 +112,8 @@ private:
     static void VSL_CMD_HANDLER(get_sim_time);
     // static void VSL_CMD_HANDLER(get_value);
     // static void VSL_CMD_HANDLER(get_type);
-    // static void VSL_CMD_HANDLER(finish);
-    // static void VSL_CMD_HANDLER(stop);
+    static void VSL_CMD_HANDLER(finish);
+    static void VSL_CMD_HANDLER(stop);
     static void VSL_CMD_HANDLER(exit);
     // static void VSL_CMD_HANDLER(run);
     // static void VSL_CMD_HANDLER(run_for_time);
@@ -123,7 +125,7 @@ private:
 
 /* Constructor */
 template<typename T>
-VslInteg<T>::VslInteg(const T* p_model, const int port, const int timeout) {
+VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
 
     vs_log_mod_debug("vsl", "Constructor called");
 
@@ -139,6 +141,8 @@ VslInteg<T>::VslInteg(const T* p_model, const int port, const int timeout) {
     // Add command handlers functions to the map
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
+    cmd_handlers_map["finish"] = VSL_CMD_HANDLER_NAME(finish);
+    cmd_handlers_map["stop"] = VSL_CMD_HANDLER_NAME(stop);
     cmd_handlers_map["exit"] = VSL_CMD_HANDLER_NAME(exit);
     sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
     sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
