@@ -136,6 +136,18 @@ void VslInteg<T>::VSL_CMD_HANDLER(finish) {
     return;
 }
 
+/******************************************************************************
+Not supported
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(not_supported) {
+    vs_msg_return(vx.fd_client_socket, "warning",
+        "This command is not (yet) supported. Discarding...");
+    vx._state = VSL_STATE_WAITING;
+    return;
+}
+
+
 } //namespace vsl
 
 #endif //VSL_INTEG_CMD_HPP

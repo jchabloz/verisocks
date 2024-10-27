@@ -110,8 +110,7 @@ private:
     static void VSL_CMD_HANDLER(get);
     static void VSL_CMD_HANDLER(get_sim_info);
     static void VSL_CMD_HANDLER(get_sim_time);
-    // static void VSL_CMD_HANDLER(get_value);
-    // static void VSL_CMD_HANDLER(get_type);
+    static void VSL_CMD_HANDLER(get_value);
     static void VSL_CMD_HANDLER(finish);
     static void VSL_CMD_HANDLER(stop);
     static void VSL_CMD_HANDLER(exit);
@@ -121,6 +120,7 @@ private:
     // static void VSL_CMD_HANDLER(run_until_change);
     // static void VSL_CMD_HANDLER(run_to_next);
     // static void VSL_CMD_HANDLER(set);
+    static void VSL_CMD_HANDLER(not_supported);
 };
 
 /* Constructor */
@@ -138,7 +138,7 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
 
-    // Add command handlers functions to the map
+    // Add commands and sub-commands handler functions to the relevant maps
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
     cmd_handlers_map["finish"] = VSL_CMD_HANDLER_NAME(finish);
@@ -146,6 +146,8 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     cmd_handlers_map["exit"] = VSL_CMD_HANDLER_NAME(exit);
     sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
     sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
+    sub_cmd_handlers_map["get_type"] = VSL_CMD_HANDLER_NAME(not_supported);
+    sub_cmd_handlers_map["get_value"] = VSL_CMD_HANDLER_NAME(get_value);
     return;
 }
 
