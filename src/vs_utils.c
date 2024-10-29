@@ -118,7 +118,7 @@ typedef struct s_obj_format {
     PLI_INT32 format;
 } obj_format_t;
 
-static obj_format_t obj_format_table[] = {
+static const obj_format_t obj_format_table[] = {
     {vpiNet,            vpiIntVal},
     {vpiReg,            vpiIntVal},
     {vpiIntegerVar,     vpiIntVal},
@@ -133,7 +133,7 @@ static obj_format_t obj_format_table[] = {
 PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
 {
     PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
-    obj_format_t *ptr = obj_format_table;
+    const obj_format_t *ptr = obj_format_table;
     while (ptr->format != vpiUndefined) {
         if (obj_type == ptr->obj_type) {
             return ptr->format;
