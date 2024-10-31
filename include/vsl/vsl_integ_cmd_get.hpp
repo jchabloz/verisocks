@@ -30,6 +30,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "verilated.h"
+#include "verilated_syms.h"
 
 #include <cstdio>
 #include <string>
@@ -291,35 +292,29 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     }
 
     /* Attempt to get a pointer to the variable */
-    std::string str_scope;
-    std::string str_var;
-    if (str_path.find_last_of(".") != str_path.npos) {
-        str_scope = str_path.substr(0, str_path.find_last_of("."));
-        str_var = str_path.substr(str_path.find_last_of(".") + 1);
-    } else {
-        str_scope = "";
-        str_var = str_path;
-    }
-
-    str_scope = vx.p_model->hierName() + str_scope;
-    auto p_xscope = vx.p_context->scopeFind(str_scope.c_str());
-    if (nullptr == p_xscope) {
+    auto p_var = vx.get_var(str_path);
+    if (nullptr == p_var) {
         vs_log_mod_error(
-            "vsl", "Scope %s not found in context", str_scope.c_str());
+            "vsl", "Variable %s not found in context", str_path.c_str()
+        );
         handle_error();
         return;
     }
 
-    auto p_xvar = p_xscope->varFind(str_var.c_str());
-    if (nullptr == p_xvar) {
-        vs_log_mod_error(
-            "vsl", "Variable %s not found in scope %s",
-            str_var.c_str(), str_scope.c_str());
-        handle_error();
-        return;
-    }
+    // /* Check if array */
+    // if (p_xvar->dims() < 2) {
+    //     auto p_var = static_cast<uint64_t*>(p_xvar->datap());
+    // }
 
+    /* Check packed variable type and adjust casting accordingly */
+    // static_cast<int> *p_var;
 
+    /* Normal exit */
+    if (nullptr != p_msg) cJSON_Delete(p_msg);
+    if (nullptr != str_msg) cJSON_free(str_msg);
+    if (nullptr != cstr_path) cJSON_free(cstr_path);
+    vx._state = VSL_STATE_WAITING;
+    return;
 }
 
 } //namespace vsl

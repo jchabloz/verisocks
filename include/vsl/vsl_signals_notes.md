@@ -71,3 +71,18 @@ follows:
 - the packed and unpacked ranges are also aware of the order in which the
   elements should be accessed (variables ``x[6:0]`` vs ``x[0:6]``).
 
+
+
+### Signal/variable types
+
+
+
+
+
+
+<!-- Different possible signal types:
+
+VlUnpacked<T,D>
+VlEvent
+functions (e.g. trigger_transaction() in SPI master example) -->
+

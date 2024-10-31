@@ -30,6 +30,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "verilated.h"
+#include "verilated_syms.h"
 
 #include <cstdio>
 #include <functional>
@@ -80,8 +81,6 @@ private:
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
 
-    // const T* p_model; //Pointer to verilated model instance
-    // const VerilatedContext* p_context; //Pointer to Verilator context
     T* p_model; //Pointer to verilated model instance
     VerilatedContext* p_context; //Pointer to Verilator context
     int num_port {5100}; //Port number
@@ -90,21 +89,27 @@ private:
     int fd_client_socket {-1}; //File descriptor, connected client socket
     bool _is_connected {false};
 
+    /* State machine functions */
     void main_init();
     void main_connect();
     void main_wait();
     void main_process();
     void main_sim();
 
-    /* Declaration of command handlers functions
+    /* Utility functions */
+    /* Get a pointer for a given public variable */
+    VerilatedVar* get_var(std::string str_path);
 
+    /* Declaration of command handlers functions */
+    /*
     In order to be able to insert functions in a command handlers function map,
     they need to be declared as static functions! Alternatively, they could
     also be declared as friend functions and then be defined outside of the
-    VslInteg class. What is the best in principle? Since static functions
-    cannot access non-static members, we anyway have to pass in parameter a
-    reference of the class instance to which it has to apply, thus the benefit
-    of encapsulating the handler functions as class members is very limited.
+    VslInteg class, however using a template class makes it a lot more
+    difficult. Note that, since static functions cannot access non-static
+    members, we anyway have to pass in parameter a reference of the class
+    instance to which it has to apply, thus the benefit of encapsulating the
+    handler functions as class members is limited to say the least.
     */
     static void VSL_CMD_HANDLER(info);
     static void VSL_CMD_HANDLER(get);
@@ -123,11 +128,12 @@ private:
     static void VSL_CMD_HANDLER(not_supported);
 };
 
-/* Constructor */
+/******************************************************************************
+Constructor
+******************************************************************************/
 template<typename T>
 VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
-
-    vs_log_mod_debug("vsl", "Constructor called");
+    vs_log_mod_debug("vsl", "Constructor called (%s)", __FILE__);
 
     /* Check that the type parameter corresponds to a verilated model */
     static_assert(std::is_base_of<VerilatedModel,T>::value,
@@ -151,15 +157,20 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     return;
 }
 
-/* Destructor */
+/******************************************************************************
+Destructor
+******************************************************************************/
 template<typename T>
 VslInteg<T>::~VslInteg() {
-    vs_log_mod_debug("vsl", "Destructor called");
+    vs_log_mod_debug("vsl", "Destructor called (%s)", __FILE__);
     if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
     if (nullptr != p_cmd) cJSON_Delete(p_cmd);
     return;
 }
 
+/******************************************************************************
+Finite state-machine
+******************************************************************************/
 template<typename T>
 void VslInteg<T>::run() {
     std::printf("******************************************\n");
@@ -393,6 +404,33 @@ void VslInteg<T>::main_sim() {
     vs_log_mod_info("vsl", "Simulation ongoing");
     //TODO - implement Verilator simulation code
     return;
+}
+
+/******************************************************************************
+Utility functions
+******************************************************************************/
+/* Get variable by path */
+template<typename T>
+VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
+
+    /* Extract scope and variable paths */
+    std::string str_scope(p_model->hierName());
+    std::string str_var;
+    if (str_path.find_last_of(".") != str_path.npos) {
+        str_scope += std::string(".");
+        str_scope += str_path.substr(0, str_path.find_last_of("."));
+        str_var = str_path.substr(str_path.find_last_of(".") + 1);
+    } else {
+        str_var = str_path;
+    }
+
+    auto p_xscope = p_context->scopeFind(str_scope.c_str());
+    if (nullptr == p_xscope) {
+        vs_log_mod_error("vsl", "Could not find scope %s", str_scope.c_str());
+        return nullptr;
+    }
+    auto p_xvar = p_xscope->varFind(str_var.c_str());
+    return p_xvar;
 }
 
 } //namespace vsl
