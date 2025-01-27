@@ -33,6 +33,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "verilated.h"
 #include "verilated_syms.h"
+#include "cJSON.h"
 
 #include <cmath>
 #include <map>
@@ -78,40 +79,91 @@ uint64_t double_to_time(double time_value, const char* time_unit,
     return time;
 }
 
-int get_scalar_value(VerilatedVar* p_var, VslVar_t& x)
+template <typename T>
+inline auto get_value(VerilatedVar* p_var)
 {
+    T retval = *(static_cast<T*>(p_var->datap()));
+    return retval;
+}
+
+template <typename T>
+inline void set_value(VerilatedVar* p_var, T x)
+{
+    *(p_var->datap()) = x;
+}
+
+template <typename T>
+auto get_array_value(VerilatedVar* p_var, T* p_array)
+{
+    //TODO
+    /*
+    1. Check dimension, if > 2, consider as not supported for now
+    2. 
+    
+    */
+}
+
+int vsl_utils_get_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
+{
+    double number_value {0.0f};
+    std::string str_value {""};
+
+    /* Detect if non-scalar */
     if (p_var->dims() > 1) {
         vs_log_mod_error(
-            "vsl_utils", "Cannot extract scalar value from array");
+            "vsl_utils", "Cannot extract scalar value (higher dimension)");
         return -1;
     }
+
+    /* Get value from variable pointer */
     switch (p_var->vltype()) {
         case VLVT_UINT8:
-            x = *(static_cast<uint8_t*>(p_var->datap()));
-            return 0;
+            number_value = static_cast<double>(get_value<uint8_t>(p_var));
+            break;
         case VLVT_UINT16:
-            x = *(static_cast<uint16_t*>(p_var->datap()));
-            return 0;
+            number_value = static_cast<double>(get_value<uint16_t>(p_var));
+            break;
         case VLVT_UINT32:
-            x = *(static_cast<uint32_t*>(p_var->datap()));
-            return 0;
+            number_value = static_cast<double>(get_value<uint32_t>(p_var));
+            break;
         case VLVT_UINT64:
-            x = *(static_cast<uint64_t*>(p_var->datap()));
-            return 0;
+            number_value = static_cast<double>(get_value<uint64_t>(p_var));
+            break;
         case VLVT_REAL:
-            x = *(static_cast<double*>(p_var->datap()));
-            return 0;
+            number_value = get_value<double>(p_var);
+            break;
+        case VLVT_STRING:
+            str_value = get_value<std::string>(p_var);
+            break;
         case VLVT_UNKNOWN:
         case VLVT_WDATA:
-        case VLVT_STRING:
         case VLVT_PTR:
         default:
             vs_log_mod_error(
-                "vsl_utils", "Not supported type for scalar value");
+                "vsl_utils", "Type not supported (yet) for scalar value");
             return -1;
     }
-}
 
+    cJSON* p_value = nullptr;
+    switch (p_var->vltype()) {
+        case VLVT_UINT8:
+        case VLVT_UINT16:
+        case VLVT_UINT32:
+        case VLVT_UINT64:
+        case VLVT_REAL:
+            p_value = cJSON_AddNumberToObject(p_msg, key, number_value);
+            break;
+        case VLVT_STRING:
+            p_value = cJSON_AddStringToObject(p_msg, key, str_value.c_str());
+            break;
+        default:
+            return -1;
+    }
+    if (nullptr == p_value) {
+        return -1;
+    }
+    return 0;
+}
 
 
 

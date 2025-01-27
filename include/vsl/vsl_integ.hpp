@@ -424,12 +424,12 @@ VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
         str_var = str_path;
     }
 
-    auto p_xscope = p_context->scopeFind(str_scope.c_str());
+    const VerilatedScope* p_xscope = p_context->scopeFind(str_scope.c_str());
     if (nullptr == p_xscope) {
         vs_log_mod_error("vsl", "Could not find scope %s", str_scope.c_str());
         return nullptr;
     }
-    auto p_xvar = p_xscope->varFind(str_var.c_str());
+    VerilatedVar* p_xvar = p_xscope->varFind(str_var.c_str());
     return p_xvar;
 }
 
