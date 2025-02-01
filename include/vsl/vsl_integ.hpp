@@ -409,7 +409,12 @@ void VslInteg<T>::main_sim() {
 /******************************************************************************
 Utility functions
 ******************************************************************************/
-/* Get variable by path */
+/**
+ * @brief Get Verilated variable from path
+ * 
+ * @param str_path Variable path
+ * @return (VerilatedVar*) Pointer to variable
+ */
 template<typename T>
 VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
 

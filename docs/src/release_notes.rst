@@ -5,8 +5,17 @@ Release notes
 #############
 
 Releases of documentation and code are using the same version numbers. The
-version numbering system follows the `semantic versioning
-<https://semver.org/>`_ principles.
+version numbering system (tries and) follows the `semantic versioning
+<https://semver.org/>`_ principles:
+
+.. note::
+
+  Given a version number ``MAJOR.MINOR.PATCH``, increment the:
+
+    1. ``MAJOR`` version when you make incompatible API changes
+    2. ``MINOR`` version when you add functionality in a backward compatible manner
+    3. ``PATCH`` version when you make backward compatible bug fixes
+
 
 1.2.0 - 2024-03-16
 ******************

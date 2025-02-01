@@ -29,6 +29,7 @@ SOFTWARE.
 #include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
+#include "vsl/vsl_utils.hpp"
 #include "verilated.h"
 #include "verilated_syms.h"
 
@@ -301,13 +302,20 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         return;
     }
 
-    // /* Check if array */
-    // if (p_xvar->dims() < 2) {
-    //     auto p_var = static_cast<uint64_t*>(p_xvar->datap());
+    if (p_var->dims() < 2) {
+        /* Add scalar variable value to return message */
+        int retval = vsl_utils_get_value(p_var, p_msg, "value");
+        if (0 > retval) {
+            vs_log_mod_error(
+                "vsl", "Error getting value for variable %s", str_path.c_str()
+            );
+            handle_error();
+            return;
+        }
+    }
+    // else {
+    // TODO: Handle arrays
     // }
-
-    /* Check packed variable type and adjust casting accordingly */
-    // static_cast<int> *p_var;
 
     /* Normal exit */
     if (nullptr != p_msg) cJSON_Delete(p_msg);

@@ -118,16 +118,20 @@ int vsl_utils_get_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
     /* Get value from variable pointer */
     switch (p_var->vltype()) {
         case VLVT_UINT8:
-            number_value = static_cast<double>(get_value<uint8_t>(p_var));
+            number_value = static_cast<double>(
+                get_value<uint8_t>(p_var));
             break;
         case VLVT_UINT16:
-            number_value = static_cast<double>(get_value<uint16_t>(p_var));
+            number_value = static_cast<double>(
+                get_value<uint16_t>(p_var));
             break;
         case VLVT_UINT32:
-            number_value = static_cast<double>(get_value<uint32_t>(p_var));
+            number_value = static_cast<double>(
+                get_value<uint32_t>(p_var));
             break;
         case VLVT_UINT64:
-            number_value = static_cast<double>(get_value<uint64_t>(p_var));
+            number_value = static_cast<double>(
+                get_value<uint64_t>(p_var));
             break;
         case VLVT_REAL:
             number_value = get_value<double>(p_var);
@@ -169,48 +173,6 @@ int vsl_utils_get_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
 
 
 /*
-typedef struct s_obj_format {
-    PLI_INT32 obj_type;
-    PLI_INT32 format;
-} obj_format_t;
-
-static const obj_format_t obj_format_table[] = {
-    {vpiNet,            vpiIntVal},
-    {vpiReg,            vpiIntVal},
-    {vpiIntegerVar,     vpiIntVal},
-    {vpiMemoryWord,     vpiIntVal},
-    {vpiRealVar,        vpiRealVal},
-    {vpiParameter,      vpiRealVal},
-    {vpiConstant,       vpiRealVal},
-    {vpiNamedEvent,     vpiSuppressVal},
-    {vpiUndefined,      vpiUndefined} //Mandatory last table item
-};
-
-PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
-{
-    PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
-    const obj_format_t *ptr = obj_format_table;
-    while (ptr->format != vpiUndefined) {
-        if (obj_type == ptr->obj_type) {
-            return ptr->format;
-        }
-        ptr++;
-    }
-    vs_log_mod_error("vs_utils",
-        "Object type %d currently not supported", obj_type);
-    return -1;
-}
-
-PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value *p_value)
-{
-    PLI_INT32 format = vs_utils_get_format(h_obj);
-    if (0 > format) {
-        return -1;
-    }
-    p_value->format = format;
-    vpi_get_value(h_obj, p_value);
-    return 0;
-}
 
 PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2)
 {
@@ -254,44 +216,6 @@ currently not supported", vpi_value.format);
     return 0;
 }
 
-PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key)
-{
-    cJSON *p_value;
-    switch (value.format) {
-    case vpiBinStrVal:
-    case vpiOctStrVal:
-    case vpiDecStrVal:
-    case vpiHexStrVal:
-    case vpiStringVal:
-        p_value = cJSON_AddStringToObject(
-            p_msg, key, value.value.str);
-        break;
-    case vpiScalarVal:
-        p_value = cJSON_AddNumberToObject(
-            p_msg, key, value.value.scalar);
-        break;
-    case vpiIntVal:
-        p_value = cJSON_AddNumberToObject(
-            p_msg, key, (double) value.value.integer);
-        break;
-    case vpiRealVal:
-        p_value = cJSON_AddNumberToObject(
-            p_msg, key, value.value.real);
-        break;
-    default:
-        vs_vpi_log_info("Format %d currently not supported", value.format);
-        goto error;
-        break;
-    }
-    if (NULL == p_value) {
-        vs_log_mod_error("vs_vpi", "Could not add value to object");
-        goto error;
-    }
-    return 0;
-
-    error:
-    return -1;
-}
 */
 
 } //namespace vsl
