@@ -23,7 +23,10 @@ Testbench
 *******************************************************************************/
 module spi_master_tb();
 
-    wire cs_b, mosi, sclk, miso;
+	real toto /*verilator public*/;
+	integer tutu /*verilator public*/;
+
+    wire cs_b, mosi, sclk, miso /*verilator public*/;
 
     /* SPI master - unit under test */
     spi_master i_spi_master (
@@ -43,6 +46,10 @@ module spi_master_tb();
 
     /* Initial loop */
     initial begin
+	
+		toto = 1.593;
+		tutu = -1;
+
         `ifdef DUMP_FILE
         $dumpfile(`DUMP_FILE);
         $dumpvars(0, spi_master_tb);
