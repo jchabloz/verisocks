@@ -47,8 +47,8 @@ module spi_master_tb();
     /* Initial loop */
     initial begin
 	
-		toto = 1.593;
-		tutu = -1;
+		toto = -1.623;
+		tutu = 13;
 
         `ifdef DUMP_FILE
         $dumpfile(`DUMP_FILE);
