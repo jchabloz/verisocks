@@ -247,13 +247,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     cJSON *p_msg;
     cJSON *p_item_path;
     char *str_msg = nullptr;
-    char *cstr_path = nullptr;
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
         if (nullptr != p_msg) cJSON_Delete(p_msg);
         if (nullptr != str_msg) cJSON_free(str_msg);
-        if (nullptr != cstr_path) cJSON_free(cstr_path);
         vx._state = VSL_STATE_WAITING;
         vs_msg_return(vx.fd_client_socket, "error",
             "Error processing command get(sel=value) - Discarding");
@@ -279,7 +277,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         handle_error();
         return;
     }
-    cstr_path = cJSON_GetStringValue(p_item_path);
+    char* cstr_path = cJSON_GetStringValue(p_item_path);
     if (nullptr == cstr_path) {
         vs_log_mod_error("vsl", "Command field \"path\" NULL");
         handle_error();
@@ -317,10 +315,22 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     // TODO: Handle arrays
     // }
 
+    str_msg = vs_msg_create_message(p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+
+    if (nullptr == str_msg) {
+        vs_log_mod_error("vsl", "NULL pointer");
+        handle_error();
+        return;
+    }
+    if (0 > vs_msg_write(vx.fd_client_socket, str_msg)) {
+        vs_log_mod_error("vsl", "Error writing return message");
+        handle_error();
+        return;
+    }
+
     /* Normal exit */
     if (nullptr != p_msg) cJSON_Delete(p_msg);
     if (nullptr != str_msg) cJSON_free(str_msg);
-    if (nullptr != cstr_path) cJSON_free(cstr_path);
     vx._state = VSL_STATE_WAITING;
     return;
 }
