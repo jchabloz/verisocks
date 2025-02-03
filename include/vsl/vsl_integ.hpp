@@ -173,19 +173,20 @@ Finite state-machine
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::run() {
-    std::printf("******************************************\n");
-    std::printf("*  __   __       _             _         *\n");
-    std::printf("*  \\ \\ / /__ _ _(_)___ ___  __| |__ ___  *\n");
-    std::printf("*   \\ V / -_) '_| (_-</ _ \\/ _| / /(_-<  *\n");
-    std::printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/  *\n");
-    std::printf("*                                        *\n");
-    std::printf("*         Verilator integration          *\n");
-    std::printf("*   Copyright (c) 2024 Jérémie Chabloz   *\n");
-    std::printf("******************************************\n");
+    std::printf("*******************************************\n");
+    std::printf("*  __   __       _             _          *\n");
+    std::printf("*  \\ \\ / /__ _ _(_)___ ___  __| |__ ___   *\n");
+    std::printf("*   \\ V / -_) '_| (_-</ _ \\/ _| / /(_-<   *\n");
+    std::printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/   *\n");
+    std::printf("*                                         *\n");
+    std::printf("*          Verilator integration          *\n");
+    std::printf("* Copyright (c) 2024-2025 Jérémie Chabloz *\n");
+    std::printf("*******************************************\n");
 
     while(true) {
         switch (_state) {
         case VSL_STATE_INIT:
+            p_model->eval(); //Initial model evaluation
             main_init();
             break;
         case VSL_STATE_CONNECT:
