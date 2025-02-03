@@ -43,18 +43,28 @@ VL_FLAGS += --top $(VL_TOP)
 #*****************************************************************************
 # Verisocks integration
 #*****************************************************************************
-VSL_SRCS = \
+VS_SRCS = \
 	cJSON.c \
 	vs_msg.c \
 	vs_server.c \
+
+VSL_SRCS = \
 	vsl_utils.cpp \
 	test_main.cpp
+
+VSL_HEADERS = \
+    $(VSL_DIR)/include/vsl.h \
+    $(VSL_DIR)/include/vsl/vsl_integ.hpp \
+    $(VSL_DIR)/include/vsl/vsl_integ_cmd.hpp \
+    $(VSL_DIR)/include/vsl/vsl_integ_cmd_get.hpp \
+    $(VSL_DIR)/include/vsl/vsl_utils.hpp
 
 VSL_INCDIRS = \
 	$(VSL_DIR)/include \
 	$(VSL_DIR)/cjson
 
-VSL_OBJS = $(addprefix $(VSL_BUILD_DIR)/,$(subst .c,.o,$(VSL_SRCS)))
+VSL_OBJS = $(addprefix $(VSL_BUILD_DIR)/,$(subst .c,.o,$(VS_SRCS)))
+VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
 
@@ -71,7 +81,7 @@ $(VL_OBJ_DIR)/%.mk: $(VL_SRCS)
 	@mkdir -p $(VL_OBJ_DIR)
 	$(VERILATOR) $(VL_FLAGS) $^
 
-$(VSL_BUILD_DIR)/%.opp: %.cpp
+$(VSL_BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(VSL_BUILD_DIR)
 	$(CXX) -o $@ -c $(CPPFLAGS) $<
 

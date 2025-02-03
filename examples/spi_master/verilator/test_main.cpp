@@ -23,7 +23,8 @@ int main(int argc, char** argv, char**) {
     Verilator?
     */
     // std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
-    std::string str_path{"TOP.spi_master_tb.i_spi_master.start_transaction"};
+    //std::string str_path{"TOP.spi_master_tb.i_spi_master.start_transaction"};
+    std::string str_path{"TOP.spi_master_tb.toto"};
     std::string str_scope;
     std::string str_var;
     if (str_path.find_last_of(".") != str_path.npos) {
@@ -35,6 +36,7 @@ int main(int argc, char** argv, char**) {
     auto p_xscope = contextp->scopeFind(str_scope.c_str());
     if (p_xscope != nullptr) {
         printf("Scope %s found\n", p_xscope->name());
+        printf("Searching for variable %s in scope\n", str_var.c_str());
         auto p_xvar = p_xscope->varFind(str_var.c_str());
         if (p_xvar != nullptr) {
             printf("Variable %s found\n", p_xvar->name());
