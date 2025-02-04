@@ -300,6 +300,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         return;
     }
 
+    /* Scalar variables */
     if (p_var->dims() < 2) {
         /* Add scalar variable value to return message */
         int retval = vsl_utils_get_value(p_var, p_msg, "value");
@@ -311,9 +312,30 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
             return;
         }
     }
-    // else {
-    // TODO: Handle arrays
-    // }
+    /* Array variables */
+    else if (p_var->dims() == 2) {
+        vs_log_mod_debug(
+            "vsl", "Variable %s detected to be an array", str_path.c_str()
+        );
+        size_t mem_size = p_var->elements(1); //Number of elements in the array
+        vs_log_mod_debug("vsl", "Array depth: %d", (int) mem_size);
+        cJSON *p_array = cJSON_AddArrayToObject(p_msg, "value");
+        /*
+        if (nullptr == p_array) {
+            vs_log_mod_error("vsl", "Could not create cJSON array");
+            handle_error();
+            return;
+        }
+        */
+        //TODO
+    }
+    else {
+        vs_log_mod_error(
+            "vsl", "Arrays with dimensions > 2 not supported"
+        );
+        handle_error();
+        return;
+    }
 
     str_msg = vs_msg_create_message(p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});
 

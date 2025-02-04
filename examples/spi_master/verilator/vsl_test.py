@@ -21,6 +21,8 @@ with Verisocks(HOST, PORT) as vs_cli:
     print(answer)
     answer = vs_cli.get("value", "spi_master_tb.toto")
     print(answer)
+    answer = vs_cli.get("value", "spi_master_tb.i_spi_master.tx_buffer")
+    print(answer)
 
     answer = vs_cli.send_cmd("finish")
     # answer = vs_cli.send_cmd("exit")

@@ -22,9 +22,9 @@ int main(int argc, char** argv, char**) {
     Should the usage of scopeFind and varFind methods should stay internal to
     Verilator?
     */
-    // std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
+    std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
     //std::string str_path{"TOP.spi_master_tb.i_spi_master.start_transaction"};
-    std::string str_path{"TOP.spi_master_tb.toto"};
+    //std::string str_path{"TOP.spi_master_tb.toto"};
     std::string str_scope;
     std::string str_var;
     if (str_path.find_last_of(".") != str_path.npos) {
