@@ -24,8 +24,6 @@ VM_SP_OR_SC = $(VM_SC)
 #*****************************************************************************
 # Design prefix (from --prefix)
 VM_PREFIX = Vspi_master_tb
-VSL_BUILD_DIR = vsl_build
-VL_OBJ_DIR = vl_obj_dir
 VL_TOP = spi_master_tb
 
 # Verilog/SystemVerilog source files to be verilated
@@ -36,6 +34,10 @@ VL_SRCS = \
 
 # Testbench C++ source files
 TB_CPP_SRCS = test_main.cpp
+
+# Build folders
+VL_OBJ_DIR = vl_obj_dir
+VSL_BUILD_DIR = vsl_build
 
 #*****************************************************************************
 # Verilation
