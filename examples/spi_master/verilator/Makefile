@@ -81,11 +81,11 @@ $(VL_OBJ_DIR)/%.mk: $(VL_SRCS)
 	@mkdir -p $(VL_OBJ_DIR)
 	$(VERILATOR) $(VL_FLAGS) $^
 
-$(VSL_BUILD_DIR)/%.o: %.cpp
+$(VSL_BUILD_DIR)/%.o: %.cpp $(VSL_HEADERS)
 	@mkdir -p $(VSL_BUILD_DIR)
 	$(CXX) -o $@ -c $(CPPFLAGS) $<
 
-$(VSL_BUILD_DIR)/%.o: %.c
+$(VSL_BUILD_DIR)/%.o: %.c $(VSL_HEADERS)
 	@mkdir -p $(VSL_BUILD_DIR)
 	$(CXX) -o $@ -c $(CPPFLAGS) $<
 
@@ -102,8 +102,10 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 VPATH += $(VL_OBJ_DIR)
 
 ### Link rules... (from --exe)
-$(VM_PREFIX): $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
-	$(LINK) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
+link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
+link_deps = $(link_args) $(VSL_HEADERS)
+$(VM_PREFIX): $(link_deps)
+	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
 .PHONY: clean
 clean:
