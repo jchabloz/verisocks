@@ -28,14 +28,18 @@ VSL_BUILD_DIR = vsl_build
 VL_OBJ_DIR = vl_obj_dir
 VL_TOP = spi_master_tb
 
-#*****************************************************************************
-# Verilation
-#*****************************************************************************
+# Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \
 	../spi_slave.v \
 	../spi_master.v \
 	../spi_master_tb.v
 
+# Testbench C++ source files
+TB_CPP_SRCS = test_main.cpp
+
+#*****************************************************************************
+# Verilation
+#*****************************************************************************
 VL_FLAGS = --cc --timing
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP)
@@ -48,9 +52,8 @@ VS_SRCS = \
 	vs_msg.c \
 	vs_server.c \
 
-VSL_SRCS = \
-	vsl_utils.cpp \
-	test_main.cpp
+VSL_SRCS = vsl_utils.cpp
+VSL_SRCS += $(TB_CPP_SRCS)
 
 VSL_HEADERS = \
     $(VSL_DIR)/include/vsl.h \
@@ -80,6 +83,7 @@ verilate: $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk $(VL_OBJ_DIR)/$(VM_PREFIX).mk
 $(VL_OBJ_DIR)/%.mk: $(VL_SRCS)
 	@mkdir -p $(VL_OBJ_DIR)
 	$(VERILATOR) $(VL_FLAGS) $^
+VPATH += $(VL_OBJ_DIR)
 
 $(VSL_BUILD_DIR)/%.o: %.cpp $(VSL_HEADERS)
 	@mkdir -p $(VSL_BUILD_DIR)
@@ -93,26 +97,21 @@ VM_USER_CFLAGS = \
 	-DVL_TIME_CONTEXT \
 
 ### Default rules...
-# Include list of all generated classes
 include $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
-# Include global rules
 include $(VERILATOR_ROOT)/include/verilated.mk
 
-### Executable rules... (from --exe)
-VPATH += $(VL_OBJ_DIR)
-
-### Link rules... (from --exe)
+### Link rules
 link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
 link_deps = $(link_args) $(VSL_HEADERS)
 $(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
-.PHONY: clean
+.PHONY: clean verilate
 clean:
 	$(RM) -r $(VSL_BUILD_DIR)
 	$(RM) -r $(VL_OBJ_DIR)
 	$(RM) $(VK_OBJS) $(VK_GLOBAL_OBJS)
 	$(RM) $(VM_PREFIX)__ALL.*
-	$(RM) *.d
 	$(RM) $(VM_PREFIX)
+	$(RM) *.d
 
