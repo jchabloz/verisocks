@@ -52,7 +52,7 @@ VL_FLAGS += --top $(VL_TOP)
 VS_SRCS = \
 	cJSON.c \
 	vs_msg.c \
-	vs_server.c \
+	vs_server.c
 
 VSL_SRCS = vsl_utils.cpp
 VSL_SRCS += $(TB_CPP_SRCS)
@@ -72,6 +72,7 @@ VSL_OBJS = $(addprefix $(VSL_BUILD_DIR)/,$(subst .c,.o,$(VS_SRCS)))
 VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
+CPPFLAGS += -DVS_LOG_LEVEL=10
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
 
