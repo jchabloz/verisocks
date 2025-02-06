@@ -32,7 +32,7 @@ with Verisocks(HOST, PORT) as vs_cli:
     get_variable_value(vs_cli, "spi_master_tb.miso")
     get_variable_value(vs_cli, "spi_master_tb.tutu")
     get_variable_value(vs_cli, "spi_master_tb.toto")
-    get_variable_value(vs_cli, "spi_master_tb.i_spi_master.tx_buffer")
+    get_variable_value(vs_cli, "spi_master_tb.tata")
 
     answer = vs_cli.send_cmd("finish")
     # answer = vs_cli.send_cmd("exit")

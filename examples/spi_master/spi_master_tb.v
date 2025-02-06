@@ -25,6 +25,7 @@ module spi_master_tb();
 
 	real toto /*verilator public*/;
 	integer tutu /*verilator public*/;
+    reg [6:0] tata [11:0] /*verilator public*/;
 
     wire cs_b, mosi, sclk, miso /*verilator public*/;
 
@@ -49,6 +50,18 @@ module spi_master_tb();
 	
 		toto = -1.623;
 		tutu = 13;
+		tata[0] = 7'd0;
+		tata[1] = 7'd1;
+		tata[2] = 7'd3;
+		tata[3] = 7'd5;
+		tata[4] = 7'd7;
+		tata[5] = 7'd11;
+		tata[6] = 7'd13;
+		tata[7] = 7'd17;
+		tata[8] = 7'd23;
+		tata[9] = 7'd29;
+		tata[10] = 7'd31;
+		tata[11] = 7'd37;
 
         `ifdef DUMP_FILE
         $dumpfile(`DUMP_FILE);

@@ -5,9 +5,7 @@
 @date 2022-09-30
 ******************************************************************************/
 /*
-MIT License
-
-Copyright (c) 2024 Jérémie Chabloz
+Copyright (c) 2024-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -174,8 +172,11 @@ int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
             "vsl_utils", "Cannot extract value as an array - check dimensions!");
         return -1;
     }
-
-	//TODO: add check in index vs array size
+    if (index > (p_var->elements(1) - 1)) {
+        vs_log_mod_error(
+            "vsl_utils", "Index exceeds array depth");
+        return -1;
+    }
 
     /* Get value from variable pointer */
     switch (p_var->vltype()) {
@@ -208,10 +209,15 @@ int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
             return -1;
     }
 
-	cJSON_AddItemToArray(p_array, cJSON_CreateNumber(number_value));
-	//TODO: Add checks
+    cJSON_bool retval = cJSON_AddItemToArray(
+        p_array, cJSON_CreateNumber(number_value));
+    if (1 != retval) {
+        vs_log_mod_error(
+            "vsl_utils", "Error adding number to array");
+        return -1;
+    }
 
-	return 0;
+    return 0;
 }
 
 

@@ -1,7 +1,5 @@
 /*
-MIT License
-
-Copyright (c) 2024 Jérémie Chabloz
+Copyright (c) 2024-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -44,7 +42,7 @@ using VslValue = std::variant<
 /**
  * @brief Utility function that can be used to convert an integer simulation
  * time value in a real value based on a given time unit.
- * 
+ *
  * @param time Time integer value (simulation precision)
  * @param time_unit Time unit (e.g. "us")
  * @param p_context Pointer to Verilator's current context
@@ -57,7 +55,7 @@ double time_to_double(
  * @brief Utility function that can be used to convert a real time value in a
  * given time unit to an integer value with the context's simulation time
  * precision.
- * 
+ *
  * @param time_value Time real value in time unit
  * @param time_unit Time unit (e.g. "us")
  * @param p_context Pointer to Verilator's current context
@@ -69,7 +67,7 @@ uint64_t double_to_time(
 /**
  * @brief Utility to get the value of a scalar or string variable and include
  * it in a JSON message.
- * 
+ *
  * @param p_var Pointer to VerilatedVar instance
  * @param p_msg Pointer to cJSON message
  * @param key Key to use in cJSON message for the value
