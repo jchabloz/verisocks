@@ -320,26 +320,14 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         );
         vs_log_mod_debug("vsl", "Array width: %d", p_var->elements(0));
         vs_log_mod_debug("vsl", "Array depth: %d", p_var->elements(1));
-        cJSON *p_array = cJSON_AddArrayToObject(p_msg, "value");
-        if (nullptr == p_array) {
-            vs_log_mod_error("vsl", "Could not create cJSON array");
+        if (0 > add_array_to_msg(p_var, p_msg, "value")) {
+            vs_log_mod_error(
+                "vsl",
+                "Error getting array values for variable %s",
+                str_path.c_str()
+            );
             handle_error();
             return;
-        }
-        size_t mem_size = p_var->elements(1);
-        size_t mem_index = 0;
-        while (mem_index < mem_size) {
-            retval = add_value_to_array(p_var, p_array, mem_index);
-            if (0 > retval) {
-                vs_log_mod_error(
-                    "vsl",
-                    "Error getting value for array variable %s",
-                    str_path.c_str()
-                );
-                handle_error();
-                return;
-            }
-            mem_index++;
         }
     }
     else {

@@ -75,6 +75,26 @@ uint64_t double_to_time(
  */
 int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
 
+/**
+ * @brief Utility function to get the value of an array variable and include it
+ * in a JSON message.
+ *
+ * @param p_var Pointer to VerilatedVar instance
+ * @param p_msg Pointer to cJSON message
+ * @param key Key to use in cJSON message for the value
+ * @return (int) Status - 0 if successful
+ */
+int add_array_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
+
+/**
+ * @brief Utility function to get the value of an array variable at a given
+ * index and include it in a JSON array at the same index.
+ *
+ * @param p_var Pointer to VerilatedVar instance
+ * @param p_array Pointer to cJSON array instance
+ * @param index Index
+ * @return (int) Status - 0 if successful
+ */
 int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index);
 
 int set_variable_value(VerilatedVar* p_var, double value);

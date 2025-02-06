@@ -2,7 +2,6 @@
 @file vsl_utils.cpp
 @author jchabloz
 @brief Utilities for Verisocks Verilator integration
-@date 2022-09-30
 ******************************************************************************/
 /*
 Copyright (c) 2024-2025 Jérémie Chabloz
@@ -163,6 +162,34 @@ int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
     return 0;
 }
 
+
+int add_array_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
+{
+
+    if (p_var->dims() != 2) {
+        vs_log_mod_error(
+            "vsl_utils", "Cannot extract value as an array - check dimensions!");
+        return -1;
+    }
+    cJSON *p_array = cJSON_AddArrayToObject(p_msg, key);
+    if (nullptr == p_array) {
+        vs_log_mod_error("vsl_utils", "Could not create cJSON array");
+        return -1;
+    }
+    size_t mem_size = p_var->elements(1);
+    size_t mem_index = 0;
+    while (mem_index < mem_size) {
+        if (0 > add_value_to_array(p_var, p_array, mem_index)) {
+            vs_log_mod_error(
+                "vsl_utils", "Error getting value for array variable");
+                return -1;
+            }
+            mem_index++;
+    }
+    return 0;
+}
+
+
 int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
 {
     double number_value {0.0f};
@@ -257,39 +284,5 @@ int set_variable_value(VerilatedVar* p_var, double value)
     return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2)
-{
-    if (val1.format != val2.format) return 1;
-    switch (val1.format) {
-    case vpiIntVal:
-        if (val1.value.integer == val2.value.integer) return 0;
-        break;
-    case vpiRealVal:
-        if (val1.value.real == val2.value.real) return 0;
-        break;
-    default:
-        vs_log_mod_error("vs_utils", "vs_utils_compare_values, format %d is \
-currently not supported", val1.format);
-        return -1;
-    }
-    return 1;
-}
-
-
-*/
-
 } //namespace vsl
+//EOF
