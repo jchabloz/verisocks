@@ -75,7 +75,7 @@ uint64_t double_to_time(
  * @param key Key to use in cJSON message for the value
  * @return (int) Status - 0 if successful
  */
-int vsl_utils_get_value(VerilatedVar* p_var, cJSON* p_msg, const char* key);
+int vsl_utils_add_value(VerilatedVar* p_var, cJSON* p_msg, const char* key);
 
 } //namespace vsl
 

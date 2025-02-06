@@ -303,7 +303,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     /* Scalar variables */
     if (p_var->dims() < 2) {
         /* Add scalar variable value to return message */
-        int retval = vsl_utils_get_value(p_var, p_msg, "value");
+        int retval = vsl_utils_add_value(p_var, p_msg, "value");
         if (0 > retval) {
             vs_log_mod_error(
                 "vsl", "Error getting value for variable %s", str_path.c_str()
@@ -318,20 +318,26 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
             "vsl", "Variable %s detected to be an array", str_path.c_str()
         );
         size_t mem_size = p_var->elements(1); //Number of elements in the array
-        vs_log_mod_debug("vsl", "Array depth: %d", (int) mem_size);
+        vs_log_mod_debug("vsl", "Array width: %d", p_var->elements(0));
+        vs_log_mod_debug("vsl", "Array depth: %d", p_var->elements(1));
         cJSON *p_array = cJSON_AddArrayToObject(p_msg, "value");
-        /*
         if (nullptr == p_array) {
             vs_log_mod_error("vsl", "Could not create cJSON array");
             handle_error();
             return;
         }
+        /*
+        while (mem_size > 0) {
+            
+            cJSON_AddItemToArray(p_array,
+                cJSON_CreateNumber());
+            mem_size--;
+        }
         */
-        //TODO
     }
     else {
         vs_log_mod_error(
-            "vsl", "Arrays with dimensions > 2 not supported"
+            "vsl", "Arrays with dimensions > 2 are not supported (yet)"
         );
         handle_error();
         return;

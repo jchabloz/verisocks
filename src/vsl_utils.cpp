@@ -103,7 +103,7 @@ auto get_array_value(VerilatedVar* p_var, T* p_array)
     */
 }
 
-int vsl_utils_get_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
+int vsl_utils_add_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
 {
     double number_value {0.0f};
     std::string str_value {""};
