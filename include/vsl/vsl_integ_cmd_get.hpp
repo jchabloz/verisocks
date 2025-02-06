@@ -26,9 +26,9 @@ SOFTWARE.
 #define VSL_INTEG_CMD_GET_HPP
 
 #include "cJSON.h"
-#include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
+#include "vsl/vsl_integ.hpp"
 #include "vsl/vsl_utils.hpp"
 #include "verilated.h"
 #include "verilated_syms.h"

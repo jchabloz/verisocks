@@ -65,8 +65,8 @@ uint64_t double_to_time(
     double time_value, const char* time_unit, VerilatedContext* p_context);
 
 /**
- * @brief Utility to get the value of a scalar or string variable and include
- * it in a JSON message.
+ * @brief Utility function to get the value of a scalar or string variable and
+ * include it in a JSON message.
  *
  * @param p_var Pointer to VerilatedVar instance
  * @param p_msg Pointer to cJSON message
@@ -76,6 +76,8 @@ uint64_t double_to_time(
 int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
 
 int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index);
+
+int set_variable_value(VerilatedVar* p_var, double value);
 
 } //namespace vsl
 

@@ -92,9 +92,9 @@ static inline auto get_array_value(VerilatedVar* p_var, size_t index)
 }
 
 template <typename T>
-inline void set_value(VerilatedVar* p_var, T x)
+static inline void set_value(VerilatedVar* p_var, double value)
 {
-    *(p_var->datap()) = x;
+    *((T*)p_var->datap()) = static_cast<T>(value);
 }
 
 int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
@@ -220,6 +220,54 @@ int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
     return 0;
 }
 
+int set_variable_value(VerilatedVar* p_var, double value)
+{
+    /* Detect if non-scalar */
+    if (p_var->dims() > 1) {
+        vs_log_mod_error(
+            "vsl_utils", "Cannot set variable value (non-scalar)");
+        return -1;
+    }
+
+    switch (p_var->vltype()) {
+        case VLVT_UINT8:
+            set_value<uint8_t>(p_var, value);
+            break;
+        case VLVT_UINT16:
+            set_value<uint16_t>(p_var, value);
+            break;
+        case VLVT_UINT32:
+            set_value<uint32_t>(p_var, value);
+            break;
+        case VLVT_UINT64:
+            set_value<uint32_t>(p_var, value);
+            break;
+        case VLVT_REAL:
+            *((double*)p_var->datap()) = value;
+            break;
+        case VLVT_STRING:
+        case VLVT_UNKNOWN:
+        case VLVT_WDATA:
+        case VLVT_PTR:
+        default:
+            vs_log_mod_error(
+                "vsl_utils", "Type not supported (yet) for scalar variable");
+            return -1;
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 
@@ -241,29 +289,6 @@ currently not supported", val1.format);
     return 1;
 }
 
-PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value)
-{
-    s_vpi_value vpi_value;
-    vpi_value.format = vs_utils_get_format(h_obj);
-    if (0 > vpi_value.format) {
-        return -1;
-    }
-    switch (vpi_value.format) {
-    case vpiIntVal:
-        vpi_value.value.integer = (PLI_INT32) value;
-        break;
-    case vpiRealVal:
-        vpi_value.value.real = value;
-        break;
-    default:
-        vs_log_mod_error("vs_utils", "vs_utils_set_value, format %d is \
-currently not supported", vpi_value.format);
-        return -1;
-    }
-
-    vpi_put_value(h_obj, &vpi_value, NULL, vpiNoDelay);
-    return 0;
-}
 
 */
 

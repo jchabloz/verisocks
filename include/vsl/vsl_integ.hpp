@@ -81,12 +81,12 @@ private:
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
 
-    T* p_model; //Pointer to verilated model instance
+    T* p_model;                  //Pointer to verilated model instance
     VerilatedContext* p_context; //Pointer to Verilator context
-    int num_port {5100}; //Port number
-    int num_timeout_sec {120}; //Timeout, in seconds
-    int fd_server_socket {-1}; //File descriptor, server socket
-    int fd_client_socket {-1}; //File descriptor, connected client socket
+    int num_port {5100};         //Port number
+    int num_timeout_sec {120};   //Timeout, in seconds
+    int fd_server_socket {-1};   //File descriptor, server socket
+    int fd_client_socket {-1};   //File descriptor, connected client socket
     bool _is_connected {false};
 
     /* State machine functions */
@@ -124,7 +124,7 @@ private:
     // static void VSL_CMD_HANDLER(run_until_time);
     // static void VSL_CMD_HANDLER(run_until_change);
     // static void VSL_CMD_HANDLER(run_to_next);
-    // static void VSL_CMD_HANDLER(set);
+    static void VSL_CMD_HANDLER(set);
     static void VSL_CMD_HANDLER(not_supported);
 };
 
@@ -147,6 +147,7 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     // Add commands and sub-commands handler functions to the relevant maps
     cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
+    cmd_handlers_map["set"] = VSL_CMD_HANDLER_NAME(set);
     cmd_handlers_map["finish"] = VSL_CMD_HANDLER_NAME(finish);
     cmd_handlers_map["stop"] = VSL_CMD_HANDLER_NAME(stop);
     cmd_handlers_map["exit"] = VSL_CMD_HANDLER_NAME(exit);
@@ -440,9 +441,6 @@ VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
 }
 
 } //namespace vsl
-
-#include "vsl_integ_cmd.hpp"
-#include "vsl_integ_cmd_get.hpp"
 
 #endif //VSL_INTEG_HPP
 //EOF
