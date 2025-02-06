@@ -1,5 +1,7 @@
 ## Verilator support
 
+* [ ] Support get and set commands for individual array items
+  management + freeing memory)
 * [ ] How to cope with callbacks on signals?
 * [ ] How to access public signals without adding /*verilator_public*/
   statements everywhere?
