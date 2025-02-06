@@ -301,9 +301,10 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     }
 
     /* Scalar variables */
+	int retval;
     if (p_var->dims() < 2) {
         /* Add scalar variable value to return message */
-        int retval = vsl_utils_add_value(p_var, p_msg, "value");
+        retval = add_value_to_msg(p_var, p_msg, "value");
         if (0 > retval) {
             vs_log_mod_error(
                 "vsl", "Error getting value for variable %s", str_path.c_str()
@@ -326,14 +327,17 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
             handle_error();
             return;
         }
-        /*
         while (mem_size > 0) {
-            
-            cJSON_AddItemToArray(p_array,
-                cJSON_CreateNumber());
+			retval = add_value_to_array(p_var, p_array, mem_size);	
+        	if (0 > retval) {
+            	vs_log_mod_error(
+            	    "vsl", "Error getting value for variable %s", str_path.c_str()
+            	);
+            	handle_error();
+            	return;
+        	}
             mem_size--;
         }
-        */
     }
     else {
         vs_log_mod_error(

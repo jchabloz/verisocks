@@ -80,9 +80,16 @@ uint64_t double_to_time(double time_value, const char* time_unit,
 }
 
 template <typename T>
-inline auto get_value(VerilatedVar* p_var)
+static inline auto get_value(VerilatedVar* p_var)
 {
     T retval = *(static_cast<T*>(p_var->datap()));
+    return retval;
+}
+
+template <typename T>
+static inline auto get_array_value(VerilatedVar* p_var, size_t index)
+{
+    T retval = static_cast<T*>(p_var->datap())[index];
     return retval;
 }
 
@@ -92,18 +99,7 @@ inline void set_value(VerilatedVar* p_var, T x)
     *(p_var->datap()) = x;
 }
 
-template <typename T>
-auto get_array_value(VerilatedVar* p_var, T* p_array)
-{
-    //TODO
-    /*
-    1. Check dimension, if > 2, consider as not supported for now
-    2. 
-    
-    */
-}
-
-int vsl_utils_add_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
+int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
 {
     double number_value {0.0f};
     std::string str_value {""};
@@ -169,7 +165,54 @@ int vsl_utils_add_value(VerilatedVar* p_var, cJSON* p_msg, const char* key)
     return 0;
 }
 
+int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
+{
+    double number_value {0.0f};
 
+    if (p_var->dims() != 2) {
+        vs_log_mod_error(
+            "vsl_utils", "Cannot extract value as an array - check dimensions!");
+        return -1;
+    }
+
+	//TODO: add check in index vs array size
+
+    /* Get value from variable pointer */
+    switch (p_var->vltype()) {
+        case VLVT_UINT8:
+            number_value = static_cast<double>(
+                get_array_value<uint8_t>(p_var, index));
+            break;
+        case VLVT_UINT16:
+            number_value = static_cast<double>(
+                get_array_value<uint16_t>(p_var, index));
+            break;
+        case VLVT_UINT32:
+            number_value = static_cast<double>(
+                get_array_value<uint32_t>(p_var, index));
+            break;
+        case VLVT_UINT64:
+            number_value = static_cast<double>(
+                get_array_value<uint64_t>(p_var, index));
+            break;
+        case VLVT_REAL:
+            number_value = get_array_value<double>(p_var, index);
+            break;
+        case VLVT_STRING:
+        case VLVT_UNKNOWN:
+        case VLVT_WDATA:
+        case VLVT_PTR:
+        default:
+            vs_log_mod_error(
+                "vsl_utils", "Type not supported for array value");
+            return -1;
+    }
+
+	cJSON_AddItemToArray(p_array, cJSON_CreateNumber(number_value));
+	//TODO: Add checks
+
+	return 0;
+}
 
 
 /*
