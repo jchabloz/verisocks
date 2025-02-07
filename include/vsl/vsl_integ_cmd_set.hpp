@@ -24,11 +24,11 @@ SOFTWARE.
 #define VSL_INTEG_CMD_SET_HPP
 
 #include "cJSON.h"
-//#include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
-//#include "vsl/vsl_utils.hpp"
-//#include "verilated.h"
+#include "vsl/vsl_integ.hpp"
+#include "vsl/vsl_utils.hpp"
+#include "verilated.h"
 //#include "verilated_syms.h"
 
 //#include <cstdio>
@@ -85,11 +85,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     }
 
     cJSON *p_item_val;
+    p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
     /* Scalar variables */
     if (p_var->dims() < 2) {
-        double value {0.0f};
+        double value {0.0f}; //Default value if not specified in message
         /* Get the value from the JSON message content */
-        p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
         if (nullptr != p_item_val) {
             value = cJSON_GetNumberValue(p_item_val);
             if (std::isnan(value)) {
@@ -105,7 +105,16 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     }
     /* Array variables */
     else if (p_var->dims() == 2) {
-        //TODO
+        if (nullptr == p_item_val) {
+            vs_log_mod_error("vsl", "Command field \"value\" invalid/not found");
+            handle_error();
+            return;
+        }
+        if (0 > set_array_variable_value(p_var, p_item_val)) {
+            vs_log_mod_error("vsl", "Error setting array variable value");
+            handle_error();
+            return;
+        }
     }
     else {
         vs_log_mod_error(

@@ -53,6 +53,7 @@ static int16_t get_time_factor(const char* time_unit)
         vs_log_mod_error(
             "vsl_utils", "Wrong time unit identifier %s", time_unit);
         return 0;
+        return 0;
     }
     return TIME_DEF_MAP[time_unit];
 }
@@ -76,6 +77,17 @@ uint64_t double_to_time(double time_value, const char* time_unit,
     return time;
 }
 
+/**
+ * @brief Retrieves the value from a VerilatedVar pointer.
+ *
+ * This function template takes a pointer to a VerilatedVar and returns the
+ * value stored in it, cast to the specified type T.
+ *
+ * @tparam T The type to which the value should be cast.
+ * @param p_var Pointer to the VerilatedVar from which the value is to be
+ * retrieved.
+ * @return The value stored in the VerilatedVar, cast to type T.
+ */
 template <typename T>
 static inline auto get_value(VerilatedVar* p_var)
 {
@@ -83,6 +95,18 @@ static inline auto get_value(VerilatedVar* p_var)
     return retval;
 }
 
+/**
+ * @brief Retrieves a value from an array stored in a VerilatedVar object.
+ * 
+ * This function template takes a VerilatedVar pointer and an index, and
+ * returns the value at the specified index in the array. The type of the value
+ * is determined by the template parameter T.
+ * 
+ * @tparam T The type of the value to be retrieved from the array.
+ * @param p_var Pointer to the VerilatedVar object containing the array.
+ * @param index The index of the value to retrieve from the array.
+ * @return The value at the specified index in the array, cast to type T.
+ */
 template <typename T>
 static inline auto get_array_value(VerilatedVar* p_var, size_t index)
 {
@@ -90,10 +114,40 @@ static inline auto get_array_value(VerilatedVar* p_var, size_t index)
     return retval;
 }
 
+/**
+ * @brief Sets the value of a VerilatedVar object.
+ *
+ * This function template sets the value of a VerilatedVar object by casting
+ * the provided double value to the specified template type T and assigning it
+ * to the data pointer of the VerilatedVar object.
+ *
+ * @tparam T The type to which the value will be cast and assigned.
+ * @param p_var Pointer to the VerilatedVar object whose value is to be set.
+ * @param value The double value to be cast and assigned to the VerilatedVar
+ * object.
+ */
 template <typename T>
 static inline void set_value(VerilatedVar* p_var, double value)
 {
-    *((T*)p_var->datap()) = static_cast<T>(value);
+    *(static_cast<T*>(p_var->datap())) = static_cast<T>(value);
+}
+
+/**
+ * @brief Sets the value of an element in an array.
+ *
+ * This function template assigns a specified value to an element at a given
+ * index in an array represented by a VerilatedVar pointer.
+ *
+ * @tparam T The type of the array element.
+ * @param p_var Pointer to the VerilatedVar array.
+ * @param value The value to be assigned to the array element.
+ * @param index The index of the array element to be set.
+ */
+template <typename T>
+static inline void set_array_value(
+    VerilatedVar* p_var, double value, size_t index)
+{
+    static_cast<T*>(p_var->datap())[index] = static_cast<T>(value);
 }
 
 int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
@@ -189,10 +243,10 @@ int add_array_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key)
     return 0;
 }
 
-
 int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index)
 {
     double number_value {0.0f};
+
 
     if (p_var->dims() != 2) {
         vs_log_mod_error(
@@ -283,6 +337,64 @@ int set_variable_value(VerilatedVar* p_var, double value)
     }
     return 0;
 }
+
+int set_array_variable_value(VerilatedVar* p_var, cJSON* p_obj)
+{
+    /* Detect if the variable is not an array */
+    if (p_var->dims() != 2) {
+        vs_log_mod_error(
+            "vsl_utils", "Variable is not an array as expected");
+        return -1;
+    }
+
+    /* Detect if the JSON object is not an array object */
+    if (!cJSON_IsArray(p_obj)) {
+        vs_log_mod_error(
+            "vsl_utils", "Command field \"value\" should be an array");
+        return -1;
+    }
+
+    /* Verify that the arrays sizes are corresponding */
+    size_t mem_size = p_var->elements(1);
+    if (mem_size != (size_t) cJSON_GetArraySize(p_obj)) {
+        vs_log_mod_error(
+            "vsl_utils",
+            "Command field \"value\" should be an array of length %d",
+            (int) mem_size);
+        return -1;
+    }
+
+    cJSON *iterator;
+    double value = 0.0f;
+    size_t index = 0;
+    cJSON_ArrayForEach(iterator, p_obj) {
+        value = cJSON_GetNumberValue(iterator);
+        switch (p_var->vltype()) {
+            case VLVT_UINT8:
+                set_array_value<uint8_t>(p_var, value, index);
+                break;
+            case VLVT_UINT16:
+                set_array_value<uint16_t>(p_var, value, index);
+                break;
+            case VLVT_UINT32:
+                set_array_value<uint32_t>(p_var, value, index);
+                break;
+            case VLVT_UINT64:
+                set_array_value<uint64_t>(p_var, value, index);
+                break;
+            case VLVT_REAL:
+                static_cast<double*>(p_var->datap())[index] = value;
+                break;
+            default:
+                vs_log_mod_error(
+                    "vsl_utils", "Type not supported for array value");
+                return -1;
+        }
+        index++;
+    }
+    return 0;
+}
+
 
 } //namespace vsl
 //EOF

@@ -40,13 +40,15 @@ using VslValue = std::variant<
 >;
 
 /**
- * @brief Utility function that can be used to convert an integer simulation
- * time value in a real value based on a given time unit.
- *
- * @param time Time integer value (simulation precision)
- * @param time_unit Time unit (e.g. "us")
- * @param p_context Pointer to Verilator's current context
- * @return (double) Time value in time unit
+ * @brief Converts a given simulation integer time value to a double
+ * representation based on the specified time unit.
+ * 
+ * @param time The integer time value to be converted.
+ * @param time_unit The unit of the time value (e.g., "ns" for nanoseconds,
+ * "us" for microseconds).
+ * @param p_context Pointer to the VerilatedContext, which may be used for
+ * simulation context.
+ * @return double The converted time value as a double.
  */
 double time_to_double(
     uint64_t time, const char* time_unit, VerilatedContext* p_context);
@@ -71,7 +73,7 @@ uint64_t double_to_time(
  * @param p_var Pointer to VerilatedVar instance
  * @param p_msg Pointer to cJSON message
  * @param key Key to use in cJSON message for the value
- * @return (int) Status - 0 if successful
+ * @return int Returns 0 on success, or a non-zero error code on failure.
  */
 int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
 
@@ -82,22 +84,45 @@ int add_value_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
  * @param p_var Pointer to VerilatedVar instance
  * @param p_msg Pointer to cJSON message
  * @param key Key to use in cJSON message for the value
- * @return (int) Status - 0 if successful
+ * @return int Returns 0 on success, or a non-zero error code on failure.
  */
 int add_array_to_msg(VerilatedVar* p_var, cJSON* p_msg, const char* key);
 
 /**
- * @brief Utility function to get the value of an array variable at a given
- * index and include it in a JSON array at the same index.
+ * @brief Adds a value to a JSON array at a specified index.
  *
- * @param p_var Pointer to VerilatedVar instance
- * @param p_array Pointer to cJSON array instance
- * @param index Index
- * @return (int) Status - 0 if successful
+ * This function takes a pointer to a VerilatedVar object and adds its value
+ * to a cJSON array at the given index.
+ *
+ * @param p_var Pointer to the VerilatedVar object containing the value to add.
+ * @param p_array Pointer to the cJSON array where the value will be added.
+ * @param index The index at which the value should be added in the array.
+ * @return int Returns 0 on success, or a non-zero error code on failure.
  */
 int add_value_to_array(VerilatedVar* p_var, cJSON* p_array, size_t index);
 
+/**
+ * @brief Sets the value of a Verilated variable.
+ *
+ * This function assigns a given double value to a specified Verilated variable.
+ *
+ * @param p_var Pointer to the Verilated variable to be set.
+ * @param value The double value to assign to the variable.
+ * @return int Returns 0 on success, or a non-zero error code on failure.
+ */
 int set_variable_value(VerilatedVar* p_var, double value);
+
+/**
+ * @brief Sets the value of an array variable in a Verilated model.
+ *
+ * This function assigns a value to an array variable represented by a 
+ * VerilatedVar pointer using the data provided in a cJSON object.
+ *
+ * @param p_var Pointer to the VerilatedVar representing the array variable.
+ * @param p_obj Pointer to the cJSON object containing the value to be set.
+ * @return int Returns 0 on success, or a non-zero error code on failure.
+ */
+int set_array_variable_value(VerilatedVar* p_var, cJSON* p_obj);
 
 } //namespace vsl
 
