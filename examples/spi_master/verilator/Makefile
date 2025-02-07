@@ -9,6 +9,13 @@ SYSTEMC_INCLUDE ?= /usr/local/systemc-2.3.3/include
 SYSTEMC_LIBDIR ?= /usr/local/systemc-2.3.3/lib-linux64
 VSL_DIR = $(HOME)/projects/verisocks
 
+# Logging levels for vs_log module
+LOG_LEVEL_DEBUG = 10
+LOG_LEVEL_INFO = 20
+LOG_LEVEL_WARNING = 30
+LOG_LEVEL_ERROR = 40
+LOG_LEVEL_CRITICAL = 50
+
 #*****************************************************************************
 # Switches
 #*****************************************************************************
@@ -73,7 +80,7 @@ VSL_OBJS = $(addprefix $(VSL_BUILD_DIR)/,$(subst .c,.o,$(VS_SRCS)))
 VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
-CPPFLAGS += -DVS_LOG_LEVEL=10
+CPPFLAGS += -DVS_LOG_LEVEL=$(LOG_LEVEL_DEBUG)
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
 
