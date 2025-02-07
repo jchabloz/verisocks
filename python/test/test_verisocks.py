@@ -20,7 +20,7 @@ VS_TIMEOUT = 2
 
 # Expectations
 sim_info_product = "Icarus Verilog"
-sim_info_version = r"1[0-2]\.[0-9]+"
+sim_info_version = r"1[0-3]\.[0-9]+"
 
 
 def setup_test(port):
