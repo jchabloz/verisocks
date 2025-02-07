@@ -16,6 +16,9 @@ def find_free_port():
     within the function, it is assumed that the same port number should also be
     free again; this is where the weakness of this method lies, since race
     conditions cannot be fully excluded.
+
+    Returns:
+        int: A free port number
     """
     with socket.socket() as s:
         s.bind(('', 0))
@@ -46,7 +49,7 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
             are "captured" (i.e. not visible).
 
     Returns:
-        subprocess.Popen
+        subprocess.Popen: Process object of the launched simulation
     """
 
     if elab_cmd:
@@ -99,7 +102,7 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
             are "captured" (i.e. not visible).
 
     Returns:
-        subprocess.Popen
+        subprocess.Popen: Process object of the launched simulation
     """
 
     vpi_libpath = _format_path(cwd, vpi_libpath)
