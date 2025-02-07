@@ -29,12 +29,9 @@ SOFTWARE.
 #include "vsl/vsl_integ.hpp"
 #include "vsl/vsl_utils.hpp"
 #include "verilated.h"
-//#include "verilated_syms.h"
 
-//#include <cstdio>
 #include <string>
 #include <cmath>
-
 
 namespace vsl{
 
