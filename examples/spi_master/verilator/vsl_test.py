@@ -34,9 +34,13 @@ with Verisocks(HOST, PORT) as vs_cli:
     get_variable_value(vs_cli, "spi_master_tb.toto")
     get_variable_value(vs_cli, "spi_master_tb.tata")
 
-    answer = vs_cli.set("spi_master_tb.tutu", value=237);
+    answer = vs_cli.set("spi_master_tb.tutu", value=237)
     print(answer)
     get_variable_value(vs_cli, "spi_master_tb.tutu")
+
+    answer = vs_cli.set("spi_master_tb.tata", value=[45]*12)
+    print(answer)
+    get_variable_value(vs_cli, "spi_master_tb.tata")
 
     answer = vs_cli.send_cmd("finish")
     # answer = vs_cli.send_cmd("exit")
