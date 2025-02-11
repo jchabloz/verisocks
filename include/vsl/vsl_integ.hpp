@@ -49,7 +49,6 @@ SOFTWARE.
 
 namespace vsl{
 
-// typedef enum {
 enum VslState {
     VSL_STATE_INIT,        ///Initial state, Verisocks server socket not initialized
     VSL_STATE_CONNECT,     ///Socket created, bound to address, waiting for connection
@@ -64,6 +63,15 @@ template<typename T>
 class VslInteg {
 
 public:
+
+    /**
+     * @brief Constructs a VslInteg object.
+     * 
+     * @tparam T The type of the model.
+     * @param p_model Pointer to the model object.
+     * @param port The port number to be used. Default is 5100.
+     * @param timeout The timeout duration in seconds. Default is 120.
+     */
     VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
@@ -81,13 +89,13 @@ private:
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
 
-    T* p_model;                  //Pointer to verilated model instance
-    VerilatedContext* p_context; //Pointer to Verilator context
-    int num_port {5100};         //Port number
-    int num_timeout_sec {120};   //Timeout, in seconds
-    int fd_server_socket {-1};   //File descriptor, server socket
-    int fd_client_socket {-1};   //File descriptor, connected client socket
-    bool _is_connected {false};
+    T* p_model;                   //Pointer to verilated model instance
+    VerilatedContext* p_context;  //Pointer to Verilator context
+    int num_port {5100};          //Port number
+    int num_timeout_sec {120};    //Timeout, in seconds
+    int fd_server_socket {-1};    //File descriptor, server socket
+    int fd_client_socket {-1};    //File descriptor, connected client socket
+    bool _is_connected {false};   //Socket connection status
 
     /* State machine functions */
     void main_init();
@@ -119,7 +127,7 @@ private:
     static void VSL_CMD_HANDLER(finish);
     static void VSL_CMD_HANDLER(stop);
     static void VSL_CMD_HANDLER(exit);
-    // static void VSL_CMD_HANDLER(run);
+    static void VSL_CMD_HANDLER(run);
     // static void VSL_CMD_HANDLER(run_for_time);
     // static void VSL_CMD_HANDLER(run_until_time);
     // static void VSL_CMD_HANDLER(run_until_change);
@@ -144,17 +152,20 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
 
-    // Add commands and sub-commands handler functions to the relevant maps
-    cmd_handlers_map["info"] = VSL_CMD_HANDLER_NAME(info);
-    cmd_handlers_map["get"] = VSL_CMD_HANDLER_NAME(get);
-    cmd_handlers_map["set"] = VSL_CMD_HANDLER_NAME(set);
+    // Add commands handler functions to the relevant maps
+    cmd_handlers_map["info"]   = VSL_CMD_HANDLER_NAME(info);
+    cmd_handlers_map["get"]    = VSL_CMD_HANDLER_NAME(get);
+    cmd_handlers_map["set"]    = VSL_CMD_HANDLER_NAME(set);
+    cmd_handlers_map["run"]    = VSL_CMD_HANDLER_NAME(run);
     cmd_handlers_map["finish"] = VSL_CMD_HANDLER_NAME(finish);
-    cmd_handlers_map["stop"] = VSL_CMD_HANDLER_NAME(stop);
-    cmd_handlers_map["exit"] = VSL_CMD_HANDLER_NAME(exit);
+    cmd_handlers_map["stop"]   = VSL_CMD_HANDLER_NAME(stop);
+    cmd_handlers_map["exit"]   = VSL_CMD_HANDLER_NAME(exit);
+
+    // Add sub-commands handler functions to the relevant maps
     sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
     sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
-    sub_cmd_handlers_map["get_type"] = VSL_CMD_HANDLER_NAME(not_supported);
-    sub_cmd_handlers_map["get_value"] = VSL_CMD_HANDLER_NAME(get_value);
+    sub_cmd_handlers_map["get_type"]     = VSL_CMD_HANDLER_NAME(not_supported);
+    sub_cmd_handlers_map["get_value"]    = VSL_CMD_HANDLER_NAME(get_value);
     return;
 }
 

@@ -29,5 +29,6 @@ SOFTWARE.
 #include "vsl/vsl_integ_cmd.hpp"
 #include "vsl/vsl_integ_cmd_get.hpp"
 #include "vsl/vsl_integ_cmd_set.hpp"
+#include "vsl/vsl_integ_cmd_run.hpp"
 
 #endif
