@@ -47,7 +47,7 @@ module spi_master(cs_b, mosi, miso, sclk);
     reg [255:0] ascii_ret_id;
     reg rx_crc_error;
     event start_transaction /*verilator public*/;
-    event end_transaction;
+    event end_transaction /*verilator public*/;
     integer transaction_counter;
 
     /**************************************************************************

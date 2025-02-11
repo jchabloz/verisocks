@@ -25,6 +25,7 @@ module spi_master_tb();
 
 	real toto /*verilator public*/;
 	integer tutu /*verilator public*/;
+    reg titi /*verilator public*/;
     reg [6:0] tata [11:0] /*verilator public*/;
 
     wire cs_b, mosi, sclk, miso /*verilator public*/;
@@ -50,6 +51,7 @@ module spi_master_tb();
 	
 		toto = -1.623;
 		tutu = 13;
+        titi = 0;
 		tata[0] = 7'd0;
 		tata[1] = 7'd1;
 		tata[2] = 7'd3;

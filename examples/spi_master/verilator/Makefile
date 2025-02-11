@@ -70,6 +70,7 @@ VSL_HEADERS = \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd.hpp \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_get.hpp \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_set.hpp \
+    $(VSL_DIR)/include/vsl/vsl_integ_cmd_run.hpp \
     $(VSL_DIR)/include/vsl/vsl_utils.hpp
 
 VSL_INCDIRS = \

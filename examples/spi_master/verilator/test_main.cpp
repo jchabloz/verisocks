@@ -4,6 +4,9 @@
 #include "verilated.h"
 #include "vsl.h"
 #include "Vspi_master_tb.h"
+#include "Vspi_master_tb__Syms.h"
+
+#include <memory>
 
 //======================
 
@@ -14,7 +17,7 @@ int main(int argc, char** argv, char**) {
     contextp->commandArgs(argc, argv);
 
     // Construct the Verilated model, from Vtop.h generated from Verilating
-    const std::unique_ptr<Vspi_master_tb> topp{new Vspi_master_tb{contextp.get()}};
+    const std::unique_ptr<Vspi_master_tb> topp {new Vspi_master_tb{contextp.get()}};
 
 
     /* SANDBOX */
@@ -22,7 +25,8 @@ int main(int argc, char** argv, char**) {
     Should the usage of scopeFind and varFind methods should stay internal to
     Verilator?
     */
-    std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
+    // std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
+    std::string str_path{"TOP.spi_master_tb.i_spi_master.end_transaction"};
     //std::string str_path{"TOP.spi_master_tb.i_spi_master.start_transaction"};
     //std::string str_path{"TOP.spi_master_tb.toto"};
     std::string str_scope;
@@ -47,6 +51,10 @@ int main(int argc, char** argv, char**) {
             printf("Variable dim 1 range: [%d:%d]\n", (int) p_xvar->left(1), (int) p_xvar->right(1));
         }
     }
+
+    /* Trying to access public signals and functions */
+    topp->spi_master_tb->titi = 1u;
+    topp->spi_master_tb->i_spi_master->start_transaction.fire();
 
     vsl::VslInteg<Vspi_master_tb> vslx{topp.get(), 5100, 5};
     vslx.run();
