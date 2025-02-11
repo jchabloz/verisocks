@@ -25,19 +25,9 @@ SOFTWARE.
 
 #include "verilated.h"
 #include "cJSON.h"
-#include <variant>
 #include <string>
 
 namespace vsl{
-
-using VslValue = std::variant<
-    uint8_t,
-    uint16_t,
-    uint32_t,
-    uint64_t,
-    double,
-    std::string
->;
 
 /**
  * @brief Converts a given simulation integer time value to a double
