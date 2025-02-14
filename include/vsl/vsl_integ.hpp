@@ -161,9 +161,9 @@ private:
     static void VSL_CMD_HANDLER(stop);
     static void VSL_CMD_HANDLER(exit);
     static void VSL_CMD_HANDLER(run);
-    // static void VSL_CMD_HANDLER(run_for_time);
-    // static void VSL_CMD_HANDLER(run_until_time);
-    // static void VSL_CMD_HANDLER(run_until_change);
+    static void VSL_CMD_HANDLER(run_for_time);
+    static void VSL_CMD_HANDLER(run_until_time);
+    static void VSL_CMD_HANDLER(run_until_change);
     // static void VSL_CMD_HANDLER(run_to_next);
     static void VSL_CMD_HANDLER(set);
     static void VSL_CMD_HANDLER(not_supported);
@@ -195,10 +195,13 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     cmd_handlers_map["exit"]   = VSL_CMD_HANDLER_NAME(exit);
 
     // Add sub-commands handler functions to the relevant maps
-    sub_cmd_handlers_map["get_sim_info"] = VSL_CMD_HANDLER_NAME(get_sim_info);
-    sub_cmd_handlers_map["get_sim_time"] = VSL_CMD_HANDLER_NAME(get_sim_time);
-    sub_cmd_handlers_map["get_type"]     = VSL_CMD_HANDLER_NAME(not_supported);
-    sub_cmd_handlers_map["get_value"]    = VSL_CMD_HANDLER_NAME(get_value);
+    sub_cmd_handlers_map["get_sim_info"]     = VSL_CMD_HANDLER_NAME(get_sim_info);
+    sub_cmd_handlers_map["get_sim_time"]     = VSL_CMD_HANDLER_NAME(get_sim_time);
+    sub_cmd_handlers_map["get_type"]         = VSL_CMD_HANDLER_NAME(not_supported);
+    sub_cmd_handlers_map["get_value"]        = VSL_CMD_HANDLER_NAME(get_value);
+    sub_cmd_handlers_map["run_for_time"]     = VSL_CMD_HANDLER_NAME(run_for_time);
+    sub_cmd_handlers_map["run_until_time"]   = VSL_CMD_HANDLER_NAME(run_until_time);
+    sub_cmd_handlers_map["run_until_change"] = VSL_CMD_HANDLER_NAME(run_until_change);
     return;
 }
 

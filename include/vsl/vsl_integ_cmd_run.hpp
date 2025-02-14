@@ -81,6 +81,24 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
     return;
 }
 
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
+    //TODO
+    return;
+}
+
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
+    //TODO
+    return;
+}
+
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
+    //TODO
+    return;
+}
+
 } //namespace vsl
 
 #endif //VSL_INTEG_CMD_RUN_HPP
