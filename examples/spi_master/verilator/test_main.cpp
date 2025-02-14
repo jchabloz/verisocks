@@ -19,44 +19,7 @@ int main(int argc, char** argv, char**) {
     // Construct the Verilated model, from Vtop.h generated from Verilating
     const std::unique_ptr<Vspi_master_tb> topp {new Vspi_master_tb{contextp.get()}};
 
-
-    /* SANDBOX */
-    /* Looking up variables - should we use this to access variables/signals?
-    Should the usage of scopeFind and varFind methods should stay internal to
-    Verilator?
-    */
-    // std::string str_path{"TOP.spi_master_tb.i_spi_master.tx_buffer"};
-    std::string str_path{"TOP.spi_master_tb.i_spi_master.end_transaction"};
-    //std::string str_path{"TOP.spi_master_tb.i_spi_master.start_transaction"};
-    //std::string str_path{"TOP.spi_master_tb.toto"};
-    std::string str_scope;
-    std::string str_var;
-    if (str_path.find_last_of(".") != str_path.npos) {
-        str_scope = str_path.substr(0, str_path.find_last_of("."));
-        str_var = str_path.substr(str_path.find_last_of(".") + 1);
-    }
-
-    /*
     contextp->internalsDump();
-    auto p_xscope = contextp->scopeFind(str_scope.c_str());
-    if (p_xscope != nullptr) {
-        printf("Scope %s found\n", p_xscope->name());
-        printf("Searching for variable %s in scope\n", str_var.c_str());
-        auto p_xvar = p_xscope->varFind(str_var.c_str());
-        if (p_xvar != nullptr) {
-            printf("Variable %s found\n", p_xvar->name());
-            printf("Variable type: %d\n", (int) p_xvar->vltype());
-            printf("Variable total size: %d\n", (int) p_xvar->totalSize());
-            printf("Variable dims: %d\n", (int) p_xvar->dims());
-            printf("Variable dim 0 range: [%d:%d]\n", (int) p_xvar->left(0), (int) p_xvar->right(0));
-            printf("Variable dim 1 range: [%d:%d]\n", (int) p_xvar->left(1), (int) p_xvar->right(1));
-        }
-    }
-    */
-
-    /* Trying to access public signals and functions */
-    topp->spi_master_tb->titi = 1u;
-    topp->spi_master_tb->i_spi_master->start_transaction.fire();
 
     /* Create top VSL instance */
     vsl::VslInteg<Vspi_master_tb> vslx{topp.get(), 5100, 5};
@@ -66,6 +29,7 @@ int main(int argc, char** argv, char**) {
     vslx.register_scalar("spi_master_tb.toto", &topp->spi_master_tb->toto, VLVT_REAL, 0u);
     vslx.register_scalar("spi_master_tb.tutu", &topp->spi_master_tb->tutu, VLVT_UINT32, 32u);
     vslx.register_array("spi_master_tb.tata", topp->spi_master_tb->tata.m_storage, VLVT_UINT8, 7u, 12u);
+    vslx.register_array("spi_master_tb.i_spi_master.rx_buffer", topp->spi_master_tb->i_spi_master->rx_buffer.m_storage, VLVT_UINT8, 8u, 8u);
     vslx.register_array("spi_master_tb.i_spi_master.tx_buffer", topp->spi_master_tb->i_spi_master->tx_buffer.m_storage, VLVT_UINT8, 8u, 7u);
     vslx.register_event("spi_master_tb.i_spi_master.start_transaction", &topp->spi_master_tb->i_spi_master->start_transaction);
     vslx.register_event("spi_master_tb.i_spi_master.end_transaction", &topp->spi_master_tb->i_spi_master->end_transaction);

@@ -10,7 +10,7 @@ PORT = 5100
 def setup_sim():
     elab_cmd = ["make"]
     sim_cmd = ["./Vspi_master_tb"]
-    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=False)
+    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
 
 
@@ -42,7 +42,7 @@ with Verisocks(HOST, PORT) as vs_cli:
     get_variable_value(vs_cli, "spi_master_tb.tutu")
     get_variable_value(vs_cli, "spi_master_tb.toto")
     get_variable_value(vs_cli, "spi_master_tb.tata")
-    # get_variable_value(vs_cli, "spi_master_tb.start_transaction")
+    get_variable_value(vs_cli, "spi_master_tb.i_spi_master.start_transaction")
 
     answer = vs_cli.set("spi_master_tb.tutu", value=237)
     print(answer)
