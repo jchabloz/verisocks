@@ -36,6 +36,7 @@ int main(int argc, char** argv, char**) {
         str_var = str_path.substr(str_path.find_last_of(".") + 1);
     }
 
+    /*
     contextp->internalsDump();
     auto p_xscope = contextp->scopeFind(str_scope.c_str());
     if (p_xscope != nullptr) {
@@ -51,12 +52,25 @@ int main(int argc, char** argv, char**) {
             printf("Variable dim 1 range: [%d:%d]\n", (int) p_xvar->left(1), (int) p_xvar->right(1));
         }
     }
+    */
 
     /* Trying to access public signals and functions */
     topp->spi_master_tb->titi = 1u;
     topp->spi_master_tb->i_spi_master->start_transaction.fire();
 
+    /* Create top VSL instance */
     vsl::VslInteg<Vspi_master_tb> vslx{topp.get(), 5100, 5};
+
+    /* Register public variables */
+    vslx.register_scalar("spi_master_tb.miso", &topp->spi_master_tb->miso, VLVT_UINT8, 1u);
+    vslx.register_scalar("spi_master_tb.toto", &topp->spi_master_tb->toto, VLVT_REAL, 0u);
+    vslx.register_scalar("spi_master_tb.tutu", &topp->spi_master_tb->tutu, VLVT_UINT32, 32u);
+    vslx.register_array("spi_master_tb.tata", topp->spi_master_tb->tata.m_storage, VLVT_UINT8, 7u, 12u);
+    vslx.register_array("spi_master_tb.i_spi_master.tx_buffer", topp->spi_master_tb->i_spi_master->tx_buffer.m_storage, VLVT_UINT8, 8u, 7u);
+    vslx.register_event("spi_master_tb.i_spi_master.start_transaction", &topp->spi_master_tb->i_spi_master->start_transaction);
+    vslx.register_event("spi_master_tb.i_spi_master.end_transaction", &topp->spi_master_tb->i_spi_master->end_transaction);
+
+    /* Run simulation */
     vslx.run();
 
     /*

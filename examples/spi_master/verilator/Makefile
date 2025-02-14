@@ -61,7 +61,7 @@ VS_SRCS = \
 	vs_msg.c \
 	vs_server.c
 
-VSL_SRCS = vsl_utils.cpp
+VSL_SRCS = vsl_utils.cpp vsl_types.cpp
 VSL_SRCS += $(TB_CPP_SRCS)
 
 VSL_HEADERS = \
@@ -71,7 +71,8 @@ VSL_HEADERS = \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_get.hpp \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_set.hpp \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_run.hpp \
-    $(VSL_DIR)/include/vsl/vsl_utils.hpp
+    $(VSL_DIR)/include/vsl/vsl_utils.hpp \
+    $(VSL_DIR)/include/vsl/vsl_types.hpp
 
 VSL_INCDIRS = \
 	$(VSL_DIR)/include \

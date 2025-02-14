@@ -10,7 +10,7 @@ PORT = 5100
 def setup_sim():
     elab_cmd = ["make"]
     sim_cmd = ["./Vspi_master_tb"]
-    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
+    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=False)
     return pop
 
 
