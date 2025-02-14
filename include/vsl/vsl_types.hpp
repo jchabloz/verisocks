@@ -32,9 +32,12 @@ SOFTWARE.
 namespace vsl {
 
 enum VslType {
-    VSL_TYPE_SCALAR, ///Scalar variable type
-    VSL_TYPE_ARRAY,  ///Array variable type
-    VSL_TYPE_EVENT   ///Event variable type
+    VSL_TYPE_SCALAR,        ///Scalar variable type
+    VSL_TYPE_ARRAY,         ///Array variable type (dimension = 2)
+    VSL_TYPE_MDARRAY,       ///Multi-dimensional array variable type (dimension > 2)
+    VSL_TYPE_EVENT,         ///Event variable type
+    VSL_TYPE_NOT_SUPPORTED, ///Not supported variable type
+    VSL_TYPE_UNKNOWN        ///Unknown variable type
 };
 
 /**
@@ -53,30 +56,73 @@ enum VslType {
  */
 class VslVar {
 public:
-    VslVar(const char* namep, std::any datap, VerilatedVarType vltype,
-        VslType type, size_t dims, size_t depth) :
-        namep(namep), datap(datap), type(type), vltype(vltype),
-        dims(dims), depth(depth) {};
-    VslVar(const char* namep, std::any datap, VerilatedVarType vltype,
-        VslType type) :
-        namep(namep), datap(datap), type(type), vltype(vltype) {};
+
+    /* Default constructor*/
+    VslVar() = default;
+
+    /* Default destructor */
     virtual ~VslVar() = default;
+
+    /* Constructor */
+    VslVar(const char* namep, std::any datap, VerilatedVarType vltype,
+        VslType type, size_t dims, size_t width, size_t depth) : 
+        namep {namep}, datap {datap}, vltype {vltype}, type {type},
+        dims {dims}, width {width}, depth {depth} {};
 
     double get_value();
     double get_array_value(size_t index);
-    void set_value(double value);
-    void set_array_value(double value, size_t index);
+    int set_value(double value);
+    int set_array_value(double value, size_t index);
+    int set_array_variable_value(cJSON* p_obj);
     int add_value_to_msg(cJSON* p_msg, const char* key);
     int add_array_to_msg(cJSON* p_msg, const char* key);
 
+    const char* get_name() { return namep; }
+    const size_t get_dims() { return dims; }
+    const size_t get_width() { return width; }
+    const size_t get_depth() { return depth; }
+    const VerilatedVarType get_vltype() { return vltype; }
+    const VslType get_type() { return type; }
 
 private:
     const char* namep;
     std::any datap;
-    VerilatedVarType vltype;
-    VslType type;
+    VerilatedVarType vltype {VLVT_UNKNOWN};
+    VslType type {VSL_TYPE_UNKNOWN};
     size_t dims {0};
+    size_t width {0};
     size_t depth {0};
+};
+
+class VslVarMap {
+
+public:
+    VslVarMap() = default;
+    virtual ~VslVarMap() = default;
+
+    void add_var(const char* namep, VslVar& var) {
+        var_map[namep] = var;
+    }
+
+    void add_var(const char* namep, std::any datap, VerilatedVarType vltype,
+        VslType type, size_t dims, size_t width, size_t depth) {
+        var_map[namep] = VslVar {
+            namep, datap, vltype, type, dims, width, depth};
+    }
+
+    VslVar* get_var(std::string str_path) {
+        auto search = var_map.find(str_path);
+        if (search != var_map.end()) {
+            return &var_map[str_path];
+        }
+        vs_log_mod_error("vsl_types",
+            "Could not find variable %s in registered variables map",
+            str_path.c_str());
+        return nullptr;
+    }
+
+private:
+    std::unordered_map<std::string, VslVar> var_map;
 };
 
 } // namespace vsl

@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "vsl/vsl_types.hpp"
 #include "vs_logging.h"
+#include "vsl/vsl_types.hpp"
 #include "verilated.h"
 #include <any>
 
@@ -67,7 +67,7 @@ double VslVar::get_value() {
                     return 0.0f;
             }
         case VSL_TYPE_EVENT:
-            if (std::any_cast<VlEvent*>(datap)->isFired())
+            if (std::any_cast<VlEvent*>(datap)->isTriggered())
                 return 1.0f;
             else
                 return 0.0f;
@@ -108,60 +108,118 @@ double VslVar::get_array_value(size_t index) {
     }
 }
 
-void VslVar::set_value(double value) {
+int VslVar::set_value(double value) {
     switch (type) {
         case VSL_TYPE_SCALAR:
             switch (vltype) {
                 case VLVT_UINT8:
                     __set_value<uint8_t>(datap, value);
-                    break;
+                    return 0;
                 case VLVT_UINT16:
                     __set_value<uint16_t>(datap, value);
-                    break;
+                    return 0;
                 case VLVT_UINT32:
                     __set_value<uint32_t>(datap, value);
-                    break;
+                    return 0;
                 case VLVT_UINT64:
                     __set_value<uint64_t>(datap, value);
-                    break;
+                    return 0;
                 case VLVT_REAL:
                     *(std::any_cast<double*>(datap)) = value;
-                    break;
+                    return 0;
                 default:
-                    break;
+                    vs_log_mod_error(
+                        "vsl_types",
+                        "Type not supported (yet) for scalar variable");
+                    return -1;
             }
             break;
+        case VSL_TYPE_EVENT:
+            VlEvent* event;
+            event = std::any_cast<VlEvent*>(datap);
+            if (static_cast<uint8_t>(value) > 0) {
+                event->fire();
+            } else {
+                event->clearFired();
+                event->clearTriggered();
+            }
+            return 0;
         default:
-            break;
+            vs_log_mod_error(
+                "vsl_types", "Cannot set variable value (non-scalar)");
+            return -1;
     }
 }
 
-void VslVar::set_array_value(double value, size_t index) {
+int VslVar::set_array_value(double value, size_t index) {
     switch (type) {
         case VSL_TYPE_ARRAY:
+            if (index > (depth - 1)) {
+                vs_log_mod_error(
+                    "vsl_types", "Index exceeds array depth");
+                return -1;
+            }
             switch (vltype) {
                 case VLVT_UINT8:
                     __set_array_value<uint8_t>(datap, value, index);
-                    break;
+                    return 0;
                 case VLVT_UINT16:
                     __set_array_value<uint16_t>(datap, value, index);
-                    break;
+                    return 0;
                 case VLVT_UINT32:
                     __set_array_value<uint32_t>(datap, value, index);
-                    break;
+                    return 0;
                 case VLVT_UINT64:
                     __set_array_value<uint64_t>(datap, value, index);
-                    break;
+                    return 0;
                 case VLVT_REAL:
                     std::any_cast<double*>(datap)[index] = value;
-                    break;
+                    return 0;
                 default:
-                    break;
+                    vs_log_mod_error(
+                        "vsl_types", "Type not supported for array value");
+                    return -1;
             }
-            break;
         default:
-            break;
+            vs_log_mod_error(
+                "vsl_types", "Cannot set value (not part of an array)");
+            return -1;
     }
+}
+
+int VslVar::set_array_variable_value(cJSON* p_obj) {
+    /* Detect if the variable is not an array */
+    if (type != VSL_TYPE_ARRAY) {
+        vs_log_mod_error(
+            "vsl_types", "Variable is not an array as expected");
+        return -1;
+    }
+
+    /* Detect if the JSON object is not an array object */
+    if (!cJSON_IsArray(p_obj)) {
+        vs_log_mod_error(
+            "vsl_types", "Command field \"value\" should be an array");
+        return -1;
+    }
+
+    /* Verify that the arrays sizes are corresponding */
+    if (depth != (size_t) cJSON_GetArraySize(p_obj)) {
+        vs_log_mod_error(
+            "vsl_types",
+            "Command field \"value\" should be an array of length %d",
+            (int) depth);
+        return -1;
+    }
+
+    cJSON *iterator;
+    double value = 0.0f;
+    size_t index = 0;
+    cJSON_ArrayForEach(iterator, p_obj) {
+        value = cJSON_GetNumberValue(iterator);
+        set_array_value(value, index);
+        index++;
+    }
+    return 0;
 }
 
 int VslVar::add_value_to_msg(cJSON* p_msg, const char* key) {

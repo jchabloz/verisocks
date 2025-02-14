@@ -31,6 +31,7 @@ SOFTWARE.
 #include "vs_msg.h"
 #include "verilated.h"
 #include "verilated_syms.h"
+#include "vsl/vsl_types.hpp"
 
 #include <cstdio>
 #include <functional>
@@ -77,6 +78,32 @@ public:
 
     void run();
 
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t dims, size_t width,
+        size_t depth) {
+            var_map.add_var(namep, datap, vltype, type, dims, width, depth);
+    }
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t width, size_t depth) {
+            var_map.add_var(namep, datap, vltype, type, 2u, width, depth);
+    }
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t width) {
+            var_map.add_var(namep, datap, vltype, type, 0, width, 0u);
+    }
+    void register_scalar(const char* namep, std::any datap,
+        VerilatedVarType vltype, size_t width) {
+            register_variable(namep, datap, vltype, VSL_TYPE_SCALAR, width);
+    }
+    void register_array(const char* namep, std::any datap,
+        VerilatedVarType vltype, size_t width, size_t depth) {
+            register_variable(
+                namep, datap, vltype, VSL_TYPE_ARRAY, width, depth);
+    }
+    void register_event(const char* namep, VlEvent* eventp) {
+        register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
+    }
+
 private:
     VslState _state {VSL_STATE_INIT}; //Verisocks state
     cJSON* p_cmd {nullptr}; //Pointer to current/latest command
@@ -88,6 +115,8 @@ private:
     /* Sub-command handler functions map */
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
+
+    VslVarMap var_map {};         //Map of Verilator variables
 
     T* p_model;                   //Pointer to verilated model instance
     VerilatedContext* p_context;  //Pointer to Verilator context
@@ -105,6 +134,10 @@ private:
     void main_sim();
 
     /* Utility functions */
+    VslVar* get_registered_variable(std::string str_path) {
+        return var_map.get_var(str_path);
+    }
+
     /* Get a pointer for a given public variable */
     VerilatedVar* get_var(std::string str_path);
 
@@ -431,6 +464,11 @@ Utility functions
 template<typename T>
 VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
 
+    /* Known limitations/issues
+    - Events cannot be distinguished!
+    - VerilatedVar uses void pointers with concerns about type safety
+    */
+
     /* Extract scope and variable paths */
     std::string str_scope(p_model->hierName());
     std::string str_var;
@@ -448,6 +486,10 @@ VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
         return nullptr;
     }
     VerilatedVar* p_xvar = p_xscope->varFind(str_var.c_str());
+    if (nullptr == p_xvar) {
+        vs_log_mod_error("vsl", "Could not find variable %s", str_var.c_str());
+        return nullptr;
+    }
     return p_xvar;
 }
 

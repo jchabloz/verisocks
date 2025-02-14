@@ -291,6 +291,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     }
 
     /* Attempt to get a pointer to the variable */
+    auto p_var2 = vx.get_registered_variable(str_path);
     auto p_var = vx.get_var(str_path);
     if (nullptr == p_var) {
         vs_log_mod_error(
@@ -302,9 +303,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
 
     /* Scalar variables */
     int retval;
-    if (p_var->dims() < 2) {
+    // if (p_var->dims() < 2) {
+    if (p_var2->get_dims() < 2) {
         /* Add scalar variable value to return message */
-        retval = add_value_to_msg(p_var, p_msg, "value");
+        retval = p_var2->add_value_to_msg(p_msg, "value");
+        // retval = add_value_to_msg(p_var, p_msg, "value");
         if (0 > retval) {
             vs_log_mod_error(
                 "vsl", "Error getting value for variable %s", str_path.c_str()
@@ -314,13 +317,15 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         }
     }
     /* Array variables */
-    else if (p_var->dims() == 2) {
+    // else if (p_var->dims() == 2) {
+    else if (p_var2->get_dims() == 2) {
         vs_log_mod_debug(
             "vsl", "Variable %s detected to be an array", str_path.c_str()
         );
-        vs_log_mod_debug("vsl", "Array width: %d", p_var->elements(0));
-        vs_log_mod_debug("vsl", "Array depth: %d", p_var->elements(1));
-        if (0 > add_array_to_msg(p_var, p_msg, "value")) {
+        // vs_log_mod_debug("vsl", "Array width: %d", p_var->elements(0));
+        // vs_log_mod_debug("vsl", "Array depth: %d", p_var->elements(1));
+        // if (0 > add_array_to_msg(p_var, p_msg, "value")) {
+        if (0 > p_var2->add_array_to_msg(p_msg, "value")) {
             vs_log_mod_error(
                 "vsl",
                 "Error getting array values for variable %s",
