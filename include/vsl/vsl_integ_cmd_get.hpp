@@ -29,7 +29,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "vsl/vsl_integ.hpp"
-#include "vsl/vsl_utils.hpp"
+#include "vsl/vsl_types.hpp"
 #include "verilated.h"
 #include "verilated_syms.h"
 
@@ -291,8 +291,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     }
 
     /* Attempt to get a pointer to the variable */
-    auto p_var2 = vx.get_registered_variable(str_path);
-    auto p_var = vx.get_var(str_path);
+    auto p_var = vx.get_registered_variable(str_path);
     if (nullptr == p_var) {
         vs_log_mod_error(
             "vsl", "Variable %s not found in context", str_path.c_str()
@@ -302,45 +301,37 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     }
 
     /* Scalar variables */
-    int retval;
-    // if (p_var->dims() < 2) {
-    if (p_var2->get_dims() < 2) {
-        /* Add scalar variable value to return message */
-        retval = p_var2->add_value_to_msg(p_msg, "value");
-        // retval = add_value_to_msg(p_var, p_msg, "value");
-        if (0 > retval) {
+    switch (p_var->get_type()) {
+        case VSL_TYPE_SCALAR:
+        case VSL_TYPE_EVENT:
+            if (0 > p_var->add_value_to_msg(p_msg, "value")) {
+                vs_log_mod_error(
+                    "vsl", "Error getting value for variable %s",
+                    str_path.c_str());
+                handle_error();
+                return;
+            }
+            break;
+        case VSL_TYPE_ARRAY:
+            vs_log_mod_debug("vsl",
+                "Variable %s detected to be an array", str_path.c_str());
+            vs_log_mod_debug("vsl",
+                "Array width: %d", (int) p_var->get_width());
+            vs_log_mod_debug("vsl",
+                "Array depth: %d", (int) p_var->get_depth());
+            if (0 > p_var->add_array_to_msg(p_msg, "value")) {
+                vs_log_mod_error("vsl",
+                    "Error getting array values for variable %s",
+                    str_path.c_str());
+                handle_error();
+                return;
+            }
+            break;
+        default:
             vs_log_mod_error(
-                "vsl", "Error getting value for variable %s", str_path.c_str()
-            );
+                "vsl", "Type not supported (yet) for getting value");
             handle_error();
             return;
-        }
-    }
-    /* Array variables */
-    // else if (p_var->dims() == 2) {
-    else if (p_var2->get_dims() == 2) {
-        vs_log_mod_debug(
-            "vsl", "Variable %s detected to be an array", str_path.c_str()
-        );
-        // vs_log_mod_debug("vsl", "Array width: %d", p_var->elements(0));
-        // vs_log_mod_debug("vsl", "Array depth: %d", p_var->elements(1));
-        // if (0 > add_array_to_msg(p_var, p_msg, "value")) {
-        if (0 > p_var2->add_array_to_msg(p_msg, "value")) {
-            vs_log_mod_error(
-                "vsl",
-                "Error getting array values for variable %s",
-                str_path.c_str()
-            );
-            handle_error();
-            return;
-        }
-    }
-    else {
-        vs_log_mod_error(
-            "vsl", "Arrays with dimensions > 2 are not supported (yet) :-("
-        );
-        handle_error();
-        return;
     }
 
     str_msg = vs_msg_create_message(p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});

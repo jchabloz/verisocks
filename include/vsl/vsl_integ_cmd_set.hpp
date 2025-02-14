@@ -72,52 +72,57 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     vs_log_mod_info("vsl", "Command \"set(path=%s)\" received.", cstr_path);
 
     /* Attempt to get a pointer to the variable */
-    auto p_var = vx.get_var(str_path);
+    auto p_var = vx.get_registered_variable(str_path);
     if (nullptr == p_var) {
         vs_log_mod_error(
-            "vsl", "Variable %s not found in context", str_path.c_str()
+            "vsl", "Variable %s not found registered variable map",
+            str_path.c_str()
         );
         handle_error();
         return;
     }
 
     cJSON *p_item_val;
+    double value {0.0f};
     p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
     /* Scalar variables */
-    if (p_var->dims() < 2) {
-        double value {0.0f}; //Default value if not specified in message
-        /* Get the value from the JSON message content */
-        if (nullptr != p_item_val) {
-            value = cJSON_GetNumberValue(p_item_val);
-            if (std::isnan(value)) {
-                vs_log_mod_error("vsl", "Command field \"value\" invalid (NaN)");
+    switch (p_var->get_type()) {
+        case VSL_TYPE_SCALAR:
+        case VSL_TYPE_EVENT:
+            if (nullptr != p_item_val) {
+                value = cJSON_GetNumberValue(p_item_val);
+                if (std::isnan(value)) {
+                    vs_log_mod_error(
+                        "vsl", "Command field \"value\" invalid (NaN)");
+                    handle_error();
+                    return;
+                }
+            }
+            if (0 > p_var->set_value(value)) {
                 handle_error();
                 return;
             }
-        }
-        if (0 > set_variable_value(p_var, value)) {
+            break;
+        case VSL_TYPE_ARRAY:
+            if (nullptr == p_item_val) {
+                vs_log_mod_error("vsl",
+                    "Command field \"value\" invalid/not found");
+                handle_error();
+                return;
+            }
+            if (0 > p_var->set_array_variable_value(p_item_val)) {
+                vs_log_mod_error("vsl",
+                    "Error setting array variable value");
+                handle_error();
+                return;
+            }
+            break;
+        default:
+            vs_log_mod_error(
+                "vsl", "Variable type not support"
+            );
             handle_error();
             return;
-        }
-    }
-    /* Array variables */
-    else if (p_var->dims() == 2) {
-        if (nullptr == p_item_val) {
-            vs_log_mod_error("vsl", "Command field \"value\" invalid/not found");
-            handle_error();
-            return;
-        }
-        if (0 > set_array_variable_value(p_var, p_item_val)) {
-            vs_log_mod_error("vsl", "Error setting array variable value");
-            handle_error();
-            return;
-        }
-    }
-    else {
-        vs_log_mod_error(
-            "vsl", "Arrays with dimensions > 2 are not supported (yet) :-("
-        );
-        handle_error();
         return;
     }
 

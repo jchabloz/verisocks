@@ -135,14 +135,7 @@ int VslVar::set_value(double value) {
             }
             break;
         case VSL_TYPE_EVENT:
-            VlEvent* event;
-            event = std::any_cast<VlEvent*>(datap);
-            if (static_cast<uint8_t>(value) > 0) {
-                event->fire();
-            } else {
-                event->clearFired();
-                event->clearTriggered();
-            }
+            std::any_cast<VlEvent*>(datap)->fire();
             return 0;
         default:
             vs_log_mod_error(
@@ -226,6 +219,7 @@ int VslVar::add_value_to_msg(cJSON* p_msg, const char* key) {
     cJSON* p_value = nullptr;
     switch (type) {
         case VSL_TYPE_SCALAR:
+        case VSL_TYPE_EVENT:
             switch (vltype) {
                 case VLVT_UINT8:
                 case VLVT_UINT16:
@@ -239,7 +233,7 @@ int VslVar::add_value_to_msg(cJSON* p_msg, const char* key) {
                 default:
                     vs_log_mod_error(
                         "vsl_type",
-                        "Type not supported for scalar value"
+                        "Type not supported for adding value to JSON message"
                     );
                     return -1;
             }
