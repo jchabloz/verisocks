@@ -25,9 +25,9 @@ SOFTWARE.
 
 #include "verilated.h"
 #include "cJSON.h"
-#include <unordered_map>
 #include <string>
 #include <any>
+#include <unordered_map>
 
 namespace vsl {
 
@@ -100,16 +100,63 @@ public:
     VslVarMap() = default;
     virtual ~VslVarMap() = default;
 
+    /**
+     * @brief Adds a variable to the variable map.
+     *
+     * This function inserts a variable into the variable map with the
+     * specified name.
+     *
+     * @param namep The name of the variable to be added.
+     * @param var The variable to be added to the map.
+     */
     void add_var(const char* namep, VslVar& var) {
         var_map[namep] = var;
     }
 
+    /**
+     * @brief Adds a variable to the variable map with the specified
+     * properties.
+     * 
+     * @param namep The name of the variable.
+     * @param datap The data associated with the variable, stored as std::any.
+     * @param vltype The type of the variable as defined by VerilatedVarType.
+     * @param type The type of the variable as defined by VslType.
+     * @param dims The number of dimensions of the variable.
+     * @param width The width of the variable.
+     * @param depth The depth of the variable.
+     */
     void add_var(const char* namep, std::any datap, VerilatedVarType vltype,
         VslType type, size_t dims, size_t width, size_t depth) {
         var_map[namep] = VslVar {
             namep, datap, vltype, type, dims, width, depth};
     }
 
+    /**
+     * @brief Checks if a variable exists in the variable map.
+     * 
+     * This function checks whether a given string path exists as a key in the
+     * var_map.
+     * 
+     * @param str_path The string path to check in the var_map.
+     * @return true if the string path exists in the var_map, false otherwise.
+     */
+    const bool has_var(std::string str_path) {
+        if (var_map.count(str_path) > 0) return true;
+        return false;
+    }
+
+    /**
+     * @brief Retrieves a variable from the variable map.
+     *
+     * This function searches for a variable in the `var_map` using the
+     * provided string path. If the variable is found, a pointer to the
+     * variable is returned. If the variable is not found, an error is logged
+     * and a `nullptr` is returned.
+     *
+     * @param str_path The string path used to search for the variable in the
+     * map.
+     * @return VslVar* Pointer to the variable if found, otherwise `nullptr`.
+     */
     VslVar* get_var(std::string str_path) {
         auto search = var_map.find(str_path);
         if (search != var_map.end()) {
