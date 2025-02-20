@@ -27,6 +27,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "vsl/vsl_integ.hpp"
+#include "vsl/vsl_utils.hpp"
 #include "verilated.h"
 
 #include <string>
@@ -83,7 +84,59 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
 
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
-    //TODO
+
+    /* Error handler lambda function */
+    auto handle_error = [&]() {
+        vs_log_mod_warning(
+            "vsl", "Error processing command run(for_time) - Discarding");
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command run(for time) - Discarding");
+        vx._state = VSL_STATE_WAITING;
+    };
+
+    /* Get the time field from the JSON message content */
+    cJSON* p_item_time;
+    p_item_time = cJSON_GetObjectItem(vx.p_cmd, "time");
+    if (nullptr == p_item_time) {
+        vs_log_mod_error("vsl", "Command field \"time\" invalid/not found");
+        handle_error();
+        return;
+    }
+    double time_value;
+    time_value = cJSON_GetNumberValue(p_item_time);
+    if (time_value <= 0.0) {
+        vs_log_mod_error("vsl", "Command field \"time\" <= 0.0");
+        handle_error();
+        return;
+    }
+
+    cJSON* p_item_unit;
+    p_item_unit = cJSON_GetObjectItem(vx.p_cmd, "time_unit");
+    if (nullptr == p_item_unit) {
+        vs_log_mod_error(
+            "vsl", "Command field \"time_unit\" invalid/not found");
+        handle_error();
+        return;
+    }
+    char* str_time_unit;
+    str_time_unit = cJSON_GetStringValue(p_item_unit);
+    if ((nullptr == str_time_unit) || std::string(str_time_unit).empty()) {
+        vs_log_mod_error("vsl", "Command field \"time_unit\" NULL or empty");
+        handle_error();
+        return;
+    }
+    vs_log_mod_info(
+        "vsl", "Command \"run(cb=for_time, time=%f %s)\" received.",
+        time_value, str_time_unit);
+
+    uint64_t cb_time;
+    cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
+    cb_time += vx.p_context->time();
+
+    //TODO: Register callback with the calculated time value
+    //TODO: Add a consistency check on the calculated time value
+
+    vx._state = VSL_STATE_SIM_RUNNING;
     return;
 }
 

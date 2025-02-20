@@ -116,15 +116,15 @@ private:
     std::unordered_map<std::string, std::function<void(VslInteg&)>>
     sub_cmd_handlers_map {};
 
-    VslVarMap var_map {};         //Map of Verilator variables
+    VslVarMap var_map {};          //Map of Verilator variables
 
-    T* p_model;                   //Pointer to verilated model instance
-    VerilatedContext* p_context;  //Pointer to Verilator context
-    int num_port {5100};          //Port number
-    int num_timeout_sec {120};    //Timeout, in seconds
-    int fd_server_socket {-1};    //File descriptor, server socket
-    int fd_client_socket {-1};    //File descriptor, connected client socket
-    bool _is_connected {false};   //Socket connection status
+    T* p_model;                    //Pointer to verilated model instance
+    VerilatedContext* p_context;   //Pointer to Verilator context
+    int num_port {5100};           //Port number
+    int num_timeout_sec {120};     //Timeout, in seconds
+    int fd_server_socket {-1};     //File descriptor, server socket
+    int fd_client_socket {-1};     //File descriptor, connected client socket
+    bool _is_connected {false};    //Socket connection status
 
     /* State machine functions */
     void main_init();
@@ -447,11 +447,37 @@ void VslInteg<T>::main_process() {
 
 /******************************************************************************
 Main finite state-machine - Simulation ongoing
+Methods that can be used:
+vx.p_model->eval();
+vx.p_model->eventsPending();
+vx.p_model->nextTimeSlot();
+vx.p_context->time()
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim() {
     vs_log_mod_info("vsl", "Simulation ongoing");
-    //TODO - implement Verilator simulation code
+
+    while (!p_context->gotFinish()) {
+        /* Evaluate model */
+        p_model->eval();
+
+        //TODO Check callbacks!!
+
+        /* Advance time */
+        if (!p_model->eventsPending()) {
+            break;
+        }
+        p_context->time(p_model->nextTimeSlot());
+    }
+    if (!p_context->gotFinish()) {
+        vs_log_mod_warning("vsl", "Exiting without $finish; no events left");
+    }
+
+    /* Execute 'final' processes */
+    p_model->final();
+
+    /* Print statistical summary report */
+    p_context->statsPrintSummary();
     return;
 }
 
