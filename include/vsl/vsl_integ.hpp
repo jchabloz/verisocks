@@ -76,6 +76,9 @@ public:
     VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
+    inline const T* model() {return p_model;}
+    inline const VerilatedContext* context() {return p_context;}
+
     void run();
 
     void register_variable(const char* namep, std::any datap,
@@ -104,6 +107,19 @@ public:
         register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
     }
 
+    int register_value_callback(const char* path, const double value);
+    int register_time_callback(const uint64_t time);
+    void clear_callbacks() {
+        b_has_time_callback = false;
+        b_has_value_callback = false;
+    }
+
+    inline const bool has_callback() {
+        return (b_has_value_callback || b_has_time_callback);
+    }
+    inline const bool has_value_callback() {return b_has_value_callback;}
+    inline const bool has_time_callback() {return b_has_time_callback;}
+
 private:
     VslState _state {VSL_STATE_INIT}; //Verisocks state
     cJSON* p_cmd {nullptr}; //Pointer to current/latest command
@@ -125,6 +141,13 @@ private:
     int fd_server_socket {-1};     //File descriptor, server socket
     int fd_client_socket {-1};     //File descriptor, connected client socket
     bool _is_connected {false};    //Socket connection status
+
+    /* Callbacks management */
+    bool b_has_time_callback {false};
+    bool b_has_value_callback {false};
+    uint64_t cb_time {0u};
+    std::string cb_value_path;
+    double cb_value {0.0f};
 
     /* State machine functions */
     void main_init();
@@ -479,6 +502,36 @@ void VslInteg<T>::main_sim() {
     /* Print statistical summary report */
     p_context->statsPrintSummary();
     return;
+}
+
+/******************************************************************************
+Callbacks management
+******************************************************************************/
+template<typename T>
+int VslInteg<T>::register_value_callback(const char* path, const double value)
+{
+    if (has_callback()) {
+        vs_log_mod_error("vsl", "Could not register new value callback as \
+another callback is already registered - Discarding");
+        return -1;
+    }
+    cb_value_path = std::string(path);
+    cb_value = value;
+    b_has_value_callback = true;
+    return 0;
+}
+
+template<typename T>
+int VslInteg<T>::register_time_callback(uint64_t time)
+{
+    if (has_callback()) {
+        vs_log_mod_error("vsl", "Could not register new time callback as \
+another callback is already registered - Discarding");
+        return -1;
+    }
+    cb_time = time;
+    b_has_time_callback = true;
+    return 0;
 }
 
 /******************************************************************************
