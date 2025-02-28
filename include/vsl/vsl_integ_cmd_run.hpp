@@ -129,13 +129,16 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
         "vsl", "Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, str_time_unit);
 
+    if (time_value <= 0.0f) {
+        vs_log_mod_error("vsl", "Invalid time value %f", time_value);
+        handle_error();
+        return;
+    }
+
     uint64_t cb_time;
     cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
     cb_time += vx.p_context->time();
-
-    //TODO: Register callback with the calculated time value
-    //TODO: Add a consistency check on the calculated time value
-
+    vx.register_time_callback(cb_time);
     vx._state = VSL_STATE_SIM_RUNNING;
     return;
 }

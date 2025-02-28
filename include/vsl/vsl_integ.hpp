@@ -56,6 +56,7 @@ enum VslState {
     VSL_STATE_WAITING,     ///Connected and waiting to receive next command
     VSL_STATE_PROCESSING,  ///Processing a command
     VSL_STATE_SIM_RUNNING, ///Simulation running
+    VSL_STATE_SIM_FINISH,  ///Finish simulation
     VSL_STATE_EXIT,        ///Exiting Verisocks
     VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
 };
@@ -119,6 +120,7 @@ public:
     }
     inline const bool has_value_callback() {return b_has_value_callback;}
     inline const bool has_time_callback() {return b_has_time_callback;}
+    const bool check_value_callback();
 
 private:
     VslState _state {VSL_STATE_INIT}; //Verisocks state
@@ -155,6 +157,7 @@ private:
     void main_wait();
     void main_process();
     void main_sim();
+    void main_sim_finish();
 
     /* Utility functions */
     VslVar* get_registered_variable(std::string str_path) {
@@ -274,6 +277,9 @@ void VslInteg<T>::run() {
             break;
         case VSL_STATE_SIM_RUNNING:
             main_sim();
+            break;
+        case VSL_STATE_SIM_FINISH:
+            main_sim_finish();
             break;
         case VSL_STATE_EXIT:
             if (0 <= fd_server_socket) {
@@ -484,23 +490,49 @@ void VslInteg<T>::main_sim() {
         /* Evaluate model */
         p_model->eval();
 
-        //TODO Check callbacks!!
+        /* Check if value-based callback has been reached */
+        if (check_value_callback()) {
+            clear_callbacks();
+            vs_msg_return(fd_client_socket, "ack",
+                "Reached callback - Getting back to Verisocks main loop");
+            _state = VSL_STATE_WAITING;
+            return;
+        }
+
+        /* If no more pending events remaining ... finish simulation */
+        if (!p_model->eventsPending()) {break;}
+
+        /* If there is a time-based callback */
+        if (has_time_callback() && (p_model->nextTimeSlot() >= cb_time)) {
+            p_context->time(cb_time);
+            p_model->eval(); //TBC
+            clear_callbacks();
+            vs_msg_return(fd_client_socket, "ack",
+                "Reached callback - Getting back to Verisocks main loop");
+            _state = VSL_STATE_WAITING;
+            return;
+        }
 
         /* Advance time */
-        if (!p_model->eventsPending()) {
-            break;
-        }
         p_context->time(p_model->nextTimeSlot());
     }
+    _state = VSL_STATE_SIM_FINISH;
+    return;
+}
+
+/******************************************************************************
+Main finite state-machine - Simulation finishing
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::main_sim_finish() {
+
     if (!p_context->gotFinish()) {
         vs_log_mod_warning("vsl", "Exiting without $finish; no events left");
     }
 
-    /* Execute 'final' processes */
     p_model->final();
-
-    /* Print statistical summary report */
     p_context->statsPrintSummary();
+    _state = VSL_STATE_EXIT;
     return;
 }
 
@@ -516,6 +548,11 @@ another callback is already registered - Discarding");
         return -1;
     }
     cb_value_path = std::string(path);
+    if (nullptr == get_registered_variable(cb_value_path)) {
+        vs_log_mod_error("vsl", "Could not register new value callback - Path \
+not found in registered variables - Discarding");
+        return -1;
+    }
     cb_value = value;
     b_has_value_callback = true;
     return 0;
@@ -529,9 +566,36 @@ int VslInteg<T>::register_time_callback(uint64_t time)
 another callback is already registered - Discarding");
         return -1;
     }
+
+    if (time <= p_context->time()) {
+        vs_log_mod_error("vsl", "Could not register new time callback - \
+Time value in the past - Discarding");
+        return -1;
+    }
+
     cb_time = time;
     b_has_time_callback = true;
     return 0;
+}
+
+template<typename T>
+const bool VslInteg<T>::check_value_callback() {
+    if (has_value_callback()) {
+        auto p_var = get_registered_variable(cb_value_path);
+        switch (p_var->get_type()) {
+            case VSL_TYPE_SCALAR:
+                if (p_var->get_value() == cb_value) return true;
+                return false;
+            case VSL_TYPE_EVENT:
+                if (p_var->get_value() == 1.0f) return true;
+                return false;
+            default:
+                vs_log_mod_warning("vsl", "Value callback not supported with \
+this type of variable - Discarding");
+                return false;
+        }
+    }
+    return false;
 }
 
 /******************************************************************************
