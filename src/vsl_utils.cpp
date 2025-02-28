@@ -53,7 +53,6 @@ static int16_t get_time_factor(const char* time_unit)
         vs_log_mod_error(
             "vsl_utils", "Wrong time unit identifier %s", time_unit);
         return 0;
-        return 0;
     }
     return TIME_DEF_MAP[time_unit];
 }
@@ -70,11 +69,14 @@ double time_to_double(uint64_t time, const char* time_unit,
 uint64_t double_to_time(double time_value, const char* time_unit,
                       VerilatedContext* p_context)
 {
+    if (time_value <= 0.0f) {
+        vs_log_mod_warning("vsl_utils", "Time value nul or negative");
+        return 0u;
+    }
     double time_precision = static_cast<double>(p_context->timeprecision());
     double time_factor = static_cast<double>(get_time_factor(time_unit));
     time_value *= std::pow(10.0, time_factor - time_precision);
-    uint64_t time = static_cast<uint64_t>(time_value);
-    return time;
+    return static_cast<uint64_t>(time_value);
 }
 
 } //namespace vsl
