@@ -135,23 +135,154 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
         return;
     }
 
+    /* Register callback */
     uint64_t cb_time;
     cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
     cb_time += vx.p_context->time();
-    vx.register_time_callback(cb_time);
+    if (0 > vx.register_time_callback(cb_time)) {
+        handle_error();
+        return;
+    }
+
+    /* Return control to simulation loop */
     vx._state = VSL_STATE_SIM_RUNNING;
     return;
 }
 
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
-    //TODO
+
+    /* Error handler lambda function */
+    auto handle_error = [&]() {
+        vs_log_mod_warning(
+            "vsl", "Error processing command run(until_time) - Discarding");
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command run(until_time) - Discarding");
+        vx._state = VSL_STATE_WAITING;
+    };
+
+    /* Get the time field from the JSON message content */
+    cJSON* p_item_time;
+    p_item_time = cJSON_GetObjectItem(vx.p_cmd, "time");
+    if (nullptr == p_item_time) {
+        vs_log_mod_error("vsl", "Command field \"time\" invalid/not found");
+        handle_error();
+        return;
+    }
+    double time_value;
+    time_value = cJSON_GetNumberValue(p_item_time);
+    if (time_value <= 0.0) {
+        vs_log_mod_error("vsl", "Command field \"time\" <= 0.0");
+        handle_error();
+        return;
+    }
+
+    /* Get the time unit field from the JSON message content */
+    cJSON* p_item_unit;
+    p_item_unit = cJSON_GetObjectItem(vx.p_cmd, "time_unit");
+    if (nullptr == p_item_unit) {
+        vs_log_mod_error(
+            "vsl", "Command field \"time_unit\" invalid/not found");
+        handle_error();
+        return;
+    }
+    char* str_time_unit;
+    str_time_unit = cJSON_GetStringValue(p_item_unit);
+    if ((nullptr == str_time_unit) || std::string(str_time_unit).empty()) {
+        vs_log_mod_error("vsl", "Command field \"time_unit\" NULL or empty");
+        handle_error();
+        return;
+    }
+    vs_log_mod_info(
+        "vsl", "Command \"run(cb=until_time, time=%f %s)\" received.",
+        time_value, str_time_unit);
+
+    uint64_t cb_time;
+    cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
+    if (0 > vx.register_time_callback(cb_time)) {
+        handle_error();
+        return;
+    }
+
+    /* Return control to simulation loop */
+    vx._state = VSL_STATE_SIM_RUNNING;
     return;
 }
 
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
-    //TODO
+
+    /* Error handler lambda function */
+    auto handle_error = [&]() {
+        vs_log_mod_warning(
+            "vsl", "Error processing command run(until_change) - Discarding");
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command run(until_change) - Discarding");
+        vx._state = VSL_STATE_WAITING;
+    };
+
+    /* Get the object path from the JSON message content */
+    cJSON* p_item_path;
+    p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
+    if (nullptr == p_item_path) {
+        vs_log_mod_error("vsl", "Command field \"path\" invalid/not found");
+        handle_error();
+        return;
+    }
+    char* str_path;
+    str_path = cJSON_GetStringValue(p_item_path);
+    if ((nullptr == str_path) || std::string(str_path).empty()) {
+        vs_log_mod_error("vsl", "Command field \"path\" NULL or empty");
+        handle_error();
+        return;
+    }
+
+    /* Check if the path corresponds to a valid, registered variable */
+    VslVar* p_var = vx.get_registered_variable(std::string(str_path));
+    if (nullptr == p_var) {
+        vs_log_mod_error("vsl", "Could not access to variable %s", str_path);
+        handle_error();
+        return;
+    }
+
+    /* Get the value from the JSON message content */
+    cJSON* p_item_val;
+    double value;
+    if (p_var->get_type() == VSL_TYPE_SCALAR) {
+        p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
+        if (nullptr == p_item_val) {
+            vs_log_mod_error("vsl",
+                "Command field \"value\" invalid/not found");
+            handle_error();
+            return;
+        }
+        value = cJSON_GetNumberValue(p_item_val);
+        if (std::isnan(value)) {
+            vs_log_mod_error("vsl", "Command field \"value\" invalid (NaN)");
+            handle_error();
+            return;
+        }
+        vs_log_mod_info("vsl",
+            "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
+            str_path, value);
+    } else if (p_var->get_type() == VSL_TYPE_EVENT) {
+        value = 1.0f;
+        vs_log_mod_info("vsl",
+            "Command \"run(cb=until_change, path=%s)\" received.", str_path);
+    } else {
+        vs_log_mod_error("vsl", "Variable type not supported for callback");
+        handle_error();
+        return;
+    }
+
+    /* Register callback */
+    if (0 > vx.register_value_callback(str_path, value)) {
+        handle_error();
+        return;
+    }
+
+    /* Return control to simulation loop */
+    vx._state = VSL_STATE_SIM_RUNNING;
     return;
 }
 

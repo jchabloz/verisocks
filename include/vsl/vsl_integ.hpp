@@ -569,7 +569,7 @@ another callback is already registered - Discarding");
 
     if (time <= p_context->time()) {
         vs_log_mod_error("vsl", "Could not register new time callback - \
-Time value in the past - Discarding");
+Time value is not in the future - Discarding");
         return -1;
     }
 
