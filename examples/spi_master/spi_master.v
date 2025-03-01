@@ -48,7 +48,7 @@ module spi_master(cs_b, mosi, miso, sclk);
     reg rx_crc_error;
     event start_transaction /*verilator public*/;
     event end_transaction /*verilator public*/;
-    integer transaction_counter;
+    integer transaction_counter /*verilator public*/;
 
     /**************************************************************************
     Function - Update CRC value

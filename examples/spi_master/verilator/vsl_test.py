@@ -43,6 +43,8 @@ with Verisocks(HOST, PORT) as vs_cli:
     get_variable_value(vs_cli, "spi_master_tb.toto")
     get_variable_value(vs_cli, "spi_master_tb.tata")
     get_variable_value(vs_cli, "spi_master_tb.i_spi_master.start_transaction")
+    get_variable_value(vs_cli,
+                       "spi_master_tb.i_spi_master.transaction_counter")
 
     answer = vs_cli.set("spi_master_tb.tutu", value=237)
     print(answer)

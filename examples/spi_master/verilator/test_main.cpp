@@ -33,6 +33,8 @@ int main(int argc, char** argv, char**) {
         &topp->spi_master_tb->toto, VLVT_REAL, 0u);
     vslx.register_scalar("spi_master_tb.tutu",
         &topp->spi_master_tb->tutu, VLVT_UINT32, 32u);
+    vslx.register_scalar("spi_master_tb.i_spi_master.transaction_counter",
+        &topp->spi_master_tb->i_spi_master->transaction_counter, VLVT_UINT32, 32u);
     vslx.register_array("spi_master_tb.tata",
         topp->spi_master_tb->tata.m_storage, VLVT_UINT8, 7u, 12u);
     vslx.register_array("spi_master_tb.i_spi_master.rx_buffer",
