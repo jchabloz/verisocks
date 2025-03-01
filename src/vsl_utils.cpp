@@ -47,15 +47,15 @@ static std::map<std::string, int16_t> TIME_DEF_MAP {
     {"fs", -15}
 };
 
+bool check_time_unit(std::string time_unit) {
+    return (TIME_DEF_MAP.find(time_unit) != TIME_DEF_MAP.end());
+}
+
 static int16_t get_time_factor(const char* time_unit)
 {
     std::string str_key {time_unit};
-    if (TIME_DEF_MAP.find(str_key) == TIME_DEF_MAP.end()) {
-        vs_log_mod_error(
-            "vsl_utils", "Wrong time unit identifier: %s", time_unit);
-        return 0;
-    }
-    return TIME_DEF_MAP[str_key];
+    if (check_time_unit(str_key)) {return TIME_DEF_MAP[str_key];}
+    return 0;
 }
 
 double time_to_double(uint64_t time, const char* time_unit,

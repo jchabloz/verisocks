@@ -30,6 +30,14 @@ SOFTWARE.
 namespace vsl{
 
 /**
+ * @brief Checks the validity of a time unit identifier key.check_time_unit
+ * 
+ * @param time_unit Time unit key (e.g. "us")
+ * @return bool If the key is valid, returns true, false otherwise
+ */
+bool check_time_unit(std::string time_unit);
+
+/**
  * @brief Converts a given simulation integer time value to a double
  * representation based on the specified time unit.
  * 

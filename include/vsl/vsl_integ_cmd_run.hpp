@@ -124,6 +124,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
         handle_error();
         return;
     }
+    if (!check_time_unit(std::string(str_time_unit))) {
+        vs_log_mod_error("vsl", "Wrong time unit identifier: %s", str_time_unit);
+        handle_error();
+        return;
+    }
     vs_log_mod_info(
         "vsl", "Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, str_time_unit);
@@ -189,6 +194,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
     str_time_unit = cJSON_GetStringValue(p_item_unit);
     if ((nullptr == str_time_unit) || std::string(str_time_unit).empty()) {
         vs_log_mod_error("vsl", "Command field \"time_unit\" NULL or empty");
+        handle_error();
+        return;
+    }
+    if (!check_time_unit(std::string(str_time_unit))) {
+        vs_log_mod_error("vsl", "Wrong time unit identifier: %s", str_time_unit);
         handle_error();
         return;
     }

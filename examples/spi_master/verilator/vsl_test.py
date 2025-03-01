@@ -52,7 +52,11 @@ with Verisocks(HOST, PORT) as vs_cli:
     print(answer)
     get_variable_value(vs_cli, "spi_master_tb.tata")
 
-    answer = vs_cli.run("for_time", time=10, time_unit="us", timeout=60)
+    answer = vs_cli.run("for_time", time=14.32, time_unit="us", timeout=60)
+    print(answer)
+    get_sim_time(vs_cli)
+
+    answer = vs_cli.run("until_time", time=114, time_unit="us")
     print(answer)
     get_sim_time(vs_cli)
 
