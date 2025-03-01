@@ -38,7 +38,7 @@ SOFTWARE.
 
 namespace vsl{
 
-static std::map<const char*, int16_t> TIME_DEF_MAP {
+static std::map<std::string, int16_t> TIME_DEF_MAP {
     {"s", 0},
     {"ms", -3},
     {"us", -6},
@@ -49,12 +49,13 @@ static std::map<const char*, int16_t> TIME_DEF_MAP {
 
 static int16_t get_time_factor(const char* time_unit)
 {
-    if (TIME_DEF_MAP.find(time_unit) == TIME_DEF_MAP.end()) {
+    std::string str_key {time_unit};
+    if (TIME_DEF_MAP.find(str_key) == TIME_DEF_MAP.end()) {
         vs_log_mod_error(
-            "vsl_utils", "Wrong time unit identifier %s", time_unit);
+            "vsl_utils", "Wrong time unit identifier: %s", time_unit);
         return 0;
     }
-    return TIME_DEF_MAP[time_unit];
+    return TIME_DEF_MAP[str_key];
 }
 
 double time_to_double(uint64_t time, const char* time_unit,
@@ -73,6 +74,8 @@ uint64_t double_to_time(double time_value, const char* time_unit,
         vs_log_mod_warning("vsl_utils", "Time value nul or negative");
         return 0u;
     }
+    vs_log_mod_debug("vsl_utils", "Time value: %f", time_value);
+    vs_log_mod_debug("vsl_utils", "Time unit: %s", time_unit);
     double time_precision = static_cast<double>(p_context->timeprecision());
     double time_factor = static_cast<double>(get_time_factor(time_unit));
     time_value *= std::pow(10.0, time_factor - time_precision);
