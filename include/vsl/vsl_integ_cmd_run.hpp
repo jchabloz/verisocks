@@ -62,7 +62,6 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
         handle_error();
         return;
     }
-    vs_log_mod_info("vsl", "Command \"run(cb=%s)\" received.", cstr_cb);
 
     /* Look up and execute sub-command handler */
     std::string cb_key = "run_";

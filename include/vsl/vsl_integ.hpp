@@ -529,6 +529,8 @@ void VslInteg<T>::main_sim_finish() {
     if (!p_context->gotFinish()) {
         vs_log_mod_warning("vsl", "Exiting without $finish; no events left");
     }
+    vs_msg_return(fd_client_socket, "warning",
+        "Exiting Verisocks due to end of simulation");
 
     p_model->final();
     p_context->statsPrintSummary();
