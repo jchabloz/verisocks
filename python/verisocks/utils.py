@@ -67,7 +67,7 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
     else:
         pop = subprocess.Popen(sim_cmd)
 
-    logging.info(f"Launched Icarus with PID {pop.pid}")
+    logging.info(f"Launched simulation with PID {pop.pid}")
     return pop
 
 
