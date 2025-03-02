@@ -30,6 +30,7 @@ VSL_BUILD_DIR ?= vsl_build
 VL_FLAGS = --cc --timing
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP)
+VL_FLAGS += -O3
 
 #*****************************************************************************
 # Verisocks integration
@@ -39,7 +40,10 @@ VS_SRCS = \
 	vs_msg.c \
 	vs_server.c
 
-VSL_SRCS = vsl_utils.cpp vsl_types.cpp
+VSL_SRCS = \
+	vsl_utils.cpp \
+	vsl_types.cpp
+
 VSL_SRCS += $(TB_CPP_SRCS)
 
 VSL_HEADERS = \
@@ -61,6 +65,7 @@ VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
 CPPFLAGS += -DVS_LOG_LEVEL=$(VS_LOG_LEVEL)
+CPPFLAGS += -O3
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
 

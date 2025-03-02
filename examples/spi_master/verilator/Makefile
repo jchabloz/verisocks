@@ -5,9 +5,6 @@ VERILATOR = /usr/local/bin/verilator
 VERILATOR_ROOT = /usr/local/share/verilator
 VSL_DIR = $(HOME)/projects/verisocks
 
-#*****************************************************************************
-# Variables
-#*****************************************************************************
 # Design prefix
 VM_PREFIX = Vspi_master_tb
 
@@ -27,5 +24,6 @@ TB_CPP_SRCS = test_main.cpp
 VL_OBJ_DIR = vl_obj_dir
 VSL_BUILD_DIR = vsl_build
 
-include $(VSL_DIR)/include/vsl/vsl.mk
+VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
 
+include $(VSL_DIR)/include/vsl/vsl.mk
