@@ -31,40 +31,43 @@ def get_variable_value(vs, path):
     print(f"Value for variable {path}: {answer['value']}")
 
 
-pop = setup_sim()
-with Verisocks(HOST, PORT) as vs_cli:
-    answer = vs_cli.info("Verilator integration test")
-    print(answer)
+if __name__ == "__main__":
 
-    get_sim_info(vs_cli)
-    get_sim_time(vs_cli)
-    get_variable_value(vs_cli, "spi_master_tb.miso")
-    get_variable_value(vs_cli, "spi_master_tb.tutu")
-    get_variable_value(vs_cli, "spi_master_tb.toto")
-    get_variable_value(vs_cli, "spi_master_tb.tata")
-    get_variable_value(vs_cli, "spi_master_tb.i_spi_master.start_transaction")
-    get_variable_value(vs_cli,
-                       "spi_master_tb.i_spi_master.transaction_counter")
+    pop = setup_sim()
+    with Verisocks(HOST, PORT) as vs_cli:
+        answer = vs_cli.info("Verilator integration test")
+        print(answer)
 
-    answer = vs_cli.set("spi_master_tb.tutu", value=237)
-    print(answer)
-    get_variable_value(vs_cli, "spi_master_tb.tutu")
+        get_sim_info(vs_cli)
+        get_sim_time(vs_cli)
+        get_variable_value(vs_cli, "spi_master_tb.miso")
+        get_variable_value(vs_cli, "spi_master_tb.tutu")
+        get_variable_value(vs_cli, "spi_master_tb.toto")
+        get_variable_value(vs_cli, "spi_master_tb.tata")
+        get_variable_value(vs_cli,
+                           "spi_master_tb.i_spi_master.start_transaction")
+        get_variable_value(vs_cli,
+                           "spi_master_tb.i_spi_master.transaction_counter")
 
-    answer = vs_cli.set("spi_master_tb.tata", value=[45]*12)
-    print(answer)
-    get_variable_value(vs_cli, "spi_master_tb.tata")
+        answer = vs_cli.set("spi_master_tb.tutu", value=237)
+        print(answer)
+        get_variable_value(vs_cli, "spi_master_tb.tutu")
 
-    answer = vs_cli.run("for_time", time=14.32, time_unit="us", timeout=60)
-    print(answer)
-    get_sim_time(vs_cli)
+        answer = vs_cli.set("spi_master_tb.tata", value=[45]*12)
+        print(answer)
+        get_variable_value(vs_cli, "spi_master_tb.tata")
 
-    answer = vs_cli.run("until_time", time=114, time_unit="us")
-    print(answer)
-    get_sim_time(vs_cli)
+        answer = vs_cli.run("for_time", time=14.32, time_unit="us", timeout=60)
+        print(answer)
+        get_sim_time(vs_cli)
 
-    answer = vs_cli.send_cmd("finish")
-    # answer = vs_cli.send_cmd("exit")
-    print(answer)
+        answer = vs_cli.run("until_time", time=114, time_unit="us")
+        print(answer)
+        get_sim_time(vs_cli)
 
-pop.communicate(timeout=10)
-# EOF
+        answer = vs_cli.send_cmd("finish")
+        # answer = vs_cli.send_cmd("exit")
+        print(answer)
+
+    pop.communicate(timeout=10)
+    # EOF
