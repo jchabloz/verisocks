@@ -30,7 +30,7 @@ VSL_BUILD_DIR ?= vsl_build
 VL_FLAGS = --cc --timing
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP)
-VL_FLAGS += -O3
+VL_FLAGS += $(VL_USER_FLAGS)
 
 #*****************************************************************************
 # Verisocks integration
@@ -66,6 +66,7 @@ CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
 CPPFLAGS += -DVS_LOG_LEVEL=$(VS_LOG_LEVEL)
 CPPFLAGS += -O3
+CPPFLAGS += $(CPP_USER_FLAGS)
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
 
@@ -103,6 +104,10 @@ VM_SP_OR_SC = $(VM_SC)
 include $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 include $(VERILATOR_ROOT)/include/verilated.mk
 
+%.fst: %.vcd
+	vcd2fst $< $@
+	$(RM) $<
+
 ### Link rules
 link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
 link_deps = $(link_args) $(VSL_HEADERS)
@@ -117,4 +122,4 @@ clean:
 	$(RM) $(VM_PREFIX)__ALL.*
 	$(RM) $(VM_PREFIX)
 	$(RM) *.d
-
+	$(RM) *.fst *.vcd

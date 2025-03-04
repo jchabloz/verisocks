@@ -20,6 +20,11 @@ int main(int argc, char** argv, char**) {
     // Construct the Verilated model, from Vtop.h generated from Verilating
     const std::unique_ptr<Vspi_master_tb> topp {new Vspi_master_tb{contextp.get()}};
 
+    // Setup traceing
+    #ifdef DUMP_FILE
+    Verilated::traceEverOn(true);
+    #endif
+
     // Dump public variables
     contextp->internalsDump();
 
