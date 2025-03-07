@@ -1,20 +1,25 @@
 from verisocks.verisocks import Verisocks
-from verisocks.utils import setup_sim_run
+from verisocks.utils import setup_sim_run, find_free_port
 import logging
 import pytest
 import socket
 import random
-
+import os.path
 
 # Parameters
 HOST = socket.gethostbyname("localhost")
-PORT = 5100
-VS_TIMEOUT = 10
+TIMEOUT = 10
+
+cwd = os.path.dirname(__file__)
 
 
-def setup_test():
-    elab_cmd = ["make"]
-    sim_cmd = ["./Vspi_master_tb"]
+def setup_test(port=5100, timeout=10):
+    elab_cmd = ["make", "-C", cwd]
+    sim_cmd = [
+        os.path.join(cwd, "Vspi_master_tb"),
+        f"{port}",
+        f"{timeout}"
+    ]
     pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
 
@@ -69,8 +74,9 @@ def send_spi(vs, tx_buffer):
 @pytest.fixture
 def vs():
     # Set up simulation and launch it as a separate process
-    setup_test()
-    _vs = Verisocks(HOST, PORT)
+    port = find_free_port()
+    setup_test(port, TIMEOUT)
+    _vs = Verisocks(HOST, port)
     _vs.connect()
     yield _vs
     # Teardown

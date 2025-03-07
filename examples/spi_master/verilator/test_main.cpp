@@ -6,11 +6,22 @@
 #include "Vspi_master_tb.h"
 #include "Vspi_master_tb__Syms.h"
 
+#include <cstdlib>
 #include <memory>
 
 //======================
 
 int main(int argc, char** argv, char**) {
+
+	//Get arguments for port number and timeout
+	int port_number {5100};
+	int timeout {5};
+	if (argc > 0) {
+		port_number = std::atoi(argv[1]);
+	}
+	if (argc > 1) {
+		timeout = std::atoi(argv[2]);
+	}
 
     // Setup context, defaults, and parse command line
     Verilated::debug(0);
@@ -29,7 +40,7 @@ int main(int argc, char** argv, char**) {
     contextp->internalsDump();
 
     // Create top VSL instance
-    vsl::VslInteg<Vspi_master_tb> vslx{topp.get(), 5100, 5};
+    vsl::VslInteg<Vspi_master_tb> vslx{topp.get(), port_number, timeout};
 
     // Register public variables
     vslx.register_scalar("spi_master_tb.miso",
@@ -56,26 +67,5 @@ int main(int argc, char** argv, char**) {
     // Run simulation
     vslx.run();
 
-    /*
-    // Simulate until $finish
-    while (!contextp->gotFinish()) {
-        // Evaluate model
-        topp->eval();
-        // Advance time
-        if (!topp->eventsPending()) break;
-        contextp->time(topp->nextTimeSlot());
-    }
-
-    if (!contextp->gotFinish()) {
-        VL_DEBUG_IF(VL_PRINTF("+ Exiting without $finish; no events left\n"););
-    }
-
-    // Execute 'final' processes
-    topp->final();
-
-    // Print statistical summary report
-    contextp->statsPrintSummary();
-
-    */
     return 0;
 }

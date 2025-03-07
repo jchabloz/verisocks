@@ -1,27 +1,34 @@
 from verisocks.verisocks import Verisocks
-from verisocks.utils import setup_sim_run
+from verisocks.utils import setup_sim_run, find_free_port
 import socket
 import pytest
 import logging
 import numpy as np
-
+import os.path
 
 # Parameters
 HOST = socket.gethostbyname("localhost")
-PORT = 5100
+TIMEOUT = 10
+
+cwd = os.path.dirname(__file__)
 
 
-def setup_sim(capture_output=True):
-    elab_cmd = ["make"]
-    sim_cmd = ["./Vspi_master_tb"]
+def setup_sim(port=5100, timeout=10, capture_output=True):
+    elab_cmd = ["make", "-C", cwd]
+    sim_cmd = [
+        os.path.join(cwd, "Vspi_master_tb"),
+        f"{port}",
+        f"{timeout}"
+    ]
     pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=capture_output)
     return pop
 
 
 @pytest.fixture
 def vs():
-    setup_sim()
-    _vs = Verisocks(HOST, PORT)
+    port = find_free_port()
+    setup_sim(port, TIMEOUT)
+    _vs = Verisocks(HOST, port)
     _vs.connect()
     yield _vs
     try:
