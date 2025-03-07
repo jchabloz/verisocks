@@ -7,8 +7,8 @@ VSL_DIR = $(HOME)/projects/verisocks
 
 # Verilator user flags
 VL_USER_FLAGS = --trace
-VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
-CPP_USER_FLAGS = -DDUMP_FILE
+#VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
+#CPP_USER_FLAGS = -DDUMP_FILE
 
 # Design prefix
 VM_PREFIX = Vspi_master_tb
