@@ -6,9 +6,17 @@ VERILATOR_ROOT = /usr/local/share/verilator
 VSL_DIR = $(HOME)/projects/verisocks
 
 # Verilator user flags
-VL_USER_FLAGS = --trace
+# Setup traceing - use $dump() in testbench
+# CPP_USER_FLAGS = -DDUMP_FILE
+
+# Using FST (slower due to compression)
+#VL_USER_FLAGS = --trace-fst
+#VL_USER_FLAGS += -DDUMP_FILE=\"test.fst\"
+#USER_LDLIBS = -lz
+
+# Using VCD
+#VL_USER_FLAGS = --trace
 #VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
-#CPP_USER_FLAGS = -DDUMP_FILE
 
 # Design prefix
 VM_PREFIX = Vspi_master_tb
@@ -18,6 +26,7 @@ VL_TOP = spi_master_tb
 
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \
+	spi_master_tb.vlt \
 	../spi_slave.v \
 	../spi_master.v \
 	../spi_master_tb.v
