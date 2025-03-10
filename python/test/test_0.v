@@ -33,8 +33,10 @@ end
 
 initial begin
 
+	`ifndef VERILATOR
 	$display("INFO [Top]: Initializing Verisocks");
 	$verisocks_init(`NUM_PORT, `VS_TIMEOUT);
+	`endif
 
 	clk = 1'b0;
 	count = 8'd0;
