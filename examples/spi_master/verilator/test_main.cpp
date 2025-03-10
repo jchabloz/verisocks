@@ -16,10 +16,10 @@ int main(int argc, char** argv, char**) {
 	//Get arguments for port number and timeout
 	int port_number {5100};
 	int timeout {5};
-	if (argc > 0) {
+	if (argc > 1) {
 		port_number = std::atoi(argv[1]);
 	}
-	if (argc > 1) {
+	if (argc > 2) {
 		timeout = std::atoi(argv[2]);
 	}
 
