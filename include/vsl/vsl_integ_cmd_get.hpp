@@ -303,6 +303,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     /* Scalar variables */
     switch (p_var->get_type()) {
         case VSL_TYPE_SCALAR:
+        case VSL_TYPE_PARAM:
         case VSL_TYPE_EVENT:
             if (0 > p_var->add_value_to_msg(p_msg, "value")) {
                 vs_log_mod_error(

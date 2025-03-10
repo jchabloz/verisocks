@@ -99,6 +99,10 @@ public:
         VerilatedVarType vltype, size_t width) {
             register_variable(namep, datap, vltype, VSL_TYPE_SCALAR, width);
     }
+    void register_param(const char* namep, std::any datap,
+        VerilatedVarType vltype, size_t width) {
+            register_variable(namep, datap, vltype, VSL_TYPE_PARAM, width);
+    }
     void register_array(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width, size_t depth) {
             register_variable(
@@ -505,7 +509,7 @@ void VslInteg<T>::main_sim() {
         /* If there is a time-based callback */
         if (has_time_callback() && (p_model->nextTimeSlot() >= cb_time)) {
             p_context->time(cb_time);
-            p_model->eval(); //TBC
+            //p_model->eval(); //TBC
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
                 "Reached callback - Getting back to Verisocks main loop");

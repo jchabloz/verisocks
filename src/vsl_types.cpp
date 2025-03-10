@@ -66,6 +66,25 @@ double VslVar::get_value() {
                 default:
                     return 0.0f;
             }
+        case VSL_TYPE_PARAM:
+            switch (vltype) {
+                case VLVT_UINT8:
+                    return static_cast<const double>(
+						__get_value<const uint8_t>(datap));
+                case VLVT_UINT16:
+                    return static_cast<const double>(
+						__get_value<const uint16_t>(datap));
+                case VLVT_UINT32:
+                    return static_cast<const double>(
+						__get_value<const uint32_t>(datap));
+                case VLVT_UINT64:
+                    return static_cast<const double>(
+						__get_value<const uint64_t>(datap));
+                case VLVT_REAL:
+                    return __get_value<const double>(datap);
+                default:
+                    return 0.0f;
+            }
         case VSL_TYPE_EVENT:
             if (std::any_cast<VlEvent*>(datap)->isTriggered())
                 return 1.0f;
@@ -137,6 +156,10 @@ int VslVar::set_value(double value) {
         case VSL_TYPE_EVENT:
             std::any_cast<VlEvent*>(datap)->fire();
             return 0;
+        case VSL_TYPE_PARAM:
+            vs_log_mod_error(
+                "vsl_types", "Cannot set parameter value");
+            return -1;
         default:
             vs_log_mod_error(
                 "vsl_types", "Cannot set variable value (non-scalar)");
@@ -219,6 +242,7 @@ int VslVar::add_value_to_msg(cJSON* p_msg, const char* key) {
     cJSON* p_value = nullptr;
     switch (type) {
         case VSL_TYPE_SCALAR:
+        case VSL_TYPE_PARAM:
         case VSL_TYPE_EVENT:
             switch (vltype) {
                 case VLVT_UINT8:

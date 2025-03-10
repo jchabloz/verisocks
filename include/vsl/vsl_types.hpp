@@ -36,6 +36,7 @@ enum VslType {
     VSL_TYPE_ARRAY,         ///Array variable type (dimension = 2)
     VSL_TYPE_MDARRAY,       ///Multi-dimensional array variable type (dimension > 2)
     VSL_TYPE_EVENT,         ///Event variable type
+    VSL_TYPE_PARAM,         ///Parameter type (assumed to be scalar)
     VSL_TYPE_NOT_SUPPORTED, ///Not supported variable type
     VSL_TYPE_UNKNOWN        ///Unknown variable type
 };
