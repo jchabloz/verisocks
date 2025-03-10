@@ -20,7 +20,7 @@ reg [7:0] count_memory [0:15];
 reg [3:0] mem_pointer;
 event counter_end;
 
-always @*
+always @clk
 	clk <= #(1/fclk/2.0) ~clk;
 
 always @(posedge(clk)) begin
