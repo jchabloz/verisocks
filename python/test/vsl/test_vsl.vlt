@@ -1,0 +1,7 @@
+`verilator_config
+public -module "main" -var "int_param"
+public -module "main" -var "fclk"
+public -module "main" -var "clk"
+public -module "main" -var "count"
+public -module "main" -var "count_memory"
+public -module "main" -var "counter_end"
