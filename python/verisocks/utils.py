@@ -32,7 +32,8 @@ def _format_path(cwd, path):
     return os.path.abspath(os.path.join(cwd, path))
 
 
-def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
+def setup_sim_run(elab_cmd, sim_cmd, capture_output=True,
+                  capture_logfile=None):
     """Run simulation setup commands.
 
     This command is e.g. used by :py:meth:`setup_sim` with elaboration and
@@ -47,6 +48,8 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
             command is mandatory and cannot be None.
         capture_output (bool): Defines if stdout and stderr output
             are "captured" (i.e. not visible).
+        capture_logfile (int): Valid file descriptor to capture stdout and
+            stderr
 
     Returns:
         subprocess.Popen: Process object of the launched simulation
@@ -65,7 +68,11 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
             stderr=subprocess.DEVNULL
         )
     else:
-        pop = subprocess.Popen(sim_cmd)
+        if capture_logfile:
+            pop = subprocess.Popen(
+                sim_cmd, stdout=capture_logfile, stderr=capture_logfile)
+        else:
+            pop = subprocess.Popen(sim_cmd)
 
     logging.info(f"Launched simulation with PID {pop.pid}")
     return pop
@@ -74,7 +81,7 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True):
 def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
               vvp_logpath="vvp.log", ivl_exec=None, ivl_args=None,
               vvp_exec=None, vvp_args=None, vvp_postargs=None,
-              capture_output=True):
+              capture_output=True, capture_logfile=None):
     """Set up Icarus simulation by elaborating the design with :code:`iverilog`
     and launching the simulation with :code:`vvp`. Uses
     :py:meth:`setup_sim_run` to run the concatenated commands and arguments.
@@ -100,6 +107,8 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
             be configured as "-fst".
         capture_output (bool): Defines if stdout and stderr output
             are "captured" (i.e. not visible).
+        capture_logfile (int): Valid file descriptor to capture stdout and
+            stderr
 
     Returns:
         subprocess.Popen: Process object of the launched simulation
@@ -163,5 +172,5 @@ def setup_sim(vpi_libpath, *src_files, cwd=".", vvp_filepath=None,
         *vvp_postargs
     ]
 
-    pop = setup_sim_run(ivl_cmd, vvp_cmd, capture_output)
+    pop = setup_sim_run(ivl_cmd, vvp_cmd, capture_output, capture_logfile)
     return pop
