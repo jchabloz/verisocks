@@ -304,9 +304,9 @@ def test_set(vs):
 
     answer = vs.set(path="main.count_memory[6]", value=37)
     assert answer["type"] == "ack"
-    answer = vs.get(sel="value", path="main.count_memory")
+    answer = vs.get(sel="value", path="main.count_memory[6]")
     assert answer["type"] == "result"
-    assert answer["value"][6] == 37
+    assert answer["value"] == 37
 
     # Set an event
     answer = vs.set(path="main.counter_end")
