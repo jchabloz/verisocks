@@ -46,8 +46,8 @@ def setup_test(port, timeout, capture_output=True,
 def vs():
     # Setup
     port = find_free_port()
-    #flog = open("vsl.log", "w")
-    #pop = setup_test(port, VS_TIMEOUT, False, flog)
+    # flog = open("vsl.log", "w")
+    # pop = setup_test(port, VS_TIMEOUT, False, flog)
     pop = setup_test(port, VS_TIMEOUT)
     _vs = Verisocks(HOST, port)
     _vs.connect()
@@ -59,7 +59,7 @@ def vs():
         logging.warning("Connection error - Cannot send finish command")
     _vs.close()
     pop.communicate(timeout=10)
-    #flog.close()
+    # flog.close()
 
 
 def test_connect(vs):
@@ -150,38 +150,15 @@ def test_get_value(vs):
         assert answer["type"] == "error"
 
 
-#def test_get_type(vs):
-#    """Tests Verisocks get(sel="type") function"""
-#
-#    # Get an integer parameter type
-#    answer = vs.get("type", path="main.int_param")
-#    assert answer["type"] == "result"
-#    assert answer["vpi_type"] == 41  # vpiParameter (see vpi_user.h)
-#
-#    # Get a real parameter type
-#    answer = vs.get(sel="type", path="main.fclk")
-#    assert answer["type"] == "result"
-#    assert answer["vpi_type"] == 41  # vpiParameter (see vpi_user.h)
-#
-#    # Get a reg type
-#    answer = vs.get(sel="type", path="main.clk")
-#    assert answer["type"] == "result"
-#    assert answer["vpi_type"] == 48  # vpiReg (see vpi_user.h)
-#
-#    # Get a reg[] type
-#    answer = vs.get(sel="type", path="main.count")
-#    assert answer["type"] == "result"
-#    assert answer["vpi_type"] == 48  # vpiReg (see vpi_user.h)
-#
-#    # Get a memory array type
-#    answer = vs.get(sel="type", path="main.count_memory")
-#    assert answer["type"] == "result"
-#    assert answer["vpi_type"] == 29  # vpiMemory (see vpi_user.h)
-#
-#    # Error case: wrong path
-#    with pytest.raises(VerisocksError):
-#        answer = vs.get(sel="type", path="wrong_path")
-#        assert answer["type"] == "error"
+def test_get_type(vs):
+    """Tests Verisocks get(sel="type") function
+
+    Note: With Verilator integration, this command is currently not supported.
+    A warning message is thus expected.
+    """
+    answer = vs.get(sel="type", path="main.clk")
+    assert answer['type'] == "warning"
+    logging.info(repr(answer))
 
 
 def test_run_for_time(vs):
@@ -329,12 +306,12 @@ def test_read_not_expected(vs):
     assert vs.read() is False
 
 
-#def test_sim_finishes(vs):
-#    """Tests the case where the simulation runs out before the specified
-#    callback event occurs
-#    """
-#    with pytest.raises(VerisocksError):
-#        _ = vs.run(cb="until_time", time=1200, time_unit="us")
+def test_sim_finishes(vs):
+    """Tests the case where the simulation runs out before the specified
+    callback event occurs
+    """
+    with pytest.raises(VerisocksError):
+        _ = vs.run(cb="until_time", time=1200, time_unit="us")
 
 
 def test_exit():

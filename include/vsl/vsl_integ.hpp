@@ -504,7 +504,11 @@ void VslInteg<T>::main_sim() {
         }
 
         /* If no more pending events remaining ... finish simulation */
-        if (!p_model->eventsPending()) {break;}
+        if (!p_model->eventsPending()) {
+            vs_log_mod_warning(
+                "vsl", "Exiting without $finish; no events left");
+            break;
+        }
 
         /* If there is a time-based callback */
         if (has_time_callback() && (p_model->nextTimeSlot() >= cb_time)) {
@@ -520,6 +524,12 @@ void VslInteg<T>::main_sim() {
         /* Advance time */
         p_context->time(p_model->nextTimeSlot());
     }
+    /* If there is a callback hanging, it means that the Verisocks client is
+    expecting a return message... in this case, an error is returned */
+    if (has_callback()) {
+        vs_msg_return(fd_client_socket, "error",
+            "Exiting Verisocks due to end of simulation");
+    }
     _state = VSL_STATE_SIM_FINISH;
     return;
 }
@@ -529,13 +539,6 @@ Main finite state-machine - Simulation finishing
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim_finish() {
-
-    if (!p_context->gotFinish()) {
-        vs_log_mod_warning("vsl", "Exiting without $finish; no events left");
-    }
-    vs_msg_return(fd_client_socket, "warning",
-        "Exiting Verisocks due to end of simulation");
-
     p_model->final();
     p_context->statsPrintSummary();
     _state = VSL_STATE_EXIT;
