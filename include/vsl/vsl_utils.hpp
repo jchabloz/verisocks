@@ -64,6 +64,32 @@ double time_to_double(
 uint64_t double_to_time(
     double time_value, const char* time_unit, VerilatedContext* p_context);
 
+/**
+ * @brief Array range
+ */
+struct VslArrayRange {
+    std::string array_name;
+    size_t left;
+    size_t right;
+};
+
+/**
+ * @brief Check if a variable path contains the [] operator
+ * 
+ * @param path Variable path
+ * @return (bool) Returns true if the path contains a range definition
+ */
+bool has_range(const std::string& path);
+
+
+
+VslArrayRange get_range(const std::string& path);
+
+
+
+
+
+
 } //namespace vsl
 
 #endif //VSL_SIGNALS_HPP

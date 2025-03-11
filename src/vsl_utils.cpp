@@ -35,6 +35,7 @@ SOFTWARE.
 #include <cmath>
 #include <map>
 #include <string>
+#include <regex>
 
 namespace vsl{
 
@@ -80,6 +81,30 @@ uint64_t double_to_time(double time_value, const char* time_unit,
     double time_factor = static_cast<double>(get_time_factor(time_unit));
     time_value *= std::pow(10.0, time_factor - time_precision);
     return static_cast<uint64_t>(time_value);
+}
+
+bool has_range(const std::string& path) {
+    std::regex range_regex {"\\[([0-9]+)(:([0-9]+))?\\]$"};
+    std::smatch m;
+    std::regex_search(path, m, range_regex);
+    if (m.empty()) return false;
+    return true;
+}
+
+VslArrayRange get_range(const std::string& path) {
+    VslArrayRange range {"None", 0, 0};
+    const std::regex range_regex {"^(.+)\\[([0-9]+)(:([0-9]+))?\\]$"};
+    std::smatch m;
+    std::regex_search(path, m, range_regex);
+    if (m.empty()) return range;
+    range.array_name = m[1];
+    range.left = static_cast<size_t>(std::stoi(m[2]));    
+    if (0 < m[4].length()) {
+        range.right = static_cast<size_t>(std::stoi(m[4]));    
+    } else {
+        range.right = static_cast<size_t>(std::stoi(m[2]));    
+    }
+    return range;
 }
 
 } //namespace vsl
