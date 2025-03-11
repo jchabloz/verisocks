@@ -141,7 +141,7 @@ public:
      * @param str_path The string path to check in the var_map.
      * @return true if the string path exists in the var_map, false otherwise.
      */
-    const bool has_var(std::string str_path) {
+    const bool has_var(const std::string& str_path) {
         if (var_map.count(str_path) > 0) return true;
         return false;
     }
@@ -158,7 +158,7 @@ public:
      * map.
      * @return VslVar* Pointer to the variable if found, otherwise `nullptr`.
      */
-    VslVar* get_var(std::string str_path) {
+    VslVar* get_var(const std::string& str_path) {
         auto search = var_map.find(str_path);
         if (search != var_map.end()) {
             return &var_map[str_path];
