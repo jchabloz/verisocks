@@ -30,6 +30,7 @@ SOFTWARE.
 #include "vs_msg.h"
 #include "vsl/vsl_integ.hpp"
 #include "vsl/vsl_types.hpp"
+#include "vsl/vsl_utils.hpp"
 #include "verilated.h"
 #include "verilated_syms.h"
 
@@ -290,17 +291,46 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         return;
     }
 
+    /* Check if the provided path contains the [ ] range selection operator*/
+    bool path_has_range = has_range(str_path);
+    VslArrayRange path_range;
+    VslVar* p_var;
+    if (path_has_range) {
+        path_range = get_range(str_path);
+        vs_log_mod_debug("vsl", "Range found (left: %d, right %d, incr %d)",
+            (int) path_range.left, (int) path_range.right,
+            (int) path_range.incr);
+        p_var = vx.get_registered_variable(path_range.array_name);
+    } else {
+        p_var = vx.get_registered_variable(str_path);
+    }
+
     /* Attempt to get a pointer to the variable */
-    auto p_var = vx.get_registered_variable(str_path);
     if (nullptr == p_var) {
         vs_log_mod_error(
-            "vsl", "Variable %s not found in context", str_path.c_str()
-        );
+            "vsl", "Variable %s not found in context", str_path.c_str());
         handle_error();
         return;
     }
 
+    /* Consistency checks on range */
+    if (path_has_range) {
+        if (p_var->get_type() != VSL_TYPE_ARRAY) {
+            vs_log_mod_error(
+                "vsl", "Range operator [] only supported for array type");
+            handle_error();
+            return;
+        }
+        if ((path_range.left >= p_var->get_depth()) ||
+            (path_range.right >= p_var->get_depth())) {
+            vs_log_mod_error("vsl", "Range overflow");
+            handle_error();
+            return;
+        }
+    }
+
     /* Scalar variables */
+    int ack = 0;
     switch (p_var->get_type()) {
         case VSL_TYPE_SCALAR:
         case VSL_TYPE_PARAM:
@@ -320,7 +350,10 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
                 "Array width: %d", (int) p_var->get_width());
             vs_log_mod_debug("vsl",
                 "Array depth: %d", (int) p_var->get_depth());
-            if (0 > p_var->add_array_to_msg(p_msg, "value")) {
+            ack = path_has_range ?
+                p_var->add_array_to_msg(p_msg, "value", path_range) :
+                p_var->add_array_to_msg(p_msg, "value");
+            if (0 > ack) {
                 vs_log_mod_error("vsl",
                     "Error getting array values for variable %s",
                     str_path.c_str());

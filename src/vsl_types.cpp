@@ -312,5 +312,48 @@ int VslVar::add_array_to_msg(cJSON* p_msg, const char* key) {
     return 0;
 }
 
+int VslVar::add_array_to_msg(cJSON* p_msg, const char* key,
+    const VslArrayRange& range)
+{
+    cJSON* p_obj = nullptr;
+    if (range.left == range.right) {
+        p_obj = cJSON_AddNumberToObject(
+            p_msg, key, get_array_value(range.left));
+        if (p_obj == nullptr) {return -1;}
+        return 0;
+    }
+    p_obj = cJSON_AddArrayToObject(p_msg, key);
+    if (p_obj == nullptr) {
+        vs_log_mod_error("vsl_type", "Could not create cJSON array");
+        return -1;
+    }
+    cJSON_bool retval;
+    size_t mem_index = range.right;
+    while (mem_index != (range.left + range.incr)) {
+        retval = cJSON_AddItemToArray(
+            p_obj,
+            cJSON_CreateNumber(get_array_value(mem_index))
+        );
+        if (1 != retval) {
+            vs_log_mod_error(
+                "vsl_type", "Error adding number to array");
+            return -1;
+        }
+        mem_index += range.incr;
+    }
+    return 0;
+}
+
+VslVar* VslVarMap::get_var(const std::string& str_path) {
+    auto search = var_map.find(str_path);
+    if (search != var_map.end()) {
+        return &var_map[str_path];
+    }
+    vs_log_mod_error("vsl_types",
+        "Could not find variable %s in registered variables map",
+        str_path.c_str());
+    return nullptr;
+}
+
 } //namespace vsl
 // EOF

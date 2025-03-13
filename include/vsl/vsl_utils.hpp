@@ -68,9 +68,10 @@ uint64_t double_to_time(
  * @brief Array range
  */
 struct VslArrayRange {
-    std::string array_name;
     size_t left;
     size_t right;
+    int8_t incr;
+    std::string array_name;
 };
 
 /**
@@ -81,14 +82,14 @@ struct VslArrayRange {
  */
 bool has_range(const std::string& path);
 
-
-
+/**
+ * @brief Parse and extract variable path and range definition parameters
+ *
+ * @param path Variable path with range definition, e.g. counter[4] or
+ * counter[6:3]
+ * @return (VslArrayRange)
+ */
 VslArrayRange get_range(const std::string& path);
-
-
-
-
-
 
 } //namespace vsl
 

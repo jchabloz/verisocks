@@ -23,6 +23,7 @@ SOFTWARE.
 #ifndef VSL_TYPES_HPP
 #define VSL_TYPES_HPP
 
+#include "vsl/vsl_utils.hpp"
 #include "verilated.h"
 #include "cJSON.h"
 #include <string>
@@ -77,6 +78,8 @@ public:
     int set_array_variable_value(cJSON* p_obj);
     int add_value_to_msg(cJSON* p_msg, const char* key);
     int add_array_to_msg(cJSON* p_msg, const char* key);
+    int add_array_to_msg(cJSON* p_msg, const char* key,
+        const VslArrayRange& range);
 
     const char* get_name() { return namep; }
     const size_t get_dims() { return dims; }
@@ -158,16 +161,7 @@ public:
      * map.
      * @return VslVar* Pointer to the variable if found, otherwise `nullptr`.
      */
-    VslVar* get_var(const std::string& str_path) {
-        auto search = var_map.find(str_path);
-        if (search != var_map.end()) {
-            return &var_map[str_path];
-        }
-        vs_log_mod_error("vsl_types",
-            "Could not find variable %s in registered variables map",
-            str_path.c_str());
-        return nullptr;
-    }
+    VslVar* get_var(const std::string& str_path);
 
 private:
     std::unordered_map<std::string, VslVar> var_map;

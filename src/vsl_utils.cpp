@@ -92,7 +92,7 @@ bool has_range(const std::string& path) {
 }
 
 VslArrayRange get_range(const std::string& path) {
-    VslArrayRange range {"None", 0, 0};
+    VslArrayRange range {0, 0, 1, "None"};
     const std::regex range_regex {"^(.+)\\[([0-9]+)(:([0-9]+))?\\]$"};
     std::smatch m;
     std::regex_search(path, m, range_regex);
@@ -104,6 +104,7 @@ VslArrayRange get_range(const std::string& path) {
     } else {
         range.right = static_cast<size_t>(std::stoi(m[2]));    
     }
+    if (range.right > range.left) range.incr = -1;
     return range;
 }
 
