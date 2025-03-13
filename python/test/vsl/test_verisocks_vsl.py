@@ -144,6 +144,18 @@ def test_get_value(vs):
         96, 97, 98, 99, 100, 85, 86, 87,
         88, 89, 90, 91, 92, 93, 94, 95]
 
+    answer = vs.get(sel="value", path="main.count_memory[3]")
+    assert answer["type"] == "result"
+    assert answer["value"] == 99
+
+    answer = vs.get(sel="value", path="main.count_memory[6:3]")
+    assert answer["type"] == "result"
+    assert answer["value"] == [99, 100, 85, 86]
+
+    answer = vs.get(sel="value", path="main.count_memory[3:6]")
+    assert answer["type"] == "result"
+    assert answer["value"] == [86, 85, 100, 99]
+
     # Error case: wrong path
     with pytest.raises(VerisocksError):
         answer = vs.get(sel="value", path="wrong_path")
@@ -288,11 +300,17 @@ def test_set(vs):
     assert answer["type"] == "result"
     assert answer["value"] == list(range(16))
 
-#    answer = vs.set(path="main.count_memory[6]", value=37)
-#    assert answer["type"] == "ack"
-#    answer = vs.get(sel="value", path="main.count_memory")
-#    assert answer["type"] == "result"
-#    assert answer["value"][6] == 37
+    answer = vs.set(path="main.count_memory[6]", value=37)
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count_memory[6]")
+    assert answer["type"] == "result"
+    assert answer["value"] == 37
+
+    answer = vs.set(path="main.count_memory[6:4]", value=[17, 234, 126])
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count_memory[6:4]")
+    assert answer["type"] == "result"
+    assert answer["value"] == [17, 234, 126]
 
     # Set an event
     answer = vs.set(path="main.counter_end")
