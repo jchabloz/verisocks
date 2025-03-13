@@ -1,6 +1,6 @@
 @startuml verisocks_architecture
-' title Verisocks architecture overview
-' footer "Copyright (c) Jérémie Chabloz - 2022"
+' title Verisocks architecture overview - Verilator integration
+' footer "Copyright (c) Jérémie Chabloz - 2025"
 
 !include <tupadr3/font-awesome-5/server>
 !include <tupadr3/font-awesome-5/python>
@@ -14,34 +14,27 @@
 skinparam NoteBackgroundColor AliceBlue
 skinparam ComponentStyle rectangle
 skinparam DefaultFontName Helvetica
-
-frame "PLI application" {
-    rectangle "PLI routine" {
-        rectangle "<$server>\nServer" as tcp_server
-    }
-}
     
 file "<$database>\nTB\nconfig" as cfg_tb
 file "<$database>\nDUT\nconfig" as cfg_dut
 file "<$file_code>\nFirmware" as fw
 
-
-frame "Verilog simulator" as sim {
-    rectangle "Verilog testbench" as tb {
-        [<$microchip>\nDUT] as dut
-        rectangle {
-            [User defined\nsystem task (PLI)\n""$verisocks_init()""] as task
-        }
+frame "C++ testbench code" as sim {
+    rectangle "<$server>\nServer" as tcp_server
+    frame "Verilated code" as vl {
+        rectangle "<$microchip>\nDUT" as dut
     }
 }
 
-cfg_tb .right.> tb
+cfg_tb .right.> sim
 cfg_dut .up.> dut
 
 frame "Test framework" as client {
     [<$python>\nClient] as tcp_client
     [<$robot>\nTest\nframework] as tcms
 }
+dut <-> tcp_server
+tcp_client <-> tcp_server : TCP/IP
 
 note top of tcp_client
 Any language or tool allowing
@@ -62,17 +55,9 @@ Only accepts a single
 connection at a time.
 endnote
 
-note top of task
-User-defined task
-called in an ""initial""
-block
-endnote
-
-task <--> dut
-task <-> tcp_server : VPI
-tcp_server <-> tcp_client : TCP/IP
 tcms <-left-> tcp_client
-
 fw .up.> dut
+
+' tcp_server <-> tcp_client : TCP/IP
 
 @enduml
