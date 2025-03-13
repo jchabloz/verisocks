@@ -1,12 +1,12 @@
 /*
 Copyright (c) 2025 Jérémie Chabloz
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -32,14 +32,18 @@ SOFTWARE.
 
 namespace vsl {
 
+/**
+ * @enum VslType
+ * @brief Variable types
+ */
 enum VslType {
-    VSL_TYPE_SCALAR,        ///Scalar variable type
-    VSL_TYPE_ARRAY,         ///Array variable type (dimension = 2)
-    VSL_TYPE_MDARRAY,       ///Multi-dimensional array variable type (dimension > 2)
-    VSL_TYPE_EVENT,         ///Event variable type
-    VSL_TYPE_PARAM,         ///Parameter type (assumed to be scalar)
-    VSL_TYPE_NOT_SUPPORTED, ///Not supported variable type
-    VSL_TYPE_UNKNOWN        ///Unknown variable type
+    VSL_TYPE_SCALAR,        //Scalar variable type
+    VSL_TYPE_ARRAY,         //Array variable type (dimension = 2)
+    VSL_TYPE_MDARRAY,       //Multi-dimensional array variable type (dimension > 2)
+    VSL_TYPE_EVENT,         //Event variable type
+    VSL_TYPE_PARAM,         //Parameter type (assumed to be scalar)
+    VSL_TYPE_NOT_SUPPORTED, //Not supported variable type
+    VSL_TYPE_UNKNOWN        //Unknown variable type
 };
 
 /**
@@ -71,21 +75,122 @@ public:
         namep {namep}, datap {datap}, vltype {vltype}, type {type},
         dims {dims}, width {width}, depth {depth} {};
 
+    /**
+     * @brief Returns the value of a scalar variable
+     *
+     * If the variable is a scalar or a parameter, the function returns the
+     * numerical value of the variable as a double.
+     * If the variable is an event, it returns 1.0f if the event is triggered
+     * and 0.0f if it is not.
+     * In case of a non-scalar variable, the value 0.0f is returned by default.
+     * It is expected that this has been checked before calling this function.
+     * 
+     * @return Variable numeric value as a double
+     */
     double get_value();
+
+    /**
+     * @brief Returns the value of an array variable at a given index
+     * 
+     * If the variable is an array, the function returns the numerical value of
+     * the array that is located at the index.
+     * If the variable is not an array, the value 0.0f is returned by default.
+     * It is expected that this has been checked before calling this function.
+     * 
+     * @param index Index of the value to be returned
+     * @return Variable numeric value as a double
+     */
     double get_array_value(size_t index);
+
+    /**
+     * @brief Sets the value of a scalar variable
+     * @param value Value to be set
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int set_value(double value);
+    
+    /**
+     * @brief Sets the value of an array variable at a given index
+     * @param value Value to be set
+     * @param index Index of the variable to be set in the array
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int set_array_value(double value, size_t index);
+
+    /**
+     * @brief Sets a full array from a cJSON array object
+     * 
+     * @param p_obj Pointer to cJSON array object
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int set_array_variable_value(cJSON* p_obj);
+    
+    /**
+     * @brief Add the value of a scalar variable to a cJSON object
+     * @param p_msg Pointer to cJSON message object
+     * @param key Key to be used in the cJSON object
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int add_value_to_msg(cJSON* p_msg, const char* key);
+    
+    /**
+     * @brief Add an array variable to a cJSON object
+     * @param p_msg Pointer to cJSON message object
+     * @param key Key to be used in the cJSON object
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int add_array_to_msg(cJSON* p_msg, const char* key);
+        
+    /**
+     * @brief Add a sub-range of an array variable to a cJSON object
+     * 
+     * If the length of the specified sub-range is 1, the corresponding value
+     * is added to the cJSON objet as a numerical value and not an array.
+     * 
+     * @param p_msg Pointer to cJSON message object
+     * @param key Key to be used in the cJSON object
+     * @param range Sub-range definition
+     * @return Returns 0 in case of success, -1 otherwise
+     */
     int add_array_to_msg(cJSON* p_msg, const char* key,
         const VslArrayRange& range);
 
-    const char* get_name() { return namep; }
+    /**
+     * @brief Returns the variable name
+     * @return Variable name
+     */
+    const std::string get_name() { return std::string(namep); }
+
+    /**
+     * @brief Returns the number of dimensions for the variable
+     * @return Number of dimensions
+     */
     const size_t get_dims() { return dims; }
+
+    /**
+     * @brief Returns the width of the variable (as represented in the original
+     * (System)Verilog HDL code)
+     * @return Width value
+     */
     const size_t get_width() { return width; }
+
+    /**
+     * @brief Returns the depth of an array variable
+     * @note At the moment, only 2-dimensional arrays are supported
+     * @return Depth value
+     */
     const size_t get_depth() { return depth; }
+
+    /**
+     * @brief Returns the corresponding Verilator variable type
+     * @return Verilated variable type
+     */
     const VerilatedVarType get_vltype() { return vltype; }
+
+    /**
+     * @brief Returns the variable type
+     * @return Variable type
+     */
     const VslType get_type() { return type; }
 
 private:

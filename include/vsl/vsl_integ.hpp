@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2024 Jérémie Chabloz
+Copyright (c) 2024-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -50,6 +50,10 @@ SOFTWARE.
 
 namespace vsl{
 
+/**
+ * @enum VslState
+ * @brief Internal state values for the VSL finite-state machine
+ */
 enum VslState {
     VSL_STATE_INIT,        ///Initial state, Verisocks server socket not initialized
     VSL_STATE_CONNECT,     ///Socket created, bound to address, waiting for connection
@@ -61,70 +65,114 @@ enum VslState {
     VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
 };
 
+/**
+ * @class VslInteg
+ * @brief Top-level class to use for using Verisocks with Verilator
+ *
+ * @tparam T Model class
+ * @param p_model Pointer to the Verilated model instance.
+ * @param port The port number to be used. Default is 5100.
+ * @param timeout The timeout duration in seconds. Default is 120.
+ */
 template<typename T>
 class VslInteg {
 
 public:
 
-    /**
-     * @brief Constructs a VslInteg object.
-     * 
-     * @tparam T The type of the model.
-     * @param p_model Pointer to the model object.
-     * @param port The port number to be used. Default is 5100.
-     * @param timeout The timeout duration in seconds. Default is 120.
-     */
     VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
+    /**
+     * @brief Returns a pointer to the registered model instance
+     */
     inline const T* model() {return p_model;}
+
+    /**
+     * @brief Returns a pointer to the registered Verilator context
+     */
     inline const VerilatedContext* context() {return p_context;}
 
+    /**
+     * @brief Run Verisocks FSM
+     *
+     * This is the main function to be used from the top-level C++ testbench
+     * code. It will launch the Verisocks finite-state machine and will expect
+     * a client to connect to the exposed socket. Once connected, it will be
+     * expecting to receive Verisocks commands to control the Verilated
+     * testbench simulation.
+     */
     void run();
 
-    void register_variable(const char* namep, std::any datap,
-        VerilatedVarType vltype, VslType type, size_t dims, size_t width,
-        size_t depth) {
-            var_map.add_var(namep, datap, vltype, type, dims, width, depth);
-    }
-    void register_variable(const char* namep, std::any datap,
-        VerilatedVarType vltype, VslType type, size_t width, size_t depth) {
-            var_map.add_var(namep, datap, vltype, type, 2u, width, depth);
-    }
-    void register_variable(const char* namep, std::any datap,
-        VerilatedVarType vltype, VslType type, size_t width) {
-            var_map.add_var(namep, datap, vltype, type, 0, width, 0u);
-    }
+    /**
+     * @brief Register a scalar variable
+     *
+     * This function shall be used from the top-level C++ testbench code in
+     * order to register a scalar variable to be accessible with Verisocks
+     * commands.
+     *
+     * @param namep Name of the variable as registered by Verisocks and how it
+     * will be used within Verisocks commands
+     * @param datap Pointer to the variable in the verilated C++ code
+     * @param vltype Variable verilated type
+     * @param width Variable width (should be consistent with vltype)
+     */
     void register_scalar(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width) {
             register_variable(namep, datap, vltype, VSL_TYPE_SCALAR, width);
     }
+
+    /**
+     * @brief Register a parameter variable
+     *
+     * This function shall be used from the top-level C++ testbench code in
+     * order to register a parameter variable to be accessible with Verisocks
+     * commands.
+     *
+     * @param namep Name of the parameter variable as registered by Verisocks
+     * and how it will be used within Verisocks commands
+     * @param datap Pointer to the parameter variable in the verilated C++ code
+     * @param vltype Variable verilated type
+     * @param width Variable width (should be consistent with vltype)
+     */
     void register_param(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width) {
             register_variable(namep, datap, vltype, VSL_TYPE_PARAM, width);
     }
+
+    /**
+     * @brief Register an array variable
+     *
+     * This function shall be used from the top-level C++ testbench code in
+     * order to register an array variable to be accessible with Verisocks
+     * commands.
+     *
+     * @param namep Name of the array variable as registered by Verisocks and
+     * how it will be used within Verisocks commands
+     * @param datap Pointer to the array variable in the verilated C++ code
+     * @param vltype Variable verilated type
+     * @param width Variable width (should be consistent with vltype)
+     * @param depth Array depth
+     */
     void register_array(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width, size_t depth) {
             register_variable(
                 namep, datap, vltype, VSL_TYPE_ARRAY, width, depth);
     }
+
+    /**
+     * @brief Register an event variable
+     *
+     * This function shall be used from the top-level C++ testbench code in
+     * order to register an event variable to be accessible with Verisocks
+     * commands.
+     *
+     * @param namep Name of the event variable as registered by Verisocks and
+     * how it will be used within Verisocks commands
+     * @param eventp Pointer to the event variable in the verilated C++ code
+     */
     void register_event(const char* namep, VlEvent* eventp) {
         register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
     }
-
-    int register_value_callback(const char* path, const double value);
-    int register_time_callback(const uint64_t time);
-    void clear_callbacks() {
-        b_has_time_callback = false;
-        b_has_value_callback = false;
-    }
-
-    inline const bool has_callback() {
-        return (b_has_value_callback || b_has_time_callback);
-    }
-    inline const bool has_value_callback() {return b_has_value_callback;}
-    inline const bool has_time_callback() {return b_has_time_callback;}
-    const bool check_value_callback();
 
 private:
     VslState _state {VSL_STATE_INIT}; //Verisocks state
@@ -162,6 +210,36 @@ private:
     void main_process();
     void main_sim();
     void main_sim_finish();
+
+    /* Function to register variables into the Verisocks variable map */
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t dims, size_t width,
+        size_t depth) {
+            var_map.add_var(namep, datap, vltype, type, dims, width, depth);
+    }
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t width, size_t depth) {
+            var_map.add_var(namep, datap, vltype, type, 2u, width, depth);
+    }
+    void register_variable(const char* namep, std::any datap,
+        VerilatedVarType vltype, VslType type, size_t width) {
+            var_map.add_var(namep, datap, vltype, type, 0, width, 0u);
+    }
+
+    /* Callback functions*/
+    int register_value_callback(const char* path, const double value);
+    int register_time_callback(const uint64_t time);
+    void clear_callbacks() {
+        b_has_time_callback = false;
+        b_has_value_callback = false;
+    }
+
+    inline const bool has_callback() {
+        return (b_has_value_callback || b_has_time_callback);
+    }
+    inline const bool has_value_callback() {return b_has_value_callback;}
+    inline const bool has_time_callback() {return b_has_time_callback;}
+    const bool check_value_callback();
 
     /* Utility functions */
     VslVar* get_registered_variable(std::string str_path) {

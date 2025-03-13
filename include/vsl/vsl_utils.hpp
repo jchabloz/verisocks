@@ -65,13 +65,13 @@ uint64_t double_to_time(
     double time_value, const char* time_unit, VerilatedContext* p_context);
 
 /**
- * @brief Array range
+ * @brief Struct to support accessing sub-ranges of arrays
  */
 struct VslArrayRange {
-    size_t left;
-    size_t right;
-    int8_t incr;
-    std::string array_name;
+    size_t left;    ///Left index value in the [left:right] range operator
+    size_t right;   ///Right index value in the [left:right] range operator
+    int8_t incr;    ///Increment value when iterating from right to left
+    std::string array_name; ///Array path name without [ ] operator
 };
 
 /**
