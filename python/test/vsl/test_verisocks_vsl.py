@@ -312,6 +312,12 @@ def test_set(vs):
     assert answer["type"] == "result"
     assert answer["value"] == [17, 234, 126]
 
+    answer = vs.set(path="main.count_memory[4:6]", value=[17, 234, 126])
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count_memory[6:4]")
+    assert answer["type"] == "result"
+    assert answer["value"] == [126, 234, 17]
+
     # Set an event
     answer = vs.set(path="main.counter_end")
     assert answer["type"] == "ack"
