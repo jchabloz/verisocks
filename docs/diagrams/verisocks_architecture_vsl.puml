@@ -1,4 +1,4 @@
-@startuml verisocks_architecture
+@startuml verisocks_architecture_vsl
 ' title Verisocks architecture overview - Verilator integration
 ' footer "Copyright (c) Jérémie Chabloz - 2025"
 
@@ -21,7 +21,7 @@ file "<$file_code>\nFirmware" as fw
 
 frame "C++ testbench code" as sim {
     rectangle "<$server>\nServer" as tcp_server
-    frame "Verilated code" as vl {
+    rectangle "Verilated code" as vl {
         rectangle "<$microchip>\nDUT" as dut
     }
 }

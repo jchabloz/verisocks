@@ -16,6 +16,11 @@ version numbering system (tries and) follows the `semantic versioning
     2. ``MINOR`` version when you add functionality in a backward compatible manner
     3. ``PATCH`` version when you make backward compatible bug fixes
 
+1.3.0-dev0 - Ongoing
+********************
+
+* Added support for Verilator integration.
+  
 
 1.2.0 - 2024-03-16
 ******************
