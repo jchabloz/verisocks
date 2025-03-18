@@ -1,0 +1,36 @@
+{
+    "config": {
+        "prefix": "Vspi_master_tb",
+        "top": "spi_master_tb",
+        "verilog_src_files": [
+            "spi_master_tb.vlt",
+            "../spi_slave.v",
+            "../spi_master.v",
+            "../spi_master_tb.v"
+        ],
+        "cpp_src_files": "test_main.cpp",
+    	"verisocks_root": "../../..",
+        "verilator_path": "/usr/local/bin/verilator",
+        "verilator_root": "/usr/local/share/verilator",
+        "use_tracing": false,
+        "use_fst": true
+    },
+    "variables": {
+        "scalars": [
+            {"path": "spi_master_tb.miso", "type": "uint8",  "width": 1},
+            {"path": "spi_master_tb.toto", "type": "real",   "width": 0},
+            {"path": "spi_master_tb.tutu", "type": "uint32", "width": 32},
+            {"path": "spi_master_tb.i_spi_master.transaction_counter", "type": "uint32", "width": 32}
+        ],
+        "arrays": [
+            {"path": "spi_master_tb.tata", "type": "uint8",  "width": 7, "depth": 12},
+            {"path": "spi_master_tb.i_spi_master.rx_buffer", "type": "uint8",  "width": 8, "depth": 8},
+            {"path": "spi_master_tb.i_spi_master.tx_buffer", "type": "uint8",  "width": 8, "depth": 7}
+        ],
+        "events": [
+            {"path": "spi_master_tb.i_spi_master.start_transaction"},
+            {"path": "spi_master_tb.i_spi_master.end_transaction"}
+        ],
+        "params": []
+    }
+}
