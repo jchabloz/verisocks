@@ -1,4 +1,34 @@
+<%page args = "prefix, variables"/>\
+<%
+VLVT_TYPES = {
+    "uint8":  "VLVT_UINT8",
+    "uint16": "VLVT_UINT16",
+    "uint32": "VLVT_UINT32",
+    "uint64": "VLVT_UINT64",
+    "real":   "VLVT_REAL"
+}
+%>\
+/*
+Copyright (c) 2025 Jérémie Chabloz
 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include "verilated.h"
 #include "vsl.h"
@@ -42,14 +72,20 @@ int main(int argc, char** argv, char**) {
     vsl::VslInteg<${prefix}> vslx{topp.get(), port_number, timeout};
 
     // Register public variables
-	% for var in variables:
-    vslx.register_scalar("main.clk", &topp->main->clk, VLVT_UINT8, 1u);
-    vslx.register_scalar("main.count", &topp->main->count, VLVT_UINT8, 8u);
-	vslx.register_array("main.count_memory", topp->main->count_memory.m_storage,
-		VLVT_UINT8, 8u, 16u);
-	vslx.register_param("main.fclk", &topp->main->fclk, VLVT_REAL, 0u);
-	vslx.register_param("main.int_param", &topp->main->int_param, VLVT_UINT32, 32u);
-	vslx.register_event("main.counter_end", &topp->main->counter_end);
+	% for var in variables['scalars']:
+    vslx.register_scalar("${var['path']}", &topp->${var['path'].replace(".", "->")},
+        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
+    % endfor
+    % for var in variables['arrays']:
+    vslx.register_array("${var['path']}", topp->${var['path'].replace(".", "->")}.m_storage,
+        ${VLVT_TYPES[var['type']]}, ${var['width']}u, ${var['depth']}u);
+    % endfor
+    % for var in variables['params']:
+    vslx.register_param("${var['path']}", &topp->${var['path'].replace(".", "->")},
+        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
+    % endfor
+    % for var in variables['events']:
+    vslx.register_param("${var['path']}", &topp->${var['path'].replace(".", "->")});
 	% endfor
 
     // Run simulation
