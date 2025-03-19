@@ -1,3 +1,6 @@
 `verilator_config
 public -module "spi_master" -var "rx_buffer"
 public -module "spi_master" -var "tx_buffer"
+public -module "spi_master" -var "start_transaction"
+public -module "spi_master" -var "end_transaction"
+public -module "spi_master" -var "transaction_counter"
