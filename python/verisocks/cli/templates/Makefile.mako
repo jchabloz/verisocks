@@ -11,6 +11,7 @@ args = "
 	use_fst = True
 "
 />\
+# Note: This file has been generated from the template ${template_filename}
 #*****************************************************************************
 # Configuration
 #*****************************************************************************
@@ -18,23 +19,23 @@ VERILATOR ?= ${verilator_path}
 VERILATOR_ROOT ?= ${verilator_root}
 VSL_DIR ?= ${verisocks_root}
 
-# Verilator user flags
 % if use_tracing:
 # Setup traceing - use $dump() in testbench
 CPP_USER_FLAGS = -DDUMP_FILE
-
 % if use_fst:
+
 # Using FST traceing (slower due to compression)
 VL_USER_FLAGS = --trace-fst
 VL_USER_FLAGS += -DDUMP_FILE=\"test.fst\"
 USER_LDLIBS = -lz
 % else:
+
 # Using VCD traceing
 VL_USER_FLAGS = --trace
 VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 % endif
-% endif
 
+% endif
 # Design prefix
 VM_PREFIX = ${prefix}
 
