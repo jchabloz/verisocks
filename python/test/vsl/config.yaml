@@ -1,0 +1,39 @@
+config:
+  prefix: Vmain
+  top: main
+  verilog_src_files:
+  - ../test_0.v
+  verisocks_root: ../../..
+  verilator_path: /usr/local/bin/verilator
+  verilator_root: /usr/local/share/verilator
+  use_tracing: false
+  use_fst: false
+
+variables:
+  scalars:
+  - path: main.clk
+    module: main
+    type: uint8
+    width: 1
+  - path: main.count
+    module: main
+    type: uint8
+    width: 8
+  arrays:
+  - path: main.count_memory
+    module: main
+    type: uint8
+    width: 8
+    depth: 16
+  params:
+  - path: main.fclk
+    module: main
+    type: real
+    width: 0
+  - path: main.int_param
+    module: main
+    type: uint32
+    width: 32
+  events:
+  - path: main.counter_end
+    module: main
