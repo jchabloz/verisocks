@@ -123,3 +123,5 @@ clean:
 	$(RM) $(VM_PREFIX)
 	$(RM) *.d
 	$(RM) *.fst *.vcd
+	$(RM) *.log
+	$(RM) -r __pycache__
