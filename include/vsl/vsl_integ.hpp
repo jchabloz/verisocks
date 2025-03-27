@@ -116,7 +116,7 @@ public:
      * @param vltype Variable verilated type
      * @param width Variable width (should be consistent with vltype)
      */
-    void register_scalar(const char* namep, std::any datap,
+    inline void register_scalar(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width) {
             register_variable(namep, datap, vltype, VSL_TYPE_SCALAR, width);
     }
@@ -134,7 +134,7 @@ public:
      * @param vltype Variable verilated type
      * @param width Variable width (should be consistent with vltype)
      */
-    void register_param(const char* namep, std::any datap,
+    inline void register_param(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width) {
             register_variable(namep, datap, vltype, VSL_TYPE_PARAM, width);
     }
@@ -153,7 +153,7 @@ public:
      * @param width Variable width (should be consistent with vltype)
      * @param depth Array depth
      */
-    void register_array(const char* namep, std::any datap,
+    inline void register_array(const char* namep, std::any datap,
         VerilatedVarType vltype, size_t width, size_t depth) {
             register_variable(
                 namep, datap, vltype, VSL_TYPE_ARRAY, width, depth);
@@ -170,7 +170,7 @@ public:
      * how it will be used within Verisocks commands
      * @param eventp Pointer to the event variable in the verilated C++ code
      */
-    void register_event(const char* namep, VlEvent* eventp) {
+    inline void register_event(const char* namep, VlEvent* eventp) {
         register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
     }
 
