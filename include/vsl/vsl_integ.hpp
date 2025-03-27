@@ -101,7 +101,7 @@ public:
      * expecting to receive Verisocks commands to control the Verilated
      * testbench simulation.
      */
-    void run();
+    int run();
 
     /**
      * @brief Register a scalar variable
@@ -328,7 +328,7 @@ VslInteg<T>::~VslInteg() {
 Finite state-machine
 ******************************************************************************/
 template<typename T>
-void VslInteg<T>::run() {
+int VslInteg<T>::run() {
     std::printf("*******************************************\n");
     std::printf("*  __   __       _             _          *\n");
     std::printf("*  \\ \\ / /__ _ _(_)___ ___  __| |__ ___   *\n");
@@ -369,7 +369,7 @@ void VslInteg<T>::run() {
                 fd_server_socket = -1;
                 _is_connected = false;
             }
-            return;
+            return 0;
         case VSL_STATE_ERROR:
         default:
             vs_log_mod_error("vsl",
@@ -379,10 +379,10 @@ void VslInteg<T>::run() {
                 fd_server_socket = -1;
                 _is_connected = false;
             }
-            return;
+            return 1;
         } //switch (_state)
     }
-    return;
+    return 2;
 }
 
 /******************************************************************************

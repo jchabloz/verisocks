@@ -107,7 +107,7 @@ int main(int argc, char** argv, char**) {
     % endif
 
     // Run simulation
-    vslx.run();
+    int retval = vslx.run();
 
-    return 0;
+    return retval;
 }

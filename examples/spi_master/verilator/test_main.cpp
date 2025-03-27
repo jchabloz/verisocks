@@ -82,7 +82,7 @@ int main(int argc, char** argv, char**) {
         &topp->spi_master_tb->i_spi_master->end_transaction);
 
     // Run simulation
-    vslx.run();
+    int retval = vslx.run();
 
-    return 0;
+    return retval;
 }

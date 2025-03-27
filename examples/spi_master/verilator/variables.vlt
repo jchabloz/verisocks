@@ -1,3 +1,4 @@
+//Note: This file has been generated from the template templates/variables.vlt.mako
 `verilator_config
 public -module "spi_master" -var "transaction_counter"
 public -module "spi_master" -var "rx_buffer"

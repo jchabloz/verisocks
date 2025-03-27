@@ -1,11 +1,10 @@
+# Note: This file has been generated from the template templates/Makefile.mako
 #*****************************************************************************
 # Configuration
 #*****************************************************************************
 VERILATOR ?= /usr/local/bin/verilator
 VERILATOR_ROOT ?= /usr/local/share/verilator
 VSL_DIR ?= ../../..
-
-# Verilator user flags
 
 # Design prefix
 VM_PREFIX = Vspi_master_tb

@@ -87,7 +87,7 @@ int main(int argc, char** argv, char**) {
         &topp->main->counter_end);
 
     // Run simulation
-    vslx.run();
+    int retval = vslx.run();
 
-    return 0;
+    return retval;
 }
