@@ -33,6 +33,16 @@ connection requests from clients over a classical (BSD) TCP socket. As long as
 the server is running, it will accept requests which will then trigger
 different actions on the simulator via the VPI interface.
 
+When using the provided Verilator integration C++ API, the architecture can
+rather be described by the diagram below.
+
+.. figure:: ../_static/diagrams/verisocks_architecture_vsl.svg
+
+The server-side of Verisocks is here directly run from the top-level C++
+testbench instead of being launched as a PLI application. The Verisocks TCP
+socket interface is exactly the same as when using VPI with the same commands
+(some minor deviations can be observed and are documented later), allowing to
+reuse the same client code with either server-side implementation.
 
 .. _sec_architecture_socket:
 
