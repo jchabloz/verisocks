@@ -33,8 +33,8 @@ connection requests from clients over a classical (BSD) TCP socket. As long as
 the server is running, it will accept requests which will then trigger
 different actions on the simulator via the VPI interface.
 
-When using the provided Verilator integration C++ API, the architecture can
-rather be described by the diagram below.
+When using the provided :ref:`Verilator integration C++ API <sec_vsl_api>`, the
+architecture can rather be described by the diagram below.
 
 .. figure:: ../_static/diagrams/verisocks_architecture_vsl.svg
 
