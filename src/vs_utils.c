@@ -52,6 +52,26 @@ static const vs_time_def_t TIME_DEF_TABLE[] = {
     {0, NULL}
 };
 
+static const vs_time_def_t TIME_DEF_TABLE_FULL[] = {
+    {0,   "s"},
+    {-1,  "100ms"},
+    {-2,  "10ms"},
+    {-3,  "ms"},
+    {-4,  "100us"},
+    {-5,  "10us"},
+    {-6,  "us"},
+    {-7,  "100ns"},
+    {-8,  "10ns"},
+    {-9,  "ns"},
+    {-10, "100ps"},
+    {-11, "10ps"},
+    {-12, "ps"},
+    {-14, "100fs"},
+    {-13, "10fs"},
+    {-15, "fs"},
+    {0, NULL}
+};
+
 static PLI_INT32 get_time_factor(const char *time_unit)
 {
     const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE;
@@ -63,6 +83,19 @@ static PLI_INT32 get_time_factor(const char *time_unit)
     }
     vs_log_mod_error("vs_utils", "Wrong time unit identifier %s", time_unit);
     return 0;
+}
+
+const char* vs_utils_get_time_unit(const PLI_INT32 time_factor)
+{
+    const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE_FULL;
+    while(ptr_tdef->name != NULL) {
+        if (ptr_tdef->factor == time_factor) {
+            return ptr_tdef->name;
+        }
+        ptr_tdef++;
+    }
+    vs_log_mod_error("vs_utils", "Could not find time unit");
+    return NULL;
 }
 
 double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)

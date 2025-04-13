@@ -111,6 +111,14 @@ PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value);
  */
 PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key);
 
+/**
+ * @brief Returns time unit based on integer time factor
+ *
+ * @param time_factor Integer time factor
+ * @return Pointer to null-terminated string
+ */
+const char* vs_utils_get_time_unit(const PLI_INT32 time_factor);
+
 typedef struct s_vs_time_def {
     int factor;
     const char *name;

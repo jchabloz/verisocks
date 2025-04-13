@@ -94,6 +94,25 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
+
+    PLI_INT32 time_unit;
+    time_unit = vpi_get(vpiTimeUnit, NULL);
+    if (NULL == cJSON_AddStringToObject(
+        p_msg, "time_unit", vs_utils_get_time_unit(time_unit))
+    ) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+
+    PLI_INT32 time_precision;
+    time_precision = vpi_get(vpiTimePrecision, NULL);
+    if (NULL == cJSON_AddStringToObject(
+        p_msg, "time_precision", vs_utils_get_time_unit(time_precision))
+    ) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
