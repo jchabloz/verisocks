@@ -142,14 +142,14 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
         handle_error();
         return;
     }
-    if (nullptr == cJSON_AddNumberToObject(p_msg, "time_unit",
-                                           vx.p_context->timeunit())) {
+    if (nullptr == cJSON_AddStringToObject(p_msg, "time_unit",
+        vx.p_context->timeunitString())) {
         vs_log_mod_error("vsl", "Could not add number to object");
         handle_error();
         return;
     }
-    if (nullptr == cJSON_AddNumberToObject(p_msg, "time_precision",
-                                           vx.p_context->timeprecision())) {
+    if (nullptr == cJSON_AddStringToObject(p_msg, "time_precision",
+        vx.p_context->timeprecisionString())) {
         vs_log_mod_error("vsl", "Could not add number to object");
         handle_error();
         return;
