@@ -222,6 +222,17 @@ def test_run_for_time(vs):
     prev_sim_time = answer["time"]
 
 
+def test_run_to_next(vs):
+    """Tests Verisocks run(cb="to_next") function"""
+
+    # To next
+    answer = vs.run(cb="to_next")
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="sim_time")
+    assert answer["type"] == "result"
+    assert answer["time"] == pytest.approx(0.49505e-6)
+
+
 def test_run_until_time(vs):
     """Tests Verisocks run(cb="until_time") function"""
 

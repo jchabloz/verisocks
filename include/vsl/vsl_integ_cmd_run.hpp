@@ -154,6 +154,37 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
 }
 
 template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(run_to_next) {
+
+    /* Error handler lambda function */
+    auto handle_error = [&]() {
+        vs_log_mod_warning(
+            "vsl", "Error processing command run(to_next) - Discarding");
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command run(to_next) - Discarding");
+        vx._state = VSL_STATE_WAITING;
+    };
+
+    vs_log_mod_info("vsl", "Command \"run(cb=to_next)\" received.");
+
+    /* Check if next time slot exists */
+    if (!vx.p_model->eventsPending()) {
+        handle_error();
+        return;
+    }
+
+    uint64_t cb_time = vx.p_model->nextTimeSlot();
+    if (0 > vx.register_time_callback(cb_time)) {
+        handle_error();
+        return;
+    }
+
+    /* Return control to simulation loop */
+    vx._state = VSL_STATE_SIM_RUNNING;
+    return;
+}
+
+template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
 
     /* Error handler lambda function */
