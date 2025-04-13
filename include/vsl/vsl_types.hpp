@@ -71,7 +71,7 @@ public:
 
     /* Constructor */
     VslVar(const char* namep, std::any datap, VerilatedVarType vltype,
-        VslType type, size_t dims, size_t width, size_t depth) : 
+        VslType type, size_t dims, size_t width, size_t depth) :
         namep {namep}, datap {datap}, vltype {vltype}, type {type},
         dims {dims}, width {width}, depth {depth} {};
 
@@ -84,19 +84,19 @@ public:
      * and 0.0f if it is not.
      * In case of a non-scalar variable, the value 0.0f is returned by default.
      * It is expected that this has been checked before calling this function.
-     * 
+     *
      * @return Variable numeric value as a double
      */
     double get_value();
 
     /**
      * @brief Returns the value of an array variable at a given index
-     * 
+     *
      * If the variable is an array, the function returns the numerical value of
      * the array that is located at the index.
      * If the variable is not an array, the value 0.0f is returned by default.
      * It is expected that this has been checked before calling this function.
-     * 
+     *
      * @param index Index of the value to be returned
      * @return Variable numeric value as a double
      */
@@ -108,7 +108,7 @@ public:
      * @return Returns 0 in case of success, -1 otherwise
      */
     int set_value(double value);
-    
+
     /**
      * @brief Sets the value of an array variable at a given index
      * @param value Value to be set
@@ -119,12 +119,12 @@ public:
 
     /**
      * @brief Sets a full array from a cJSON array object
-     * 
+     *
      * @param p_obj Pointer to cJSON array object
      * @return Returns 0 in case of success, -1 otherwise
      */
     int set_array_variable_value(cJSON* p_obj);
-    
+
     /**
      * @brief Add the value of a scalar variable to a cJSON object
      * @param p_msg Pointer to cJSON message object
@@ -132,7 +132,7 @@ public:
      * @return Returns 0 in case of success, -1 otherwise
      */
     int add_value_to_msg(cJSON* p_msg, const char* key);
-    
+
     /**
      * @brief Add an array variable to a cJSON object
      * @param p_msg Pointer to cJSON message object
@@ -140,13 +140,13 @@ public:
      * @return Returns 0 in case of success, -1 otherwise
      */
     int add_array_to_msg(cJSON* p_msg, const char* key);
-        
+
     /**
      * @brief Add a sub-range of an array variable to a cJSON object
-     * 
+     *
      * If the length of the specified sub-range is 1, the corresponding value
      * is added to the cJSON objet as a numerical value and not an array.
-     * 
+     *
      * @param p_msg Pointer to cJSON message object
      * @param key Key to be used in the cJSON object
      * @param range Sub-range definition
@@ -225,7 +225,7 @@ public:
     /**
      * @brief Adds a variable to the variable map with the specified
      * properties.
-     * 
+     *
      * @param namep The name of the variable.
      * @param datap The data associated with the variable, stored as std::any.
      * @param vltype The type of the variable as defined by VerilatedVarType.
@@ -242,10 +242,10 @@ public:
 
     /**
      * @brief Checks if a variable exists in the variable map.
-     * 
+     *
      * This function checks whether a given string path exists as a key in the
      * var_map.
-     * 
+     *
      * @param str_path The string path to check in the var_map.
      * @return true if the string path exists in the var_map, false otherwise.
      */
