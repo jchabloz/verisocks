@@ -9,8 +9,12 @@ This section describes how to use Verisocks with Verilator to produce a compact
 and efficient model for your hardware that can be interfaced using the
 Verisocks commands.
 
-With the current version of the provided API, it is assumed that the verilation
-has been performed using the :code:`--timing` option.
+With the current version (|version|) of the provided API, the following
+assumptions are made:
+
+* the verilog sources contain all the necessary stimuli to generate all
+  required clocks and other timed events for the simulation to proceed
+* the verilation is performed using the :code:`--timing` option of verilator
 
 
 .. toctree::
@@ -18,4 +22,4 @@ has been performed using the :code:`--timing` option.
 
     vsl_api
     vsl_wizard
-    vsl_examples
+

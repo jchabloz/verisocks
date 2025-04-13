@@ -19,8 +19,13 @@ version numbering system (tries and) follows the `semantic versioning
 1.3.0-dev0 - Ongoing
 ********************
 
-* Added support for Verilator integration.
-  
+* Added an :ref:`API <sec_vsl_api>` to support integrating Verisocks with
+  Verilator, including full documentation
+* Included a :ref:`CLI wizard script <sec_vsl_wizard>` to Python package in
+  order to facilitate the creation of top-level ``C++`` code to use Verisocks
+  with Verilated code
+* Modified the command :ref:`get(sim_info) <sec_tcp_cmd_get>` to return
+  ``time_unit`` and ``time_precision`` information
 
 1.2.0 - 2024-03-16
 ******************
