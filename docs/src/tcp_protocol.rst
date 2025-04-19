@@ -1,6 +1,8 @@
 .. sectionauthor:: Jérémie Chabloz
 .. role:: json(code)
     :language: json
+.. role:: verilog(code)
+    :language: verilog
 
 .. _sec_tcp_protocol:
 
@@ -301,11 +303,25 @@ This command can be used to get pieces of information from the simulator.
 
     * :json:`"path":` (string): Path to the verilog variable
 
+  For the :json:`"path":` field, selecting only a specific index of an array is
+  also possible by using the :code:`[]` operator, e.g.
+  :json:`"<path_to_array>[4]"`. The Verilator integration API even supports
+  sub-ranges, such as e.g. :json:`"<path_to_array>[6:3]"` or
+  :json:`"<path_to_array>[3:6]"`.
+
 * Returned frame (for :json:`"sel": "sim_info"`):
 
   * :json:`"type": "result"`
   * :json:`"product":` (string): Simulator product name
   * :json:`"version":` (string): Simulator version
+  * :json:`"time_unit":` (string): Simulator time unit
+  * :json:`"time_precision":` (string): Simulator time precision
+
+  The Verilator integration API version of Verisocks further includes the
+  following fields:
+
+  * :json:`"model_name":` (string): Model name
+  * :json:`"model_hier_name":` (string): Model top instance name
 
 * Returned frame (for :json:`"sel": "sim_time"`):
 
@@ -315,13 +331,16 @@ This command can be used to get pieces of information from the simulator.
 * Returned frame (for :json:`"sel": "value"`):
 
   * :json:`"type": "result"`
-  * :json:`"value":` (number or array): Value for the queried variable
+  * :json:`"value":` (number or array): Value for the queried variable.
 
 * Returned frame (for :json:`"sel": "type"`):
 
   * :json:`"type": "result"`
   * :json:`"vpi_type":` (number): Value for the queried variable's VPI type
     (see VPI objects types definitions in IEEE 1364-2001)
+
+  Note that this selection value is currently not supported by the Verilator
+  integration API version of Verisocks. A warning message will be returned.
 
 With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.get() <verisocks.verisocks.Verisocks.get>`
@@ -342,6 +361,12 @@ This command can be used to forcefully set the value of a simulator variable.
     corresponds to a verilog named event, this argument is not required. If the
     path corresponds to a memory array, this argument needs to be provided as
     an array of the same length.
+
+  For the :json:`"path":` field, selecting only a specific index of an array is
+  also possible by using the :code:`[]` operator, e.g.
+  :json:`"<path_to_array>[4]"`. The Verilator integration API even supports
+  sub-ranges, such as e.g. :json:`"<path_to_array>[6:3]"` or
+  :json:`"<path_to_array>[3:6]"`.
 
 * Returned frame (normal case):
 

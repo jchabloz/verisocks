@@ -1,13 +1,32 @@
-/**
- * @file vs_utils.c
- * @author jchabloz
- * @brief Utilities for Verisocks VPI
- * @version 0.1
- * @date 2022-09-30
- * 
- * @copyright Copyright (c) 2022
- * 
- */
+/**************************************************************************//**
+@file vs_utils.c
+@author jchabloz
+@brief Utilities for Verisocks VPI
+@date 2022-09-30
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <math.h>
 #include <string.h>
@@ -33,6 +52,26 @@ static const vs_time_def_t TIME_DEF_TABLE[] = {
     {0, NULL}
 };
 
+static const vs_time_def_t TIME_DEF_TABLE_FULL[] = {
+    {0,   "s"},
+    {-1,  "100ms"},
+    {-2,  "10ms"},
+    {-3,  "ms"},
+    {-4,  "100us"},
+    {-5,  "10us"},
+    {-6,  "us"},
+    {-7,  "100ns"},
+    {-8,  "10ns"},
+    {-9,  "ns"},
+    {-10, "100ps"},
+    {-11, "10ps"},
+    {-12, "ps"},
+    {-14, "100fs"},
+    {-13, "10fs"},
+    {-15, "fs"},
+    {0, NULL}
+};
+
 static PLI_INT32 get_time_factor(const char *time_unit)
 {
     const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE;
@@ -44,6 +83,19 @@ static PLI_INT32 get_time_factor(const char *time_unit)
     }
     vs_log_mod_error("vs_utils", "Wrong time unit identifier %s", time_unit);
     return 0;
+}
+
+const char* vs_utils_get_time_unit(const PLI_INT32 time_factor)
+{
+    const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE_FULL;
+    while(ptr_tdef->name != NULL) {
+        if (ptr_tdef->factor == time_factor) {
+            return ptr_tdef->name;
+        }
+        ptr_tdef++;
+    }
+    vs_log_mod_error("vs_utils", "Could not find time unit");
+    return NULL;
 }
 
 double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)
@@ -58,7 +110,7 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)
 
     double time_value = NAN;
     if (vpiSimTime == time.type) {
-	    PLI_UINT64 time_value_int =
+        PLI_UINT64 time_value_int =
             (PLI_UINT64) time.low + ((PLI_UINT64) time.high << 32u);
         time_value =
             time_value_int * pow(10.0, time_precision - time_factor);
@@ -99,7 +151,7 @@ typedef struct s_obj_format {
     PLI_INT32 format;
 } obj_format_t;
 
-static obj_format_t obj_format_table[] = {
+static const obj_format_t obj_format_table[] = {
     {vpiNet,            vpiIntVal},
     {vpiReg,            vpiIntVal},
     {vpiIntegerVar,     vpiIntVal},
@@ -114,7 +166,7 @@ static obj_format_t obj_format_table[] = {
 PLI_INT32 vs_utils_get_format(vpiHandle h_obj)
 {
     PLI_INT32 obj_type = vpi_get(vpiType, h_obj);
-    obj_format_t *ptr = obj_format_table;
+    const obj_format_t *ptr = obj_format_table;
     while (ptr->format != vpiUndefined) {
         if (obj_type == ptr->obj_type) {
             return ptr->format;

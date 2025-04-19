@@ -9,10 +9,11 @@ test/*.xml
 *.swp
 *.vvp
 tags
-Makefile
+/Makefile
 include/vpi_config.h
 *.fst
 obj_dir/
+vl_obj_dir/
 cvcsim
 
 # autoconf files

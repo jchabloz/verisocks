@@ -20,7 +20,7 @@ VS_TIMEOUT = 2
 
 # Expectations
 sim_info_product = "Icarus Verilog"
-sim_info_version = r"1[0-2]\.[0-9]+"
+sim_info_version = r"1[0-3]\.[0-9]+"
 
 
 def setup_test(port):
@@ -135,6 +135,10 @@ def test_get_value(vs):
         96, 97, 98, 99, 100, 85, 86, 87,
         88, 89, 90, 91, 92, 93, 94, 95]
 
+    answer = vs.get(sel="value", path="main.count_memory[3]")
+    assert answer["type"] == "result"
+    assert answer["value"] == 99
+
     # Error case: wrong path
     with pytest.raises(VerisocksError):
         answer = vs.get(sel="value", path="wrong_path")
@@ -224,6 +228,17 @@ def test_run_for_time(vs):
     prev_sim_time = answer["time"]
 
 
+def test_run_to_next(vs):
+    """Tests Verisocks run(cb="to_next") function"""
+
+    # To next
+    answer = vs.run(cb="to_next")
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="sim_time")
+    assert answer["type"] == "result"
+    assert answer["time"] == pytest.approx(0.49505e-6)
+
+
 def test_run_until_time(vs):
     """Tests Verisocks run(cb="until_time") function"""
 
@@ -304,9 +319,9 @@ def test_set(vs):
 
     answer = vs.set(path="main.count_memory[6]", value=37)
     assert answer["type"] == "ack"
-    answer = vs.get(sel="value", path="main.count_memory")
+    answer = vs.get(sel="value", path="main.count_memory[6]")
     assert answer["type"] == "result"
-    assert answer["value"][6] == 37
+    assert answer["value"] == 37
 
     # Set an event
     answer = vs.set(path="main.counter_end")

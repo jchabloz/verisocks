@@ -1,7 +1,10 @@
 # PlantUML diagrams makefile
 
 OUT_DIR = ../_static/diagrams
-diagrams = verisocks_architecture.puml verisocks_exec_focus.puml
+diagrams = \
+	verisocks_architecture.puml \
+	verisocks_architecture_vsl.puml \
+	verisocks_exec_focus.puml
 
 JAVA = /usr/bin/java
 PLANTUML_JAR = $(HOME)/Downloads/install/plantuml.jar

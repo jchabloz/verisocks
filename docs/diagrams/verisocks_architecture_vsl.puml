@@ -1,0 +1,63 @@
+@startuml verisocks_architecture_vsl
+' title Verisocks architecture overview - Verilator integration
+' footer "Copyright (c) Jérémie Chabloz - 2025"
+
+!include <tupadr3/font-awesome-5/server>
+!include <tupadr3/font-awesome-5/python>
+!include <tupadr3/font-awesome-5/robot>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/cogs>
+!include <tupadr3/font-awesome-5/file_code>
+!include <tupadr3/font-awesome-5/code>
+!include <tupadr3/font-awesome-5/microchip>
+
+skinparam NoteBackgroundColor AliceBlue
+skinparam ComponentStyle rectangle
+skinparam DefaultFontName Helvetica
+    
+file "<$database>\nTB\nconfig" as cfg_tb
+file "<$database>\nDUT\nconfig" as cfg_dut
+file "<$file_code>\nFirmware" as fw
+
+frame "C++ testbench code" as sim {
+    rectangle "<$server>\nServer" as tcp_server
+    rectangle "Verilated code" as vl {
+        rectangle "<$microchip>\nDUT" as dut
+    }
+}
+
+cfg_tb .right.> sim
+cfg_dut .up.> dut
+
+frame "Test framework" as client {
+    [<$python>\nClient] as tcp_client
+    [<$robot>\nTest\nframework] as tcms
+}
+dut <-> tcp_server
+tcp_client <-> tcp_server : TCP/IP
+
+note top of tcp_client
+Any language or tool allowing
+usage of TCP sockets can be
+used to write a suitable client
+endnote
+
+note bottom of tcms
+Test case management system,
+automated or manual, such as
+Robot, pytest, Kiwi, etc.
+endnote
+
+note bottom of tcp_server
+C program using
+BSD socket.
+Only accepts a single
+connection at a time.
+endnote
+
+tcms <-left-> tcp_client
+fw .up.> dut
+
+' tcp_server <-> tcp_client : TCP/IP
+
+@enduml

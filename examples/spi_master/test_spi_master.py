@@ -14,17 +14,19 @@ LIBVPI = "../../build/verisocks.vpi"  # Relative path to this file!
 VS_TIMEOUT = 10
 SRC = ["spi_master.v", "spi_slave.v", "spi_master_tb.v"]
 
+cwd = os.path.dirname(__file__)
+dump_file = os.path.join(cwd, "spi_master_tb.fst")
 
 def setup_test():
     setup_sim(
         LIBVPI,
         *SRC,
-        cwd=os.path.dirname(__file__),
+        cwd=cwd,
         vvp_filepath="spi_master_tb",
         ivl_args=[
             f"-DVS_NUM_PORT={PORT}",
             f"-DVS_TIMEOUT={VS_TIMEOUT}",
-            "-DDUMP_FILE=\"spi_master_tb.fst\""
+            f"-DDUMP_FILE=\"{dump_file}\""
         ]
     )
 

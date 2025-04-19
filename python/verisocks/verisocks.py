@@ -114,6 +114,12 @@ class Verisocks:
             delay = self.connect_delay
 
         if not self._connected:
+
+            if self.sock is None:
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.sock.setblocking(True)
+                self.sock.settimeout(self._timeout)
+
             logging.info(f"Attempting connection to {self.address}")
             trial = 0
             while trial < trials:
@@ -498,7 +504,7 @@ Still {self._rx_expected} messages expected.")
         """
         return self.send(command="info", value=value)
 
-    def get(self, sel, path=""):
+    def get(self, sel, path=None):
         """Sends a :keyword:`get <sec_tcp_cmd_get>` command request to the
         Verisocks server.
 
@@ -526,7 +532,9 @@ Still {self._rx_expected} messages expected.")
         Returns:
             JSON object: Content of returned message
         """
-        return self.send(command="get", sel=sel, path=path)
+        if path:
+            return self.send(command="get", sel=sel, path=path)
+        return self.send(command="get", sel=sel)
 
     def finish(self, timeout=None):
         """Sends a :keyword:`finish <sec_tcp_cmd_finish>` command to the

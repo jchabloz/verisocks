@@ -5,8 +5,27 @@ Release notes
 #############
 
 Releases of documentation and code are using the same version numbers. The
-version numbering system follows the `semantic versioning
-<https://semver.org/>`_ principles.
+version numbering system (tries and) follows the `semantic versioning
+<https://semver.org/>`_ principles:
+
+.. note::
+
+  Given a version number ``MAJOR.MINOR.PATCH``, increment the:
+
+    1. ``MAJOR`` version when you make incompatible API changes
+    2. ``MINOR`` version when you add functionality in a backward compatible manner
+    3. ``PATCH`` version when you make backward compatible bug fixes
+
+1.3.0 - 2025-04-19
+******************
+
+* Added an :ref:`API <sec_vsl_api>` to support integrating Verisocks with
+  Verilator, including full documentation
+* Included a :ref:`CLI wizard script <sec_vsl_wizard>` to Python package in
+  order to facilitate the creation of top-level ``C++`` code to use Verisocks
+  with Verilated code
+* Modified the command :ref:`get(sim_info) <sec_tcp_cmd_get>` to return
+  ``time_unit`` and ``time_precision`` information
 
 1.2.0 - 2024-03-16
 ******************

@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    contentStyleType="text/css"
-   height="684px"
+   data-diagram-type="DESCRIPTION"
+   height="710px"
    preserveAspectRatio="none"
-   style="width:897px;height:684px;background:#FFFFFF00;"
+   style="width:896px;height:710px;background:#FFFFFF;"
    version="1.1"
-   viewBox="0 0 897 684"
-   width="897px"
+   viewBox="0 0 896 710"
+   width="896px"
    zoomAndPan="magnify"
-   id="svg41"
+   id="svg44"
    sodipodi:docname="verisocks_architecture.svg"
-   inkscape:version="1.3.1 (9b9bdc1480, 2023-11-25, custom)"
+   inkscape:version="1.4 (1:1.4+202410161351+e7c3feb100)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <sodipodi:namedview
-     id="namedview41"
+     id="namedview44"
      pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
+     bordercolor="#000000"
+     borderopacity="0.25"
      inkscape:showpageshadow="2"
      inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="true"
+     inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     showgrid="false"
-     inkscape:zoom="0.92530658"
-     inkscape:cx="448.5"
-     inkscape:cy="341.50843"
+     inkscape:zoom="1.2408451"
+     inkscape:cx="448.48467"
+     inkscape:cy="354.99999"
      inkscape:window-width="1920"
-     inkscape:window-height="1016"
+     inkscape:window-height="1131"
      inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg41" />
+     inkscape:current-layer="svg44" />
   <defs
      id="defs1" />
   <rect
-     fill="none"
-     height="202"
+     fill="transparent"
+     height="211"
      rx="2.5"
      ry="2.5"
      style="stroke:#181818;stroke-width:1;fill:#ffffff"
-     width="149"
-     x="438"
-     y="140.5"
+     width="148"
+     x="447.61182"
+     y="149.5"
      id="rect1" />
   <path
-     d="m 561,140.5 v 9.2969 l -10,10 H 438"
-     fill="none"
-     style="stroke:#181818;stroke-width:1"
+     d="m 561.9814,149.5 v 12.0679 l -10,10 H 447.6118"
+     fill="transparent"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
      id="path1" />
   <text
      fill="#000000"
@@ -58,47 +58,46 @@
      font-size="14px"
      font-weight="bold"
      lengthAdjust="spacing"
-     textLength="113"
-     x="441"
-     y="154.4951"
-     id="text1">PLI application</text>
-  <g
-     id="cluster_PLI routine">
-    <rect
-       fill="none"
-       height="135"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:1"
-       width="101"
-       x="462"
-       y="183.5"
-       id="rect2" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       font-weight="bold"
-       lengthAdjust="spacing"
-       textLength="85"
-       x="470"
-       y="198.4951"
-       id="text2">PLI routine</text>
-  </g>
+     textLength="104.3696"
+     x="449"
+     y="165.4659"
+     id="text1"
+     transform="translate(1.6118048)">PLI application</text>
   <rect
-     fill="none"
-     height="421.5"
+     fill="transparent"
+     height="141"
      rx="2.5"
      ry="2.5"
      style="stroke:#181818;stroke-width:1;fill:#ffffff"
-     width="324"
-     x="90"
-     y="108"
+     width="100"
+     x="471.61182"
+     y="195.5"
+     id="rect2" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     font-weight="bold"
+     lengthAdjust="spacing"
+     textLength="77.825699"
+     x="481.0871"
+     y="212.4659"
+     id="text2"
+     transform="translate(1.6118048)">PLI routine</text>
+  <rect
+     fill="transparent"
+     height="434.5"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="332"
+     x="91.611801"
+     y="116"
      id="rect3" />
   <path
-     d="m 226,108 v 9.2969 l -10,10 H 90"
-     fill="none"
-     style="stroke:#181818;stroke-width:1"
+     d="m 223.0473,116 v 12.0679 l -10,10 H 91.611805"
+     fill="transparent"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
      id="path3" />
   <text
      fill="#000000"
@@ -106,60 +105,56 @@
      font-size="14px"
      font-weight="bold"
      lengthAdjust="spacing"
-     textLength="126"
+     textLength="121.4355"
      x="93"
-     y="121.9951"
-     id="text3">Icarus simulator</text>
-  <g
-     id="cluster_tb">
-    <rect
-       fill="none"
-       height="338.5"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:1"
-       width="260"
-       x="122"
-       y="159"
-       id="rect4" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       font-weight="bold"
-       lengthAdjust="spacing"
-       textLength="141"
-       x="181.5"
-       y="173.9951"
-       id="text4">Verilog testbench</text>
-  </g>
-  <g
-     id="cluster_##11">
-    <rect
-       fill="none"
-       height="101"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:1"
-       width="188"
-       x="162"
-       y="210"
-       id="rect5" />
-  </g>
+     y="131.9659"
+     id="text3"
+     transform="translate(1.6118048)">Verilog simulator</text>
   <rect
-     fill="none"
-     height="152"
+     fill="transparent"
+     height="348.5"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="268"
+     x="123.6118"
+     y="170"
+     id="rect4" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     font-weight="bold"
+     lengthAdjust="spacing"
+     textLength="123.5495"
+     x="194.2252"
+     y="186.9659"
+     id="text4"
+     transform="translate(1.6118048)">Verilog testbench</text>
+  <rect
+     fill="transparent"
+     height="106"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
+     width="196"
+     x="163.6118"
+     y="224"
+     id="rect5" />
+  <rect
+     fill="transparent"
+     height="160"
      rx="2.5"
      ry="2.5"
      style="stroke:#181818;stroke-width:1;fill:#ffffff"
      width="227"
-     x="611"
-     y="175"
+     x="619.61182"
+     y="186"
      id="rect6" />
   <path
-     d="m 747,175 v 9.2969 l -10,10 H 611"
-     fill="none"
-     style="stroke:#181818;stroke-width:1"
+     d="m 740.6034,186 v 12.0679 l -10,10 H 619.6118"
+     fill="transparent"
+     style="stroke:#181818;stroke-width:1;fill:#ffffff"
      id="path6" />
   <text
      fill="#000000"
@@ -167,545 +162,569 @@
      font-size="14px"
      font-weight="bold"
      lengthAdjust="spacing"
-     textLength="126"
-     x="614"
-     y="188.9951"
-     id="text6">Test framework</text>
-  <g
-     id="elem_tcp_server">
-    <rect
-       fill="#f1f1f1"
-       height="84.296898"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:0.5"
-       width="68"
-       x="478"
-       y="218.5"
-       id="rect7" />
-    <image
-       height="48"
-       width="48"
-       x="488"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABaklEQVR4Xu2YwW2EMBBF3QIlUAIlIKUBSqAESuCWKyVQAiVwz4USKIEKHP2D0eA/0V6yynwphyft/rW18+UZj+10XVdShgQ1SFCDBDVIOM/z4ziOz4jUsZKBvu9zSik067pm18A4jjQ4KsgSMtB1HQ2Mil2F20DbtjTw3TRNk5dlydu2ZZu+yAZo0zTRHBDGAIIv/w9gCJlgNS+1wxjY9/3LBosYhmF4GIDJel4YAzZYpEzR7Zbp1WYYA6CkTa1Dw2+1DlwDCj2gYFPvNmCXMDJ1kd8fAJyh6pGbEZnn+RE8GVCEBDUeX6RTSL6I5bdR+Ub2FwaQ114Kl6MEzv1eXGEMyB/m5I/Try402DbrOcA14BVSVFwD3lJFxb3UQ1ToBT8+q1gj9YNSFOpYXQNqkCC9AtI1IL8LyfeBiJ34/2nx3cifRl/dB4BXm2EMgF+7kSn0gIJ7J5Z/lQDS70KqkKAGCWqQoAYJanwD4kCpAOYmP2IAAAAASUVORK5CYII="
-       y="228.5"
-       id="image7" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="44"
-       x="488"
-       y="289.49509"
-       id="text7">Server</text>
-  </g>
-  <g
-     id="elem_dut">
-    <rect
-       fill="#f1f1f1"
-       height="84.296898"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:0.5"
-       width="68"
-       x="222"
-       y="389.5"
-       id="rect8" />
-    <image
-       height="48"
-       width="48"
-       x="232"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2ZwY2DMBBFaSElpARKiLQNpARKoITc9koJlJASct8LJVBCKmD1VxrkzPcQW4QdI3F4Ehk5zDywx4RUz+ez2jMU2BsUeEfXddPlcpnO5/NHaZpmGobhW+d7BwWWuF6vU1VVm/J4PH503iUoYNH3PSXbAtwNnXsJClj8x9UXcqYSBSww73Wirbjf78l3gQIWh0AGqwTwZbRKYRzHLy8Bq5aogAw+nU4vJ5O25iGgc2Kv0CKzANqXPhEoSUBASyeB2+32Z1jyHcBnvWPTGoAIer4gg/XJtkQErFpCSMDCQyAFClgcAhmsEsCixSoXPPcBXYuu9UVABut2WlIXatuWROYDXbhQkoAQ3QdgF/tCSQK4yIiFP3poTomI4LkPWLWEkICFh0AKFLA4BDJYJYC+j0UieApgzsdqiQpI4bqdltSF8HCnReYDXbhQkoAQ3QfwnF3XNQ0uSQAXGTUu7gMQCV/5eQpYtYSQgIWHQAoUsDgEMlgtgP4rSMxDAK09VospgEG6E3kuYp0T74S0yHygCxdKEhCi+wAG63dCoDQB1BiuEZpTIiJ4CuBdUKyWEBKw8BBIgQIWh0AGuxeIzXULCljgB7ZOtBWxPzIsKGCBk+pEW4AnUJ17CQosgVsb2ys+RW7xgAIpYJGF7yw/gX5ESIUCe4MCe+MXXfqBkpEkdGIAAAAASUVORK5CYII="
-       y="399.5"
-       id="image8" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="30"
-       x="232"
-       y="460.49509"
-       id="text8">DUT</text>
-  </g>
-  <g
-     id="elem_task">
-    <rect
-       fill="#f1f1f1"
-       height="68.890602"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:0.5"
-       width="156"
-       x="178"
-       y="226"
-       id="rect9" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="88"
-       x="188"
-       y="248.9951"
-       id="text9">User defined</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="116"
-       x="188"
-       y="265.29199"
-       id="text10">system task (PLI)</text>
-    <text
-       fill="#000000"
-       font-family="monospace"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="136"
-       x="188"
-       y="281.5889"
-       id="text11">$verisocks_init()</text>
-  </g>
-  <g
-     id="elem_tcp_client">
-    <rect
-       fill="#f1f1f1"
-       height="84.296898"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:0.5"
-       width="68"
-       x="627"
-       y="218.5"
-       id="rect11" />
-    <image
-       height="48"
-       width="48"
-       x="637"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgUlEQVR4Xu2Yy83iQBCEnQIhEAIhIG0ChEAIhMBtr4RACITAfS+EQAhE4FUh9a9R1Ty6/VqNtIdPQmXTrp5Xtz18Pp+hZ0ToDRF6Q4TeEGEJ3u/3L/B6vX7bb75nKUSYwv1+H8/n87jf78dhGIrg+ul0Gh+Px8gxpiJCBBjZ7XZi1MPxeByXmBkRvODhZgZJYGSjyRwOh9kzIYIXLBszYiOJNc8mW8xdTiJ4ud1uXwNY16kenYXL5fJvErherz8mMBvQLKkI2PwcO4IIXtIE5vA/ARa8YMNi6dSAOTbMbJLA8/n8g/WNUY+As54NM5YAx7d91UKEFBhvVde5WAK50wsaPLAvVwL4Iwdcg1oCgI9pRgRj7ZE3WgkALCn2V00A1ZGDrIUVsloCtZZDBICgHGQtsHm/RjLXUkqNnwgAGXOAtYAxz4yXeiYRvmImwBrY6HsGrLQPRNgiARwQds57ih0oFTwR0j7fA0YPZtLXxxr2HBzTnpE38L7BXrMJfMVMgBy2BLA+8QAY8lA7cUosnoCtSe8SmIt7CYFWEcMI4r4p/f9UbLYZEUBrVG00WokuCfYY+ywm0BpZb/FZCpvxHCL8XMgEMrZOoPbeLIJRaye2TqDURlQTAKVzessESpvXlQBAALxZpee4VVF+WA6uAV68nyBFiMBmc3AlzsFxI4gQgc1OheNGECECG5kKx40gQgQ20gLnOfYU9lDaD3HcCCJEYIMt0p4+LZYcN4IIEaKtRC4BnDgcN4IIEVotRw77cGVLyPsBq4QIUWCGTXppFSkPIkwBnWKrgzUw8ri31F1GEWEu9h0VvRSqKcziN7SlTKeI0Bsi9IYIvSFCb4jQG38BnI1qU7mI2QYAAAAASUVORK5CYII="
-       y="228.5"
-       id="image11" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="39"
-       x="637"
-       y="289.49509"
-       id="text12">Client</text>
-  </g>
-  <g
-     id="elem_tcms">
-    <rect
-       fill="#f1f1f1"
-       height="100.5938"
-       rx="2.5"
-       ry="2.5"
-       style="stroke:#181818;stroke-width:0.5"
-       width="92"
-       x="730"
-       y="210"
-       id="rect12" />
-    <image
-       height="48"
-       width="48"
-       x="740"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2YwY3CMBBF0wIlUAIlIG0DlEAJKYHbXimBEiiBOxdKoIRUkNVfyZH3f9uZCDvSaHN4IvqMPfMTx2PohmHoPCOCN0TwhgjeEMEbInhDhFq83++v6/U63u/3kb+riQg1QPG73W7suu6Xvu+bmRChBrfbbSoewAzH1EKEGmDpbAaMiFCDzcACRCiBl/N4PP4prhYweT6fR+xgnLeECDlOp5MkbQGMPB6PJ+fPIUKKy+UiiVoCE9YnIUIKTrAG1uYnAoOjAE++BofDoY4B7qprsd/vfRuwbr0iMK4MvF6vbxQMcD1nAOsU7whirTuVdUxsINSUOppPF1woJk/pcQLe6rgDM6m7mjMRx8Y6v9zTBb6IA+cMoLFxMTDEcTHotDwGT4LjQM4AiJ/ENBHe+jhozgCOFNZiAinT6LocB0oGUNPHBgCvSctxg48JubPVKgYAikbX5PElLGNWM9CKzcBm4EP+n4GljQxgJ0FcIMyBz1hH3NwYZrGBOAmwGOCjRJiDO27coXkMYnleUDIQzzFNBHCWwYQgNKmSAZjEmEBoSrirsY643BjLEwg14QaFQ2bSQIqSgZakDn4pRGDcG3D/mxjgbnCC1oRNZA4RUqy9jKw/6IEIObCUcjtGTZb+vSiCBSRoAeexIII3RPCGCN4QwRsieEMEb/wAT/1ne8YdymkAAAAASUVORK5CYII="
-       y="220"
-       id="image12" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="31"
-       x="740"
-       y="280.99509"
-       id="text13">Test</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="72"
-       x="740"
-       y="297.29199"
-       id="text14">framework</text>
-  </g>
-  <g
-     id="elem_cfg_tb">
-    <path
-       d="m 6,212.5 v 95.5938 a 2.5,2.5 0 0 0 2.5,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 220 L 64,210 H 8.5 A 2.5,2.5 0 0 0 6,212.5"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path14" />
-    <path
-       d="m 64,210 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 H 74"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path15" />
-    <image
-       height="48"
-       width="48"
-       x="16"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII="
-       y="220"
-       id="image15" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="19"
-       x="16"
-       y="280.99509"
-       id="text15">TB</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="42"
-       x="16"
-       y="297.29199"
-       id="text16">config</text>
-  </g>
-  <g
-     id="elem_cfg_dut">
-    <path
-       d="m 167,579 v 95.5938 a 2.5,2.5 0 0 0 2.5,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 586.5 l -10,-10 H 169.5 A 2.5,2.5 0 0 0 167,579"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path16" />
-    <path
-       d="m 225,576.5 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path17" />
-    <image
-       height="48"
-       width="48"
-       x="177"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2Zy43CQAyG0wIlUAIlIG0DlJASKIHbXimBEiiB+14ogRKoYFZfJK8ie5xMYJJhtDl80spkHr89D4+3eT6fTc0YQ20YwxRut9vP5XIJp9MptG0bDodD2O/3YbfbdWy327+/sQPfHI/HcD6fw/V6DY/H40v3OwVj8GAgJstEmVjTNFlBHI7AKXrsIYxBg5fwmh5wTjabTRellOgYg3C/378Jve58aYiKntuoAMKoOyoJy0vPcVAAIdSdlMaLhDGw7nTjT4B9qOdalQBvGRnDKmAmkgV0xkgHpUneA8BtqzsojXdDG4Ow9O3rwZFONqDnNyoAaFjyNmYljKUTxhCDtILcZI4kTsNmJVPVc/AwBhSzfDzlkpUiiMHeEUV0GYtbdmiZ8BvjaTsYQ/8YJYTe5tHQjkgxGCBSEBt98Y1u60FbWcLJx2jsHsDLeGDISzlAHMsndoC8JUCDIDrsv6wY3Ft2/b4lUv2XHF4eSyCzCkiFSY1NLJUiAnKyCihN9QImJXO5Nl5Okp+UUP2jHj6lrOKlEKMChCoLW7F8RZK4uUqLRHuotOjZjUFOoZRcnE5JJSQlYK1Cv7irC7y6uBtzVh95k3j7wBj0MUpDPK+/mxNE4ZR+pF8WoMOM9xDkhXQqjIeXJQv1jvAsAmIwoDxMWEYIxHvApGSJYQf5P8LUfTSbgKVYBZTm/wjojJEOSjMpG11LixlZS4tQVWlxDMlKlywtDmEMr4Kw3KXFFIyhNoyhNn4B0z5wC5asNCgAAAAASUVORK5CYII="
-       y="586.5"
-       id="image17" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="30"
-       x="177"
-       y="647.49512"
-       id="text17">DUT</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="42"
-       x="177"
-       y="663.79199"
-       id="text18">config</text>
-  </g>
-  <g
-     id="elem_fw">
-    <path
-       d="m 270,587.5 v 79.2969 a 2.5,2.5 0 0 0 2.5,2.5 h 77 a 2.5,2.5 0 0 0 2.5,-2.5 V 595 l -10,-10 h -69.5 a 2.5,2.5 0 0 0 -2.5,2.5"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path18" />
-    <path
-       d="m 342,585 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
-       fill="#f1f1f1"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path19" />
-    <image
-       height="48"
-       width="48"
-       x="280"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACfElEQVR4Xu2YvZEiMRhESYEQCIEQqLoECIEQCAHvXEIgBELAP4cQCIEIuGpDW32vBfODGJarNZ5BS2i6ZzSfNJpdr9fZJxPCpxEC2e/3t+VyeVssFk+x2+1uZcz1en0Tl8vlF683lBCc0+n0Zzab3Vqw3W6/AuiGSFOwZ0OE4Oju08hYagHEsyFCcKYIIJ4JEYIzVQAxNkQIzpQBxJgQIThTBxBDQ4TgvCOAGBIiBOddAUTfECE47wwgVqvV13/uEYLzqgAyNp/Pe0FPJATnVQFaEoLTMoCmDcdvQQhOywBCU+dwOAyCnkgIrwwwBnoiIfwEaAw9kRB+AlTQqkqtL/REQmgdoJRPbQvGjEdPJITWAbiAsb0LeiIhOC0C6Lu6jKe6zvYu6ImE4DwbgHuZzWYTfbqgJxKC0yeA5rjmd82cjk58PAWSrnHP5/Pv8vsR9ERCcLoCcH8jw97uW4FyROPnQ31C0BMJwXkUoLZXlznv4x8kpe14PP7zP/V5VGZ5DRKCcy9Azbyqjffh0/GPGG7SFOLeRw6vQ0JwagE4r0Vt/vtUkUG2s7wK3Rj2Yx8SgsMArCqCd76g+V363CuftSfBPrweCcFhAKG7zX58eRmU7eItT6BQm0b+JBiSlUbjevuk70Ch9iLXKg1PuL9FFSqw0pSp4hrfEa4Dj8xzrBohOF0BRFmJi1E+mZrBb7MS1/D5XasqQ6EnEoIzJoCXzzH/J/REQnCGGtB08f/XyuJQ6ImE4AwNoDntixPbx0BPJARnaACn9vKOgZ5ICK0CtIKeSAj/VYB7m7ApoScSgqM63mexeRXcU9UIoYb2Lzw1fjV+mvGIED6NED6Nv4OAtZ3fPf9FAAAAAElFTkSuQmCC"
-       y="595"
-       id="image19" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="14px"
-       lengthAdjust="spacing"
-       textLength="62"
-       x="280"
-       y="655.99512"
-       id="text19">Firmware</text>
-  </g>
-  <g
-     id="elem_GMN20">
-    <path
-       d="m 662,404 v 55.3984 H 890 V 414 L 880,404 H 780 L 776,311.29 772,404 H 662"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path20" />
-    <path
-       d="m 880,404 v 10 h 10 l -10,-10"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path21" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="207"
-       x="668"
-       y="421.06689"
-       id="text21">Test case management system,</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="197"
-       x="668"
-       y="436.19971"
-       id="text22">automated or manual, such as</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="148"
-       x="668"
-       y="451.33249"
-       id="text23">Robot, pytest, Kiwi, etc.</text>
-  </g>
-  <g
-     id="elem_GMN23">
-    <path
-       d="m 433.5,396 v 70.5313 h 157 V 406 l -10,-10 H 516 l -4,-93.16 -4,93.16 h -74.5"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path23" />
-    <path
-       d="m 580.5,396 v 10 h 10 l -10,-10"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path24" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="106"
-       x="439.5"
-       y="413.06689"
-       id="text24">C program using</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="78"
-       x="439.5"
-       y="428.19971"
-       id="text25">BSD socket.</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="135"
-       x="439.5"
-       y="443.33249"
-       id="text26">Only accepts a single</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="136"
-       x="439.5"
-       y="458.4653"
-       id="text27">connection at a time.</text>
-  </g>
-  <g
-     id="elem_GMN26">
-    <path
-       d="M 179.5,6 V 61.3984 H 252 l 4,164.4916 4,-164.4916 h 72.5 V 16 l -10,-10 h -143"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path27" />
-    <path
-       d="m 322.5,6 v 10 h 10 l -10,-10"
-       fill="#f0f8ff"
-       style="stroke:#181818;stroke-width:0.5"
-       id="path28" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="113"
-       x="185.5"
-       y="23.0669"
-       id="text28">User-defined task</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="72"
-       x="185.5"
-       y="38.199699"
-       id="text29">called in an</text>
-    <text
-       fill="#000000"
-       font-family="monospace"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="56"
-       x="261.5"
-       y="38.199699"
-       id="text30">initial</text>
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="33"
-       x="185.5"
-       y="53.3325"
-       id="text31">block</text>
-  </g>
-  <g
-     id="link_cfg_tb_tb">
-    <path
-       d="m 74.1,260.5 c 9.245,0 18.49,0 27.7338,0 4.6218,0 9.2434,0 13.8645,0 1.1553,0 2.3105,0 3.4657,0 0.5776,0 1.1552,0 1.7328,0 0.2888,0 0.5776,0 0.8664,0 0.0722,0 -5.8556,0 -5.7834,0"
-       fill="none"
-       id="cfg_tb-to-tb"
-       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
-    <polygon
-       fill="#181818"
-       points="116.9798,260.5 112.9798,264.5 121.9798,260.5 112.9798,256.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon31" />
-  </g>
-  <g
-     id="link_dut_cfg_dut">
-    <path
-       d="M 242.6985,479.3111 C 234.1485,509.3711 224.15,544.55 215.09,576.44"
-       fill="none"
-       id="dut-backto-cfg_dut"
-       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
-    <polygon
-       fill="#181818"
-       points="242.9721,478.3492 245.7252,483.291 244.34,473.54 238.0304,481.1023 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon32" />
-  </g>
-  <g
-     id="link_task_dut">
-    <path
-       d="m 256,301.29 c 0,27.07 0,53.15 0,82.01"
-       fill="none"
-       id="task-dut"
-       style="stroke:#181818;stroke-width:1" />
-    <polygon
-       fill="#181818"
-       points="256,300.29 260,304.29 256,295.29 252,304.29 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon33" />
-    <polygon
-       fill="#181818"
-       points="256,384.3 252,380.3 256,389.3 260,380.3 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon34" />
-  </g>
-  <g
-     id="link_task_tcp_server">
-    <path
-       d="m 340.2,260.5 c 48.08,0 95.27,0 131.77,0"
-       fill="none"
-       id="task-tcp_server"
-       style="stroke:#181818;stroke-width:1" />
-    <polygon
-       fill="#181818"
-       points="339.2,260.5 343.2,256.5 334.2,260.5 343.2,264.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon35" />
-    <polygon
-       fill="#181818"
-       points="472.97,260.5 468.97,264.5 477.97,260.5 468.97,256.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon36" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="20"
-       x="396"
-       y="253.56689"
-       id="text36">VPI</text>
-  </g>
-  <g
-     id="link_tcp_server_tcp_client">
-    <path
-       d="m 552.18,260.5 c 24.23,0 44.6,0 68.8,0"
-       fill="none"
-       id="tcp_server-tcp_client"
-       style="stroke:#181818;stroke-width:1" />
-    <polygon
-       fill="#181818"
-       points="551.18,260.5 555.18,256.5 546.18,260.5 555.18,264.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon37" />
-    <polygon
-       fill="#181818"
-       points="621.98,260.5 617.98,264.5 626.98,260.5 617.98,256.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon38" />
-    <text
-       fill="#000000"
-       font-family="Helvetica"
-       font-size="13px"
-       lengthAdjust="spacing"
-       textLength="39"
-       x="567"
-       y="253.56689"
-       id="text38">TCP/IP</text>
-  </g>
-  <g
-     id="link_tcp_client_tcms">
-    <path
-       d="m 701.14,260.5 c 11.58,0 11.16,0 22.74,0"
-       fill="none"
-       id="tcp_client-tcms"
-       style="stroke:#181818;stroke-width:1" />
-    <polygon
-       fill="#181818"
-       points="700.14,260.5 704.14,256.5 695.14,260.5 704.14,264.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon39" />
-    <polygon
-       fill="#181818"
-       points="724.88,260.5 720.88,264.5 729.88,260.5 720.88,256.5 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon40" />
-  </g>
-  <g
-     id="link_dut_fw">
-    <path
-       d="m 269.302,479.3109 c 9.31,32.72 20.638,72.5791 29.958,105.3791"
-       fill="none"
-       id="dut-backto-fw"
-       style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
-    <polygon
-       fill="#181818"
-       points="269.0284,478.3491 273.9703,481.1017 267.66,473.54 266.2758,483.2911 "
-       style="stroke:#181818;stroke-width:1"
-       id="polygon41" />
-  </g>
+     textLength="110.9916"
+     x="621"
+     y="201.9659"
+     id="text6"
+     transform="translate(1.6118048)">Test framework</text>
+  <rect
+     fill="#f1f1f1"
+     height="87.067902"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:0.5"
+     width="68"
+     x="487.61182"
+     y="233.5"
+     id="rect7" />
+  <image
+     height="48"
+     width="48"
+     x="497.61182"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABWElEQVR4Xu2YsQ2DMBREvQIjMAIjIGUBRmAUurSMwAiMQJ+GERiBCRxdYfTj++kS5Z+U4knJBZR/8tn+djrPMylDghokqEGCGiQcx3Hb9/0ekbpWMtD3fU4phWZZluwaGMeRHo4KUkIGuq6jB6NiR+Ey0LYtPfhtmqbJ8zzndV2zjS/SAG2aJnoHhDGA4sv/AxhCEqzmRTuMgW3bHrZY1DAMw4sBmKzfC2PAFovIQMMo2CXTm5thDIASm1qHht9qHbgGFPaAgo3eZaAMYXTqSX59AHCGWY9sRgTLqq2XDChCghovX6QjJD+J5ZdR+Y3sFwaQay/CpZVA3+/VFcaAfDMn305/9EDjTaSouAa8oYqKe6iHqLAXvL1WsUbqC6Uo1LW6BtQgQXoEpOeA/Cokvw/I78S/MCDfC8l3o9554H+1qIB7Jpa/lQDS90KqkKAGCWqQoAYJajwB+rOpxhtpov4AAAAASUVORK5CYII="
+     y="243.5"
+     id="image7" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="42.153801"
+     x="496"
+     y="306.46591"
+     id="text7"
+     transform="translate(1.6118048)">Server</text>
+  <rect
+     fill="#f1f1f1"
+     height="87.067902"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:0.5"
+     width="68"
+     x="227.6118"
+     y="407.5"
+     id="rect8" />
+  <image
+     height="48"
+     width="48"
+     x="237.6118"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB/UlEQVR4Xu2ZwY2DMBBFaSElpARKiLQNpARKoITc9koJlJASct8LJVBCKmD1VxrkzPcQW4QdI3F4Ehk5zDywx4RUz+ez2jMU2BsUeEfXddPlcpnO5/NHaZpmGobhW+d7BwWWuF6vU1VVm/J4PH503iUoYNH3PSXbAtwNnXsJClj8x9UXcqYSBSww73Wirbjf78l3gQIWh0AGqwTwZbRKYRzHLy8Bq5aogAw+nU4vJ5O25iGgc2Kv0CKzANqXPhEoSUBASyeB2+32Z1jyHcBnvWPTGoAIer4gg/XJtkQErFpCSMDCQyAFClgcAhmsEsCixSoXPPcBXYuu9UVABut2WlIXatuWROYDXbhQkoAQ3QdgF/tCSQK4yIiFP3poTomI4LkPWLWEkICFh0AKFLA4BDJYJYC+j0UieApgzsdqiQpI4bqdltSF8HCnReYDXbhQkoAQ3QfwnF3XNQ0uSQAXGTUu7gMQCV/5eQpYtYSQgIWHQAoUsDgEMlgtgP4rSMxDAK09VospgEG6E3kuYp0T74S0yHygCxdKEhCi+wAG63dCoDQB1BiuEZpTIiJ4CuBdUKyWEBKw8BBIgQIWh0AGuxeIzXULCljgB7ZOtBWxPzIsKGCBk+pEW4AnUJ17CQosgVsb2ys+RW7xgAIpYJGF7yw/gX5ESIUCe4MCe+MXXfqBkpEkdGIAAAAASUVORK5CYII="
+     y="417.5"
+     id="image8" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="28.2379"
+     x="236"
+     y="480.46591"
+     id="text8"
+     transform="translate(1.6118048)">DUT</text>
+  <rect
+     fill="#f1f1f1"
+     height="74.432701"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:0.5"
+     width="163.2881"
+     x="180.1118"
+     y="240"
+     id="rect9" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="84.349701"
+     x="188.5"
+     y="264.96591"
+     id="text9"
+     transform="translate(1.6118048)">User defined</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="109.9136"
+     x="188.5"
+     y="284.03391"
+     id="text10"
+     transform="translate(1.6118048)">system task (PLI)</text>
+  <text
+     fill="#000000"
+     font-family="monospace"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="143.2881"
+     x="188.5"
+     y="301.13101"
+     id="text11"
+     transform="translate(1.6118048)">$verisocks_init()</text>
+  <rect
+     fill="#f1f1f1"
+     height="87.067902"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:0.5"
+     width="68"
+     x="635.61182"
+     y="233.5"
+     id="rect11" />
+  <image
+     height="48"
+     width="48"
+     x="645.61182"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgUlEQVR4Xu2Yy83iQBCEnQIhEAIhIG0ChEAIhMBtr4RACITAfS+EQAhE4FUh9a9R1Ty6/VqNtIdPQmXTrp5Xtz18Pp+hZ0ToDRF6Q4TeEGEJ3u/3L/B6vX7bb75nKUSYwv1+H8/n87jf78dhGIrg+ul0Gh+Px8gxpiJCBBjZ7XZi1MPxeByXmBkRvODhZgZJYGSjyRwOh9kzIYIXLBszYiOJNc8mW8xdTiJ4ud1uXwNY16kenYXL5fJvErherz8mMBvQ0lnxgs3PsSOI4CVNYA7/E2DBCzYslkwNmGPDzCYJPJ/PP9i0GPUIOOvZMGMJcHzbVy1ESIHxVnWdiyWQO72gwQP7ciWAP3LANaglAPiYZkQw1h55o5UAwJJif9UEUB05yFpYIaslUGs5RAAIykHWApv3ayRzLaXU+IkAkDEHWAsY88x4qWcS4StmAqyBjb5nwEr7QIQtEsABYee8p9iBUsETIe3zPWD0YCZ9faxhz8Ex7Rl5A+8b7DWbwFfMBMhhSwDrEw+AIQ+1E6fE4gnYmvQugbm4lxBoFTGMIO6zl5otsNlmRACtUbXRaCW6JNhj7LOYQGtkvcVnKWzGc4jwcyETyNg6gdp7swhGrZ3YOoFSG1FNAJTO6S0TKG1eVwIAAfBmlZ7jVkX5YTm4BnjxfoIUIQKbzcGVOAfHjSBCBDY7FY4bQYQIbGQqHDeCCBHYSAuc59hT2ENpP8RxI4gQgQ22SHv6tFhy3AgiRIi2ErkEcOJw3AgiRGi1HDnsw5UtIe8HrBIiRIEZNumlVaQ8iDAFdIqtDtbAyOPeUncZRYS52HdU9FKopjCL39CWMp0iQm+I0Bsi9IYIvSFCb/wF7Vhqg72YpvUAAAAASUVORK5CYII="
+     y="243.5"
+     id="image11" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="37.673801"
+     x="644"
+     y="306.46591"
+     id="text12"
+     transform="translate(1.6118048)">Client</text>
+  <rect
+     fill="#f1f1f1"
+     height="106.1358"
+     rx="2.5"
+     ry="2.5"
+     style="stroke:#181818;stroke-width:0.5"
+     width="92.169701"
+     x="738.61182"
+     y="224"
+     id="rect12" />
+  <image
+     height="48"
+     width="48"
+     x="748.61182"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACCElEQVR4Xu2YwW0CMRBFtwVKoARKQEoDlEAJlMAtV0qgBErgngslUAIVbPQjeTX5396dFfaSUTg8BX3G9vy11zOkezweXWREiIYI0RAhGiJEQ4RoiFCL+/3+cTqd+svl0vN3NRGhBkh+tVr1Xdf9cDgcmpkQoQbn83lIHqzX61gGcHSsAewGx9RChBq8DcxAhBr8WQN4Obfb7a/kaoEXfb/f97jBeN0xRCix2+1k0RZgt67X6xevX0KEHMfjURZqCUx4d0KEHLzAEniLnwgMWgGefAk2m00dA1xVl8JbvUVgXmXAe/WKwIQycLvdPpEwwOcpAzineEcQ672pvGOsgZRTrjUfPnCimDyn2wX4quMKzOSeasmEjbU6v9zDB3xhA6cMoLBxMjDEcRZUWh6DneA4UDIA7E4ME+Gtt0FTBtBSeJNJ5Eyj6nIcGDOAnJ42APhMetoNbhNKvdUiBgCSRtXk8WN4xixmoBVvA28DT/L/DMwtZAA3CeISaQ78tTripsYwsw3YRYDHALcSaQ6uuLZC8xjE8rygZIBbmGEigF4GE4JUpMYMwCTGJFJRwlO1OuJKYzw7kHLCA0pNZtZAjjEDLck1fjlEYF5loNovsvC/iQG2kxdoTbpEphAhx9LHyHt8gAglcJRKN0ZN5v57UQQPWKAFvI4HEaIhQjREiIYI0RAhGiJE4xtwhmg+E1XpdgAAAABJRU5ErkJggg=="
+     y="234"
+     id="image12" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="27.439899"
+     x="747"
+     y="296.96591"
+     id="text13"
+     transform="translate(1.6118048)">Test</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="72.169701"
+     x="747"
+     y="316.03391"
+     id="text14"
+     transform="translate(1.6118048)">framework</text>
+  <path
+     d="m 7.6118048,226.5 v 101.1358 a 2.5,2.5 0 0 0 2.5000002,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 234 l -10,-10 h -55.5 a 2.5,2.5 0 0 0 -2.5000002,2.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path14" />
+  <path
+     d="m 65.611805,224 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path15" />
+  <image
+     height="48"
+     width="48"
+     x="17.611805"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2YzY0CMQxGpwVKoARKQNoGKIESKIHbXimBEiiB+14ogRKoIKs3klcjO55k2Mxko53Dk5CZJP7s/DjpXq9X1zLG0BrGMIX7/f51vV7D+XwOx+MxHA6HsN/vw26369lutz+/sQPfnE6ncLlcwu12C8/n80P3OwVj8GAgnMVRHOu6rhibzaYXRyAIih57DGPQECWipgedEwQhJic7xiA8Ho9PoqI7XxqEaN+SAkij7qgmBFL7OCqAFOpOauNlwhiYd7rxX4B1qH1tSoA3jYxhFTAT2QJ6Y6SD2mSvAeC01R3UxjuhjUFY+vT1YEunGtD+JQUADSnEdKdLwUxIlRPGEIOyggqydBEXg8VKpap98DAGFDN9POVSlSKIwd4VxdQgu4zFKTs2TfiP8bQdjGG4jZJCb/FoaEemGAwQKYiNvvhGt/WgrUzh7G00dg4QZSIwFqUSII7pE9tAfiVAgyB9s2Jwb9oN+5ZMDW9yOJcqIIsKyAWnUo7lUkVASVYBtWlewKRirtTCK0n2lRKav9QDe3XNQk7wSoikAKHWwxaOpw5GV0CsXpEibo6nRSDbY0+Lnt0YZBfKqcVzHnf1A2+sBNH9DpE7ibcOjEFvozTESf3dnCCKoAwz/bYAnWaihyAvpVNhPKIsVai3hRcREGN4MWEaIZDoAU4Bv7GDTLWp62g2AUuxCqjN/xHQGyMd1GZSNbo+LRZkfVqEpp4WU0hVuuTT4hjG8C4IK/20mIMxtIYxtMY3MbtxxBPq2ZAAAAAASUVORK5CYII="
+     y="234"
+     id="image15" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="16.8839"
+     x="16"
+     y="296.96591"
+     id="text15"
+     transform="translate(1.6118048)">TB</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="40.879799"
+     x="16"
+     y="316.03391"
+     id="text16"
+     transform="translate(1.6118048)">config</text>
+  <path
+     d="m 172.6118,600 v 101.1358 a 2.5,2.5 0 0 0 2.5,2.5 h 63 a 2.5,2.5 0 0 0 2.5,-2.5 V 607.5 l -10,-10 h -55.5 a 2.5,2.5 0 0 0 -2.5,2.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path16" />
+  <path
+     d="m 230.6118,597.5 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path17" />
+  <image
+     height="48"
+     width="48"
+     x="182.6118"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACOUlEQVR4Xu2YzY0CMQxGpwVKoARKQNoGKIESKIHbXimBEiiB+14ogRKoIKs3klcjO55k2Mxko53Dk5CZJP7s/DjpXq9X1zLG0BrGMIX7/f51vV7D+XwOx+MxHA6HsN/vw26369lutz+/sQPfnE6ncLlcwu12C8/n80P3OwVj8GAgnMVRHOu6rhibzaYXRyAIih57DGPQECWipgedEwQhJic7xiA8Ho9PoqI7XxqEaN+SAkij7qgmBFL7OCqAFOpOauNlwhiYd7rxX4B1qH1tSoA3jYxhFTAT2QJ6Y6SD2mSvAeC01R3UxjuhjUFY+vT1YEunGtD+JQUADSnEdKdLwUxIlRPGEIOyggqydBEXg8VKpap98DAGFDN9POVSlSKIwd4VxdQgu4zFKTs2TfiP8bQdjGG4jZJCb/FoaEemGAwQKYiNvvhGt/WgrUzh7G00dg4QZSIwFqUSII7pE9tAfiVAgyB9s2Jwb9oN+5ZMDW9yOJcqIIsKyAWnUo7lUkVASVYBtWlewKRirtTCK0n2lRKav9QDe3XNQk7wSoikAKHWwxaOpw5GV0CsXpEibo6nRSDbY0+Lnt0YZBfKqcVzHnf1A2+sBNH9DpE7ibcOjEFvozTESf3dnCCKoAwz/bYAnWaihyAvpVNhPKIsVai3hRcREGN4MWEaIZDoAU4Bv7GDTLWp62g2AUuxCqjN/xHQGyMd1GZSNbo+LRZkfVqEpp4WU0hVuuTT4hjG8C4IK/20mIMxtIYxtMY3MbtxxBPq2ZAAAAAASUVORK5CYII="
+     y="607.5"
+     id="image17" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="28.2379"
+     x="181"
+     y="670.46588"
+     id="text17"
+     transform="translate(1.6118048)">DUT</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="40.879799"
+     x="181"
+     y="689.53387"
+     id="text18"
+     transform="translate(1.6118048)">config</text>
+  <path
+     d="m 275.6118,609.5 v 82.0679 a 2.5,2.5 0 0 0 2.5,2.5 h 77.2858 a 2.5,2.5 0 0 0 2.5,-2.5 V 617 l -10,-10 h -69.7858 a 2.5,2.5 0 0 0 -2.5,2.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path18" />
+  <path
+     d="m 347.8976,607 v 7.5 a 2.5,2.5 0 0 0 2.5,2.5 h 7.5"
+     fill="#f1f1f1"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path19" />
+  <image
+     height="48"
+     width="48"
+     x="285.61182"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACd0lEQVR4Xu2YwZHiMBRESYEQCIEQqNoECIEQCIHbXAmBEAiB+14IgRCIgKk+aKr3tcDYCANbc3gHWkLutuUvWZPz+Tz5ZEL4NEIg2+32Mp/PL7PZ7CE2m82ljLlcLi/idDr94fX6EoJzOBz+TiaTSwvW6/VPAN0QaQr2aIgQHN19GhlKLYB4NEQIzhgBxCMhQnDGCiCGhgjBGTOAGBIiBGfsAKJviBCcVwQQfUKE4LwqgLg3RAjOKwOIxWLx859rhOA8K4CMTafTu6AnEoLzrAAtCcFpGUDThuO3IASnZQChqbPb7XpBTySEZwYYAj2REH4DNIaeSAi/ASpoVaV2L/REQmgdoJRPbQuGjEdPJITWAbiAsb0LeiIhOC0C6Lu6jKe6zvYu6ImE4DwagHuZ1WoVfbqgJxKCc08AzXHN75o5HZ34eAokXeMej8ev8vsW9ERCcLoCcH8jw97uW4FyROPnQwrRVaHoiYTg3ApQ26vLnPfxD5LStt/v//mf+twKwWuQEJxrAWrmVW28D5+Of8Rwk6YQ1z5yeB0SglMLwHktavPfp4oMsp3lVejGsB/7kBAcBtCjZh/e+YLmd+lzrXzWngT78HokBIcBhO42+/HlZflku3jJEyjUppE/CYZkudS43j7qO1Covci1SsMT7reoQgWGKFPFNb4jb7MOFMpKXIwyVM2gXt63WIlr+PyuVZW+0BMJwRkSwMvnkP8TeiIhOH0NcJ2olc++0BMJwekbQHPaFye2D4GeSAhO3wBO7eUdAj2REFoFaAU9kRD+qwDXNmFjQk8kBEd1/J7F5llwT1UjhBrav/DU+Nn4acYtQvg0Qvg0vgESNbaNoXi88wAAAABJRU5ErkJggg=="
+     y="617"
+     id="image19" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="14px"
+     lengthAdjust="spacing"
+     textLength="62.285801"
+     x="284"
+     y="679.96588"
+     id="text19"
+     transform="translate(1.6118048)">Firmware</text>
+  <path
+     d="m 568.1118,6 v 63.118 h 97.5 l 4,163.982 4,-163.982 H 771.411 V 16 l -10,-10 H 568.1118"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path20" />
+  <path
+     d="m 761.411,6 v 10 h 10 l -10,-10"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path21" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="182.29919"
+     x="572.5"
+     y="24.896999"
+     id="text21"
+     transform="translate(1.6118048)">Any language or tool allowing</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="171.84711"
+     x="572.5"
+     y="42.603001"
+     id="text22"
+     transform="translate(1.6118048)">usage of TCP sockets can be</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="178.59419"
+     x="572.5"
+     y="60.308998"
+     id="text23"
+     transform="translate(1.6118048)">used to write a suitable client</text>
+  <path
+     d="m 678.1118,419.5 v 63.118 H 890.888 V 429.5 l -10,-10 h -92.2762 l -4,-89.43 -4,89.43 h -102.5"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path23" />
+  <path
+     d="m 880.888,419.5 v 10 h 10 l -10,-10"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path24" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="191.7762"
+     x="682.5"
+     y="438.397"
+     id="text24"
+     transform="translate(1.6118048)">Test case management system,</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="185.8092"
+     x="682.5"
+     y="456.103"
+     id="text25"
+     transform="translate(1.6118048)">automated or manual, such as</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="141.3882"
+     x="682.5"
+     y="473.80899"
+     id="text26"
+     transform="translate(1.6118048)">Robot, pytest, Kiwi, etc.</text>
+  <path
+     d="m 447.1118,410.5 v 80.8241 H 596.2399 V 420.5 l -10,-10 h -60.6281 l -4,-89.98 -4,89.98 h -70.5"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path26" />
+  <path
+     d="m 586.2399,410.5 v 10 h 10 l -10,-10"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path27" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="102.6611"
+     x="451.5"
+     y="429.397"
+     id="text27"
+     transform="translate(1.6118048)">C program using</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="71.240097"
+     x="451.5"
+     y="447.103"
+     id="text28"
+     transform="translate(1.6118048)">BSD socket.</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="127.9201"
+     x="451.5"
+     y="464.80899"
+     id="text29"
+     transform="translate(1.6118048)">Only accepts a single</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="128.1281"
+     x="451.5"
+     y="482.51511"
+     id="text30"
+     transform="translate(1.6118048)">connection at a time.</text>
+  <path
+     d="m 187.6118,6 v 63.118 h 70 l 4,170.612 4,-170.612 h 70.2097 V 16 l -10,-10 H 187.6118"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path30" />
+  <path
+     d="m 325.8215,6 v 10 h 10 l -10,-10"
+     fill="#f0f8ff"
+     style="stroke:#181818;stroke-width:0.5"
+     id="path31" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="107.6661"
+     x="192"
+     y="24.896999"
+     id="text31"
+     transform="translate(1.6118048)">User-defined task</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="69.043098"
+     x="192"
+     y="42.603001"
+     id="text32"
+     transform="translate(1.6118048)">called in an</text>
+  <text
+     fill="#000000"
+     font-family="monospace"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="54.786598"
+     x="264.4231"
+     y="43.3461"
+     id="text33"
+     transform="translate(1.6118048)">initial</text>
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="32.396"
+     x="192"
+     y="60.308998"
+     id="text34"
+     transform="translate(1.6118048)">block</text>
+  <path
+     d="m 75.711805,277 c 9.245,0 18.49,0 27.733795,0 4.6218,0 9.2434,0 13.8645,0 1.1553,0 2.3105,0 3.4657,0 0.5776,0 1.1552,0 1.7328,0 0.2888,0 0.5776,0 0.8664,0 0.0722,0 -5.8556,0 -5.7834,0"
+     fill="transparent"
+     id="cfg_tb-to-tb"
+     style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+  <polygon
+     fill="#181818"
+     points="112.9798,273 116.9798,277 112.9798,281 121.9798,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon34"
+     transform="translate(1.6118048)" />
+  <path
+     d="m 248.0711,500.6298 c -8.38,30.07 -18.0093,64.6602 -26.9093,96.6102"
+     fill="transparent"
+     id="dut-backto-cfg_dut"
+     style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+  <polygon
+     fill="#181818"
+     points="241.8007,502.4458 246.7277,499.6665 249.5071,504.5934 248.07,494.85 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon35"
+     transform="translate(1.6118048)" />
+  <path
+     d="m 261.6118,320.06 c 0,27.18 0,52.56 0,81.25"
+     fill="transparent"
+     id="task-dut"
+     style="stroke:#181818;stroke-width:1" />
+  <polygon
+     fill="#181818"
+     points="256,323.06 260,319.06 264,323.06 260,314.06 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon36"
+     transform="translate(1.6118048)" />
+  <polygon
+     fill="#181818"
+     points="264,398.31 260,402.31 256,398.31 260,407.31 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon37"
+     transform="translate(1.6118048)" />
+  <path
+     d="m 349.1618,277 c 48.55,0 95.62,0 132.13,0"
+     fill="transparent"
+     id="task-tcp_server"
+     style="stroke:#181818;stroke-width:1" />
+  <polygon
+     fill="#181818"
+     points="350.55,281 346.55,277 350.55,273 341.55,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon38"
+     transform="translate(1.6118048)" />
+  <polygon
+     fill="#181818"
+     points="476.68,273 480.68,277 476.68,281 485.68,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon39"
+     transform="translate(1.6118048)" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="20.072001"
+     x="403.75"
+     y="269.897"
+     id="text39"
+     transform="translate(1.6118048)">VPI</text>
+  <path
+     d="m 561.9418,277 c 23.91,0 43.66,0 67.53,0"
+     fill="transparent"
+     id="tcp_server-tcp_client"
+     style="stroke:#181818;stroke-width:1" />
+  <polygon
+     fill="#181818"
+     points="563.33,281 559.33,277 563.33,273 554.33,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon40"
+     transform="translate(1.6118048)" />
+  <polygon
+     fill="#181818"
+     points="624.86,273 628.86,277 624.86,281 633.86,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon41"
+     transform="translate(1.6118048)" />
+  <text
+     fill="#000000"
+     font-family="Helvetica"
+     font-size="13px"
+     lengthAdjust="spacing"
+     textLength="40.417"
+     x="574"
+     y="269.897"
+     id="text41"
+     transform="translate(1.6118048)">TCP/IP</text>
+  <path
+     d="m 709.7518,277 c 11.58,0 11.16,0 22.74,0"
+     fill="transparent"
+     id="tcp_client-tcms"
+     style="stroke:#181818;stroke-width:1" />
+  <polygon
+     fill="#181818"
+     points="711.14,281 707.14,277 711.14,273 702.14,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon42"
+     transform="translate(1.6118048)" />
+  <polygon
+     fill="#181818"
+     points="727.88,273 731.88,277 727.88,281 736.88,277 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon43"
+     transform="translate(1.6118048)" />
+  <path
+     d="m 275.1521,500.6299 c 9.23,33.13 20.3297,72.9901 29.5497,106.1001"
+     fill="transparent"
+     id="dut-backto-fw"
+     style="stroke:#181818;stroke-width:1;stroke-dasharray:7, 7" />
+  <polygon
+     fill="#181818"
+     points="270.4922,504.5933 273.2719,499.6666 278.1987,502.4463 271.93,494.85 "
+     style="stroke:#181818;stroke-width:1"
+     id="polygon44"
+     transform="translate(1.6118048)" />
 </svg>

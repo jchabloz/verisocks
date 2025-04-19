@@ -1,22 +1,39 @@
-/**
- * @file vs_msg.h
- * @author jchabloz
- * @brief Verisocks messages definition and utilities
- * @version 0.1
- * @date 2022-08-07
- * @note Only UTF-8 text encoding is supported for now.
- * 
- * Verisocks TCP socket message format:
- * --------------------------------------------------------------
- * | Pre-header |   Header (JSON)   |   Message payload (JSON)  |
- * --------------------------------------------------------------
- * 
- */
+/**************************************************************************//**
+@file vs_msg.h
+@author jchabloz
+@brief Verisocks messages definition and utilities
+@date 2022-08-07
+@note Only UTF-8 text encoding is supported for now.
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef VS_MSG_H
 #define VS_MSG_H
 
 #include "cJSON.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +65,7 @@ typedef struct vs_msg_info {
 
 /**
  * @brief Returns the header for a message.
- * 
+ *
  * @param p_msg Pointer to the message content.
  * @param p_msg_info Pointer to message info structure. If the message content
  * type is binary, the len field is mandatory, for a string-based content type,
@@ -62,7 +79,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
 /**
  * @brief Returns a fully formatted message as based on a cJSON object content,
  * including header and pre-header.
- * 
+ *
  * @param p_msg Pointer the message content. Depending on the type, a pointer to
  * a cJSON struct is expected.
  * @param msg_info Message information (type and length)
@@ -80,7 +97,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
 /**
  * @brief Returns a fully formatted message with JSON content, including header
  * and pre-header.
- * 
+ *
  * @param str_message JSON content as a string. The function checks if the
  * string can be parsed as a valid JSON object.
  * @return char* Formatted message string. Returns NULL if error.
@@ -91,7 +108,7 @@ char* vs_msg_create_json_message_from_string(const char *str_message);
 
 /**
  * @brief Scans a partial or full message to get the header length.
- * 
+ *
  * @param message Formatted message, including at least the pre-header.
  * @return const size_t Header length as contained in the pre-header.
  * @warning The caller is responsible to guarantee that at least the 2-bytes
@@ -102,7 +119,7 @@ size_t vs_msg_read_header_length(const char* message);
 /**
  * @brief Scans a partial or full message to extract the type and length
  * information from the message header.
- * 
+ *
  * @param message Formatted message, including at least pre-header and header.
  * @param msg_info Pointer to a vs_msg_info_t structure.
  * @return Returns 0 if successful, -1 in case of error.
@@ -111,7 +128,7 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans the message and extract its content as a string/byte array.
- * 
+ *
  * @param message Formatted message, including pre-header, header and payload.
  * @param msg_info Pointer to a vs_msg_info_t structure.
  * @return String/byte array. Returns a NULL pointer in case of error.
@@ -121,7 +138,7 @@ char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a message and extract its JSON payload.
- * 
+ *
  * @param message Formatted message, including pre-header, header and payload.
  * @return cJSON* Pointer to a cJSON struct with the message payload. Returns
  * NULL pointer in case of an error.
@@ -130,7 +147,7 @@ cJSON* vs_msg_read_json(const char *message);
 
 /**
  * @brief Write a formatted message to the given descriptor.
- * 
+ *
  * @param fd I/O descriptor
  * @param str_msg Formatted message
  * @return Returns 0 if successful (all characters have been written). If > 0,
@@ -139,8 +156,18 @@ cJSON* vs_msg_read_json(const char *message);
 int vs_msg_write(int fd, const char *str_msg);
 
 /**
+ * @brief Return message to client.
+ *
+ * @param fd I/O descriptor (client)
+ * @param str_type Type
+ * @param str_value Value
+ * @return Returns 0 if successful, -1 if an error occurred
+ */
+int vs_msg_return(int fd, const char *str_type, const char *str_value);
+
+/**
  * @brief Reads formatted message from the given descriptor.
- * 
+ *
  * @param fd I/O descriptor
  * @param buffer Pointer to read buffer
  * @param len Size of buffer. If the message to read is longer than the buffer,

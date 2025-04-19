@@ -8,12 +8,14 @@ Includes and misc definitions
 *******************************************************************************/
 `timescale 1us/10ps //Time scale definitions
 
+`ifndef VERILATOR
 `ifndef VS_NUM_PORT
 `define VS_NUM_PORT 5100
 `endif
 
 `ifndef VS_TIMEOUT
 `define VS_TIMEOUT 120
+`endif
 `endif
 
 /*******************************************************************************
@@ -41,13 +43,16 @@ module spi_master_tb();
 
     /* Initial loop */
     initial begin
+	
         `ifdef DUMP_FILE
         $dumpfile(`DUMP_FILE);
         $dumpvars(0, spi_master_tb);
         `endif
 
         /* Launch Verisocks server after other initialization */
+		`ifndef VERILATOR
         $verisocks_init(`VS_NUM_PORT, `VS_TIMEOUT);
+		`endif
 
         /* Make sure that the simulation finishes after a while... */
         #10_000

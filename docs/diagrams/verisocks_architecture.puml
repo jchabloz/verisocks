@@ -26,7 +26,7 @@ file "<$database>\nDUT\nconfig" as cfg_dut
 file "<$file_code>\nFirmware" as fw
 
 
-frame "Icarus simulator" {
+frame "Verilog simulator" as sim {
     rectangle "Verilog testbench" as tb {
         [<$microchip>\nDUT] as dut
         rectangle {
@@ -42,6 +42,12 @@ frame "Test framework" as client {
     [<$python>\nClient] as tcp_client
     [<$robot>\nTest\nframework] as tcms
 }
+
+note top of tcp_client
+Any language or tool allowing
+usage of TCP sockets can be
+used to write a suitable client
+endnote
 
 note bottom of tcms
 Test case management system,

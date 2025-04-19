@@ -64,7 +64,7 @@ jobs:
         mkdir -p build
         mv verisocks.vpi build/.
     - name: Run pytest
-      run: pytest -x --log-cli-level=INFO --cov=verisocks
+      run: pytest -x --log-cli-level=INFO --cov=verisocks python/test/test_verisocks.py
     - name: Archive test logs
       if: always()
       uses: actions/upload-artifact@v4

@@ -1,11 +1,32 @@
-/**
- * @file vs_vpi.h
- * @author jchabloz
- * @brief Verisocks VPI
- * @version 0.1
- * @date 2022-08-07
- * 
- */
+/**************************************************************************//**
+@file vs_vpi.h
+@author jchabloz
+@brief Verisocks VPI
+@date 2022-08-07
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #ifndef VS_VPI_H
 #define VS_VPI_H
@@ -46,15 +67,15 @@ typedef struct vs_vpi_data {
 
 /**
  * @brief Process a command receives as a JSON message content
- * 
+ *
  * @param p_data Pointer to a VPI instance-specfic data
- * @return Integer return value of executed command handler 
+ * @return Integer return value of executed command handler
  */
 int vs_vpi_process_command(vs_vpi_data_t *p_data);
 
 /**
  * @brief Return message to client.
- * 
+ *
  * @param fd I/O descriptor (client)
  * @param str_type Type
  * @param str_value Value
@@ -105,7 +126,7 @@ vs_vpi_data_t *p_data)
 /**
  * @brief Find a command or sub-command handler in a command handler register
  * table.
- * 
+ *
  * @param p_cmd_table Pointer to command handler register table
  * @param str_cmd Command selection key
  * @return Pointer to command handler function if found, NULL otherwise.

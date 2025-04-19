@@ -1,13 +1,32 @@
 /**************************************************************************//**
- * @file vs_vpi.c
- * @author jchabloz
- * @brief Verisocks VPI functions
- * @version 0.1
- * @date 2022-08-27
- *
- * @copyright Copyright (c) Jérémie Chabloz, 2022
- *
- *****************************************************************************/
+@file vs_vpi.c
+@author jchabloz
+@brief Verisocks VPI functions
+@date 2022-08-27
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +80,7 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 
     vs_vpi_log_debug("Get simulator info...");
     s_vpi_vlog_info vlog_info;
-	if (0 > vpi_get_vlog_info(&vlog_info)) {
+    if (0 > vpi_get_vlog_info(&vlog_info)) {
         vs_log_mod_error("vs_vpi", "Could not get vlog_info");
         goto error;
     }
@@ -75,6 +94,25 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not add string to object");
         goto error;
     }
+
+    PLI_INT32 time_unit;
+    time_unit = vpi_get(vpiTimeUnit, NULL);
+    if (NULL == cJSON_AddStringToObject(
+        p_msg, "time_unit", vs_utils_get_time_unit(time_unit))
+    ) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+
+    PLI_INT32 time_precision;
+    time_precision = vpi_get(vpiTimePrecision, NULL);
+    if (NULL == cJSON_AddStringToObject(
+        p_msg, "time_precision", vs_utils_get_time_unit(time_precision))
+    ) {
+        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        goto error;
+    }
+
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
         (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
@@ -126,9 +164,9 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     }
 
     vs_vpi_log_debug("Getting simulator time...");
-	s_vpi_time s_time;
-	s_time.type = vpiSimTime;
-	vpi_get_time(NULL, &s_time);
+    s_vpi_time s_time;
+    s_time.type = vpiSimTime;
+    vpi_get_time(NULL, &s_time);
     sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
 

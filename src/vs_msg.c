@@ -1,12 +1,33 @@
-/**
- * @file vs_msg.c
- * @author jchabloz
- * @brief Verisocks messages definition and utilities
- * @version 0.1
- * @date 2022-08-22
- * @note Only UTF-8 text encoding is supported for now.
- *
- */
+/**************************************************************************//**
+@file vs_msg.c
+@author jchabloz
+@brief Verisocks messages definition and utilities
+@date 2022-08-22
+@note Only UTF-8 text encoding is supported for now.
+******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2022-2024 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -177,6 +198,7 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         break;
     case VS_MSG_TXT_JSON :
         str_msg = cJSON_PrintUnformatted((cJSON*) p_msg);
+        vs_log_mod_debug("vs_msg", "Preparing message: %s", str_msg);
         break;
     case VS_MSG_BIN :
         break;
@@ -416,6 +438,59 @@ int vs_msg_write(int fd, const char *str_msg)
         trials--;
     }
     return full_len - write_count;
+}
+
+/**************************************************************************//**
+ * Writes message to I/O (file) descriptor
+ *****************************************************************************/
+int vs_msg_return(int fd, const char *str_type, const char *str_value)
+{
+    cJSON *p_msg;
+    char *str_msg = NULL;
+
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error("vs_msg", "Could not create cJSON object");
+        return -1;
+    }
+
+    if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
+        vs_log_mod_error("vs_msg", "Could not add string to object");
+        goto error;
+    }
+
+    if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
+        vs_log_mod_error("vs_msg", "Could not add string to object");
+        goto error;
+    }
+
+    #ifndef __cplusplus
+    str_msg = vs_msg_create_message(p_msg,
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+    #else
+    str_msg = vs_msg_create_message(p_msg,
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    #endif
+    if (NULL == str_msg) {
+        vs_log_mod_error("vs_vpi", "NULL pointer");
+        goto error;
+    }
+
+    int retval;
+    retval = vs_msg_write(fd, str_msg);
+    if (0 > retval) {
+        vs_log_mod_error("vs_msg", "Error writing return message");
+        goto error;
+    }
+
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return 0;
+
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return -1;
 }
 
 /******************************************************************************
