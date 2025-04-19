@@ -16,8 +16,8 @@ version numbering system (tries and) follows the `semantic versioning
     2. ``MINOR`` version when you add functionality in a backward compatible manner
     3. ``PATCH`` version when you make backward compatible bug fixes
 
-1.3.0-dev0 - Ongoing
-********************
+1.3.0 - 2025-04-19
+******************
 
 * Added an :ref:`API <sec_vsl_api>` to support integrating Verisocks with
   Verilator, including full documentation
