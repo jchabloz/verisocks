@@ -25,7 +25,7 @@ jobs:
           pip install build
       - name: Build package
         run: |
-          python -m build --user --outdir dist python
+          python -m build --outdir dist python
       - name: Store distribution packages
         uses: actions/upload-artifact@v4
         with:
