@@ -48,7 +48,23 @@ test_main.cpp)")
                         default="variables.vlt",
                         help="Rendered Verilator configuration file for \
 public variables (default:variables.vlt)")
+    parser.add_argument('--makefile-only', action='store_true',
+                        help="Render makefile only (unless any other *-only \
+option is being used)")
+    parser.add_argument('--tb-only', action='store_true',
+                        help="Render tesbench file only (unless any other \
+*-only option is being used)")
+    parser.add_argument('--vlt-only', action='store_true',
+                        help="Render variables file only (unless any other \
+*-only option is being used)")
     args = parser.parse_args()
+
+    render_makefile = args.makefile_only or (
+        not args.tb_only and not args.vlt_only)
+    render_tb = args.tb_only or (
+        not args.makefile_only and not args.vlt_only)
+    render_vlt = args.vlt_only or (
+        not args.makefile_only and not args.tb_only)
 
     # Format paths to templates relative to this file
     template_mk = join(args.templates_dir, "Makefile.mako")
@@ -78,11 +94,19 @@ public variables (default:variables.vlt)")
     cfg['config']['verilog_src_files'] = (
         [str(args.variables_file)] + cfg['config']['verilog_src_files'])
 
-    render_template(template_mk, args.makefile, **cfg['config'])
-    render_template(template_cpp, args.testbench_file,
-                    **cfg['config'], variables=cfg['variables'])
-    render_template(template_vlt, args.variables_file,
-                    variables=cfg['variables'])
+    if render_makefile:
+        render_template(template_mk, args.makefile,
+                        target_file=str(args.makefile),
+                        config_file=str(args.config),
+                        tb_file=str(args.testbench_file),
+                        vlt_file=str(args.variables_file),
+                        **cfg['config'])
+    if render_tb:
+        render_template(template_cpp, args.testbench_file,
+                        **cfg['config'], variables=cfg['variables'])
+    if render_vlt:
+        render_template(template_vlt, args.variables_file,
+                        variables=cfg['variables'])
 
 
 if __name__ == "__main__":

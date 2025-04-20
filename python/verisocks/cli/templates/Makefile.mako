@@ -1,5 +1,9 @@
 <%page
 args = "
+	target_file,
+	config_file,
+	tb_file,
+	vlt_file,
 	prefix,
 	top,
 	verilog_src_files,
@@ -67,6 +71,28 @@ VSL_BUILD_DIR = vsl_build
 VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
 
 #*****************************************************************************
+# Top rule
+#*****************************************************************************
+all: ${target_file} ${tb_file} ${vlt_file} default
+
+#*****************************************************************************
+# Wizard-generated files
+#*****************************************************************************
+${target_file}: ${config_file}
+	@echo "Re-generating Makefile"
+	vsl-wizard --makefile-only --makefile $@ $<
+
+${tb_file}: ${config_file}
+	@echo "Re-generating top-level testbench file"
+	vsl-wizard --tb-only --testbench-file $@ $<
+
+${vlt_file}: ${config_file}
+	@echo "Re-generating variables file"
+	vsl-wizard --vlt-only --variables-file $@ $<
+
+#*****************************************************************************
 # Include generic Makefile
 #*****************************************************************************
 include $(VSL_DIR)/include/vsl/vsl.mk
+
+.PHONY: all

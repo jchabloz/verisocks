@@ -114,7 +114,7 @@ link_deps = $(link_args) $(VSL_HEADERS)
 $(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
-.PHONY: clean verilate
+.PHONY: default clean verilate
 clean:
 	$(RM) -r $(VSL_BUILD_DIR)
 	$(RM) -r $(VL_OBJ_DIR)
