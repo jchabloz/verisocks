@@ -9,6 +9,11 @@ jobs:
   build:
     name: Build distribution packages
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/verisocks
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,23 +28,5 @@ jobs:
       - name: Build package
         run: |
           python -m build --outdir dist python
-      - name: Store distribution packages
-        uses: actions/upload-artifact@v4
-        with:
-          path: dist/
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/verisocks
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          path: dist/
       - name: Publish distribution packages to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
