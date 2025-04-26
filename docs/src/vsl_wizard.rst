@@ -23,7 +23,8 @@ such that the wizard script can simply be evoked as follows:
 
     usage: vsl-wizard [-h] [--templates-dir TEMPLATES_DIR]
         [--makefile MAKEFILE] [--testbench-file TESTBENCH_FILE]
-        [--variables-file VARIABLES_FILE] config
+        [--variables-file VARIABLES_FILE] [--makefile-only] [--tb-only]
+        [--vlt-only] config
 
 .. program:: vsl-wizard
 
@@ -102,3 +103,14 @@ Optional arguments
     Rendered Verilator configuration file for public variables (default:
     :code:`variables.vlt`)
 
+.. option:: --makefile-only
+
+    Render makefile only (unless any other \*-only option is being used)
+
+.. option:: --tb-only
+
+    Render testbench file only (unless any other \*-only option is being used)
+
+.. option:: --vlt-only
+
+    Render variables file only (unless any other \*-only option is being used)
