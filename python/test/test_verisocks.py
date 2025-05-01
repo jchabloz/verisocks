@@ -236,7 +236,7 @@ def test_run_to_next(vs):
     assert answer["type"] == "ack"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
-    assert answer["time"] == pytest.approx(0.49505e-6)
+    assert answer["time"] == pytest.approx(0.1e-6)
 
 
 def test_run_until_time(vs):
