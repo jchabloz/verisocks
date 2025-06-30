@@ -8,6 +8,7 @@ config:
   verilator_root: /usr/local/share/verilator
   use_tracing: false
   use_fst: false
+  log_level: debug
 
 variables:
   scalars:

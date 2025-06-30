@@ -67,6 +67,7 @@ are paths can be relative to the configuration file location.
       use_tracing: <bool>       # If true, tracing is enabled
       use_fst: <bool>           # (optional if use_tracing is false) If true,
                                 # the FST format is used for the traces file
+      log_level: <text>         # (optional) Logging level [info, debug, warning, error, critical]
     variables:                  # (optional) Public variables
       scalars:                  # (optional) List of scalar variables
       - path: <text>            # Name/alias to be used for the variable

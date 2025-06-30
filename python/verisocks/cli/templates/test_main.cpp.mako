@@ -1,4 +1,4 @@
-<%page args = "prefix, variables"/>\
+<%page args = "prefix, variables, log_level"/>\
 <%
 VLVT_TYPES = {
     "uint8":  "VLVT_UINT8",
@@ -6,6 +6,13 @@ VLVT_TYPES = {
     "uint32": "VLVT_UINT32",
     "uint64": "VLVT_UINT64",
     "real":   "VLVT_REAL"
+}
+LOG_LEVELS = {
+	"debug":    10,
+	"info":     20,
+	"warning":  30,
+	"error":    40,
+	"critical": 50
 }
 %>\
 /*
@@ -67,8 +74,10 @@ int main(int argc, char** argv, char**) {
     Verilated::traceEverOn(true);
     #endif
 
+	% if (LOG_LEVELS[log_level] < 20):
     // Dump public variables
     contextp->internalsDump();
+	% endif
 
     // Create top VSL instance
     vsl::VslInteg<${prefix}> vslx{topp.get(), port_number, timeout};

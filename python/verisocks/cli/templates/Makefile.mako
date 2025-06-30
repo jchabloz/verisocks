@@ -12,9 +12,19 @@ args = "
 	verilator_path = '/usr/local/bin/verilator',
 	verilator_root = '/usr/local/share/verilator',
 	use_tracing = False,
-	use_fst = True
+	use_fst = True,
+	log_level = 'info'
 "
 />\
+<%
+LOG_LEVELS = {
+	"debug":    "$(LOG_LEVEL_DEBUG)",
+	"info":     "$(LOG_LEVEL_INFO)",
+	"warning":  "$(LOG_LEVEL_WARNING)",
+	"error":    "$(LOG_LEVEL_ERROR)",
+	"critical": "$(LOG_LEVEL_CRITICAL)"
+}
+%>\
 # Note: This file has been generated from the template ${template_filename}
 #*****************************************************************************
 # Configuration
@@ -68,7 +78,7 @@ TB_CPP_SRCS = \\
 VL_OBJ_DIR = vl_obj_dir
 VSL_BUILD_DIR = vsl_build
 
-VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
+VS_LOG_LEVEL = ${LOG_LEVELS[log_level]}
 
 #*****************************************************************************
 # Top rule

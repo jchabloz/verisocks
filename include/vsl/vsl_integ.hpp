@@ -434,7 +434,7 @@ void VslInteg<T>::main_connect() {
     timeout.tv_sec = num_timeout_sec;
     timeout.tv_usec = 0;
 
-    vs_log_mod_debug(
+    vs_log_mod_info(
         "vsl",
         "Waiting for a client to connect (%ds timeout) ...",
         (int) timeout.tv_sec);
@@ -463,7 +463,7 @@ void VslInteg<T>::main_wait() {
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
-        vs_log_mod_debug(
+        vs_log_mod_info(
             "vsl",
             "Lost connection. Waiting for a client to (re-)connect ..."
         );
