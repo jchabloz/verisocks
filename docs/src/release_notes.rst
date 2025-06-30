@@ -24,6 +24,8 @@ version numbering system (tries and) follows the `semantic versioning
   the generated files (including the Makefile itself)
 * Added ``--*-only`` options to :ref:`CLI wizard script <sec_vsl_wizard>` to
   generate only part of the target files
+* Added ``log_level`` option to :ref:`CLI wizard script configuration file
+  <sec_vsl_wizard>`
 
 1.3.0 - 2025-04-19
 ******************
