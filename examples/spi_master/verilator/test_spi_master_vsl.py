@@ -4,19 +4,18 @@ import logging
 import pytest
 import socket
 import random
-import os.path
+from os.path import join, dirname, abspath, relpath
 
 # Parameters
 HOST = socket.gethostbyname("localhost")
 TIMEOUT = 10
-
-cwd = os.path.dirname(__file__)
+cwd = relpath(dirname(abspath(__file__)))
 
 
 def setup_test(port=5100, timeout=10):
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
-        os.path.join(cwd, "Vspi_master_tb"),
+        join(cwd, "Vspi_master_tb"),
         f"{port}",
         f"{timeout}"
     ]
@@ -118,6 +117,7 @@ def test_spi_master_simple(vs):
 
 if __name__ == "__main__":
 
-    setup_test()
-    with Verisocks(HOST, PORT) as vs_cli:
+    port = find_free_port()
+    setup_test(port, TIMEOUT)
+    with Verisocks(HOST, port) as vs_cli:
         test_spi_master_simple(vs_cli)

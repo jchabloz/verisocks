@@ -1,0 +1,16 @@
+# Define configuration
+# Note: if relative paths are defined, they are considered as relative to this
+# file's own location.
+config:
+  prefix: hello_world       # Prefix
+  top: hello_world_tb       # Name of top module
+  verilog_src_files:        # List of Verilog source files
+  - ../hello_world_tb.v
+  #cpp_src_files:           # Extra C++ source files
+  verisocks_root: ../../..  # Verisocks root path
+  verilator_path: /usr/local/bin/verilator
+  verilator_root: /usr/local/share/verilator
+  use_tracing: false
+  use_fst: false
+  log_level: debug
+
