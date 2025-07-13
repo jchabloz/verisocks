@@ -25,11 +25,16 @@ repository folder
 <https://github.com/jchabloz/verisocks/blob/main/examples/hello_world>`_.
 
 
-
-
 SPI master
 **********
 
-This example shows how to 
+This example shows how to use Verisocks with a simple SPI master model in order
+to drive a full-duplex SPI bus with arbitrary content as well as read the
+results sent by an SPI slave on the same bus.  For the purpose of the example,
+a simplistic SPI slave sends back the same content that was sent by the master
+in the previous transaction.
 
+All the sources and corresponding README file can be found in the `spi master
+example repository folder
+<https://github.com/jchabloz/verisocks/blob/main/examples/spi_master>`_.
 

@@ -26,6 +26,9 @@ version numbering system (tries and) follows the `semantic versioning
   generate only part of the target files
 * Added ``log_level`` option to :ref:`CLI wizard script configuration file
   <sec_vsl_wizard>`
+* Fixed ``variables`` as being possibly left out from the :ref:`CLI wizard
+  script configuration file<sec_vsl_wizard>`
+* Verilator extension tested with versions 5.036 and 5.038
 
 1.3.0 - 2025-04-19
 ******************
