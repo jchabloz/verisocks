@@ -83,6 +83,7 @@ int main(int argc, char** argv, char**) {
     vsl::VslInteg<${prefix}> vslx{topp.get(), port_number, timeout};
 
     // Register public variables
+    % if variables:
     % if 'scalars' in variables:
     // Scalar variables
 	% for var in variables['scalars']:
@@ -113,6 +114,7 @@ int main(int argc, char** argv, char**) {
     vslx.register_event("${var['path']}",
         &topp->${var['path'].replace(".", "->")});
     % endfor
+    % endif
     % endif
 
     // Run simulation

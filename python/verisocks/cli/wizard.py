@@ -113,20 +113,29 @@ option is being used)")
 
     # Add verilator configuration file for public variables at the front of the
     # Verilog sources list
-    cfg['config']['verilog_src_files'] = (
-        [str(args.variables_file)] + cfg['config']['verilog_src_files'])
+    if 'variables' in cfg:
+        cfg['config']['verilog_src_files'] = (
+            [str(args.variables_file)] + cfg['config']['verilog_src_files'])
 
     if render_makefile:
+        if 'variables' in cfg:
+            vlt_file=str(args.variables_file)
+        else:
+            vlt_file=None
         render_template(template_mk, args.makefile,
                         target_file=str(args.makefile),
                         config_file=str(args.config),
                         tb_file=str(args.testbench_file),
-                        vlt_file=str(args.variables_file),
+                        vlt_file=vlt_file,
                         **cfg['config'])
     if render_tb:
-        render_template(template_cpp, args.testbench_file,
-                        **cfg['config'], variables=cfg['variables'])
-    if render_vlt:
+        if 'variables' in cfg:
+            render_template(template_cpp, args.testbench_file,
+                            **cfg['config'], variables=cfg['variables'])
+        else:
+            render_template(template_cpp, args.testbench_file,
+                            **cfg['config'], variables=None)
+    if render_vlt and ('variables' in cfg):
         render_template(template_vlt, args.variables_file,
                         variables=cfg['variables'])
 

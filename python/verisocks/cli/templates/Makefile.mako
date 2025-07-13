@@ -83,7 +83,11 @@ VS_LOG_LEVEL = ${LOG_LEVELS[log_level]}
 #*****************************************************************************
 # Top rule
 #*****************************************************************************
+% if vlt_file:
 all: ${target_file} ${tb_file} ${vlt_file} default
+% else:
+all: ${target_file} ${tb_file} default
+% endif
 
 #*****************************************************************************
 # Wizard-generated files
@@ -96,9 +100,11 @@ ${tb_file}: ${config_file}
 	@echo "Re-generating top-level testbench file"
 	vsl-wizard --tb-only --testbench-file $@ $<
 
+% if vlt_file:
 ${vlt_file}: ${config_file}
 	@echo "Re-generating variables file"
 	vsl-wizard --vlt-only --variables-file $@ $<
+% endif
 
 #*****************************************************************************
 # Include generic Makefile
