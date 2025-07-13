@@ -132,7 +132,7 @@ Commands are messages sent from a client to the Verisocks server intending to
 trigger specific actions for the simulator or the server.
 The supported commands are exhaustively listed below.
 
-
+.. _cmd_info:
 .. _sec_tcp_cmd_info:
 
 Information frame (**info**)
@@ -155,6 +155,7 @@ With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.info() <verisocks.verisocks.Verisocks.info>`
 corresponds to this command.
 
+.. _cmd_finish:
 .. _sec_tcp_cmd_finish:
 
 Finish simulation (**finish**)
