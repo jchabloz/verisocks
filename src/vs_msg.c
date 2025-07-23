@@ -48,7 +48,11 @@ const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] =
     "text/plain",
     "application/json",
     "application/octet-stream",
+    "undefined"
 };
+
+static const char UUID_FMT[] =
+    "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x";
 
 /**************************************************************************//**
 Returns the header length
@@ -74,8 +78,11 @@ static uint16_t get_header_length(const char *str_header)
 ******************************************************************************/
 cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_create_header");
+
     cJSON *p_header;
     char *str_msg = NULL;
+    char str_uuid[37] = "";
 
     /* Sanity checks on parameters */
     if (NULL == p_msg || NULL == p_msg_info) {
@@ -88,6 +95,32 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
     if (NULL == p_header) {
         vs_log_mod_error("vs_msg", "Failed to create header JSON object");
         return NULL;
+    }
+
+    /* If present, add transaction UUID to header encoded as a string */
+    if (p_msg_info->has_uuid > 0) {
+        sprintf(str_uuid, UUID_FMT,
+            p_msg_info->uuid[0],
+            p_msg_info->uuid[1],
+            p_msg_info->uuid[2],
+            p_msg_info->uuid[3],
+            p_msg_info->uuid[4],
+            p_msg_info->uuid[5],
+            p_msg_info->uuid[6],
+            p_msg_info->uuid[7],
+            p_msg_info->uuid[8],
+            p_msg_info->uuid[9],
+            p_msg_info->uuid[10],
+            p_msg_info->uuid[11],
+            p_msg_info->uuid[12],
+            p_msg_info->uuid[13],
+            p_msg_info->uuid[14],
+            p_msg_info->uuid[15]
+        );
+        if (NULL == cJSON_AddStringToObject(p_header, "uuid", str_uuid)) {
+            vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
+            goto error;
+        }
     }
 
     /* Create header depending on message type */
@@ -167,6 +200,8 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 ******************************************************************************/
 char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_create_message");
+
     /* Create header cJSON object handle */
     cJSON *p_header = vs_msg_create_header(p_msg, &msg_info);
     if (NULL == p_header) {
@@ -188,8 +223,14 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
         cJSON_free(str_header);
         return NULL;
     }
-    char pre_header_lsb = header_length & 0xff;
-    char pre_header_msb = (header_length & 0xff00) >> 8;
+    uint8_t pre_header_lsb = (uint8_t) (header_length & 0x00ff);
+    uint8_t pre_header_msb = (uint8_t) ((header_length & 0xff00) >> 8);
+
+    vs_log_mod_debug("vs_msg", "Encoded pre-header value: [0x%02x,0x%02x], %d",
+        pre_header_msb,
+        pre_header_lsb,
+        (uint16_t) pre_header_lsb + ((uint16_t) pre_header_msb << 8)
+    );
 
     /* Message content, formatted depending on message type */
     char *str_msg = NULL;
@@ -254,10 +295,10 @@ char* vs_msg_create_json_message_from_string(const char *str_message)
     /* If valid, pass the created object to the existing function */
     #ifndef __cplusplus
     char *str_msg = vs_msg_create_message(p_obj_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     char *str_msg = vs_msg_create_message(p_obj_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
 
     /* Clean up */
@@ -272,7 +313,8 @@ char* vs_msg_create_json_message_from_string(const char *str_message)
 size_t vs_msg_read_header_length(const char *message)
 {
     /* Extract the header length from the pre-header */
-    const size_t header_length = (message[0] << 8) + message[1];
+    const size_t header_length =
+        ((uint8_t)(message[0]) << 8) + (uint8_t) message[1];
     return header_length;
 }
 
@@ -281,8 +323,10 @@ size_t vs_msg_read_header_length(const char *message)
 ******************************************************************************/
 int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_read_info");
+
     /* Extract the header length from the pre-header */
-    const size_t header_length = (message[0] << 8) + message[1];
+    const size_t header_length = vs_msg_read_header_length(message);
     if (1 > header_length) {
         vs_log_mod_error("vs_msg", "Header length is invalid (< 1)");
         return -1;
@@ -295,7 +339,7 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
     char *str_header = (char*) malloc(header_length + 1);
     if (NULL == str_header) {
         vs_log_mod_perror("vs_msg",
-            "ERROR [vs_msg]: malloc could not allocate memory!");
+            "malloc could not allocate memory!");
         free(str_header);
         return -1;
     }
@@ -319,6 +363,38 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
     p_msg_info->len = (size_t) p_item_msg_length->valueint;
     vs_log_mod_debug("vs_msg",
         "Found message length = %d", (int) p_msg_info->len);
+
+    /* Parse the header to find an optional UUID value */
+    char *str_uuid;
+    cJSON *p_item_msg_uuid =
+        cJSON_GetObjectItemCaseSensitive(p_obj_header, "uuid");
+    if (NULL == p_item_msg_uuid) {
+        p_msg_info->has_uuid = 0u;
+    } else {
+        p_msg_info->has_uuid = 1u;
+        str_uuid = cJSON_GetStringValue(p_item_msg_uuid);
+        vs_log_mod_debug("vs_msg", "Found UUID in header: %s", str_uuid);
+        unsigned int uuid_tmp[16];
+        sscanf(str_uuid, UUID_FMT,
+            &uuid_tmp[0],
+            &uuid_tmp[1],
+            &uuid_tmp[2],
+            &uuid_tmp[3],
+            &uuid_tmp[4],
+            &uuid_tmp[5],
+            &uuid_tmp[6],
+            &uuid_tmp[7],
+            &uuid_tmp[8],
+            &uuid_tmp[9],
+            &uuid_tmp[10],
+            &uuid_tmp[11],
+            &uuid_tmp[12],
+            &uuid_tmp[13],
+            &uuid_tmp[14],
+            &uuid_tmp[15]
+        );
+        memcpy(p_msg_info->uuid, (uint8_t*) uuid_tmp, 16);
+    }
 
     /* Find the message type */
     cJSON *p_item_msg_type =
@@ -347,11 +423,12 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
  *****************************************************************************/
 char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_read_content");
+
     /* Get the header length from the pre-header */
     const size_t header_length = vs_msg_read_header_length(message);
 
     /* Get the message length and type from the header */
-    // vs_msg_info_t msg_info;
     if (0 > vs_msg_read_info(message, p_msg_info)) {
         return NULL;
     }
@@ -383,9 +460,11 @@ char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
  *****************************************************************************/
 cJSON* vs_msg_read_json(const char* message)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_read_json");
+
     /* Get message content */
     char *str_msg;
-    vs_msg_info_t msg_info;
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
     str_msg = vs_msg_read_content(message, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_msg", "Failed to parse message - No content");
@@ -417,7 +496,10 @@ cJSON* vs_msg_read_json(const char* message)
  *****************************************************************************/
 int vs_msg_write(int fd, const char *str_msg)
 {
-    vs_msg_info_t msg_info;
+    vs_log_mod_debug("vs_msg", "Function vs_msg_write");
+
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+
     if (0 > vs_msg_read_info(str_msg, &msg_info)) {
         vs_log_mod_error("vs_msg", "Could not get message info");
         return -1;
@@ -437,6 +519,7 @@ int vs_msg_write(int fd, const char *str_msg)
         write_count += retval;
         trials--;
     }
+    // free(p_msg_info);
     return full_len - write_count;
 }
 
@@ -445,6 +528,8 @@ int vs_msg_write(int fd, const char *str_msg)
  *****************************************************************************/
 int vs_msg_return(int fd, const char *str_type, const char *str_value)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_return");
+
     cJSON *p_msg;
     char *str_msg = NULL;
 
@@ -466,11 +551,13 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value)
 
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{
+            VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
+
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -525,6 +612,8 @@ static int readn(int fd, size_t len, char *buffer)
 
 int vs_msg_read(int fd, char *buffer, size_t len)
 {
+    vs_log_mod_debug("vs_msg", "Function vs_msg_read");
+
     if (3 > len) {
         vs_log_mod_error("vs_msg", "Buffer depth not sufficient (%d)",
                      (int) len);
@@ -562,7 +651,7 @@ Socket probably disconnected");
     }
 
     /* Parse header */
-    vs_msg_info_t msg_info;
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
     if (0 > vs_msg_read_info(buffer, &msg_info)) {
         vs_log_mod_error("vs_msg", "Issue while parsing message info");
         return -1;

@@ -26,6 +26,7 @@ import struct
 import json
 from enum import Enum, auto
 from time import sleep
+from uuid import uuid4
 
 
 class VsRxState(Enum):
@@ -317,6 +318,8 @@ class Verisocks:
                 "content-encoding": content_encoding,
                 "content-length": len(content_bytes)
             }
+        # IN_WORK
+        json_header['uuid'] = uuid4().urn.split(":")[-1]
         message_header = self._json_encode(json_header, "utf-8")
 
         # Adjust pre-header

@@ -183,10 +183,10 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");

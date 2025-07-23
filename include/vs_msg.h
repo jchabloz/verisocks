@@ -49,6 +49,7 @@ enum vs_msg_content_type {
     VS_MSG_TXT = 0,
     VS_MSG_TXT_JSON,
     VS_MSG_BIN,
+    VS_MSG_UNDEFINED,
     VS_MSG_ENUM_LEN //Don't use as a content type! Used to track number of entries.
 };
 
@@ -56,12 +57,21 @@ extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 #define VS_CMP_TYPE(str, num_type) (strcmp(str, VS_MSG_TYPES[num_type]) == 0)
 
 /**
+ * @brief Transaction UUID type
+ */
+typedef uint8_t vs_uuid_t[16];
+#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+/**
  * @brief Message info structure
  */
 typedef struct vs_msg_info {
-    enum vs_msg_content_type type; //Content type
-    size_t len; //Message content length
+    enum vs_msg_content_type type; // Content type
+    size_t len; // Message content length
+    uint8_t has_uuid; // Flag which determines if there is a valid UUID
+	vs_uuid_t uuid; // Transaction UUID number (16 bytes)
 } vs_msg_info_t;
+
 
 /**
  * @brief Returns the header for a message.

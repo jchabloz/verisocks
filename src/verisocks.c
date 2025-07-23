@@ -39,6 +39,8 @@ SOFTWARE.
 #include "vs_msg.h"
 #include "vs_vpi.h"
 
+#define READ_BUFFER_SIZE 4096
+
 /* Prototypes for some static functions */
 static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
@@ -528,7 +530,7 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
  */
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
-    char read_buffer[4096];
+    char read_buffer[READ_BUFFER_SIZE];
     int msg_len;
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,

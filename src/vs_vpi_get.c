@@ -115,10 +115,10 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
 
     if (NULL == str_msg) {
@@ -177,10 +177,10 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     }
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
@@ -292,10 +292,10 @@ VS_VPI_CMD_HANDLER(get_value)
     /* Create message */
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
@@ -367,10 +367,10 @@ VS_VPI_CMD_HANDLER(get_type)
 
     #ifndef __cplusplus
     str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #else
     str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
     #endif
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
