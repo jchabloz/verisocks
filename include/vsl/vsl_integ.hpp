@@ -457,9 +457,10 @@ template<typename T>
 void VslInteg<T>::main_wait() {
     char read_buffer[4096];
     int msg_len;
-    msg_len = vs_msg_read(fd_client_socket,
-                          read_buffer,
-                          sizeof(read_buffer));
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+
+    msg_len = vs_msg_read(
+        fd_client_socket, read_buffer, sizeof(read_buffer), &msg_info);
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
@@ -487,7 +488,7 @@ void VslInteg<T>::main_wait() {
     if (nullptr != p_cmd) {
         cJSON_Delete(p_cmd);
     }
-    p_cmd = vs_msg_read_json(read_buffer);
+    p_cmd = vs_msg_read_json(read_buffer, &msg_info);
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;

@@ -532,9 +532,12 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
     char read_buffer[READ_BUFFER_SIZE];
     int msg_len;
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,
-                          sizeof(read_buffer));
+                          sizeof(read_buffer),
+                          &msg_info);
 
     if (0 > msg_len) {
         close(p_vpi_data->fd_client_socket);
@@ -558,7 +561,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
     }
     vs_vpi_log_debug("Message: %s", &read_buffer[2]);
     if (NULL != p_vpi_data->p_cmd) cJSON_Delete(p_vpi_data->p_cmd);
-    p_vpi_data->p_cmd = vs_msg_read_json(read_buffer);
+    p_vpi_data->p_cmd = vs_msg_read_json(read_buffer, &msg_info);
     if (NULL != p_vpi_data->p_cmd) {
         p_vpi_data->state = VS_VPI_STATE_PROCESSING;
         return 0;

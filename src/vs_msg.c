@@ -421,17 +421,12 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
  * Parses a received message and returns a character array with the message
  * content. The message info struct is also updated.
  *****************************************************************************/
-char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
+char* vs_msg_read_content(const char* message, const vs_msg_info_t *p_msg_info)
 {
     vs_log_mod_debug("vs_msg", "Function vs_msg_read_content");
 
     /* Get the header length from the pre-header */
     const size_t header_length = vs_msg_read_header_length(message);
-
-    /* Get the message length and type from the header */
-    if (0 > vs_msg_read_info(message, p_msg_info)) {
-        return NULL;
-    }
 
     /* Get back message content. Could be either text or binary */
     char *str_msg;
@@ -458,19 +453,19 @@ char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info)
  * Parses a received message and returns a pointer to a cJSON object with the
  * message content.
  *****************************************************************************/
-cJSON* vs_msg_read_json(const char* message)
+cJSON* vs_msg_read_json(const char* message, const vs_msg_info_t *p_msg_info)
 {
     vs_log_mod_debug("vs_msg", "Function vs_msg_read_json");
 
     /* Get message content */
     char *str_msg;
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
-    str_msg = vs_msg_read_content(message, &msg_info);
+    // vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+    str_msg = vs_msg_read_content(message, p_msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_msg", "Failed to parse message - No content");
         return NULL;
     }
-    if (msg_info.type != VS_MSG_TXT_JSON) {
+    if (p_msg_info->type != VS_MSG_TXT_JSON) {
         vs_log_mod_error("vs_msg",
             "Header not consistent with JSON content type");
         free(str_msg);
@@ -519,7 +514,6 @@ int vs_msg_write(int fd, const char *str_msg)
         write_count += retval;
         trials--;
     }
-    // free(p_msg_info);
     return full_len - write_count;
 }
 
@@ -610,7 +604,7 @@ static int readn(int fd, size_t len, char *buffer)
     return len - read_count;
 }
 
-int vs_msg_read(int fd, char *buffer, size_t len)
+int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info)
 {
     vs_log_mod_debug("vs_msg", "Function vs_msg_read");
 
@@ -651,19 +645,19 @@ Socket probably disconnected");
     }
 
     /* Parse header */
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
-    if (0 > vs_msg_read_info(buffer, &msg_info)) {
+    //vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+    if (0 > vs_msg_read_info(buffer, p_msg_info)) {
         vs_log_mod_error("vs_msg", "Issue while parsing message info");
         return -1;
     }
     vs_log_mod_debug("vs_msg", "Received message type: %s",
-        VS_MSG_TYPES[msg_info.type]);
+        VS_MSG_TYPES[p_msg_info->type]);
     vs_log_mod_debug("vs_msg", "Received message length: %d",
-        (int) msg_info.len);
+        (int) p_msg_info->len);
 
     /* Read message content - If longer than buffer depth, truncate it*/
-    read_len = msg_info.len;
-    size_t total_len = msg_info.len + header_length + 2;
+    read_len = p_msg_info->len;
+    size_t total_len = p_msg_info->len + header_length + 2;
     if (total_len > len) {
         read_len = len - header_length - 2;
         vs_log_mod_warning("vs_msg", "Truncated message content by %d bytes",

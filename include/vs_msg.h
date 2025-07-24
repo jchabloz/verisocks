@@ -144,16 +144,18 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info);
  * @return String/byte array. Returns a NULL pointer in case of error.
  * @note Returned array allocated dynamically (malloc).
  */
-char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info);
+char* vs_msg_read_content(const char* message,
+                          const vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a message and extract its JSON payload.
  *
  * @param message Formatted message, including pre-header, header and payload.
+ * @param p_msg_info Pointer to header information structure.
  * @return cJSON* Pointer to a cJSON struct with the message payload. Returns
  * NULL pointer in case of an error.
  */
-cJSON* vs_msg_read_json(const char *message);
+cJSON* vs_msg_read_json(const char* message,const vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Write a formatted message to the given descriptor.
@@ -183,10 +185,12 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value);
  * @param len Size of buffer. If the message to read is longer than the buffer,
  * the buffer is filled to its max (without null termination guaranteed!) and
  * the function returns -1.
+ * @param p_msg_info Pointer to a vs_msg_info_t struct. The function will
+ * populate the structure with information from the message header.
  * @return Returns message length (total length, not limited to buffer depth)
  * if successful or -1 if an error occurred.
  */
-int vs_msg_read(int fd, char *buffer, size_t len);
+int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
 
 #ifdef __cplusplus
 }
