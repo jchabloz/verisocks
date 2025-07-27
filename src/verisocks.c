@@ -6,7 +6,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ SOFTWARE.
 #include <unistd.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <string.h>
 
 #include "verisocks.h"
 #include "vs_logging.h"
@@ -153,6 +154,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpiHandle h_cb_eos;
     uint32_t s_addr;
     socklen_t len;
+    uint8_t null_uuid_value[16] = VS_NULL_UUID;
 
     if (NULL != user_data) {
         vs_vpi_log_warning("Expected NULL pointer (not used)");
@@ -206,6 +208,8 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->p_cmd = NULL;
     p_vpi_data->h_cb = 0;
     p_vpi_data->value = default_value;
+    p_vpi_data->uuid.valid = 0u;
+    memcpy(&p_vpi_data->uuid.value, null_uuid_value, 16);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -532,7 +536,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
     char read_buffer[READ_BUFFER_SIZE];
     int msg_len;
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, {0u, VS_NULL_UUID}};
 
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,
@@ -547,6 +551,10 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
         p_vpi_data->state = VS_VPI_STATE_CONNECT;
         return 0;
     }
+
+    p_vpi_data->uuid.valid = msg_info.uuid.valid;
+    memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, 16);
+
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
         vs_vpi_log_warning(

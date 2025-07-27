@@ -164,6 +164,7 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
 {
     cJSON *p_msg;
     char *str_msg = NULL;
+    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
@@ -181,13 +182,7 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value)
         goto error;
     }
 
-    #ifndef __cplusplus
-    str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
-    #else
-    str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0, 0, VS_NULL_UUID});
-    #endif
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;

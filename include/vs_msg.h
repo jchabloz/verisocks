@@ -59,8 +59,14 @@ extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 /**
  * @brief Transaction UUID type
  */
-typedef uint8_t vs_uuid_t[16];
+typedef struct vs_uuid {
+    uint8_t valid;
+    uint8_t value[16];
+} vs_uuid_t;
 #define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+// typedef uint8_t vs_uuid_t[16];
+// #define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 /**
  * @brief Message info structure
@@ -68,10 +74,8 @@ typedef uint8_t vs_uuid_t[16];
 typedef struct vs_msg_info {
     enum vs_msg_content_type type; // Content type
     size_t len; // Message content length
-    uint8_t has_uuid; // Flag which determines if there is a valid UUID
-	vs_uuid_t uuid; // Transaction UUID number (16 bytes)
+	vs_uuid_t uuid; // Transaction UUID, if valid
 } vs_msg_info_t;
-
 
 /**
  * @brief Returns the header for a message.
@@ -92,7 +96,8 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
  *
  * @param p_msg Pointer the message content. Depending on the type, a pointer to
  * a cJSON struct is expected.
- * @param msg_info Message information (type and length)
+ * @param p_msg_info Message information (type and length). Pointer to
+ * vs_msg_info_t struct.
  * @return char* Formatted message string.
  * @warning The returned formatted message includes a 2-byte pre-header
  * corresponding to the length of the header directly represented as a binary
@@ -102,7 +107,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
+char* vs_msg_create_message(const void *p_msg, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Returns a fully formatted message with JSON content, including header
@@ -114,7 +119,8 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_create_json_message_from_string(const char *str_message);
+char* vs_msg_create_json_message_from_string(const char *str_message,
+    vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a partial or full message to get the header length.

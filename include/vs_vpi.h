@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,9 @@ SOFTWARE.
 #define VS_VPI_H
 
 #include "vpi_config.h"
+#include "vs_msg.h"
 #include "cJSON.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,6 +66,7 @@ typedef struct vs_vpi_data {
     cJSON *p_cmd;           ///Pointer to current/latest command
     vpiHandle h_cb;         ///Callback handle (used for value change callback)
     s_vpi_value value;      ///Value (used for value change callback)
+    vs_uuid_t uuid;         ///Current transaction UUID
 } vs_vpi_data_t;
 
 /**
