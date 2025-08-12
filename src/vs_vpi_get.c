@@ -67,6 +67,7 @@ VS_VPI_CMD_HANDLER(get_sim_info)
     cJSON *p_msg;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -148,6 +149,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     char *str_msg = NULL;
     double sim_time_sec;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -208,6 +210,7 @@ VS_VPI_CMD_HANDLER(get_value)
     char *str_msg = NULL;
     char *str_path;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -320,6 +323,7 @@ VS_VPI_CMD_HANDLER(get_type)
     char *str_path;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();

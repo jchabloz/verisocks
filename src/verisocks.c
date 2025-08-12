@@ -560,7 +560,10 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 
     /* Update VPI data with transaction UUID if present */
     p_vpi_data->uuid.valid = msg_info.uuid.valid;
-    memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, VS_UUID_LEN);
+    if (msg_info.uuid.valid > 0) {
+        vs_vpi_log_debug("Valid UUID present in header");
+        memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, VS_UUID_LEN);
+    }
 
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';

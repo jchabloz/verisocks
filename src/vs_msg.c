@@ -114,6 +114,14 @@ static uint16_t get_header_length(const char *str_header)
     return retval;
 }
 
+void vs_msg_copy_uuid(vs_msg_info_t *p_msg_info, const vs_uuid_t *p_uuid)
+{
+    if (p_uuid->valid > 0u) {
+        p_msg_info->uuid.valid = p_uuid->valid;
+        memcpy(p_msg_info->uuid.value, p_uuid->value, VS_UUID_LEN);
+    }
+}
+
 /**************************************************************************//**
 * Create message header
 ******************************************************************************/
@@ -136,15 +144,6 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
     if (NULL == p_header) {
         vs_log_mod_error("vs_msg", "Failed to create header JSON object");
         return NULL;
-    }
-
-    /* If present, add transaction UUID to header encoded as a string */
-    if (p_msg_info->uuid.valid > 0) {
-        sprintf_uuid(str_uuid, &(p_msg_info->uuid));
-        if (NULL == cJSON_AddStringToObject(p_header, "uuid", str_uuid)) {
-            vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
-            goto error;
-        }
     }
 
     /* Create header depending on message type */
@@ -211,6 +210,16 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
         vs_log_mod_error("vs_msg", "Failed to add number to cJSON object");
         goto error;
     };
+
+    /* If present, add transaction UUID to header encoded as a string */
+    if (p_msg_info->uuid.valid > 0) {
+        sprintf_uuid(str_uuid, &(p_msg_info->uuid));
+        if (NULL == cJSON_AddStringToObject(p_header, "uuid", str_uuid)) {
+            vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
+            goto error;
+        }
+    }
+
     return p_header;
 
     error:

@@ -82,6 +82,9 @@ typedef struct vs_msg_info {
 	vs_uuid_t uuid; // Transaction UUID, if valid
 } vs_msg_info_t;
 
+
+void vs_msg_copy_uuid(vs_msg_info_t *p_msg_info, const vs_uuid_t *p_uuid);
+
 /**
  * @brief Returns the header for a message.
  *
