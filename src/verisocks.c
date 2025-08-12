@@ -307,7 +307,9 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
-        "Reached callback - Getting back to Verisocks main loop");
+        "Reached callback - Getting back to Verisocks main loop",
+        &(p_vpi_data->uuid)
+    );
 
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
@@ -369,7 +371,9 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
-        "Reached callback - Getting back to Verisocks main loop");
+        "Reached callback - Getting back to Verisocks main loop",
+        &(p_vpi_data->uuid)
+    );
 
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
@@ -410,7 +414,9 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     if ((VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) ||
         (VS_VPI_STATE_PROCESSING == p_vpi_data->state)) {
         vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-            "Exiting Verisocks due to end of simulation");
+            "Exiting Verisocks due to end of simulation",
+            &(p_vpi_data->uuid)
+        );
     }
 
     /* Clean-up and exit */
@@ -552,6 +558,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
         return 0;
     }
 
+    /* Update VPI data with transaction UUID if present */
     p_vpi_data->uuid.valid = msg_info.uuid.valid;
     memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, 16);
 
@@ -561,7 +568,9 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
             "Received message longer than RX buffer, discarding it"
         );
         vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-            "Message too long - Discarding");
+            "Message too long - Discarding",
+            &(p_vpi_data->uuid)
+        );
         return -1;
     }
     else {
@@ -577,6 +586,8 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
     vs_vpi_log_warning("Received message content cannot be interpreted as a \
 valid JSON content. Discarding it.");
     vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-        "Invalid message content - Discarding");
+        "Invalid message content - Discarding",
+        &(p_vpi_data->uuid)
+    );
     return 0;
 }

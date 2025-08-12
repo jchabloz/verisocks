@@ -70,6 +70,7 @@ class Verisocks:
             :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
             being used. This value can be overriden by the method's own
             ``delay`` argument.
+        use_uuid (bool): Use transactions UUID
 
     Note:
         For certain methods, a specific timeout value can be passed as
@@ -82,7 +83,7 @@ class Verisocks:
     READ_BUFFER_LEN = 4096
 
     def __init__(self, host="127.0.0.1", port=5100, timeout=120.0,
-                 connect_trials=10, connect_delay=0.05):
+                 connect_trials=10, connect_delay=0.05, use_uuid=True):
         """Verisocks class constructor
         """
         # Connection address and status
@@ -96,6 +97,7 @@ class Verisocks:
             self.sock.settimeout(timeout)
         self.connect_trials = connect_trials
         self.connect_delay = connect_delay
+        self.use_uuid = use_uuid
 
         # RX variables
         self._rx_buffer = b""
@@ -319,7 +321,9 @@ class Verisocks:
                 "content-length": len(content_bytes)
             }
         # IN_WORK
-        json_header['uuid'] = uuid4().urn.split(":")[-1]
+        if self.use_uuid:
+            self.uuid = uuid4()
+            json_header['uuid'] = self.uuid.urn.split(":")[-1]
         message_header = self._json_encode(json_header, "utf-8")
 
         # Adjust pre-header
