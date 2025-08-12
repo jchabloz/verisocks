@@ -63,10 +63,8 @@ typedef struct vs_uuid {
     uint8_t valid;
     uint8_t value[16];
 } vs_uuid_t;
-#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-// typedef uint8_t vs_uuid_t[16];
-// #define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 /**
  * @brief Message info structure

@@ -51,8 +51,58 @@ const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] =
     "undefined"
 };
 
-static const char UUID_FMT[] =
-    "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x";
+#define UUID_FMT "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x"
+#define UUID_LEN 37u
+
+static void sprintf_uuid(char *str_uuid, const vs_uuid_t *p_uuid)
+{
+    snprintf(str_uuid, UUID_LEN, UUID_FMT,
+        p_uuid->value[0],
+        p_uuid->value[1],
+        p_uuid->value[2],
+        p_uuid->value[3],
+        p_uuid->value[4],
+        p_uuid->value[5],
+        p_uuid->value[6],
+        p_uuid->value[7],
+        p_uuid->value[8],
+        p_uuid->value[9],
+        p_uuid->value[10],
+        p_uuid->value[11],
+        p_uuid->value[12],
+        p_uuid->value[13],
+        p_uuid->value[14],
+        p_uuid->value[15]
+    );
+}
+
+static void sscanf_uuid(const char *str_uuid, vs_uuid_t *p_uuid)
+{
+    unsigned int i = 0u;
+    unsigned int uuid_tmp[16];
+    sscanf(str_uuid, UUID_FMT,
+        &uuid_tmp[0],
+        &uuid_tmp[1],
+        &uuid_tmp[2],
+        &uuid_tmp[3],
+        &uuid_tmp[4],
+        &uuid_tmp[5],
+        &uuid_tmp[6],
+        &uuid_tmp[7],
+        &uuid_tmp[8],
+        &uuid_tmp[9],
+        &uuid_tmp[10],
+        &uuid_tmp[11],
+        &uuid_tmp[12],
+        &uuid_tmp[13],
+        &uuid_tmp[14],
+        &uuid_tmp[15]
+    );
+    while (i < 16u) {
+        p_uuid->value[i] = (uint8_t) uuid_tmp[i];
+        i += 1u;
+    }
+}
 
 /**************************************************************************//**
 Returns the header length
@@ -82,7 +132,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 
     cJSON *p_header;
     char *str_msg = NULL;
-    char str_uuid[37] = "";
+    char str_uuid[UUID_LEN] = "";
 
     /* Sanity checks on parameters */
     if (NULL == p_msg || NULL == p_msg_info) {
@@ -99,24 +149,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 
     /* If present, add transaction UUID to header encoded as a string */
     if (p_msg_info->uuid.valid > 0) {
-        snprintf(str_uuid, 37u, UUID_FMT,
-            p_msg_info->uuid.value[0],
-            p_msg_info->uuid.value[1],
-            p_msg_info->uuid.value[2],
-            p_msg_info->uuid.value[3],
-            p_msg_info->uuid.value[4],
-            p_msg_info->uuid.value[5],
-            p_msg_info->uuid.value[6],
-            p_msg_info->uuid.value[7],
-            p_msg_info->uuid.value[8],
-            p_msg_info->uuid.value[9],
-            p_msg_info->uuid.value[10],
-            p_msg_info->uuid.value[11],
-            p_msg_info->uuid.value[12],
-            p_msg_info->uuid.value[13],
-            p_msg_info->uuid.value[14],
-            p_msg_info->uuid.value[15]
-        );
+        sprintf_uuid(str_uuid, &(p_msg_info->uuid));
         if (NULL == cJSON_AddStringToObject(p_header, "uuid", str_uuid)) {
             vs_log_mod_error("vs_msg", "Failed to add string to cJSON object");
             goto error;
@@ -369,27 +402,11 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
         p_msg_info->uuid.valid = 1u;
         str_uuid = cJSON_GetStringValue(p_item_msg_uuid);
         vs_log_mod_debug("vs_msg", "Found UUID in header: %s", str_uuid);
-        unsigned int uuid_tmp[16];
-        sscanf(str_uuid, UUID_FMT,
-            &uuid_tmp[0],
-            &uuid_tmp[1],
-            &uuid_tmp[2],
-            &uuid_tmp[3],
-            &uuid_tmp[4],
-            &uuid_tmp[5],
-            &uuid_tmp[6],
-            &uuid_tmp[7],
-            &uuid_tmp[8],
-            &uuid_tmp[9],
-            &uuid_tmp[10],
-            &uuid_tmp[11],
-            &uuid_tmp[12],
-            &uuid_tmp[13],
-            &uuid_tmp[14],
-            &uuid_tmp[15]
-        );
-        memcpy(p_msg_info->uuid.value, (uint8_t*) uuid_tmp, 16);
+        sscanf_uuid(str_uuid, &(p_msg_info->uuid));
     }
+    
+    char str_uuid_debug[64];
+    sprintf_uuid(str_uuid_debug, &(p_msg_info->uuid));
 
     /* Find the message type */
     cJSON *p_item_msg_type =
