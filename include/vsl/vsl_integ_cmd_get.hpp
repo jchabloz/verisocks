@@ -96,7 +96,7 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
     cJSON *p_msg;
     char *str_msg = nullptr;
-    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
@@ -182,7 +182,7 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
     cJSON *p_msg;
     char *str_msg = nullptr;
-    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
@@ -248,7 +248,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     cJSON *p_msg;
     cJSON *p_item_path;
     char *str_msg = nullptr;
-    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
 
     /* Lambda function - error handler */
     auto handle_error = [&](){

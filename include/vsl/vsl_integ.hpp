@@ -457,7 +457,7 @@ template<typename T>
 void VslInteg<T>::main_wait() {
     char read_buffer[4096];
     int msg_len;
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, 0u, VS_NULL_UUID};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
     msg_len = vs_msg_read(
         fd_client_socket, read_buffer, sizeof(read_buffer), &msg_info);

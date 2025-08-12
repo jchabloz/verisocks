@@ -51,12 +51,9 @@ const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN] =
     "undefined"
 };
 
-#define UUID_FMT "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x"
-#define UUID_LEN 37u
-
 static void sprintf_uuid(char *str_uuid, const vs_uuid_t *p_uuid)
 {
-    snprintf(str_uuid, UUID_LEN, UUID_FMT,
+    snprintf(str_uuid, VS_UUID_STR_LEN, VS_UUID_STR_FMT,
         p_uuid->value[0],
         p_uuid->value[1],
         p_uuid->value[2],
@@ -78,30 +75,24 @@ static void sprintf_uuid(char *str_uuid, const vs_uuid_t *p_uuid)
 
 static void sscanf_uuid(const char *str_uuid, vs_uuid_t *p_uuid)
 {
-    unsigned int i = 0u;
-    unsigned int uuid_tmp[16];
-    sscanf(str_uuid, UUID_FMT,
-        &uuid_tmp[0],
-        &uuid_tmp[1],
-        &uuid_tmp[2],
-        &uuid_tmp[3],
-        &uuid_tmp[4],
-        &uuid_tmp[5],
-        &uuid_tmp[6],
-        &uuid_tmp[7],
-        &uuid_tmp[8],
-        &uuid_tmp[9],
-        &uuid_tmp[10],
-        &uuid_tmp[11],
-        &uuid_tmp[12],
-        &uuid_tmp[13],
-        &uuid_tmp[14],
-        &uuid_tmp[15]
+    sscanf(str_uuid, VS_UUID_STR_FMT,
+        &p_uuid->value[0],
+        &p_uuid->value[1],
+        &p_uuid->value[2],
+        &p_uuid->value[3],
+        &p_uuid->value[4],
+        &p_uuid->value[5],
+        &p_uuid->value[6],
+        &p_uuid->value[7],
+        &p_uuid->value[8],
+        &p_uuid->value[9],
+        &p_uuid->value[10],
+        &p_uuid->value[11],
+        &p_uuid->value[12],
+        &p_uuid->value[13],
+        &p_uuid->value[14],
+        &p_uuid->value[15]
     );
-    while (i < 16u) {
-        p_uuid->value[i] = (uint8_t) uuid_tmp[i];
-        i += 1u;
-    }
 }
 
 /**************************************************************************//**
@@ -132,7 +123,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 
     cJSON *p_header;
     char *str_msg = NULL;
-    char str_uuid[UUID_LEN] = "";
+    char str_uuid[VS_UUID_STR_LEN] = "";
 
     /* Sanity checks on parameters */
     if (NULL == p_msg || NULL == p_msg_info) {
@@ -405,9 +396,6 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info)
         sscanf_uuid(str_uuid, &(p_msg_info->uuid));
     }
     
-    char str_uuid_debug[64];
-    sprintf_uuid(str_uuid_debug, &(p_msg_info->uuid));
-
     /* Find the message type */
     cJSON *p_item_msg_type =
         cJSON_GetObjectItemCaseSensitive(p_obj_header, "content-type");
@@ -504,7 +492,7 @@ int vs_msg_write(int fd, const char *str_msg)
 {
     vs_log_mod_debug("vs_msg", "Function vs_msg_write");
 
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
     if (0 > vs_msg_read_info(str_msg, &msg_info)) {
         vs_log_mod_error("vs_msg", "Could not get message info");
@@ -537,7 +525,7 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value)
 
     cJSON *p_msg;
     char *str_msg = NULL;
-    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {

@@ -167,9 +167,9 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 {
     cJSON *p_msg;
     char *str_msg = NULL;
-    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     msg_info.uuid.valid = p_uuid->valid;
-    memcpy(msg_info.uuid.value, p_uuid->value, 16);
+    memcpy(msg_info.uuid.value, p_uuid->value, VS_UUID_LEN);
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {

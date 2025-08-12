@@ -154,7 +154,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpiHandle h_cb_eos;
     uint32_t s_addr;
     socklen_t len;
-    uint8_t null_uuid_value[16] = VS_NULL_UUID;
+    uint8_t null_uuid_value[VS_UUID_LEN] = VS_UUID_NULL;
 
     if (NULL != user_data) {
         vs_vpi_log_warning("Expected NULL pointer (not used)");
@@ -209,7 +209,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->h_cb = 0;
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
-    memcpy(&p_vpi_data->uuid.value, null_uuid_value, 16);
+    memcpy(&p_vpi_data->uuid.value, null_uuid_value, VS_UUID_LEN);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -542,7 +542,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
     char read_buffer[READ_BUFFER_SIZE];
     int msg_len;
-    vs_msg_info_t msg_info = {VS_MSG_UNDEFINED, 0u, {0u, VS_NULL_UUID}};
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,
@@ -560,7 +560,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 
     /* Update VPI data with transaction UUID if present */
     p_vpi_data->uuid.valid = msg_info.uuid.valid;
-    memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, 16);
+    memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, VS_UUID_LEN);
 
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';

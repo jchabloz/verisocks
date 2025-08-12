@@ -56,15 +56,22 @@ enum vs_msg_content_type {
 extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 #define VS_CMP_TYPE(str, num_type) (strcmp(str, VS_MSG_TYPES[num_type]) == 0)
 
+#define VS_UUID_NULL {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define VS_UUID_STR_FMT "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx"
+#define VS_UUID_LEN 16u
+#define VS_UUID_STR_LEN 37u
+
+#define VS_MSG_INFO_INIT_UNDEF {VS_MSG_UNDEFINED, 0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_JSON  {VS_MSG_TXT_JSON,  0u, {0u, VS_UUID_NULL}}
+
 /**
  * @brief Transaction UUID type
  */
 typedef struct vs_uuid {
     uint8_t valid;
-    uint8_t value[16];
+    uint8_t value[VS_UUID_LEN];
 } vs_uuid_t;
 
-#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 /**
  * @brief Message info structure
