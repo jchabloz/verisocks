@@ -119,6 +119,11 @@ PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key);
  */
 const char* vs_utils_get_time_unit(const PLI_INT32 time_factor);
 
+/**
+ * @brief Structure definition for representing a time value.
+ *
+ * This structure is used to store and manipulate time-related data.
+ */
 typedef struct s_vs_time_def {
     int factor;
     const char *name;

@@ -58,23 +58,24 @@ extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 
 /**
  * @brief Transaction UUID type
+ * 
+ * This structure is used to define a type for a transaction UUID. If the valid
+ * flag is > 0, the value member corresponds to a 16-byte UUID value.
  */
 typedef struct vs_uuid {
-    uint8_t valid;
+    uint8_t valid; /// Validity flag. If > 0, the value field gives an UUID
     uint8_t value[16];
 } vs_uuid_t;
-#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-// typedef uint8_t vs_uuid_t[16];
-// #define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define VS_NULL_UUID {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 /**
  * @brief Message info structure
  */
 typedef struct vs_msg_info {
-    enum vs_msg_content_type type; // Content type
-    size_t len; // Message content length
-	vs_uuid_t uuid; // Transaction UUID, if valid
+    enum vs_msg_content_type type; /// Content type
+    size_t len; /// Message content length
+	vs_uuid_t uuid; /// Transaction UUID, if valid
 } vs_msg_info_t;
 
 /**
