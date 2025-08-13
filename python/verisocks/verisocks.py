@@ -26,7 +26,7 @@ import struct
 import json
 from enum import Enum, auto
 from time import sleep
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 
 class VsRxState(Enum):
@@ -98,6 +98,7 @@ class Verisocks:
         self.connect_trials = connect_trials
         self.connect_delay = connect_delay
         self.use_uuid = use_uuid
+        self.uuid = None
 
         # RX variables
         self._rx_buffer = b""
@@ -253,10 +254,18 @@ class Verisocks:
             "content-type",
             "content-encoding"
         ]
+        if self.use_uuid:
+            header_keys.append("uuid")
         for k in header_keys:
             if k not in self.rx_header:
                 raise ValueError(f"Missing required header field '{k}'.")
         self._rx_state = VsRxState.RX_HDR
+
+        if self.use_uuid:
+            self.rx_uuid = UUID(self.rx_header['uuid'])
+            if (self.rx_uuid != self.uuid):
+                raise RuntimeError(
+                    "ERROR: Inconsistent transaction UUID values")
 
     def _read_content(self):
         """Parse RX buffer for content (private method).
@@ -320,7 +329,8 @@ class Verisocks:
                 "content-encoding": content_encoding,
                 "content-length": len(content_bytes)
             }
-        # IN_WORK
+
+        # Transaction UUID
         if self.use_uuid:
             self.uuid = uuid4()
             json_header['uuid'] = self.uuid.urn.split(":")[-1]
