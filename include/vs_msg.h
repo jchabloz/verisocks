@@ -190,9 +190,11 @@ int vs_msg_write(int fd, const char *str_msg);
  * @param fd I/O descriptor (client)
  * @param str_type Type
  * @param str_value Value
+ * @param pointer to UUID struct
  * @return Returns 0 if successful, -1 if an error occurred
  */
-int vs_msg_return(int fd, const char *str_type, const char *str_value);
+int vs_msg_return(int fd, const char *str_type, const char *str_value,
+	const vs_uuid_t *p_uuid);
 
 /**
  * @brief Reads formatted message from the given descriptor.

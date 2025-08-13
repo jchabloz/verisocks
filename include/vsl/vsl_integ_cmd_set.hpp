@@ -49,7 +49,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         if (nullptr != p_msg) cJSON_Delete(p_msg);
         if (nullptr != str_msg) cJSON_free(str_msg);
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command set - Discarding");
+            "Error processing command set - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -178,7 +178,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     }
 
     vs_msg_return(vx.fd_client_socket, "ack",
-        "Processed command \"set\"");
+        "Processed command \"set\"", &vx.uuid);
 
     /* Normal exit */
     if (nullptr != p_msg) cJSON_Delete(p_msg);

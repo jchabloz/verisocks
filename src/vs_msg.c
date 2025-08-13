@@ -116,8 +116,8 @@ static uint16_t get_header_length(const char *str_header)
 
 void vs_msg_copy_uuid(vs_msg_info_t *p_msg_info, const vs_uuid_t *p_uuid)
 {
+    p_msg_info->uuid.valid = p_uuid->valid;
     if (p_uuid->valid > 0u) {
-        p_msg_info->uuid.valid = p_uuid->valid;
         memcpy(p_msg_info->uuid.value, p_uuid->value, VS_UUID_LEN);
     }
 }
@@ -528,13 +528,15 @@ int vs_msg_write(int fd, const char *str_msg)
 /**************************************************************************//**
  * Writes message to I/O (file) descriptor
  *****************************************************************************/
-int vs_msg_return(int fd, const char *str_type, const char *str_value)
+int vs_msg_return(int fd, const char *str_type, const char *str_value,
+    const vs_uuid_t *p_uuid)
 {
     vs_log_mod_debug("vs_msg", "Function vs_msg_return");
 
     cJSON *p_msg;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, p_uuid);
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {

@@ -50,7 +50,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(info) {
     auto handle_error = [&vx]()
     {
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command info - Discarding");
+            "Error processing command info - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -74,7 +74,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(info) {
     vs_log_info("%s", str_val);
 
     /* Return an acknowledgement */
-    vs_msg_return(vx.fd_client_socket, "ack", "command info received");
+    vs_msg_return(vx.fd_client_socket, "ack", "command info received", &vx.uuid);
 
     /* Set state to "waiting next command" */
     vx._state = VSL_STATE_WAITING;
@@ -89,7 +89,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(exit) {
     vs_log_mod_info(
         "vsl", "Command \"exit\" received. Quitting Verisocks ...");
     vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing exit command - Quitting Verisocks.");
+        "Processing exit command - Quitting Verisocks.", &vx.uuid);
 
     /* Simulate until $finish */
     while (!vx.p_context->gotFinish()) {
@@ -114,7 +114,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(stop) {
     vs_log_mod_info(
         "vsl", "Command \"stop\" received");
     vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing stop command - Simulation stopped/paused");
+        "Processing stop command - Simulation stopped/paused", &vx.uuid);
 
     vx._state = VSL_STATE_WAITING;
     return;
@@ -128,7 +128,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(finish) {
     vs_log_mod_info(
         "vsl", "Command \"finish\" received. Terminating simulation...");
     vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing finish command - Terminating simulation.");
+        "Processing finish command - Terminating simulation.", &vx.uuid);
 
     vx.p_context->gotFinish(true);
     vx.p_model->final();
@@ -142,7 +142,7 @@ Not supported
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(not_supported) {
     vs_msg_return(vx.fd_client_socket, "warning",
-        "This command is not (yet) supported. Discarding...");
+        "This command is not (yet) supported. Discarding...", &vx.uuid);
     vx._state = VSL_STATE_WAITING;
     return;
 }
