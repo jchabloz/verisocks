@@ -264,8 +264,10 @@ class Verisocks:
         if self.use_uuid:
             self.rx_uuid = UUID(self.rx_header['uuid'])
             if (self.rx_uuid != self.uuid):
-                raise RuntimeError(
-                    "ERROR: Inconsistent transaction UUID values")
+                raise VerisocksError("Inconsistent transaction UUID values")
+        else:
+            if "uuid" in self.rx_header:
+                raise VerisocksError("Unexpected transaction UUID")
 
     def _read_content(self):
         """Parse RX buffer for content (private method).

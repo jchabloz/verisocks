@@ -42,14 +42,12 @@ def setup_test(port, timeout, capture_output=True,
     return pop
 
 
-@pytest.fixture
-def vs():
+@pytest.fixture(params=[True, False])
+def vs(request):
     # Setup
     port = find_free_port()
-    # flog = open("vsl.log", "w")
-    # pop = setup_test(port, VS_TIMEOUT, False, flog)
     pop = setup_test(port, VS_TIMEOUT)
-    _vs = Verisocks(HOST, port)
+    _vs = Verisocks(HOST, port, use_uuid=request.param)
     _vs.connect()
     yield _vs
     # Teardown
@@ -59,7 +57,6 @@ def vs():
         logging.warning("Connection error - Cannot send finish command")
     _vs.close()
     pop.communicate(timeout=10)
-    # flog.close()
 
 
 def test_connect(vs):
