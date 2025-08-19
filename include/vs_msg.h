@@ -63,6 +63,8 @@ extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 
 #define VS_MSG_INFO_INIT_UNDEF {VS_MSG_UNDEFINED, 0u, {0u, VS_UUID_NULL}}
 #define VS_MSG_INFO_INIT_JSON  {VS_MSG_TXT_JSON,  0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_TXT   {VS_MSG_TXT,       0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_BIN   {VS_MSG_BIN,       0u, {0u, VS_UUID_NULL}}
 
 /**
  * @brief Transaction UUID type
