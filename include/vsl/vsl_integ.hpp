@@ -195,6 +195,7 @@ private:
     int fd_server_socket {-1};     //File descriptor, server socket
     int fd_client_socket {-1};     //File descriptor, connected client socket
     bool _is_connected {false};    //Socket connection status
+    vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
 
     /* Callbacks management */
     bool b_has_time_callback {false};
@@ -434,7 +435,7 @@ void VslInteg<T>::main_connect() {
     timeout.tv_sec = num_timeout_sec;
     timeout.tv_usec = 0;
 
-    vs_log_mod_debug(
+    vs_log_mod_info(
         "vsl",
         "Waiting for a client to connect (%ds timeout) ...",
         (int) timeout.tv_sec);
@@ -457,18 +458,23 @@ template<typename T>
 void VslInteg<T>::main_wait() {
     char read_buffer[4096];
     int msg_len;
-    msg_len = vs_msg_read(fd_client_socket,
-                          read_buffer,
-                          sizeof(read_buffer));
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
+
+    msg_len = vs_msg_read(
+        fd_client_socket, read_buffer, sizeof(read_buffer), &msg_info);
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
-        vs_log_mod_debug(
+        vs_log_mod_info(
             "vsl",
             "Lost connection. Waiting for a client to (re-)connect ..."
         );
         _state = VSL_STATE_CONNECT;
         return;
+    }
+    uuid.valid = msg_info.uuid.valid;
+    if (uuid.valid) {
+        memcpy(uuid.value, msg_info.uuid.value, VS_UUID_LEN);
     }
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
@@ -477,7 +483,7 @@ void VslInteg<T>::main_wait() {
             "Received message longer than RX buffer, discarding it"
         );
         vs_msg_return(fd_client_socket, "error",
-            "Message too long - Discarding");
+            "Message too long - Discarding", &uuid);
         return;
     }
     else {
@@ -487,7 +493,7 @@ void VslInteg<T>::main_wait() {
     if (nullptr != p_cmd) {
         cJSON_Delete(p_cmd);
     }
-    p_cmd = vs_msg_read_json(read_buffer);
+    p_cmd = vs_msg_read_json(read_buffer, &msg_info);
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;
@@ -498,7 +504,7 @@ void VslInteg<T>::main_wait() {
 content. Discarding it."
     );
     vs_msg_return(fd_client_socket, "error",
-        "Invalid message content - Discarding");
+        "Invalid message content - Discarding", &uuid);
     return;
 }
 
@@ -516,7 +522,7 @@ void VslInteg<T>::main_process() {
     if (nullptr == p_item_cmd) {
         vs_log_mod_error("vsl", "Command field invalid/not found");
         vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.");
+            "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -526,7 +532,7 @@ void VslInteg<T>::main_process() {
     if (nullptr == c_str_cmd) {
         vs_log_mod_error("vsl", "Command field invalid");
         vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.");
+            "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -535,7 +541,7 @@ void VslInteg<T>::main_process() {
     if (str_cmd.empty() == true) {
         vs_log_mod_error("vsl", "Command field empty/null");
         vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.");
+            "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -552,7 +558,7 @@ void VslInteg<T>::main_process() {
     vs_log_mod_error("vsl", "Handler for command %s not found",
         str_cmd.c_str());
     vs_msg_return(fd_client_socket, "error",
-        "Could not find handler for command. Discarding.");
+        "Could not find handler for command. Discarding.", &uuid);
     _state = VSL_STATE_WAITING;
     return;
 }
@@ -577,7 +583,8 @@ void VslInteg<T>::main_sim() {
         if (check_value_callback()) {
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
-                "Reached callback - Getting back to Verisocks main loop");
+                "Reached callback - Getting back to Verisocks main loop",
+                &uuid);
             _state = VSL_STATE_WAITING;
             return;
         }
@@ -595,7 +602,8 @@ void VslInteg<T>::main_sim() {
             //p_model->eval(); //TBC
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
-                "Reached callback - Getting back to Verisocks main loop");
+                "Reached callback - Getting back to Verisocks main loop",
+                &uuid);
             _state = VSL_STATE_WAITING;
             return;
         }
@@ -607,7 +615,7 @@ void VslInteg<T>::main_sim() {
     expecting a return message... in this case, an error is returned */
     if (has_callback()) {
         vs_msg_return(fd_client_socket, "error",
-            "Exiting Verisocks due to end of simulation");
+            "Exiting Verisocks due to end of simulation", &uuid);
     }
     _state = VSL_STATE_SIM_FINISH;
     return;

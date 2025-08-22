@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,9 @@ SOFTWARE.
 #define VS_VPI_H
 
 #include "vpi_config.h"
+#include "vs_msg.h"
 #include "cJSON.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +50,8 @@ typedef enum {
     VS_VPI_STATE_PROCESSING,    ///Processing a command
     VS_VPI_STATE_SIM_RUNNING,   ///Simulation running
     VS_VPI_STATE_EXIT,          ///Exiting Verisocks
-    VS_VPI_STATE_ERROR          ///Error state (e.g. timed out while waiting for a connection)
+    VS_VPI_STATE_ERROR,         ///Error state (e.g. timed out while waiting for a connection)
+    VS_VPI_STATE_ENUM_LEN
 } vs_vpi_state_t;
 
 /**
@@ -63,6 +66,7 @@ typedef struct vs_vpi_data {
     cJSON *p_cmd;           ///Pointer to current/latest command
     vpiHandle h_cb;         ///Callback handle (used for value change callback)
     s_vpi_value value;      ///Value (used for value change callback)
+    vs_uuid_t uuid;         ///Current transaction UUID
 } vs_vpi_data_t;
 
 /**
@@ -79,9 +83,11 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data);
  * @param fd I/O descriptor (client)
  * @param str_type Type
  * @param str_value Value
+ * @param p_uuid Pointer to UUID structure (valid or not)
  * @return Returns 0 if successful, -1 if an error occurred
  */
-int vs_vpi_return(int fd, const char *str_type, const char *str_value);
+int vs_vpi_return(int fd, const char *str_type, const char *str_value,
+    const vs_uuid_t *p_uuid);
 
 extern PLI_INT32 verisocks_cb(p_cb_data cb_data);
 extern PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);

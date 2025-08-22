@@ -125,7 +125,9 @@ VS_VPI_CMD_HANDLER(run_for_time)
     vs_vpi_log_warning(
         "Error processing command run(for_time) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding");
+        "Error processing command run - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -200,7 +202,9 @@ VS_VPI_CMD_HANDLER(run_until_time)
     vs_vpi_log_warning(
         "Error processing command run(until_time) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding");
+        "Error processing command run - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -305,7 +309,9 @@ VS_VPI_CMD_HANDLER(run_until_change)
     vs_vpi_log_warning(
         "Error processing command run(until_change) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding");
+        "Error processing command run - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -344,6 +350,8 @@ VS_VPI_CMD_HANDLER(run_to_next)
     vs_vpi_log_warning(
         "Error processing command run(to_next) - Discarding");
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding");
+        "Error processing command run - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }

@@ -49,19 +49,46 @@ enum vs_msg_content_type {
     VS_MSG_TXT = 0,
     VS_MSG_TXT_JSON,
     VS_MSG_BIN,
+    VS_MSG_UNDEFINED,
     VS_MSG_ENUM_LEN //Don't use as a content type! Used to track number of entries.
 };
 
 extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 #define VS_CMP_TYPE(str, num_type) (strcmp(str, VS_MSG_TYPES[num_type]) == 0)
 
+#define VS_UUID_NULL {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+#define VS_UUID_STR_FMT "%02hhx%02hhx%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx"
+#define VS_UUID_LEN 16u
+#define VS_UUID_STR_LEN 37u
+
+#define VS_MSG_INFO_INIT_UNDEF {VS_MSG_UNDEFINED, 0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_JSON  {VS_MSG_TXT_JSON,  0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_TXT   {VS_MSG_TXT,       0u, {0u, VS_UUID_NULL}}
+#define VS_MSG_INFO_INIT_BIN   {VS_MSG_BIN,       0u, {0u, VS_UUID_NULL}}
+
+/**
+ * @brief Transaction UUID type
+ * 
+ * This structure is used to define a type for a transaction UUID. If the valid
+ * flag is > 0, the value member corresponds to a 16-byte UUID value.
+ */
+typedef struct vs_uuid {
+    uint8_t valid; /// Validity flag. If > 0, the value field gives an UUID
+    uint8_t value[VS_UUID_LEN];
+} vs_uuid_t;
+
+
 /**
  * @brief Message info structure
  */
 typedef struct vs_msg_info {
-    enum vs_msg_content_type type; //Content type
-    size_t len; //Message content length
+    enum vs_msg_content_type type; /// Content type
+    size_t len; /// Message content length
+	vs_uuid_t uuid; /// Transaction UUID, if valid
 } vs_msg_info_t;
+
+
+void vs_msg_copy_uuid(vs_msg_info_t *p_msg_info, const vs_uuid_t *p_uuid);
 
 /**
  * @brief Returns the header for a message.
@@ -82,7 +109,8 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
  *
  * @param p_msg Pointer the message content. Depending on the type, a pointer to
  * a cJSON struct is expected.
- * @param msg_info Message information (type and length)
+ * @param p_msg_info Message information (type and length). Pointer to
+ * vs_msg_info_t struct.
  * @return char* Formatted message string.
  * @warning The returned formatted message includes a 2-byte pre-header
  * corresponding to the length of the header directly represented as a binary
@@ -92,7 +120,7 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info);
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
+char* vs_msg_create_message(const void *p_msg, vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Returns a fully formatted message with JSON content, including header
@@ -104,7 +132,8 @@ char* vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info);
  * @warning The function uses malloc() to reserve a memory block for the
  * returned string. To be freed accordingly if needed.
  */
-char* vs_msg_create_json_message_from_string(const char *str_message);
+char* vs_msg_create_json_message_from_string(const char *str_message,
+    vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a partial or full message to get the header length.
@@ -134,16 +163,18 @@ int vs_msg_read_info(const char *message, vs_msg_info_t *p_msg_info);
  * @return String/byte array. Returns a NULL pointer in case of error.
  * @note Returned array allocated dynamically (malloc).
  */
-char* vs_msg_read_content(const char* message, vs_msg_info_t *p_msg_info);
+char* vs_msg_read_content(const char* message,
+                          const vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Scans a message and extract its JSON payload.
  *
  * @param message Formatted message, including pre-header, header and payload.
+ * @param p_msg_info Pointer to header information structure.
  * @return cJSON* Pointer to a cJSON struct with the message payload. Returns
  * NULL pointer in case of an error.
  */
-cJSON* vs_msg_read_json(const char *message);
+cJSON* vs_msg_read_json(const char* message,const vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Write a formatted message to the given descriptor.
@@ -161,9 +192,11 @@ int vs_msg_write(int fd, const char *str_msg);
  * @param fd I/O descriptor (client)
  * @param str_type Type
  * @param str_value Value
+ * @param pointer to UUID struct
  * @return Returns 0 if successful, -1 if an error occurred
  */
-int vs_msg_return(int fd, const char *str_type, const char *str_value);
+int vs_msg_return(int fd, const char *str_type, const char *str_value,
+	const vs_uuid_t *p_uuid);
 
 /**
  * @brief Reads formatted message from the given descriptor.
@@ -173,10 +206,12 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value);
  * @param len Size of buffer. If the message to read is longer than the buffer,
  * the buffer is filled to its max (without null termination guaranteed!) and
  * the function returns -1.
+ * @param p_msg_info Pointer to a vs_msg_info_t struct. The function will
+ * populate the structure with information from the message header.
  * @return Returns message length (total length, not limited to buffer depth)
  * if successful or -1 if an error occurred.
  */
-int vs_msg_read(int fd, char *buffer, size_t len);
+int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
 
 #ifdef __cplusplus
 }

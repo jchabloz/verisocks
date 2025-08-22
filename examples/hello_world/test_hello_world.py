@@ -55,3 +55,4 @@ if __name__ == "__main__":
     setup_test()
     with Verisocks(HOST, PORT) as vs_cli:
         test_hello_world(vs_cli)
+        vs_cli.finish()

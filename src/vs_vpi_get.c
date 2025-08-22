@@ -66,6 +66,8 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 {
     cJSON *p_msg;
     char *str_msg = NULL;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -113,14 +115,7 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         goto error;
     }
 
-    #ifndef __cplusplus
-    str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-    #else
-    str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
-    #endif
-
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -142,7 +137,9 @@ VS_VPI_CMD_HANDLER(get_sim_info)
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=sim_info) - Discarding");
+        "Error processing command get(sel=sim_info) - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -151,6 +148,8 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     cJSON *p_msg;
     char *str_msg = NULL;
     double sim_time_sec;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -175,13 +174,8 @@ VS_VPI_CMD_HANDLER(get_sim_time)
         vs_log_mod_error("vs_vpi", "Could not add number to object");
         goto error;
     }
-    #ifndef __cplusplus
-    str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-    #else
-    str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
-    #endif
+
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -203,7 +197,9 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=sim_time) - Discarding");
+        "Error processing command get(sel=sim_time) - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -213,6 +209,8 @@ VS_VPI_CMD_HANDLER(get_value)
     cJSON *p_item_path;
     char *str_msg = NULL;
     char *str_path;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -290,13 +288,7 @@ VS_VPI_CMD_HANDLER(get_value)
     }
 
     /* Create message */
-    #ifndef __cplusplus
-    str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-    #else
-    str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
-    #endif
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -318,7 +310,9 @@ VS_VPI_CMD_HANDLER(get_value)
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=value) - Discarding");
+        "Error processing command get(sel=value) - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }
 
@@ -328,6 +322,8 @@ VS_VPI_CMD_HANDLER(get_type)
     cJSON *p_item_path;
     char *str_path;
     char *str_msg = NULL;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
     p_msg = cJSON_CreateObject();
@@ -365,13 +361,7 @@ VS_VPI_CMD_HANDLER(get_type)
         goto error;
     }
 
-    #ifndef __cplusplus
-    str_msg = vs_msg_create_message(p_msg,
-        (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
-    #else
-    str_msg = vs_msg_create_message(p_msg,
-        vs_msg_info_t{VS_MSG_TXT_JSON, 0});
-    #endif
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
         goto error;
@@ -393,6 +383,8 @@ VS_VPI_CMD_HANDLER(get_type)
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=value) - Discarding");
+        "Error processing command get(sel=value) - Discarding",
+        &(p_data->uuid)
+    );
     return -1;
 }

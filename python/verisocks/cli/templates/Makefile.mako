@@ -1,5 +1,9 @@
 <%page
 args = "
+	target_file,
+	config_file,
+	tb_file,
+	vlt_file,
 	prefix,
 	top,
 	verilog_src_files,
@@ -8,9 +12,19 @@ args = "
 	verilator_path = '/usr/local/bin/verilator',
 	verilator_root = '/usr/local/share/verilator',
 	use_tracing = False,
-	use_fst = True
+	use_fst = True,
+	log_level = 'info'
 "
 />\
+<%
+LOG_LEVELS = {
+	"debug":    "$(LOG_LEVEL_DEBUG)",
+	"info":     "$(LOG_LEVEL_INFO)",
+	"warning":  "$(LOG_LEVEL_WARNING)",
+	"error":    "$(LOG_LEVEL_ERROR)",
+	"critical": "$(LOG_LEVEL_CRITICAL)"
+}
+%>\
 # Note: This file has been generated from the template ${template_filename}
 #*****************************************************************************
 # Configuration
@@ -64,9 +78,37 @@ TB_CPP_SRCS = \\
 VL_OBJ_DIR = vl_obj_dir
 VSL_BUILD_DIR = vsl_build
 
-VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
+VS_LOG_LEVEL = ${LOG_LEVELS[log_level]}
+
+#*****************************************************************************
+# Top rule
+#*****************************************************************************
+% if vlt_file:
+all: ${target_file} ${tb_file} ${vlt_file} default
+% else:
+all: ${target_file} ${tb_file} default
+% endif
+
+#*****************************************************************************
+# Wizard-generated files
+#*****************************************************************************
+${target_file}: ${config_file}
+	@echo "Re-generating Makefile"
+	vsl-wizard --makefile-only --makefile $@ $<
+
+${tb_file}: ${config_file}
+	@echo "Re-generating top-level testbench file"
+	vsl-wizard --tb-only --testbench-file $@ $<
+
+% if vlt_file:
+${vlt_file}: ${config_file}
+	@echo "Re-generating variables file"
+	vsl-wizard --vlt-only --variables-file $@ $<
+% endif
 
 #*****************************************************************************
 # Include generic Makefile
 #*****************************************************************************
 include $(VSL_DIR)/include/vsl/vsl.mk
+
+.PHONY: all

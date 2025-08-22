@@ -7,17 +7,14 @@ VERILATOR_ROOT ?= /usr/local/share/verilator
 VSL_DIR ?= ../../..
 
 # Design prefix
-VM_PREFIX = Vspi_master_tb
+VM_PREFIX = hello_world
 
 # Top module
-VL_TOP = spi_master_tb
+VL_TOP = hello_world_tb
 
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \
-	variables.vlt \
-	../spi_slave.v \
-	../spi_master.v \
-	../spi_master_tb.v
+	../hello_world_tb.v
 
 # Testbench C++ source files
 TB_CPP_SRCS = \
@@ -32,7 +29,7 @@ VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
 #*****************************************************************************
 # Top rule
 #*****************************************************************************
-all: Makefile test_main.cpp variables.vlt default
+all: Makefile test_main.cpp default
 
 #*****************************************************************************
 # Wizard-generated files
@@ -45,9 +42,6 @@ test_main.cpp: config.yaml
 	@echo "Re-generating top-level testbench file"
 	vsl-wizard --tb-only --testbench-file $@ $<
 
-variables.vlt: config.yaml
-	@echo "Re-generating variables file"
-	vsl-wizard --vlt-only --variables-file $@ $<
 
 #*****************************************************************************
 # Include generic Makefile

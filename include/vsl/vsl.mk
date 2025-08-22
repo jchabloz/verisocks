@@ -29,7 +29,7 @@ VSL_BUILD_DIR ?= vsl_build
 #*****************************************************************************
 VL_FLAGS = --cc --timing
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
-VL_FLAGS += --top $(VL_TOP)
+VL_FLAGS += --top $(VL_TOP) --prefix $(VM_PREFIX)
 VL_FLAGS += $(VL_USER_FLAGS)
 
 #*****************************************************************************
@@ -114,7 +114,7 @@ link_deps = $(link_args) $(VSL_HEADERS)
 $(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
-.PHONY: clean verilate
+.PHONY: default clean verilate
 clean:
 	$(RM) -r $(VSL_BUILD_DIR)
 	$(RM) -r $(VL_OBJ_DIR)

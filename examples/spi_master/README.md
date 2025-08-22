@@ -20,7 +20,8 @@ The example folder contains the following files:
 ## Trigger an SPI transaction from Python
 
 The main point of the example is to demonstrate how to use Verisocks to drive
-an SPI transaction. You will see that this is actually extremely easy. The used principle requires the following components:
+an SPI transaction. You will see that this is actually extremely easy. The used
+principle requires the following components:
 
 1. A verilog task
 2. A verilog named event

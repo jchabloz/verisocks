@@ -9,10 +9,10 @@ CFLAGS += -DVS_LOG_LEVEL=100
 LDFLAGS += -lcunit
 
 BUILDDIR = build
-INCDIRS = -I../include -I../cjson
+INCDIRS = -I../include
 SRC_FILES = ../src/vs_msg.c ../src/vs_server.c
 TEST_SRC_FILES = src/test_vs_msg.c src/test_vs_server.c
-LIBSRC_FILES = ../cjson/cJSON.c
+LIBSRC_FILES = ../src/cJSON.c
 
 xml_file = $(BUILDDIR)/CUnitAutomated-Results.xml
 xsl_file = /usr/share/CUnit/CUnit-Run.xsl

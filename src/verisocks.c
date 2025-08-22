@@ -6,7 +6,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ SOFTWARE.
 #include <unistd.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <string.h>
 
 #include "verisocks.h"
 #include "vs_logging.h"
@@ -38,6 +39,8 @@ SOFTWARE.
 #include "vs_server.h"
 #include "vs_msg.h"
 #include "vs_vpi.h"
+
+#define READ_BUFFER_SIZE 4096
 
 /* Prototypes for some static functions */
 static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
@@ -151,6 +154,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpiHandle h_cb_eos;
     uint32_t s_addr;
     socklen_t len;
+    uint8_t null_uuid_value[VS_UUID_LEN] = VS_UUID_NULL;
 
     if (NULL != user_data) {
         vs_vpi_log_warning("Expected NULL pointer (not used)");
@@ -204,6 +208,8 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->p_cmd = NULL;
     p_vpi_data->h_cb = 0;
     p_vpi_data->value = default_value;
+    p_vpi_data->uuid.valid = 0u;
+    memcpy(&p_vpi_data->uuid.value, null_uuid_value, VS_UUID_LEN);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
     /* Create and bind server socket */
@@ -301,7 +307,9 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
-        "Reached callback - Getting back to Verisocks main loop");
+        "Reached callback - Getting back to Verisocks main loop",
+        &(p_vpi_data->uuid)
+    );
 
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
@@ -363,7 +371,9 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
-        "Reached callback - Getting back to Verisocks main loop");
+        "Reached callback - Getting back to Verisocks main loop",
+        &(p_vpi_data->uuid)
+    );
 
     /* Call verisocks main loop */
     p_vpi_data->state = VS_VPI_STATE_WAITING;
@@ -404,7 +414,9 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     if ((VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) ||
         (VS_VPI_STATE_PROCESSING == p_vpi_data->state)) {
         vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-            "Exiting Verisocks due to end of simulation");
+            "Exiting Verisocks due to end of simulation",
+            &(p_vpi_data->uuid)
+        );
     }
 
     /* Clean-up and exit */
@@ -528,11 +540,14 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
  */
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
-    char read_buffer[4096];
+    char read_buffer[READ_BUFFER_SIZE];
     int msg_len;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
+
     msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
                           read_buffer,
-                          sizeof(read_buffer));
+                          sizeof(read_buffer),
+                          &msg_info);
 
     if (0 > msg_len) {
         close(p_vpi_data->fd_client_socket);
@@ -542,13 +557,23 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
         p_vpi_data->state = VS_VPI_STATE_CONNECT;
         return 0;
     }
+
+    /* Update VPI data with transaction UUID if present */
+    p_vpi_data->uuid.valid = msg_info.uuid.valid;
+    if (msg_info.uuid.valid > 0) {
+        vs_vpi_log_debug("Valid UUID present in header");
+        memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, VS_UUID_LEN);
+    }
+
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
         vs_vpi_log_warning(
             "Received message longer than RX buffer, discarding it"
         );
         vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-            "Message too long - Discarding");
+            "Message too long - Discarding",
+            &(p_vpi_data->uuid)
+        );
         return -1;
     }
     else {
@@ -556,7 +581,7 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
     }
     vs_vpi_log_debug("Message: %s", &read_buffer[2]);
     if (NULL != p_vpi_data->p_cmd) cJSON_Delete(p_vpi_data->p_cmd);
-    p_vpi_data->p_cmd = vs_msg_read_json(read_buffer);
+    p_vpi_data->p_cmd = vs_msg_read_json(read_buffer, &msg_info);
     if (NULL != p_vpi_data->p_cmd) {
         p_vpi_data->state = VS_VPI_STATE_PROCESSING;
         return 0;
@@ -564,6 +589,8 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
     vs_vpi_log_warning("Received message content cannot be interpreted as a \
 valid JSON content. Discarding it.");
     vs_vpi_return(p_vpi_data->fd_client_socket, "error",
-        "Invalid message content - Discarding");
+        "Invalid message content - Discarding",
+        &(p_vpi_data->uuid)
+    );
     return 0;
 }

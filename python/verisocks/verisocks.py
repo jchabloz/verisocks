@@ -1,9 +1,32 @@
+# MIT License
+#
+# Copyright (c) 2022-2025 Jérémie Chabloz
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import socket
 import logging
 import struct
 import json
 from enum import Enum, auto
 from time import sleep
+from uuid import UUID, uuid4
 
 
 class VsRxState(Enum):
@@ -47,6 +70,9 @@ class Verisocks:
             :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
             being used. This value can be overriden by the method's own
             ``delay`` argument.
+        use_uuid (bool): Use transactions UUID. If true (default), an UUID
+            number will be added to the request header and will be verified to
+            match when the corresponding answer is received.
 
     Note:
         For certain methods, a specific timeout value can be passed as
@@ -59,7 +85,7 @@ class Verisocks:
     READ_BUFFER_LEN = 4096
 
     def __init__(self, host="127.0.0.1", port=5100, timeout=120.0,
-                 connect_trials=10, connect_delay=0.05):
+                 connect_trials=10, connect_delay=0.05, use_uuid=True):
         """Verisocks class constructor
         """
         # Connection address and status
@@ -73,6 +99,8 @@ class Verisocks:
             self.sock.settimeout(timeout)
         self.connect_trials = connect_trials
         self.connect_delay = connect_delay
+        self.use_uuid = use_uuid
+        self.uuid = None
 
         # RX variables
         self._rx_buffer = b""
@@ -228,10 +256,20 @@ class Verisocks:
             "content-type",
             "content-encoding"
         ]
+        if self.use_uuid:
+            header_keys.append("uuid")
         for k in header_keys:
             if k not in self.rx_header:
                 raise ValueError(f"Missing required header field '{k}'.")
         self._rx_state = VsRxState.RX_HDR
+
+        if self.use_uuid:
+            self.rx_uuid = UUID(self.rx_header['uuid'])
+            if (self.rx_uuid != self.uuid):
+                raise VerisocksError("Inconsistent transaction UUID values")
+        else:
+            if "uuid" in self.rx_header:
+                raise VerisocksError("Unexpected transaction UUID")
 
     def _read_content(self):
         """Parse RX buffer for content (private method).
@@ -295,6 +333,11 @@ class Verisocks:
                 "content-encoding": content_encoding,
                 "content-length": len(content_bytes)
             }
+
+        # Transaction UUID
+        if self.use_uuid:
+            self.uuid = uuid4()
+            json_header['uuid'] = self.uuid.urn.split(":")[-1]
         message_header = self._json_encode(json_header, "utf-8")
 
         # Adjust pre-header

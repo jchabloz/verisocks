@@ -23,8 +23,10 @@ module hello_world_tb();
 
     initial begin
 
+		`ifndef VERILATOR
         /* Launch Verisocks server after other initialization */
         $verisocks_init(`VS_NUM_PORT, `VS_TIMEOUT);
+		`endif
 
         /* Make sure that the simulation finishes after a while... */
         #1000

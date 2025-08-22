@@ -50,7 +50,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get) {
 
     auto handle_error = [&vx]() {
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get - Discarding");
+            "Error processing command get - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -84,7 +84,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get) {
     vs_log_mod_error("vsl", "Handler for sub-command %s not found",
         sel_key.c_str());
     vs_msg_return(vx.fd_client_socket, "error",
-        "Could not find handler for command. Discarding.");
+        "Could not find handler for command. Discarding.", &vx.uuid);
     vx._state = VSL_STATE_WAITING;
     return;
 }
@@ -96,6 +96,8 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
     cJSON *p_msg;
     char *str_msg = nullptr;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &vx.uuid);
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
@@ -103,7 +105,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=sim_info) - Discarding");
+            "Error processing command get(sel=sim_info) - Discarding",
+			&vx.uuid);
     };
 
     /* Create return message object */
@@ -154,8 +157,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
         handle_error();
         return;
     }
-    str_msg = vs_msg_create_message(
-        p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
 
     if (nullptr == str_msg) {
         vs_log_mod_error("vsl", "NULL pointer");
@@ -182,6 +184,8 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
     cJSON *p_msg;
     char *str_msg = nullptr;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &vx.uuid);
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
@@ -189,7 +193,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=sim_time) - Discarding");
+            "Error processing command get(sel=sim_time) - Discarding",
+			&vx.uuid);
     };
 
     /* Create return message object */
@@ -219,8 +224,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
         return;
     }
 
-    str_msg = vs_msg_create_message(p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});
-
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (nullptr == str_msg) {
         vs_log_mod_error("vsl", "nullptr pointer");
         handle_error();
@@ -248,6 +252,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
     cJSON *p_msg;
     cJSON *p_item_path;
     char *str_msg = nullptr;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &vx.uuid);
 
     /* Lambda function - error handler */
     auto handle_error = [&](){
@@ -255,7 +261,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=value) - Discarding");
+            "Error processing command get(sel=value) - Discarding", &vx.uuid);
     };
 
     /* Create return message object */
@@ -368,7 +374,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
             return;
     }
 
-    str_msg = vs_msg_create_message(p_msg, vs_msg_info_t{VS_MSG_TXT_JSON, 0});
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
 
     if (nullptr == str_msg) {
         vs_log_mod_error("vsl", "NULL pointer");

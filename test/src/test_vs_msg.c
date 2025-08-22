@@ -120,24 +120,28 @@ void test_vs_msg_create_header_wrong_type(void)
     CU_ASSERT_PTR_NULL(p_header);
 }
 
-void test_vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
+void test_vs_msg_create_message(const void *p_msg, vs_msg_info_t *p_msg_info)
 {
     char *str_msg;
-    str_msg = vs_msg_create_message(p_msg, msg_info);
+    str_msg = vs_msg_create_message(p_msg, p_msg_info);
     CU_ASSERT_PTR_NOT_NULL(str_msg);
 
-    vs_msg_info_t msg_info_read;
+    //vs_msg_info_t msg_info_read = {VS_MSG_UNDEFINED, 0u, {0u, VS_UUID_NULL}};
+	//msg_info_read.type = p_msg_info->type;
 
-    if (VS_MSG_TXT_JSON == msg_info.type) {
-        cJSON *p_msg_read = vs_msg_read_json(str_msg);
+    if (VS_MSG_TXT_JSON == p_msg_info->type) {
+        //cJSON *p_msg_read = vs_msg_read_json(str_msg, &msg_info_read);
+        cJSON *p_msg_read = vs_msg_read_json(str_msg, p_msg_info);
         CU_ASSERT_PTR_NOT_NULL(p_msg_read);
         CU_ASSERT(cJSON_Compare(p_msg, p_msg_read, cJSON_True));
         cJSON_Delete(p_msg_read);
     } else {
-        char *str_msg_read = vs_msg_read_content(str_msg, &msg_info_read);
+        //char *str_msg_read = vs_msg_read_content(str_msg, &msg_info_read);
+        char *str_msg_read = vs_msg_read_content(str_msg, p_msg_info);
         CU_ASSERT_PTR_NOT_NULL(str_msg_read);
-        if (VS_MSG_TXT == msg_info.type) CU_ASSERT_STRING_EQUAL((char *) p_msg, str_msg_read);
-        if (VS_MSG_BIN == msg_info.type) CU_ASSERT_NSTRING_EQUAL(p_msg, str_msg_read, msg_info.len);
+        if (VS_MSG_TXT == p_msg_info->type) CU_ASSERT_STRING_EQUAL((char *) p_msg, str_msg_read);
+        if (VS_MSG_BIN == p_msg_info->type) CU_ASSERT_NSTRING_EQUAL(
+			p_msg, str_msg_read, p_msg_info->len);
         free(str_msg_read);
     }
     free(str_msg);
@@ -145,23 +149,28 @@ void test_vs_msg_create_message(const void *p_msg, vs_msg_info_t msg_info)
 
 void test_vs_msg_create_message_json(void)
 {
-    test_vs_msg_create_message(p_msg_json, (vs_msg_info_t) {VS_MSG_TXT_JSON, 0});
+	vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_UUID_NULL}};
+    test_vs_msg_create_message(p_msg_json, &msg_info);
 }
 
 void test_vs_msg_create_message_text(void)
 {
-    test_vs_msg_create_message(str_msg_text, (vs_msg_info_t) {VS_MSG_TXT, 0});
+	vs_msg_info_t msg_info = {VS_MSG_TXT, 0u, {0u, VS_UUID_NULL}};
+    test_vs_msg_create_message(p_msg_json, &msg_info);
 }
 
 void test_vs_msg_create_message_bin(void)
 {
-    test_vs_msg_create_message(msg_bin, (vs_msg_info_t) {VS_MSG_BIN, msg_bin_len});
+	vs_msg_info_t msg_info = {VS_MSG_BIN, msg_bin_len, {0u, VS_UUID_NULL}};
+    test_vs_msg_create_message(p_msg_json, &msg_info);
 }
 
 void test_vs_msg_create_json_message_from_string(void)
 {
     char *str_msg;
-    str_msg = vs_msg_create_json_message_from_string(str_msg_json_string);
+	vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_UUID_NULL}};
+    str_msg = vs_msg_create_json_message_from_string(
+		str_msg_json_string, &msg_info);
     CU_ASSERT_PTR_NOT_NULL(str_msg);
 
     vs_msg_info_t msg_info_read;
@@ -186,7 +195,7 @@ void test_vs_msg_read_write_loopback(void)
     vs_msg_info_t msg_info;
     msg_info.type = VS_MSG_TXT_JSON;
     msg_info.len = 0;
-    str_msg = vs_msg_create_message(p_msg_json, msg_info);
+    str_msg = vs_msg_create_message(p_msg_json, &msg_info);
     CU_ASSERT_PTR_NOT_NULL(str_msg);
 
     /* Write message to file descriptor */
@@ -196,10 +205,10 @@ void test_vs_msg_read_write_loopback(void)
     /* Read back message from file descriptor */
     retval = (int) lseek(fd_test, 0, SEEK_SET); //Reset descriptor position to start of file
     CU_ASSERT_EQUAL(0, retval);
-    retval = vs_msg_read(fd_test, read_buffer, read_buffer_len);
+    retval = vs_msg_read(fd_test, read_buffer, read_buffer_len, &msg_info);
     CU_ASSERT(0 < retval);
 
-    cJSON *p_msg_read = vs_msg_read_json(read_buffer);
+    cJSON *p_msg_read = vs_msg_read_json(read_buffer, &msg_info);
     CU_ASSERT_PTR_NOT_NULL(p_msg_read);
     CU_ASSERT(cJSON_Compare(p_msg_json, p_msg_read, cJSON_True));
     cJSON_Delete(p_msg_read);

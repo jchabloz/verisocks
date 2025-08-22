@@ -43,7 +43,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
     /* Error handler lambda function */
     auto handle_error = [&]() {
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run - Discarding");
+            "Error processing command run - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -76,7 +76,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
     vs_log_mod_error("vsl", "Handler for sub-command %s not found",
         cb_key.c_str());
     vs_msg_return(vx.fd_client_socket, "error",
-        "Could not find handler for sub-command. Discarding.");
+        "Could not find handler for sub-command. Discarding.", &vx.uuid);
     vx._state = VSL_STATE_WAITING;
     return;
 }
@@ -89,7 +89,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
         vs_log_mod_warning(
             "vsl", "Error processing command run(for_time) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run(for time) - Discarding");
+            "Error processing command run(for time) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -161,7 +161,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_to_next) {
         vs_log_mod_warning(
             "vsl", "Error processing command run(to_next) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run(to_next) - Discarding");
+            "Error processing command run(to_next) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -192,7 +192,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
         vs_log_mod_warning(
             "vsl", "Error processing command run(until_time) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run(until_time) - Discarding");
+            "Error processing command run(until_time) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
@@ -257,7 +257,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
         vs_log_mod_warning(
             "vsl", "Error processing command run(until_change) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run(until_change) - Discarding");
+            "Error processing command run(until_change) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 

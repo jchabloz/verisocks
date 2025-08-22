@@ -14,6 +14,7 @@ module main;
 parameter integer int_param = 598402;  //Used only for tests
 parameter real fclk = 1.01; //MHz
 
+reg enable;
 reg clk;
 reg [7:0] count;
 reg [7:0] count_memory [0:15];
@@ -22,12 +23,14 @@ event counter_end;
 
 /* Note: Cannot use always @* otherwise Verilator bugs out */
 always @(clk)
-    clk <= #(1/fclk/2.0) ~clk;
+	clk <= #(1/fclk/2.0) ~clk;
 
 always @(posedge(clk)) begin
-    count <= count + 1;
-    mem_pointer <= mem_pointer + 1;
-    count_memory[mem_pointer] <= count;
+	if (enable) begin
+    	count <= count + 1;
+    	mem_pointer <= mem_pointer + 1;
+    	count_memory[mem_pointer] <= count;
+	end
 end
 
 always @(count)
@@ -54,8 +57,11 @@ initial begin
     `else
     clk = 1'b0;
     `endif
+    enable = 1'b0;
     count = 8'd0;
     mem_pointer = 4'd0;
+
+	#0.1 enable = 1'b1;
 
     #1000 $display("INFO [Top]: Simulation finished");
     $finish(0);
