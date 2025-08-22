@@ -70,7 +70,9 @@ class Verisocks:
             :py:meth:`connect()<verisocks.verisocks.Verisocks.connect>` is
             being used. This value can be overriden by the method's own
             ``delay`` argument.
-        use_uuid (bool): Use transactions UUID
+        use_uuid (bool): Use transactions UUID. If true (default), an UUID
+            number will be added to the request header and will be verified to
+            match when the corresponding answer is received.
 
     Note:
         For certain methods, a specific timeout value can be passed as

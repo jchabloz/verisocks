@@ -10,7 +10,7 @@ project = 'Verisocks'
 copyright = '2023-2025, Jérémie Chabloz'
 author = 'Jérémie Chabloz'
 version = '1.4'
-release = '1.4.0-dev'
+release = '1.4.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -69,6 +69,10 @@ The chosen frame format contains in order:
         ``UTF-8`` currently supported (supporting encodings other than system's
         default is a nightmare with the GNU standard C library).
       * ``content-length``: Length in bytes of the variable-length payload.
+      * ``uuid`` (optional): Unique identifier for the transaction, following
+        :rfc:`4122` (UUID). This field can be used by clients to match requests
+        and responses. This field shall be a field formatted with the RFC's
+        specified URN format (see example below).
 
   For example, the following constitutes a valid Verisocks header (assuming
   that the following payload is indeed 110-byte long):
@@ -78,10 +82,11 @@ The chosen frame format contains in order:
     {
       "content-type": "application/json",
       "content-encoding": "UTF-8",
-      "content-length": 110
+      "content-length": 110,
+      "uuid": "8aca5d03-3120-410c-8909-080bed5e9c2f"
     }
 
-3. **Variable-length payload**
+1. **Variable-length payload**
 
   * *Type*: As specified in the header's ``content-type`` field.
   * *Encoding*: As specified in the header's ``content-encoding`` field.
