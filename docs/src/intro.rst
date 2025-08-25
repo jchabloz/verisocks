@@ -58,11 +58,19 @@ linker argument:
 Install the Python client
 -------------------------
 
-In order to use the provided Python client, you can directly and easily install
-it from the downloaded verisocks repository using :code:`pip`. Remember that ît
-is considered best practice to use `virtual environments
-<https://docs.python.org/3/glossary.html#term-virtual-environment>`_ in order
-not to impact your system's Python packages.
+In order to use the provided reference Python client, you can directly and
+easily install it using :code:`pip`. Remember that it is considered best
+practice to use `virtual environments
+<https://docs.python.org/3/glossary.html#term-virtual-environment>`_.
+
+.. code-block:: sh
+
+	python -m venv <path to your virtual environment folder>
+	source <path to your virtual environment folder>/bin/activate
+	pip install verisocks
+
+Alternatively, if you cloned the full git repository, you can directly install
+it from the downloaded source:
 
 .. code-block:: sh
 
