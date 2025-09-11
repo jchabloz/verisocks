@@ -1,3 +1,30 @@
+/***************************************************************************//**
+ @file vsl_integ.hpp
+ @brief Verisocks integration header for Verilator-based simulation control.
+
+ This header defines the `vsl::VslInteg` template class, which provides a
+ top-level interface for integrating Verisocks with a Verilated model. It
+ implements a finite-state machine (FSM) to manage socket communication,
+ command processing, and simulation control.
+
+ Features:
+ - Socket server setup and client connection management.
+ - Command and sub-command handler registration and dispatch.
+ - Registration and access of Verilated variables (scalars, arrays,
+   parameters, events).
+ - Callback management for simulation time and value changes.
+ - Main FSM for simulation lifecycle: initialization, connection, command
+   processing, simulation running, and graceful shutdown.
+
+ Usage:
+ - Instantiate `VslInteg<T>` with your Verilated model type.
+ - Register variables and events to expose them to Verisocks commands.
+ - Call `run()` to start the FSM and handle remote commands.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 MIT License
 
@@ -41,10 +68,19 @@ SOFTWARE.
 
 
 /**
- * @brief Helper macro to declare a command handler function
+ * @brief Helper macro to declare a command handler function prototype
+ *
+ * As part of all command handler function prototypes, a `vsl::VslInteg` object
+ * is passed by reference.
+ *
  * @param cmd Command short name
  */
 #define VSL_CMD_HANDLER(cmd) VSL_ ## cmd ## _cmd_handler(VslInteg& vx)
+
+/**
+ * @brief Helper macro that is replaced by a command handler function name
+ * @param cmd Command short name
+ */
 #define VSL_CMD_HANDLER_NAME(cmd) VSL_ ## cmd ## _cmd_handler
 
 
@@ -55,30 +91,36 @@ namespace vsl{
  * @brief Internal state values for the VSL finite-state machine
  */
 enum VslState {
-    VSL_STATE_INIT,        ///Initial state, Verisocks server socket not initialized
-    VSL_STATE_CONNECT,     ///Socket created, bound to address, waiting for connection
-    VSL_STATE_WAITING,     ///Connected and waiting to receive next command
-    VSL_STATE_PROCESSING,  ///Processing a command
-    VSL_STATE_SIM_RUNNING, ///Simulation running
-    VSL_STATE_SIM_FINISH,  ///Finish simulation
-    VSL_STATE_EXIT,        ///Exiting Verisocks
-    VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
+    VSL_STATE_INIT,        ///<Initial state, Verisocks server socket not initialized
+    VSL_STATE_CONNECT,     ///<Socket created, bound to address, waiting for connection
+    VSL_STATE_WAITING,     ///<Connected and waiting to receive next command
+    VSL_STATE_PROCESSING,  ///<Processing a command
+    VSL_STATE_SIM_RUNNING, ///<Simulation running
+    VSL_STATE_SIM_FINISH,  ///<Finish simulation
+    VSL_STATE_EXIT,        ///<Exiting Verisocks
+    VSL_STATE_ERROR        ///<Error state (e.g. timed out while waiting for a connection)
 };
 
 /**
  * @class VslInteg
  * @brief Top-level class to use for using Verisocks with Verilator
  *
+ * This class is a template which takes as parameter the verilated model class.
+ *
  * @tparam T Model class
- * @param p_model Pointer to the Verilated model instance.
- * @param port The port number to be used. Default is 5100.
- * @param timeout The timeout duration in seconds. Default is 120.
  */
 template<typename T>
 class VslInteg {
 
 public:
 
+    /**
+     * @brief Construct a new VslInteg object
+     *
+     * @param p_model Pointer to the Verilated model instance.
+     * @param port The port number to be used. Default is 5100.
+     * @param timeout The timeout duration in seconds. Default is 120.
+     */
     VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
@@ -699,7 +741,7 @@ Utility functions
 ******************************************************************************/
 /**
  * @brief Get Verilated variable from path
- * 
+ *
  * @param str_path Variable path
  * @return (VerilatedVar*) Pointer to variable
  */

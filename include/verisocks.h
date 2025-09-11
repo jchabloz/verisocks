@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2025 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,7 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data);
 /** Specific runtime callback (value_change) */
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
 
+/** VPI register function */
 void verisocks_register_tf();
 
 #ifdef __cplusplus

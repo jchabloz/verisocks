@@ -1,3 +1,8 @@
+/**************************************************************************//**
+@file vsl_types.cpp
+@author jchabloz
+@brief Types for Verisocks Verilator integration
+******************************************************************************/
 /*
 Copyright (c) 2025 Jérémie Chabloz
 
@@ -49,6 +54,17 @@ static inline void __set_array_value(std::any &datap, double value, size_t index
     std::any_cast<T*>(datap)[index] = static_cast<T>(value);
 }
 
+/**
+ * @brief Retrieves the value of the variable as a double.
+ *
+ * This method returns the value stored in the VslVar instance, converted to a double.
+ * The returned value depends on the variable's type (`type`) and value type (`vltype`):
+ * - For scalar and parameter types, the underlying value is cast to double.
+ * - For event types, returns 1.0 if the event is triggered, otherwise 0.0.
+ * - For unsupported or non-scalar types, returns 0.0.
+ *
+ * @return The value of the variable as a double, or 0.0 if the type is unsupported.
+ */
 double VslVar::get_value() {
     switch (type) {
         case VSL_TYPE_SCALAR:

@@ -1,3 +1,22 @@
+/***************************************************************************//**
+ @file vsl_utils.hpp
+ @brief Utility functions and structures for Verilator-based simulation
+ support.
+ 
+ This header provides utility functions for handling simulation time units,
+ conversions between integer and real time values based on simulation
+ context, and parsing of array range expressions in variable paths. It also
+ defines a structure to represent sub-ranges of arrays for convenient access.
+ 
+ Functions include:
+ - Validation of time unit identifiers.
+ - Conversion between simulation time representations (integer/double).
+ - Detection and parsing of array range expressions in variable paths.
+ 
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 Copyright (c) 2024-2025 Jérémie Chabloz
 
@@ -68,10 +87,10 @@ uint64_t double_to_time(
  * @brief Struct to support accessing sub-ranges of arrays
  */
 struct VslArrayRange {
-    size_t left;    ///Left index value in the [left:right] range operator
-    size_t right;   ///Right index value in the [left:right] range operator
-    int8_t incr;    ///Increment value when iterating from right to left
-    std::string array_name; ///Array path name without [ ] operator
+    size_t left;    ///<Left index value in the [left:right] range operator
+    size_t right;   ///<Right index value in the [left:right] range operator
+    int8_t incr;    ///<Increment value when iterating from right to left
+    std::string array_name; ///<Array path name without [ ] operator
 };
 
 /**
