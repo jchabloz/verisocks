@@ -59,6 +59,7 @@ SOFTWARE.
 #include "verilated.h"
 #include "verilated_syms.h"
 #include "vsl/vsl_types.hpp"
+#include "vsl/vsl_clocks.hpp"
 
 #include <cstdio>
 #include <functional>
@@ -229,6 +230,7 @@ private:
     sub_cmd_handlers_map {};
 
     VslVarMap var_map {};          //Map of Verilator variables
+    VslClockMap clock_map {};      //Map of clock variables
 
     T* p_model;                    //Pointer to verilated model instance
     VerilatedContext* p_context;   //Pointer to Verilator context

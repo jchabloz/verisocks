@@ -1,3 +1,11 @@
+/***************************************************************************//**
+ @file vsl_types.hpp
+ @brief Types definitions for Verisocks Verilator integration.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 Copyright (c) 2025 Jérémie Chabloz
 
@@ -37,13 +45,14 @@ namespace vsl {
  * @brief Variable types
  */
 enum VslType {
-    VSL_TYPE_SCALAR,        //Scalar variable type
-    VSL_TYPE_ARRAY,         //Array variable type (dimension = 2)
-    VSL_TYPE_MDARRAY,       //Multi-dimensional array variable type (dimension > 2)
-    VSL_TYPE_EVENT,         //Event variable type
-    VSL_TYPE_PARAM,         //Parameter type (assumed to be scalar)
-    VSL_TYPE_NOT_SUPPORTED, //Not supported variable type
-    VSL_TYPE_UNKNOWN        //Unknown variable type
+    VSL_TYPE_SCALAR,        ///<Scalar variable type
+    VSL_TYPE_CLOCK,         ///<Clock variable type
+    VSL_TYPE_ARRAY,         ///<Array variable type (dimension = 2)
+    VSL_TYPE_MDARRAY,       ///<Multi-dimensional array variable type (dimension > 2)
+    VSL_TYPE_EVENT,         ///<Event variable type
+    VSL_TYPE_PARAM,         ///<Parameter type (assumed to be scalar)
+    VSL_TYPE_NOT_SUPPORTED, ///<Not supported variable type
+    VSL_TYPE_UNKNOWN        ///<Unknown variable type
 };
 
 /**
@@ -53,23 +62,26 @@ enum VslType {
  * This class encapsulates a variable with its associated metadata and provides
  * methods to get and set its value.
  *
- * @param namep Pointer to the name of the variable.
- * @param datap Pointer to the data of the variable.
- * @param vltype Type of the variable as defined by VerilatedVarType.
- * @param type Type of the variable as defined by VslType.
- * @param dims Number of dimensions of the variable (default is 0).
- * @param depth Depth of the variable (default is 0).
  */
 class VslVar {
 public:
 
-    /* Default constructor*/
+    /* Default constructor */
     VslVar() = default;
 
     /* Default destructor */
     virtual ~VslVar() = default;
 
-    /* Constructor */
+    /**
+    * @brief Constructor for class VslVar
+    * 
+    * @param namep Pointer to the name of the variable.
+    * @param datap Pointer to the corresponding Verilator variable.
+    * @param vltype Type of the variable as defined by VerilatedVarType.
+    * @param type Type of the variable as defined by VslType.
+    * @param dims Number of dimensions of the variable (default is 0).
+    * @param depth Depth of the variable (default is 0).
+    */
     VslVar(const char* namep, std::any datap, VerilatedVarType vltype,
         VslType type, size_t dims, size_t width, size_t depth) :
         namep {namep}, datap {datap}, vltype {vltype}, type {type},

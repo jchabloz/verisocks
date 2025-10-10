@@ -15,6 +15,7 @@ include/vpi_config.h
 obj_dir/
 vl_obj_dir/
 cvcsim
+docs/doxygen
 
 # autoconf files
 config.status

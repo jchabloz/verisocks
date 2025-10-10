@@ -32,11 +32,11 @@ SOFTWARE.
 #define VS_LOGGING_H
 
 /* Define logging levels values */
-#define LEVEL_DEBUG 10
-#define LEVEL_INFO 20
-#define LEVEL_WARNING 30
-#define LEVEL_ERROR 40
-#define LEVEL_CRITICAL 50
+#define LEVEL_DEBUG 10      ///< Logging level "debug"
+#define LEVEL_INFO 20       ///< Logging level "info"
+#define LEVEL_WARNING 30    ///< Logging level "warning"
+#define LEVEL_ERROR 40      ///< Logging level "error"
+#define LEVEL_CRITICAL 50   ///< Logging level "critical"
 
 /* Define default logging level */
 #ifndef VS_LOG_LEVEL
