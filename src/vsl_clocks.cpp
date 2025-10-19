@@ -69,6 +69,11 @@ namespace vsl{
         }
     }
 
+    void VslClock::enable(VerilatedContext* const p_context) {
+        uint64_t time = p_context->time();
+        enable(time);
+    }
+
     void VslClock::disable() {
         b_is_enabled = false;
     }
@@ -95,20 +100,21 @@ namespace vsl{
     }
 
     void VslClockMap::add_clock(const char* namep, std::any datap) {
-        clock_map[namep] = VslClock {namep, datap, 0, 0.5};
+        clock_map[std::string{namep}] = VslClock {namep, datap, 0, 0.5};
     };
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
         const uint64_t period, const double duty_cycle)
     {
-        clock_map[namep] = VslClock {namep, datap, period, duty_cycle};
+        clock_map[std::string{namep}] = VslClock {
+            namep, datap, period, duty_cycle};
     };
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
         const double period, const char* unit, const double duty_cycle,
         VerilatedContext* const p_context)
     {
-        clock_map[namep] = VslClock {
+        clock_map[std::string{namep}] = VslClock {
             namep, datap, period, unit, duty_cycle, p_context};
     };
 

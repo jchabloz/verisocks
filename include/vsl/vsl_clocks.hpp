@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include "vsl/vsl_types.hpp"
 #include <string>
-#include <algorithm>
+#include <list>
 
 namespace vsl {
 
@@ -117,6 +117,15 @@ public:
     void enable(const uint64_t time);
 
     /**
+     * @brief Enable clock
+     * 
+     * If the clock is already enabled, this method won't have any effect.
+     * 
+     * @param p_context Pointer to the current simulation context
+     */
+    void enable(VerilatedContext* const p_context);
+
+    /**
      * @brief Disable clock
      */
     inline void disable();
@@ -197,7 +206,8 @@ public:
 
 
 private:
-    std::map<std::string, VslClock> clock_map;
+    // std::map<std::string, VslClock> clock_map;
+    std::list<VslClock> clock_list;
 
 };
 
