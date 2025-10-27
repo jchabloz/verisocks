@@ -64,11 +64,12 @@ public:
         {
             set_period(period, duty_cycle);
             set_value(0);
+            enable(0ul); // Enable by default
         };
 
     /**
      * @brief Constructs a new Vsl Clock object
-     * 
+     *
      * @param namep Variable name
      * @param datap Pointer to Verilator variable
      * @param period Period in real value
@@ -83,6 +84,7 @@ public:
         {
             set_period(period, unit, duty_cycle, p_context);
             set_value(0);
+            enable(0ul); // Enable by default
         };
 
     /**
@@ -95,7 +97,7 @@ public:
 
     /**
      * @brief Set the clock period and duty cycle
-     * 
+     *
      * @param period Period real value
      * @param unit Period time unit
      * @param duty_cycle Duty cycle
@@ -109,18 +111,18 @@ public:
 
     /**
      * @brief Enable clock
-     * 
+     *
      * If the clock is already enabled, this function won't have any effect.
-     * 
+     *
      * @param time Time from which the clock has to be enabled
      */
     void enable(const uint64_t time);
 
     /**
      * @brief Enable clock
-     * 
+     *
      * If the clock is already enabled, this method won't have any effect.
-     * 
+     *
      * @param p_context Pointer to the current simulation context
      */
     void enable(VerilatedContext* const p_context);
@@ -132,40 +134,53 @@ public:
 
     /**
      * @brief Evaluate (toggle) clock if relevant
-     * 
+     *
      * If the provided time value corresponds to the time at which the time is
      * expected to toggle, it shall be toggled. Otherwise, nothing shall
      * happen. If relevant, the next event time and the cycles counter is
      * incremented at each falling edge.
-     * 
+     *
      * @param time Simulator time value
+     * @return Evaluation status:
+     * @return -1: Error case (clock outdated!)
+     * @return  0: no evaluation
+     * @return  1: rising edge event evaluated
+     * @return  2: falling edge event evaluated
      */
-    void eval(const uint64_t time);
+    int eval(const uint64_t time);
 
     /**
      * @brief Evaluate (toggle) clock if relevant in context
-     * 
+     *
      * @param p_context Pointer to current simulation context
+     * @return Evaluation status:
+     * @return -1: Error case (clock outdated!)
+     * @return  0: no evaluation
+     * @return  1: rising edge event evaluated
+     * @return  2: falling edge event evaluated
      */
-    void eval(VerilatedContext* const p_context);
+    inline int eval(VerilatedContext* const p_context) {
+        return eval(p_context->time());
+    };
 
     /**
      * @brief Return clock current status
-     * 
-     * @return true The clock is enabled
-     * @return false The clock is disabled
+     *
+     * @return true: The clock is enabled
+     * @return false: The clock is disabled
      */
-    inline bool is_enabled() {return b_is_enabled;};
+    inline bool is_enabled() const {return b_is_enabled;};
 
     /**
      * @brief Get next event time
-     * 
-     * @return uint64_t Next event time
+     *
+     * @return Simulation time at next event for the given clock
      */
-    inline uint64_t get_next_event() {return next_event_time;};
+    inline uint64_t get_next_event() const {return next_event_time;};
 
     // Define < operator to allow using sorting algorithms
     bool operator<(const VslClock& other) const {
+        if (!b_is_enabled) return false; // Disabled clocks at the back
         return next_event_time < other.next_event_time;
     }
 
@@ -189,26 +204,61 @@ public:
     VslClockMap() = default;
     virtual ~VslClockMap() = default;
 
+    /**
+     * @brief Add (register) a clock variable
+     * 
+     * @param namep Name of the clock
+     * @param datap Pointer to the corresponding Verilator variable.
+     */
     void add_clock(const char* namep, std::any datap);
 
+    /**
+     * @brief Add (register) a clock variable
+     * 
+     * @param namep Name of the clock
+     * @param datap Pointer to the corresponding Verilator variable.
+     * @param period Period of the clock given (in simulation time)
+     * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
+     */
     void add_clock(const char* namep, std::any datap, const uint64_t period,
         const double duty_cycle);
 
+    /**
+     * @brief Add (register) a clock variable
+     * 
+     * @param namep Name of the clock
+     * @param datap Pointer to the corresponding Verilator variable.
+     * @param period Period of the clock
+     * @param unit Time unit used for the clock period parameter
+     * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
+     */
     void add_clock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
         VerilatedContext* const p_context);
 
-    /* TODO
-     * Get next event time
-     * Get clock w/ next event or with specific time
-     * 
-     */
+    uint64_t get_next_event();
 
+    /**
+     * @brief Evaluate all clocks at a given simulation time
+     *
+     * @param time Simulation time
+     * @return Total count of evaluated clocks
+     */
+    int eval(uint64_t time);
+
+    /**
+     * @brief Evaluate all clocks within a given simulation context
+     *
+     * @param p_context Pointer to simulation context
+     * @return Total count of evaluated clocks
+     */
+    inline int eval(VerilatedContext* const p_context) {
+        return eval(p_context->time());
+    };
 
 private:
-    // std::map<std::string, VslClock> clock_map;
-    std::list<VslClock> clock_list;
 
+    std::list<VslClock> clock_list;
 };
 
 } // namespace vsl

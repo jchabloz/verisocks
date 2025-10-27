@@ -75,7 +75,7 @@ public:
     /**
     * @brief Constructor for class VslVar
     * 
-    * @param namep Pointer to the name of the variable.
+    * @param namep Name of the variable.
     * @param datap Pointer to the corresponding Verilator variable.
     * @param vltype Type of the variable as defined by VerilatedVarType.
     * @param type Type of the variable as defined by VslType.

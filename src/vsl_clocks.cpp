@@ -31,10 +31,11 @@ SOFTWARE.
 #include "vsl/vsl_clocks.hpp"
 #include "vsl/vsl_utils.hpp"
 
-#include <cmath>
-
 namespace vsl{
 
+    /***************************************************************************
+    VslClock class methods
+    ***************************************************************************/
     int VslClock::set_period(const uint64_t period, const double duty_cycle)
     {
         if (0 == period) {return -1;}
@@ -76,47 +77,73 @@ namespace vsl{
 
     void VslClock::disable() {
         b_is_enabled = false;
+        prev_event_time = 0ul;
+        next_event_time = 0ul;
     }
 
-    void VslClock::eval(const uint64_t time) {
-        if (b_is_enabled && (time == next_event_time)) {
+    int VslClock::eval(const uint64_t time) {
+        if (!b_is_enabled || time < next_event_time) {return 0;}
+        if (time == next_event_time) {
             prev_event_time = next_event_time;
             if (0.0 == get_value()) {
                 // Rising edge
                 set_value(1.0);
                 next_event_time += period_high;
-            } else {
-                // Falling edge
-                set_value(0.0);
-                next_event_time += period_low;
-                cycles_counter += 1;
+                return 1;
             }
+            // Falling edge
+            set_value(0.0);
+            next_event_time += period_low;
+            cycles_counter += 1;
+            return 2;
         }
+        // Error case: clock is enabled but time is > than the next event!
+        return -1;
     }
 
-    void VslClock::eval(VerilatedContext* const p_context) {
-        uint64_t time = p_context->time();
-        eval(time);
-    }
-
+    /***************************************************************************
+    VslClockMap class methods
+    ***************************************************************************/
     void VslClockMap::add_clock(const char* namep, std::any datap) {
-        clock_map[std::string{namep}] = VslClock {namep, datap, 0, 0.5};
-    };
+        clock_list.push_front(VslClock {namep, datap, 0, 0.5});
+        clock_list.sort();
+    }
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
         const uint64_t period, const double duty_cycle)
     {
-        clock_map[std::string{namep}] = VslClock {
-            namep, datap, period, duty_cycle};
-    };
+        clock_list.push_front(
+            VslClock {namep, datap, period, duty_cycle});
+        clock_list.sort();
+    }
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
         const double period, const char* unit, const double duty_cycle,
         VerilatedContext* const p_context)
     {
-        clock_map[std::string{namep}] = VslClock {
-            namep, datap, period, unit, duty_cycle, p_context};
-    };
+        clock_list.push_front(
+            VslClock {namep, datap, period, unit, duty_cycle, p_context});
+        clock_list.sort();
+    }
+
+    uint64_t VslClockMap::get_next_event() {
+        // !! Assumes that the clocks list is already sorted
+        auto it = clock_list.begin();
+        return it->get_next_event();
+    }
+
+    int VslClockMap::eval(uint64_t time) {
+        // !! Assumes that the clocks list is already sorted
+        int total_evals;
+        int eval_status;
+        do {
+            auto it = clock_list.begin();
+            eval_status = it->eval(time);
+            if (eval_status > 0) {total_evals++;}
+            clock_list.sort();
+        } while (eval_status > 0);
+        return total_evals;
+    }
 
 } // namespace vsl
 // EOF
