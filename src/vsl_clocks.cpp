@@ -36,13 +36,13 @@ namespace vsl{
     /***************************************************************************
     VslClock class methods
     ***************************************************************************/
-    int VslClock::set_period(const uint64_t period, const double duty_cycle)
+    int VslClock::set_period(const vsl_time_t period, const double duty_cycle)
     {
         if (0 == period) {return -1;}
         if (0.0 >= duty_cycle || 1.0 <= duty_cycle) {return -1;}
         this->period = period;
         this->duty_cycle = duty_cycle;
-        period_high = static_cast<uint64_t>(
+        period_high = static_cast<vsl_time_t>(
             duty_cycle*static_cast<double>(period));
         period_low = period - period_high;
         return 0;
@@ -52,14 +52,14 @@ namespace vsl{
         const double duty_cycle, VerilatedContext* const p_context)
     {
         if (check_time_unit(unit) && 0.0 < period) {
-            uint64_t period_int = double_to_time(period, unit, p_context);
+            vsl_time_t period_int = double_to_time(period, unit, p_context);
             set_period(period_int, duty_cycle);
             return 0;
         }
         return -1;
     }
 
-    void VslClock::enable(const uint64_t time) {
+    void VslClock::enable(const vsl_time_t time) {
         if (!b_is_enabled) {
             if (0 < period_low && 0 < period_high) {
                 cycles_counter = 0u; // Reset events counter
@@ -71,7 +71,7 @@ namespace vsl{
     }
 
     void VslClock::enable(VerilatedContext* const p_context) {
-        uint64_t time = p_context->time();
+        vsl_time_t time = p_context->time();
         enable(time);
     }
 
@@ -81,7 +81,7 @@ namespace vsl{
         next_event_time = 0ul;
     }
 
-    int VslClock::eval(const uint64_t time) {
+    int VslClock::eval(const vsl_time_t time) {
         if (!b_is_enabled || time < next_event_time) {return 0;}
         if (time == next_event_time) {
             prev_event_time = next_event_time;
@@ -110,7 +110,7 @@ namespace vsl{
     }
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
-        const uint64_t period, const double duty_cycle)
+        const vsl_time_t period, const double duty_cycle)
     {
         clock_list.push_front(
             VslClock {namep, datap, period, duty_cycle});
@@ -126,16 +126,16 @@ namespace vsl{
         clock_list.sort();
     }
 
-    uint64_t VslClockMap::get_next_event() {
+    vsl_time_t VslClockMap::get_next_event() {
         // !! Assumes that the clocks list is already sorted
         auto it = clock_list.begin();
         return it->get_next_event();
     }
 
-    int VslClockMap::eval(uint64_t time) {
+    int VslClockMap::eval(vsl_time_t time) {
         // !! Assumes that the clocks list is already sorted
-        int total_evals;
-        int eval_status;
+        unsigned int total_evals = 0;
+        int eval_status = 0;
         do {
             auto it = clock_list.begin();
             eval_status = it->eval(time);

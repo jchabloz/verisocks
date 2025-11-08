@@ -36,9 +36,21 @@ SOFTWARE.
 
 namespace vsl {
 
+using vsl_time_t = uint64_t;
+
 /**
  * @class VslClock
  * @brief Class that represents a clock variable
+ *
+ * In order to use verilator without the --timing option, it is necessary to
+ * have a verilated design that does not contain any time-dependency and whose
+ * state evolution only depends on changes on its various inputs, such as e.g.
+ * clocks. In order to get a most efficient way to design a top-level C++
+ * testbench environments, it would be recommended to have all non-clock inputs
+ * evaluated synchronously with any periodic clock such that the resulting
+ * compiled model is purely cycle-based. In order to improve the model
+ * efficiency it is also crucial to avoid having to drive the clock signals
+ * with verisocks commands.
  */
 class VslClock : VslVar {
 
@@ -49,7 +61,7 @@ public:
     /**
     * @brief Constructs a new Vsl Clock object
     *
-    * The oscillator period is expected to provided as an integer, simulator
+    * The oscillator period is expected to be provided as an integer, simulator
     * time. The conversion from a real time value can be done using vsl_utils
     * double_to_time function.
     *
@@ -58,7 +70,7 @@ public:
     * @param period Period in integer simulator time
     * @param duty_cycle Duty cycle
     */
-    VslClock(const char* namep, std::any datap, const uint64_t period,
+    VslClock(const char* namep, std::any datap, const vsl_time_t period,
         const double duty_cycle) :
         VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
         {
@@ -93,7 +105,7 @@ public:
     * @return 0 No errors
     * @return -1 Errors
     */
-    int set_period(const uint64_t period, const double duty_cycle);
+    int set_period(const vsl_time_t period, const double duty_cycle);
 
     /**
      * @brief Set the clock period and duty cycle
@@ -116,7 +128,7 @@ public:
      *
      * @param time Time from which the clock has to be enabled
      */
-    void enable(const uint64_t time);
+    void enable(const vsl_time_t time);
 
     /**
      * @brief Enable clock
@@ -147,7 +159,7 @@ public:
      * @return  1: rising edge event evaluated
      * @return  2: falling edge event evaluated
      */
-    int eval(const uint64_t time);
+    int eval(const vsl_time_t time);
 
     /**
      * @brief Evaluate (toggle) clock if relevant in context
@@ -176,7 +188,7 @@ public:
      *
      * @return Simulation time at next event for the given clock
      */
-    inline uint64_t get_next_event() const {return next_event_time;};
+    inline vsl_time_t get_next_event() const {return next_event_time;};
 
     // Define < operator to allow using sorting algorithms
     bool operator<(const VslClock& other) const {
@@ -186,14 +198,14 @@ public:
 
 private:
 
-    bool b_is_enabled {false};     // Enabled flag
-    uint32_t cycles_counter {0u};  // Number of cycles that occured since last enable
-    uint64_t prev_event_time {0u}; // Time of the latest, previous event
-    uint64_t next_event_time {0u}; // Time of the next, upcoming event
-    double duty_cycle {0.5f};      // Duty cycle of the clock (must be >0 and <1)
-    uint64_t period;               // Period (in simulation time unit)
-    uint64_t period_low;           // Low portion of the period
-    uint64_t period_high;          // High portion of the period
+    bool b_is_enabled {false};       // Enabled flag
+    uint32_t cycles_counter {0u};    // Number of cycles that occured since last enable
+    vsl_time_t prev_event_time {0u}; // Time of the latest, previous event
+    vsl_time_t next_event_time {0u}; // Time of the next, upcoming event
+    double duty_cycle {0.5f};        // Duty cycle of the clock (must be >0 and <1)
+    vsl_time_t period;               // Period (in simulation time unit)
+    vsl_time_t period_low;           // Low portion of the period
+    vsl_time_t period_high;          // High portion of the period
 
 };
 
@@ -206,7 +218,7 @@ public:
 
     /**
      * @brief Add (register) a clock variable
-     * 
+     *
      * @param namep Name of the clock
      * @param datap Pointer to the corresponding Verilator variable.
      */
@@ -214,29 +226,35 @@ public:
 
     /**
      * @brief Add (register) a clock variable
-     * 
+     *
      * @param namep Name of the clock
      * @param datap Pointer to the corresponding Verilator variable.
      * @param period Period of the clock given (in simulation time)
      * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
      */
-    void add_clock(const char* namep, std::any datap, const uint64_t period,
+    void add_clock(const char* namep, std::any datap, const vsl_time_t period,
         const double duty_cycle);
 
     /**
      * @brief Add (register) a clock variable
-     * 
+     *
      * @param namep Name of the clock
      * @param datap Pointer to the corresponding Verilator variable.
      * @param period Period of the clock
      * @param unit Time unit used for the clock period parameter
      * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
+     * @param p_context Pointer to Verilator simulation context
      */
     void add_clock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
         VerilatedContext* const p_context);
 
-    uint64_t get_next_event();
+    /**
+     * @brief Get the time at which the next event shall occur for this clock
+     *
+     * @return vsl_time_t Next event (simulation) time
+     */
+    vsl_time_t get_next_event();
 
     /**
      * @brief Evaluate all clocks at a given simulation time
@@ -244,7 +262,7 @@ public:
      * @param time Simulation time
      * @return Total count of evaluated clocks
      */
-    int eval(uint64_t time);
+    int eval(vsl_time_t time);
 
     /**
      * @brief Evaluate all clocks within a given simulation context

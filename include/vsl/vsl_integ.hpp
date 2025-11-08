@@ -147,6 +147,24 @@ public:
     int run();
 
     /**
+     * @brief Register a clock variable
+     * 
+     * @param name Name of the clock
+     * @param datap Pointer to the corresponding Verilator variable
+     * @param period Period of the clock
+     * @param unit Time unit used for the clock period parameter
+     * @param duty_cycle Clock duty cycle
+     * @param p_context Pointer to the Verilator simulation context
+     */
+    inline void register_clock(const char* name, std::any datap,
+        const double period, const char* unit, const double duty_cycle,
+        VerilatedContext* const p_context) {
+            clock_map.add_clock(
+                name, datap, period, unit, duty_cycle, p_context
+            );
+    }
+
+    /**
      * @brief Register a scalar variable
      *
      * This function shall be used from the top-level C++ testbench code in
@@ -643,7 +661,7 @@ void VslInteg<T>::main_sim() {
         /* If there is a time-based callback */
         if (has_time_callback() && (p_model->nextTimeSlot() >= cb_time)) {
             p_context->time(cb_time);
-            //p_model->eval(); //TBC
+            //p_model->eval(); // To be checked
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
                 "Reached callback - Getting back to Verisocks main loop",
