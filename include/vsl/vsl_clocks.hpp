@@ -250,11 +250,20 @@ public:
         VerilatedContext* const p_context);
 
     /**
-     * @brief Get the time at which the next event shall occur for this clock
+     * @brief Checks if any of the registered clock is enabled
+     * 
+     * @return true At least one of the clocks is enabled
+     * @return false None of the clocks are enabled
+     */
+    const bool has_next_event() const;
+
+    /**
+     * @brief Get the time at which the next event shall occur for registered
+     * clocks
      *
      * @return vsl_time_t Next event (simulation) time
      */
-    vsl_time_t get_next_event();
+    const vsl_time_t get_next_event() const;
 
     /**
      * @brief Evaluate all clocks at a given simulation time
@@ -273,6 +282,14 @@ public:
     inline int eval(VerilatedContext* const p_context) {
         return eval(p_context->time());
     };
+
+    /**
+     * @brief Indicates if the list of registered clocks is empty
+     * 
+     * @return true No clock registered
+     * @return false Clocks registered
+     */
+    inline const bool empty() const {return clock_list.empty();}
 
 private:
 

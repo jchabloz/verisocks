@@ -126,8 +126,17 @@ namespace vsl{
         clock_list.sort();
     }
 
-    vsl_time_t VslClockMap::get_next_event() {
-        // !! Assumes that the clocks list is already sorted
+    const bool VslClockMap::has_next_event() const {
+        // Check if any clock is enabled
+        if (clock_list.empty()) {return false;}
+        for (const auto &clock : clock_list) {
+            if (clock.is_enabled()) {return true;}
+        }
+        return false;
+    }
+
+    const vsl_time_t VslClockMap::get_next_event() const {
+        // !! Assumes that the clocks list is not empty and already sorted
         auto it = clock_list.begin();
         return it->get_next_event();
     }
@@ -136,6 +145,7 @@ namespace vsl{
         // !! Assumes that the clocks list is already sorted
         unsigned int total_evals = 0;
         int eval_status = 0;
+        if (clock_list.empty()) {return 0;}
         do {
             auto it = clock_list.begin();
             eval_status = it->eval(time);
