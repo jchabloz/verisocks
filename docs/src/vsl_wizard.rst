@@ -68,6 +68,8 @@ are paths can be relative to the configuration file location.
       use_tracing: <bool>       # If true, tracing is enabled
       use_fst: <bool>           # (optional if use_tracing is false) If true,
                                 # the FST format is used for the traces file
+      use_timing: <bool>        # (optional) If true (default), the sources are
+                                # verilated with the timing option
       log_level: <text>         # (optional) Logging level
                                 # [info, debug, warning, error, critical]
     variables:                  # (optional) Public variables

@@ -16,6 +16,13 @@ version numbering system (tries and) follows the `semantic versioning
     2. ``MINOR`` version when you add functionality in a backward compatible manner
     3. ``PATCH`` version when you make backward compatible bug fixes
 
+1.5.0 - Ongoing
+***************
+
+* Added ``use_timing`` option to :ref:`CLI wizard script configuration file
+  <sec_vsl_wizard>`
+
+
 1.4.0 - 2025-08-22
 ******************
 
