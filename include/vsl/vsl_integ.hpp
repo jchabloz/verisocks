@@ -423,10 +423,16 @@ int VslInteg<T>::run() {
     std::printf("* Copyright (c) 2024-2025 Jérémie Chabloz *\n");
     std::printf("*******************************************\n");
 
+    #ifdef VSL_TIMING
+    vs_log_mod_info("vsl", "Verilated with timing extension");
+    #else
+    vs_log_mod_info("vsl", "Verilated without timing extension");
+    #endif
+
     while(true) {
         switch (_state) {
         case VSL_STATE_INIT:
-            p_model->eval(); //Initial model evaluation
+            eval(); //Initial model evaluation
             main_init();
             break;
         case VSL_STATE_CONNECT:
@@ -668,6 +674,16 @@ void VslInteg<T>::main_sim() {
 
         /* If no more pending events remaining ... finish simulation */
         if (!has_events_pending()) {
+            if (has_time_callback()) {
+                p_context->time(cb_time);
+                clear_callbacks();
+                vs_msg_return(fd_client_socket, "ack",
+                    "Reached callback without other events pending",
+                    &uuid
+                );
+                _state = VSL_STATE_WAITING;
+                return;
+            }
             vs_log_mod_warning(
                 "vsl", "Exiting without $finish; no events left");
             break;
@@ -725,12 +741,16 @@ const bool VslInteg<T>::has_events_pending() const {
 
 template<typename T>
 const vsl_time_t VslInteg<T>::next_event_time() const {
+    #ifdef VSL_TIMING
     if (clock_map.has_next_event()) {
         if (clock_map.get_next_event() <= p_model->nextTimeSlot()) {
             return clock_map.get_next_event();
         }
     }
     return p_model->nextTimeSlot();
+    #else
+        return clock_map.get_next_event();
+    #endif
 }
 
 /******************************************************************************

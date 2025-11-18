@@ -119,9 +119,9 @@ option is being used)")
 
     if render_makefile:
         if 'variables' in cfg:
-            vlt_file=str(args.variables_file)
+            vlt_file = str(args.variables_file)
         else:
-            vlt_file=None
+            vlt_file = None
         render_template(template_mk, args.makefile,
                         target_file=str(args.makefile),
                         config_file=str(args.config),

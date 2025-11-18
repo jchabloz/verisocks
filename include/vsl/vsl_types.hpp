@@ -261,10 +261,17 @@ public:
      * @param str_path The string path to check in the var_map.
      * @return true if the string path exists in the var_map, false otherwise.
      */
-    const bool has_var(const std::string& str_path) {
+    const bool has_var(const std::string& str_path) const {
         if (var_map.count(str_path) > 0) return true;
         return false;
     }
+
+    /**
+     * @brief Checks if the variables map is empty
+     *
+     * @return bool True if the variable map is empty
+     */
+    inline const bool empty() const {return var_map.empty();}
 
     /**
      * @brief Retrieves a variable from the variable map.

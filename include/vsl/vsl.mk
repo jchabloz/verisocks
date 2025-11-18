@@ -27,7 +27,7 @@ VSL_BUILD_DIR ?= vsl_build
 #*****************************************************************************
 # Verilation
 #*****************************************************************************
-VL_FLAGS = --cc --timing
+VL_FLAGS = --cc
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP) --prefix $(VM_PREFIX)
 VL_FLAGS += $(VL_USER_FLAGS)
