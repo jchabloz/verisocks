@@ -52,7 +52,7 @@ USER_LDLIBS = -lz
 % else:
 
 # Using VCD traceing
-VL_USER_FLAGS = --trace
+VL_USER_FLAGS += --trace
 VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 % endif
 
