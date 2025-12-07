@@ -676,6 +676,7 @@ void VslInteg<T>::main_sim() {
         if (!has_events_pending()) {
             if (has_time_callback()) {
                 p_context->time(cb_time);
+                eval(); // To be checked
                 clear_callbacks();
                 vs_msg_return(fd_client_socket, "ack",
                     "Reached callback without other events pending",
