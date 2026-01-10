@@ -165,11 +165,9 @@ public:
      * @param period Period of the clock
      * @param unit Time unit used for the clock period parameter
      * @param duty_cycle Clock duty cycle
-     * @param p_context Pointer to the Verilator simulation context
      */
     inline void register_clock(const char* name, std::any datap,
-        const double period, const char* unit, const double duty_cycle,
-        VerilatedContext* const p_context) {
+        const double period, const char* unit, const double duty_cycle) {
             clock_map.add_clock(
                 name, datap, period, unit, duty_cycle, p_context
             );

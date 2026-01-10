@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "vsl/vsl_clocks.hpp"
 #include "vsl/vsl_utils.hpp"
+#include <algorithm>
 
 namespace vsl{
 
@@ -64,8 +65,7 @@ namespace vsl{
             if (0 < period_low && 0 < period_high) {
                 cycles_counter = 0u; // Reset events counter
                 b_is_enabled = true; // Set enabled flag
-                next_event_time = time + period_low;
-                prev_event_time = time;
+                eval(time);
             }
         }
     }
@@ -153,6 +153,23 @@ namespace vsl{
             clock_list.sort();
         } while (eval_status > 0);
         return total_evals;
+    }
+
+    const bool VslClockMap::has_clock(const std::string name) {
+        if (clock_list.empty()) {return false;}
+        auto has_name = [&name](VslClock& clock) {
+            return clock.get_name().compare(name) == 0;
+        };
+        auto it = std::find_if(clock_list.begin(), clock_list.end(), has_name);
+        return it != clock_list.end();
+    }
+
+    VslClock& VslClockMap::get_clock(const std::string name) {
+        auto has_name = [&name](VslClock& clock) {
+            return clock.get_name().compare(name) == 0;
+        };
+        auto it = std::find_if(clock_list.begin(), clock_list.end(), has_name);
+        return *it;
     }
 
 } // namespace vsl

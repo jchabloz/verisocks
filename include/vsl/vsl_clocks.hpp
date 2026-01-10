@@ -52,7 +52,7 @@ using vsl_time_t = uint64_t;
  * efficiency it is also crucial to avoid having to drive the clock signals
  * with verisocks commands.
  */
-class VslClock : VslVar {
+class VslClock : public VslVar {
 
 public:
 
@@ -290,6 +290,25 @@ public:
      * @return false Clocks registered
      */
     inline const bool empty() const {return clock_list.empty();}
+
+    /**
+     * @brief Checks if a clock by a given name exists in the clocks list
+     * 
+     * @param name Name of the clock to search for
+     * @return bool true if the clock by the given name has been found
+     */
+    const bool has_clock(const std::string name);
+
+    /**
+     * @brief Get a registered clock by its name.
+     *
+     * It is recommended to use the function has_clock first in order to verify
+     * that the clock exists.
+     * 
+     * @param name Name of the clock
+     * @return Clock
+     */
+    VslClock& get_clock(const std::string name);
 
 private:
 

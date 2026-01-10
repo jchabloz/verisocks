@@ -174,6 +174,15 @@ public:
     const std::string get_name() { return std::string(namep); }
 
     /**
+     * @brief Compare the variable name with the provided argument
+     * @param name Name against which to test the variable's name
+     * @return True if the variable's name matches
+     */
+    const bool is_named(const std::string name) {
+        return (name.compare(std::string {namep}) == 0);
+    }
+
+    /**
      * @brief Returns the number of dimensions for the variable
      * @return Number of dimensions
      */
