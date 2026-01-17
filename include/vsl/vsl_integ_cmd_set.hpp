@@ -60,7 +60,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         handle_error();
         return;
     }
-
+    
     /* Get the path argument as a string */
     char *cstr_path = cJSON_GetStringValue(p_item_path);
     std::string str_path(cstr_path);
@@ -70,6 +70,17 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         return;
     }
     vs_log_mod_info("vsl", "Command \"set(path=%s)\" received.", cstr_path);
+
+    /* Get (optional) object sel from the JSON message content */
+    cJSON *p_item_sel = cJSON_GetObjectItem(vx.p_cmd, "sel");
+    char *cstr_sel;
+    if (nullptr != p_item_sel) {
+        cstr_sel = cJSON_GetStringValue(p_item_sel);
+        if ((nullptr != cstr_path) && !std::string(str_path).empty()) {
+            vs_log_mod_debug(
+                "vsl", "Selector with value %s received", cstr_sel);
+        }
+    }
 
     /* Check if the provided path contains the [ ] range selection operator*/
     bool path_has_range = has_range(str_path);
@@ -109,7 +120,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
             handle_error();
             return;
         }
-    }    
+    }
 
     cJSON *p_item_val;
     double value {0.0f};
@@ -147,8 +158,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
                     ack = p_var->set_array_value(value, path_range.left);
                 } else {
                     /* Range corresponds to multiple indexes */
-                    cJSON* iterator;             
-                    size_t mem_index = path_range.right;    
+                    cJSON* iterator;
+                    size_t mem_index = path_range.right;
                     cJSON_ArrayForEach(iterator, p_item_val) {
                         value = cJSON_GetNumberValue(iterator);
                         if (0 > p_var->set_array_value(value, mem_index)) {

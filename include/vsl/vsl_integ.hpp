@@ -355,6 +355,9 @@ private:
     static void VSL_CMD_HANDLER(run_until_change);
     static void VSL_CMD_HANDLER(run_to_next);
     static void VSL_CMD_HANDLER(set);
+    // static void VSL_CMD_HANDLER(set_clk_en);
+    // static void VSL_CMD_HANDLER(set_clk_per);
+    // static void VSL_CMD_HANDLER(set_clk_dc);
     static void VSL_CMD_HANDLER(not_supported);
 };
 
@@ -430,7 +433,6 @@ int VslInteg<T>::run() {
     while(true) {
         switch (_state) {
         case VSL_STATE_INIT:
-            eval(); //Initial model evaluation
             main_init();
             break;
         case VSL_STATE_CONNECT:
@@ -505,6 +507,9 @@ void VslInteg<T>::main_init() {
         (socket_address.address & 0x000000ff)
     );
     vs_log_mod_info("vsl", "Port: %d", socket_address.port);
+
+    /* Initial model evaluation*/
+    // eval();
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -674,7 +679,7 @@ void VslInteg<T>::main_sim() {
         if (!has_events_pending()) {
             if (has_time_callback()) {
                 p_context->time(cb_time);
-                eval(); // To be checked
+                // eval();
                 clear_callbacks();
                 vs_msg_return(fd_client_socket, "ack",
                     "Reached callback without other events pending",
@@ -684,14 +689,14 @@ void VslInteg<T>::main_sim() {
                 return;
             }
             vs_log_mod_warning(
-                "vsl", "Exiting without $finish; no events left");
+                "vsl", "Exiting without $finish; no events nor callbacks left");
             break;
         }
 
         /* If there is a time-based callback */
         if (has_time_callback() && (next_event_time() >= cb_time)) {
             p_context->time(cb_time);
-            //eval(); // To be checked
+            // eval(); // To be checked
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
                 "Reached callback - Getting back to Verisocks main loop",
@@ -718,6 +723,7 @@ Main finite state-machine - Simulation finishing
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim_finish() {
+    eval();
     p_model->final();
     p_context->statsPrintSummary();
     _state = VSL_STATE_EXIT;
@@ -735,7 +741,11 @@ void VslInteg<T>::eval() {
 
 template<typename T>
 const bool VslInteg<T>::has_events_pending() const {
+    #ifdef VSL_TIMING
     return p_model->eventsPending() || clock_map.has_next_event();
+    #else
+    return clock_map.has_next_event();
+    #endif
 }
 
 template<typename T>

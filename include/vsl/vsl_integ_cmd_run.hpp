@@ -196,13 +196,18 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_to_next) {
 
     vs_log_mod_info("vsl", "Command \"run(cb=to_next)\" received.");
 
+    /* Evaluate model */
+    vx.eval();
+
     /* Check if next time slot exists */
-    if (!vx.p_model->eventsPending()) {
+    if (!vx.has_events_pending()) {
+        vs_log_mod_warning(
+            "vsl", "No pending event(s) - run(to_next) not possible");
         handle_error();
         return;
     }
 
-    uint64_t cb_time = vx.p_model->nextTimeSlot();
+    uint64_t cb_time = vx.next_event_time();
     if (0 > vx.register_time_callback(cb_time)) {
         handle_error();
         return;
