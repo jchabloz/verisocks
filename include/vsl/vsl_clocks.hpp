@@ -142,7 +142,7 @@ public:
     /**
      * @brief Disable clock
      */
-    inline void disable();
+    void disable();
 
     /**
      * @brief Evaluate (toggle) clock if relevant

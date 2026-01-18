@@ -113,7 +113,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get) {
     vs_log_mod_error("vsl", "Handler for sub-command %s not found",
         sel_key.c_str());
     vs_msg_return(vx.fd_client_socket, "error",
-        "Could not find handler for command. Discarding.", &vx.uuid);
+        "Could not find handler for sub-command. Discarding.", &vx.uuid);
     vx._state = VSL_STATE_WAITING;
     return;
 }

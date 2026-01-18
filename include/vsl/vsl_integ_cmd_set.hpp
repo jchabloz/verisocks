@@ -53,6 +53,39 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         vx._state = VSL_STATE_WAITING;
     };
 
+    /* Get (optional) object sel from the JSON message content
+    If present, a sub-command handler function shall be called.
+    */
+    cJSON *p_item_sel = cJSON_GetObjectItem(vx.p_cmd, "sel");
+    char *cstr_sel;
+    /* If a "sel" parameter is provided ... */
+    if (nullptr != p_item_sel) {
+        cstr_sel = cJSON_GetStringValue(p_item_sel);
+        std::string str_sel(cstr_sel);
+        if ((nullptr != cstr_sel) && !std::string(str_sel).empty()) {
+            vs_log_mod_debug(
+                "vsl", "Selector with value %s received", cstr_sel);
+
+                /* Look up and execute sub-command handler */
+                std::string sel_key = "set_";
+            sel_key.append(str_sel);
+            auto search = vx.sub_cmd_handlers_map.find(sel_key);
+            if (search != vx.sub_cmd_handlers_map.end()) {
+                vx.sub_cmd_handlers_map[sel_key](vx);
+                return;
+            }
+
+            /* Error case - sub-command handler function not found */
+            vs_log_mod_error("vsl", "Handler for sub-command %s not found",
+                sel_key.c_str());
+            vs_msg_return(vx.fd_client_socket, "error",
+                "Could not find handler for sub-command. Discarding.",
+                &vx.uuid);
+                vx._state = VSL_STATE_WAITING;
+                return;
+            }
+        }
+
     /* Get the object path from the JSON message content */
     cJSON *p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
     if (nullptr == p_item_path) {
@@ -60,7 +93,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         handle_error();
         return;
     }
-    
+
     /* Get the path argument as a string */
     char *cstr_path = cJSON_GetStringValue(p_item_path);
     std::string str_path(cstr_path);
@@ -70,17 +103,6 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         return;
     }
     vs_log_mod_info("vsl", "Command \"set(path=%s)\" received.", cstr_path);
-
-    /* Get (optional) object sel from the JSON message content */
-    cJSON *p_item_sel = cJSON_GetObjectItem(vx.p_cmd, "sel");
-    char *cstr_sel;
-    if (nullptr != p_item_sel) {
-        cstr_sel = cJSON_GetStringValue(p_item_sel);
-        if ((nullptr != cstr_path) && !std::string(str_path).empty()) {
-            vs_log_mod_debug(
-                "vsl", "Selector with value %s received", cstr_sel);
-        }
-    }
 
     /* Check if the provided path contains the [ ] range selection operator*/
     bool path_has_range = has_range(str_path);
@@ -95,7 +117,6 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     } else {
         p_var = vx.get_registered_variable(str_path);
     }
-
     /* Attempt to get a pointer to the variable */
     if (nullptr == p_var) {
         vs_log_mod_error(
@@ -181,7 +202,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
             break;
         default:
             vs_log_mod_error(
-                "vsl", "Variable type not support"
+                "vsl", "Variable type not supported"
             );
             handle_error();
             return;
@@ -195,6 +216,87 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     if (nullptr != p_msg) cJSON_Delete(p_msg);
     if (nullptr != str_msg) cJSON_free(str_msg);
     vx._state = VSL_STATE_WAITING;
+    return;
+}
+
+/******************************************************************************
+Set clk_en sub-command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(set_clk_en) {
+
+    /* Lambda function - error handler */
+    auto handle_error = [&](){
+        vx._state = VSL_STATE_WAITING;
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command set(sel=clk_en) - Discarding", &vx.uuid);
+    };
+
+    /* Get the object path from the JSON message content */
+    cJSON *p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
+    if (nullptr == p_item_path) {
+        vs_log_mod_error("vsl", "Command field \"path\" invalid/not found");
+        handle_error();
+        return;
+    }
+
+    /* Get the path argument as a string */
+    char *cstr_path = cJSON_GetStringValue(p_item_path);
+    std::string str_path(cstr_path);
+    if ((nullptr == cstr_path) || std::string(str_path).empty()) {
+        vs_log_mod_error("vsl", "Command field \"path\" NULL or empty");
+        handle_error();
+        return;
+    }
+    vs_log_mod_info(
+        "vsl", "Command \"set(sel=clk_en, path=%s)\" received.", cstr_path);
+
+    /* Make sure clock exists */
+    if (!vx.clock_map.has_clock(str_path)) {
+        vs_log_mod_error("vsl", "Clock %s not found", cstr_path);
+        handle_error();
+        return;
+    }
+
+    // Enable or disable the clock depending on value
+    cJSON *p_item_val;
+    p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
+    if (nullptr == p_item_val) {
+        vs_log_mod_error("vsl", "Command field \"value\" invalid/not found");
+        handle_error();
+        return;
+    }
+
+    double value {0.0f};
+    value = cJSON_GetNumberValue(p_item_val);
+    if (std::isnan(value)) {
+        vs_log_mod_error("vsl", "Command field \"value\" invalid (NaN)");
+        handle_error();
+        return;
+    }
+
+    if (value > 0) {
+        vx.clock_map.get_clock(str_path).enable(vx.p_context);
+        vs_log_mod_debug("vsl", "Clock with path \"%s\" enabled", cstr_path);
+    } else {
+        vx.clock_map.get_clock(str_path).disable();
+        vs_log_mod_debug("vsl", "Clock with path \"%s\" disabled", cstr_path);
+    }
+
+    vs_msg_return(vx.fd_client_socket, "ack",
+        "Processed command \"set(sel=clk_en)\"", &vx.uuid);
+
+    /* Normal exit */
+    vx._state = VSL_STATE_WAITING;
+    return;
+}
+
+/******************************************************************************
+Set clk_cfg sub-command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(set_clk_cfg) {
+
     return;
 }
 
