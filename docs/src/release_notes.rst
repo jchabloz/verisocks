@@ -21,7 +21,9 @@ version numbering system (tries and) follows the `semantic versioning
 
 * Added ``use_timing`` option to :ref:`CLI wizard script configuration file
   <sec_vsl_wizard>`
+* Verilator integration extension: added support for clock signals
 
+  * New C++ api method :cpp:func:`vsl::VslInteg::register_clock`
 
 1.4.0 - 2025-08-22
 ******************

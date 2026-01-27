@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "vsl/vsl_clocks.hpp"
 #include "vsl/vsl_utils.hpp"
+#include "vs_logging.h"
 #include <algorithm>
 
 namespace vsl{
@@ -65,8 +66,14 @@ namespace vsl{
             if (0 < period_low && 0 < period_high) {
                 cycles_counter = 0u; // Reset events counter
                 b_is_enabled = true; // Set enabled flag
-                eval(time);
+                b_wait_dis = false;
+                prev_event_time = time;
+                next_event_time = time + period_high;
+                set_value(1.0);
+                vs_log_mod_debug("vsl_clocks", "Enabled clock");
             }
+        } else {
+            vs_log_mod_debug("vsl_clocks", "Clock already enabled");
         }
     }
 
@@ -76,9 +83,19 @@ namespace vsl{
     }
 
     void VslClock::disable() {
-        b_is_enabled = false;
-        prev_event_time = 0ul;
-        next_event_time = 0ul;
+        if (b_is_enabled) {
+            if (0.0 == get_value()) {
+                next_event_time = 0ul;
+                // prev_event_time = 0ul;
+                b_is_enabled = false;
+                vs_log_mod_debug("vsl_clocks", "Disabled clock");
+            } else {
+                b_wait_dis = true;
+                vs_log_mod_debug("vsl_clocks", "Set clocks to be disabled after next falling edge");
+            }
+        } else {
+            vs_log_mod_debug("vsl_clocks", "Clock already disabled");
+        }
     }
 
     int VslClock::eval(const vsl_time_t time) {
@@ -92,8 +109,14 @@ namespace vsl{
                 return 1;
             }
             // Falling edge
+            if (b_wait_dis) {
+                next_event_time = 0ul;
+                b_is_enabled = false;
+                b_wait_dis = false;
+            } else {
+                next_event_time += period_low;
+            }
             set_value(0.0);
-            next_event_time += period_low;
             cycles_counter += 1;
             return 2;
         }

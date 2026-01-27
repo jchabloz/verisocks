@@ -199,6 +199,7 @@ public:
 private:
 
     bool b_is_enabled {false};       // Enabled flag
+    bool b_wait_dis {false};         // Flag: waiting to get disabled
     uint32_t cycles_counter {0u};    // Number of cycles that occured since last enable
     vsl_time_t prev_event_time {0u}; // Time of the latest, previous event
     vsl_time_t next_event_time {0u}; // Time of the next, upcoming event

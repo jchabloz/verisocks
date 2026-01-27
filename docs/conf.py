@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Verisocks'
-copyright = '2023-2025, Jérémie Chabloz'
+copyright = '2023-2026, Jérémie Chabloz'
 author = 'Jérémie Chabloz'
 version = '1.5'
 release = '1.5.0-alpha'

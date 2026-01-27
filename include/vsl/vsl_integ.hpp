@@ -355,6 +355,7 @@ private:
     static void VSL_CMD_HANDLER(run_until_change);
     static void VSL_CMD_HANDLER(run_to_next);
     static void VSL_CMD_HANDLER(set);
+    static void VSL_CMD_HANDLER(set_value);
     static void VSL_CMD_HANDLER(set_clk_en);
     static void VSL_CMD_HANDLER(set_clk_cfg);
     static void VSL_CMD_HANDLER(not_supported);
@@ -390,6 +391,7 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     sub_cmd_handlers_map["get_sim_time"]     = VSL_CMD_HANDLER_NAME(get_sim_time);
     sub_cmd_handlers_map["get_type"]         = VSL_CMD_HANDLER_NAME(not_supported);
     sub_cmd_handlers_map["get_value"]        = VSL_CMD_HANDLER_NAME(get_value);
+    sub_cmd_handlers_map["set_value"]        = VSL_CMD_HANDLER_NAME(set_value);
     sub_cmd_handlers_map["set_clk_en"]       = VSL_CMD_HANDLER_NAME(set_clk_en);
     sub_cmd_handlers_map["set_clk_cfg"]      = VSL_CMD_HANDLER_NAME(set_clk_cfg);
     sub_cmd_handlers_map["run_for_time"]     = VSL_CMD_HANDLER_NAME(run_for_time);

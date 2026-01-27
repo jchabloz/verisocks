@@ -41,13 +41,8 @@ Set command handler
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(set) {
 
-    cJSON *p_msg = nullptr;
-    char *str_msg = nullptr;
-
     /* Error handler lambda function */
     auto handle_error = [&]() {
-        if (nullptr != p_msg) cJSON_Delete(p_msg);
-        if (nullptr != str_msg) cJSON_free(str_msg);
         vs_msg_return(vx.fd_client_socket, "error",
             "Error processing command set - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
@@ -83,8 +78,26 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
                 &vx.uuid);
                 vx._state = VSL_STATE_WAITING;
                 return;
-            }
         }
+    }
+
+    /* Default sub-command handler function if sel is not defined */
+    vx.sub_cmd_handlers_map["set_value"](vx);
+    return;
+}
+
+/******************************************************************************
+Set value sub-command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(set_value) {
+
+    /* Error handler lambda function */
+    auto handle_error = [&]() {
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command set - Discarding", &vx.uuid);
+        vx._state = VSL_STATE_WAITING;
+    };
 
     /* Get the object path from the JSON message content */
     cJSON *p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
@@ -117,6 +130,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
     } else {
         p_var = vx.get_registered_variable(str_path);
     }
+
     /* Attempt to get a pointer to the variable */
     if (nullptr == p_var) {
         vs_log_mod_error(
@@ -143,9 +157,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         }
     }
 
-    cJSON *p_item_val;
     double value {0.0f};
-    p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
+    cJSON *p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
     /* Scalar variables */
     int ack = 0;
     switch (p_var->get_type()) {
@@ -213,8 +226,6 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         "Processed command \"set\"", &vx.uuid);
 
     /* Normal exit */
-    if (nullptr != p_msg) cJSON_Delete(p_msg);
-    if (nullptr != str_msg) cJSON_free(str_msg);
     vx._state = VSL_STATE_WAITING;
     return;
 }
@@ -297,6 +308,87 @@ Set clk_cfg sub-command handler
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(set_clk_cfg) {
 
+    /* Lambda function - error handler */
+    auto handle_error = [&](){
+        vx._state = VSL_STATE_WAITING;
+        vs_msg_return(vx.fd_client_socket, "error",
+            "Error processing command set(sel=clk_cfg) - Discarding", &vx.uuid);
+    };
+
+    /* Get the object path from the JSON message content */
+    cJSON *p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
+    if (nullptr == p_item_path) {
+        vs_log_mod_error("vsl", "Command field \"path\" invalid/not found");
+        handle_error();
+        return;
+    }
+
+    /* Get the path argument as a string */
+    char *cstr_path = cJSON_GetStringValue(p_item_path);
+    std::string str_path(cstr_path);
+    if ((nullptr == cstr_path) || str_path.empty()) {
+        vs_log_mod_error("vsl", "Command field \"path\" NULL or empty");
+        handle_error();
+        return;
+    }
+    vs_log_mod_info(
+        "vsl", "Command \"set(sel=clk_cfg, path=%s)\" received.", cstr_path);
+
+    /* Make sure clock exists */
+    if (!vx.clock_map.has_clock(str_path)) {
+        vs_log_mod_error("vsl", "Clock %s not found", cstr_path);
+        handle_error();
+        return;
+    }
+
+    cJSON *p_item_period = cJSON_GetObjectItem(vx.p_cmd, "period");
+    if (nullptr == p_item_period) {
+        vs_log_mod_error("vsl", "Command field \"period\" invalid/not found");
+        handle_error();
+        return;
+    }
+    double period = cJSON_GetNumberValue(p_item_period);
+    if (std::isnan(period)) {
+        vs_log_mod_error("vsl", "Command field \"period\" invalid (NaN)");
+        handle_error();
+        return;
+    }
+
+    cJSON *p_item_unit = cJSON_GetObjectItem(vx.p_cmd, "unit");
+    if (nullptr == p_item_unit) {
+        vs_log_mod_error("vsl", "Command field \"unit\" invalid/not found");
+        handle_error();
+        return;
+    }
+    char *cstr_unit = cJSON_GetStringValue(p_item_unit);
+    std::string str_unit(cstr_unit);
+    if ((nullptr == cstr_unit) || str_unit.empty()) {
+        vs_log_mod_error("vsl", "Command field \"unit\" NULL or empty");
+        handle_error();
+        return;
+    }
+
+    cJSON *p_item_dc = cJSON_GetObjectItem(vx.p_cmd, "dc");
+    if (nullptr == p_item_dc) {
+        vs_log_mod_error("vsl", "Command field \"dc\" invalid/not found");
+        handle_error();
+        return;
+    }
+    double dc = cJSON_GetNumberValue(p_item_dc);
+    if (std::isnan(dc)) {
+        vs_log_mod_error("vsl", "Command field \"dc\" invalid (NaN)");
+        handle_error();
+        return;
+    }
+
+    vx.clock_map.get_clock(str_path).set_period(
+        period, cstr_unit, dc, vx.p_context);
+
+    vs_msg_return(vx.fd_client_socket, "ack",
+        "Processed command \"set(sel=clk_cfg)\"", &vx.uuid);
+
+    /* Normal exit */
+    vx._state = VSL_STATE_WAITING;
     return;
 }
 
