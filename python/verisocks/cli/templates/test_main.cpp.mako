@@ -84,6 +84,15 @@ int main(int argc, char** argv, char**) {
 
     // Register public variables
     % if variables:
+    % if 'clocks' in variables:
+    // Clocks
+    % for clk in variables['clocks']:
+    vslx.register_clock("${clk['path']}",
+        &topp->${clk['path'].replace(".", "->")},
+        ${clk['period']}, "${clk['unit']}", ${clk['duty_cycle']}
+    );
+    % endfor
+    % endif
     % if 'scalars' in variables:
     // Scalar variables
 	% for var in variables['scalars']:

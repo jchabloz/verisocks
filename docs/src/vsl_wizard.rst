@@ -73,6 +73,13 @@ are paths can be relative to the configuration file location.
       log_level: <text>         # (optional) Logging level
                                 # [info, debug, warning, error, critical]
     variables:                  # (optional) Public variables
+      clocks:                   # (optional) List of clock variables
+      - path: <text>            # Name/alias to be used for the variable
+        module: <text>          # Name of the module in which is the variable
+        period: <number>        # Clock period
+        unit: <text>            # Time unit used for clock period [fs, ps, ns, us, ms, s]
+        duty_cycle: <number>    # Clock duty cycle, in ]0,1[
+      # ...
       scalars:                  # (optional) List of scalar variables
       - path: <text>            # Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
