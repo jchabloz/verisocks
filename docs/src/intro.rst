@@ -15,11 +15,18 @@ Install Verisocks from sources
 Make sure that the following pre-requisites are available on your system prior
 to trying and compile Verisocks:
 
-* Valid Icarus Verilog installation (version >= 11.0). Follow the `Icarus
-  reference installation guide
-  <https://steveicarus.github.io/iverilog/usage/installation.html>`_ or use the
-  packaged version provided with your favorite distro.
-* GCC C or C++ compiler
+* Depending on the desired use case (using either Icarus or Verilator):
+
+  * Valid Icarus Verilog installation (version >= 11.0). Follow the `Icarus
+    reference installation guide
+    <https://steveicarus.github.io/iverilog/usage/qinstallation.html>`_ or use
+    the packaged version provided with your favorite distro.
+  * Valid `Verilator <https://www.veripool.org/verilator/>`_ installation
+    (version >= 5.0). Follow the latest `installation guide
+    <https://verilator.org/guide/latest/install.html>`_.
+
+* GCC C/C++ compiler (LLVM should of course also do the trick, even though I
+  have not tested this extensively)
 
 .. note::
 
@@ -32,9 +39,6 @@ repository:
 .. code-block:: sh
 
     git clone https://github.com/jchabloz/verisocks.git <path to your verisocks folder>
-    cd <path to your verisocks folder>
-    git submodule init
-    git submodule update --recursive
 
 Run the ``configure`` script and use ``make`` in order to compile the VPI
 module.
@@ -55,8 +59,8 @@ linker argument:
     ./configure CFLAGS=-I<path to your vpi_user.h> LDFLAGS=-L<path to your libvpi.a>
 
 
-Install the Python client
--------------------------
+Install the reference Python client
+-----------------------------------
 
 In order to use the provided reference Python client, you can directly and
 easily install it using :code:`pip`. Remember that it is considered best

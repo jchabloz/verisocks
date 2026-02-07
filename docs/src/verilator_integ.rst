@@ -18,7 +18,7 @@ assumptions are made:
 
 From version 1.5 and above, the API has been completed such that:
 
-* if possible, the verilation can be (read *should be*) performed without the
+* if possible, the verilation can be (read *should be*) performed *without* the
   :code:`--timing` option,
 * the required clock signals can be declared in the C++ testbench using the
   :cpp:func:`vsl::VslInteg::register_clock` method. These clock signals can

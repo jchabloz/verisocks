@@ -4,17 +4,18 @@
 Release notes
 #############
 
-Releases of documentation and code are using the same version numbers. The
-version numbering system (tries and) follows the `semantic versioning
-<https://semver.org/>`_ principles:
+Releases of documentation and code are using the same version numbers.
 
 .. note::
 
-  Given a version number ``MAJOR.MINOR.PATCH``, increment the:
+  The version numbering system (tries and) follows the `semantic versioning
+  <https://semver.org/>`_ principles; given a version number
+  ``MAJOR.MINOR.PATCH``, increment the:
 
     1. ``MAJOR`` version when you make incompatible API changes
     2. ``MINOR`` version when you add functionality in a backward compatible manner
     3. ``PATCH`` version when you make backward compatible bug fixes
+
 
 1.5.0 - Ongoing
 ***************
@@ -23,7 +24,8 @@ version numbering system (tries and) follows the `semantic versioning
   <sec_vsl_wizard>`
 * Verilator integration extension: added support for clock signals
 
-  * New C++ api method :cpp:func:`vsl::VslInteg::register_clock`
+  * New C++ Verilator integration API method
+    :cpp:func:`vsl::VslInteg::register_clock`
   * Extended configuration file for the :ref:`CLI wizard script
     <sec_vsl_wizard>` to support clock variables
   * Extended TCP protocol :ref:`set <sec_tcp_cmd_set>` command with (optional)
