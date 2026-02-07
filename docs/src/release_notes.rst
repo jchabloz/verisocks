@@ -4,17 +4,38 @@
 Release notes
 #############
 
-Releases of documentation and code are using the same version numbers. The
-version numbering system (tries and) follows the `semantic versioning
-<https://semver.org/>`_ principles:
+Releases of documentation and code are using the same version numbers.
 
 .. note::
 
-  Given a version number ``MAJOR.MINOR.PATCH``, increment the:
+  The version numbering system (tries and) follows the `semantic versioning
+  <https://semver.org/>`_ principles; given a version number
+  ``MAJOR.MINOR.PATCH``, increment the:
 
     1. ``MAJOR`` version when you make incompatible API changes
     2. ``MINOR`` version when you add functionality in a backward compatible manner
     3. ``PATCH`` version when you make backward compatible bug fixes
+
+
+1.5.0 - 2026-02-07
+******************
+
+* Added ``use_timing`` option to :ref:`CLI wizard script configuration file
+  <sec_vsl_wizard>`
+* Verilator integration extension: added support for clock signals
+
+  * New C++ Verilator integration API method
+    :cpp:func:`vsl::VslInteg::register_clock`
+  * Extended configuration file for the :ref:`CLI wizard script
+    <sec_vsl_wizard>` to support clock variables
+  * Extended TCP protocol :ref:`set <sec_tcp_cmd_set>` command with (optional)
+    `sel` field in order to support clock enabling/disabling and configuration
+  * New Python client method :py:meth:`Verisocks.enable_clock()
+    <verisocks.verisocks.Verisocks.enable_clock>`
+  * New Python client method :py:meth:`Verisocks.disable_clock()
+    <verisocks.verisocks.Verisocks.disable_clock>`
+  * New Python client method :py:meth:`Verisocks.configure_clock()
+    <verisocks.verisocks.Verisocks.configure_clock>`
 
 1.4.0 - 2025-08-22
 ******************

@@ -8,12 +8,12 @@ config:
   - ../spi_slave.v
   - ../spi_master.v
   - ../spi_master_tb.v
-  #cpp_src_files:             # Extra C++ source files
   verisocks_root: ../../..    # Verisocks root path
   verilator_path: /usr/local/bin/verilator
   verilator_root: /usr/local/share/verilator
   use_tracing: false
   use_fst: false
+  use_timing: true
   log_level: debug
 
 # Define model variables to be accessible with Verisocks commands

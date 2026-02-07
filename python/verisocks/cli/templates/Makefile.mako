@@ -13,6 +13,7 @@ args = "
 	verilator_root = '/usr/local/share/verilator',
 	use_tracing = False,
 	use_fst = True,
+	use_timing = True,
 	log_level = 'info'
 "
 />\
@@ -33,19 +34,25 @@ VERILATOR ?= ${verilator_path}
 VERILATOR_ROOT ?= ${verilator_root}
 VSL_DIR ?= ${verisocks_root}
 
+% if use_timing:
+# Use timing option with Verilator
+VL_USER_FLAGS += --timing
+CPP_USER_FLAGS += -DVSL_TIMING
+% endif
+
 % if use_tracing:
 # Setup traceing - use $dump() in testbench
-CPP_USER_FLAGS = -DDUMP_FILE
+CPP_USER_FLAGS += -DDUMP_FILE
 % if use_fst:
 
 # Using FST traceing (slower due to compression)
-VL_USER_FLAGS = --trace-fst
+VL_USER_FLAGS += --trace-fst
 VL_USER_FLAGS += -DDUMP_FILE=\"test.fst\"
 USER_LDLIBS = -lz
 % else:
 
 # Using VCD traceing
-VL_USER_FLAGS = --trace
+VL_USER_FLAGS += --trace
 VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 % endif
 

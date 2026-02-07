@@ -530,6 +530,56 @@ Still {self._rx_expected} messages expected.")
         """
         return self.send(command="set", path=path, **kwargs)
 
+    def enable_clock(self, path):
+        """Enable a clock signal (only with Verilator)
+
+        This function sends the command :keyword:`set <sec_tcp_cmd_set>` with
+        ``sel="clk_en"`` and ``value=1`` arguments. The clock signal will have
+        its first rising edge at the same time it is enabled.
+
+        Args:
+            path (str): Path to the clock signal
+
+        Returns:
+            JSON object: Content of the returned message
+        """
+        return self.send(command="set", sel="clk_en", path=path, value=1)
+
+    def disable_clock(self, path):
+        """Disable a clock signal (only with Verilator)
+
+        This function sends the command :keyword:`set <sec_tcp_cmd_set>` with
+        ``sel="clk_en"`` and ``value=0`` arguments.
+        If the current level of the clock signal is high, it will only be
+        disabled after its next falling edge.
+
+        Args:
+            path (str): Path to the clock signal
+
+        Returns:
+            JSON object: Content of the returned message
+        """
+        return self.send(command="set", sel="clk_en", path=path, value=0)
+
+    def configure_clock(self, path, period, unit="us", duty_cycle=0.5):
+        """Configure a clock signal (only with Verilator)
+
+        This function sends the command :keyword:`set <sec_tcp_cmd_set>` with
+        ``sel="clk_cfg"`` argument.
+
+        Args:
+            path (str): Path to the clock signal
+            period (float): Clock period
+            unit (str): Time unit used for the clock period (default: "us")
+            duty_cycle (float): Duty cycle (> 0.0 and < 1.0)
+
+        Returns:
+            JSON object: Content of the returned message
+        """
+
+        return self.send(command="set", sel="clk_cfg",
+                         path=path, period=period, unit=unit, dc=duty_cycle)
+
     def info(self, value):
         """Sends an :keyword:`info <sec_tcp_cmd_info>` command to the Verisocks
         server.

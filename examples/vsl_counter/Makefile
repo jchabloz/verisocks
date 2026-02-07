@@ -4,24 +4,26 @@
 #*****************************************************************************
 VERILATOR ?= /usr/local/bin/verilator
 VERILATOR_ROOT ?= /usr/local/share/verilator
-VSL_DIR ?= ../../..
+VSL_DIR ?= ../..
 
-# Use timing option with Verilator
-VL_USER_FLAGS += --timing
-CPP_USER_FLAGS += -DVSL_TIMING
+
+# Setup traceing - use $dump() in testbench
+CPP_USER_FLAGS += -DDUMP_FILE
+
+# Using VCD traceing
+VL_USER_FLAGS += --trace
+VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 
 # Design prefix
-VM_PREFIX = Vspi_master_tb
+VM_PREFIX = Vcounter
 
 # Top module
-VL_TOP = spi_master_tb
+VL_TOP = counter
 
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \
 	variables.vlt \
-	../spi_slave.v \
-	../spi_master.v \
-	../spi_master_tb.v
+	counter.v
 
 # Testbench C++ source files
 TB_CPP_SRCS = \

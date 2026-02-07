@@ -362,17 +362,51 @@ This command can be used to forcefully set the value of a simulator variable.
 * JSON payload fields:
 
   * :json:`"command": "set"` Command name
+  * :json:`"sel":` (string): Sub-command selector. This field is *optional* to
+    ensure back-compatibility with previous versions of the protocol. If it is
+    not provided, the command `set` will behave as :json:`"sel": "value"`. The
+    following values are possible:
+
+    * :json:`"sel": "value"` (default) - A signal value is set,
+    * :json:`"sel": "clk_en"` - A clock signal is enabled or disabled (only
+      supported with Verilator integration API),
+    * :json:`"sel": "clk_cfg"` - A clock signal is configured (only supported
+      with Verilator integration API) by specifying its period duration and
+      duty cycle.
+
+  Independently of the value for the field ``"sel"``, the ``"path"`` field has
+  to be provided as follows:
+
   * :json:`"path":` (string): Path to the simulator variable to be set
+
+    Selecting only a specific index of an array is also possible by using the
+    :code:`[]` operator, e.g. :json:`"<path_to_array>[4]"`. The Verilator
+    integration API even supports sub-ranges, such as e.g.
+    :json:`"<path_to_array>[6:3]"` or :json:`"<path_to_array>[3:6]"`.
+
+  For :json:`"sel": "value"`, the field ``"value"`` shall be defined as
+  follows:
+
   * :json:`"value":` (number or array): Value to be set. If the path
     corresponds to a verilog named event, this argument is not required. If the
     path corresponds to a memory array, this argument needs to be provided as
     an array of the same length.
 
-  For the :json:`"path":` field, selecting only a specific index of an array is
-  also possible by using the :code:`[]` operator, e.g.
-  :json:`"<path_to_array>[4]"`. The Verilator integration API even supports
-  sub-ranges, such as e.g. :json:`"<path_to_array>[6:3]"` or
-  :json:`"<path_to_array>[3:6]"`.
+  For :json:`"sel": "clk_en"`, the field ``"value"`` shall also be defined as
+  follows:
+
+  * :json:`"value":` (number): The value of this number defines if the
+    concerned clock signal is enabled (if > 0) or disabled (otherwise).
+
+  For :json:`"sel": "clk_cfg"`, the fields ``"period"``, ``"unit"`` and
+  ``"dc"`` shall be defined as follows:
+
+    * :json:`"period":` (number): Period duration,
+    * :json:`"unit":` (string): Time unit (``"s"``, ``"ms"``, ``"us"``,
+      ``"ns"``, ``"ps"`` or ``"fs"``) which applies to the ``"period"`` field
+      value,
+    * :json:`"dc":` (number): Duty cycle (shall be strictly larger than 0.0 and
+      strictly smaller than 1.0).
 
 * Returned frame (normal case):
 

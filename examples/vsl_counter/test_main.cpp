@@ -1,22 +1,5 @@
-<%page args = "prefix, variables, log_level"/>\
-<%
-VLVT_TYPES = {
-    "uint8":  "VLVT_UINT8",
-    "uint16": "VLVT_UINT16",
-    "uint32": "VLVT_UINT32",
-    "uint64": "VLVT_UINT64",
-    "real":   "VLVT_REAL"
-}
-LOG_LEVELS = {
-	"debug":    10,
-	"info":     20,
-	"warning":  30,
-	"error":    40,
-	"critical": 50
-}
-%>\
 /*
-Note: this file has been generated from the template ${template_filename}
+Note: this file has been generated from the template templates/test_main.cpp.mako
 
 Copyright (c) 2025 Jérémie Chabloz
 
@@ -41,8 +24,8 @@ SOFTWARE.
 
 #include "verilated.h"
 #include "vsl.h"
-#include "${prefix}.h"
-#include "${prefix}__Syms.h"
+#include "Vcounter.h"
+#include "Vcounter__Syms.h"
 
 #include <cstdlib>
 #include <memory>
@@ -67,64 +50,35 @@ int main(int argc, char** argv, char**) {
     contextp->commandArgs(argc, argv);
 
     // Construct the Verilated model, from Vtop.h generated from Verilating
-    const std::unique_ptr<${prefix}> topp {new ${prefix}{contextp.get()}};
+    const std::unique_ptr<Vcounter> topp {new Vcounter{contextp.get()}};
 
     // Setup traceing
     #ifdef DUMP_FILE
     Verilated::traceEverOn(true);
     #endif
 
-	% if (LOG_LEVELS[log_level] < 20):
     // Dump public variables
     contextp->internalsDump();
-	% endif
 
     // Create top VSL instance
-    vsl::VslInteg<${prefix}> vslx{topp.get(), port_number, timeout};
+    vsl::VslInteg<Vcounter> vslx{topp.get(), port_number, timeout};
 
     // Register public variables
-    % if variables:
-    % if 'clocks' in variables:
     // Clocks
-    % for clk in variables['clocks']:
-    vslx.register_clock("${clk['path']}",
-        &topp->${clk['path'].replace(".", "->")},
-        ${clk['period']}, "${clk['unit']}", ${clk['duty_cycle']}
+    vslx.register_clock("clk",
+        &topp->clk,
+        1.4, "us", 0.6
     );
-    % endfor
-    % endif
-    % if 'scalars' in variables:
     // Scalar variables
-	% for var in variables['scalars']:
-    vslx.register_scalar("${var['path']}",
-        &topp->${var['path'].replace(".", "->")},
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
-    % endfor
-    % endif
-    % if 'arrays' in variables:
-    // Array variables
-    % for var in variables['arrays']:
-    vslx.register_array("${var['path']}",
-        topp->${var['path'].replace(".", "->")}.m_storage,
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u, ${var['depth']}u);
-    % endfor
-    % endif
-    % if 'params' in variables:
-    // Parameters
-    % for var in variables['params']:
-    vslx.register_param("${var['path']}",
-        &topp->${var['path'].replace(".", "->")},
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
-    % endfor
-    % endif
-    % if 'events' in variables:
-    // Named events
-    % for var in variables['events']:
-    vslx.register_event("${var['path']}",
-        &topp->${var['path'].replace(".", "->")});
-    % endfor
-    % endif
-    % endif
+    vslx.register_scalar("arst_b",
+        &topp->arst_b,
+        VLVT_UINT8, 1u);
+    vslx.register_scalar("count",
+        &topp->count,
+        VLVT_UINT16, 10u);
+    vslx.register_scalar("clk",
+        &topp->clk,
+        VLVT_UINT8, 1u);
 
     // Run simulation
     int retval = vslx.run();

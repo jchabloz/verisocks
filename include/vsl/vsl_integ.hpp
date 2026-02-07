@@ -1,3 +1,30 @@
+/***************************************************************************//**
+ @file vsl_integ.hpp
+ @brief Verisocks integration header for Verilator-based simulation control.
+
+ This header defines the `vsl::VslInteg` template class, which provides a
+ top-level interface for integrating Verisocks with a Verilated model. It
+ implements a finite-state machine (FSM) to manage socket communication,
+ command processing, and simulation control.
+
+ Features:
+ - Socket server setup and client connection management.
+ - Command and sub-command handler registration and dispatch.
+ - Registration and access of Verilated variables (scalars, arrays,
+   parameters, events).
+ - Callback management for simulation time and value changes.
+ - Main FSM for simulation lifecycle: initialization, connection, command
+   processing, simulation running, and graceful shutdown.
+
+ Usage:
+ - Instantiate `VslInteg<T>` with your Verilated model type.
+ - Register variables and events to expose them to Verisocks commands.
+ - Call `run()` to start the FSM and handle remote commands.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 MIT License
 
@@ -32,6 +59,7 @@ SOFTWARE.
 #include "verilated.h"
 #include "verilated_syms.h"
 #include "vsl/vsl_types.hpp"
+#include "vsl/vsl_clocks.hpp"
 
 #include <cstdio>
 #include <functional>
@@ -41,10 +69,19 @@ SOFTWARE.
 
 
 /**
- * @brief Helper macro to declare a command handler function
+ * @brief Helper macro to declare a command handler function prototype
+ *
+ * As part of all command handler function prototypes, a `vsl::VslInteg` object
+ * is passed by reference.
+ *
  * @param cmd Command short name
  */
 #define VSL_CMD_HANDLER(cmd) VSL_ ## cmd ## _cmd_handler(VslInteg& vx)
+
+/**
+ * @brief Helper macro that is replaced by a command handler function name
+ * @param cmd Command short name
+ */
 #define VSL_CMD_HANDLER_NAME(cmd) VSL_ ## cmd ## _cmd_handler
 
 
@@ -55,30 +92,36 @@ namespace vsl{
  * @brief Internal state values for the VSL finite-state machine
  */
 enum VslState {
-    VSL_STATE_INIT,        ///Initial state, Verisocks server socket not initialized
-    VSL_STATE_CONNECT,     ///Socket created, bound to address, waiting for connection
-    VSL_STATE_WAITING,     ///Connected and waiting to receive next command
-    VSL_STATE_PROCESSING,  ///Processing a command
-    VSL_STATE_SIM_RUNNING, ///Simulation running
-    VSL_STATE_SIM_FINISH,  ///Finish simulation
-    VSL_STATE_EXIT,        ///Exiting Verisocks
-    VSL_STATE_ERROR        ///Error state (e.g. timed out while waiting for a connection)
+    VSL_STATE_INIT,        ///<Initial state, Verisocks server socket not initialized
+    VSL_STATE_CONNECT,     ///<Socket created, bound to address, waiting for connection
+    VSL_STATE_WAITING,     ///<Connected and waiting to receive next command
+    VSL_STATE_PROCESSING,  ///<Processing a command
+    VSL_STATE_SIM_RUNNING, ///<Simulation running
+    VSL_STATE_SIM_FINISH,  ///<Finish simulation
+    VSL_STATE_EXIT,        ///<Exiting Verisocks
+    VSL_STATE_ERROR        ///<Error state (e.g. timed out while waiting for a connection)
 };
 
 /**
  * @class VslInteg
  * @brief Top-level class to use for using Verisocks with Verilator
  *
+ * This class is a template which takes as parameter the verilated model class.
+ *
  * @tparam T Model class
- * @param p_model Pointer to the Verilated model instance.
- * @param port The port number to be used. Default is 5100.
- * @param timeout The timeout duration in seconds. Default is 120.
  */
 template<typename T>
 class VslInteg {
 
 public:
 
+    /**
+     * @brief Construct a new VslInteg object
+     *
+     * @param p_model Pointer to the Verilated model instance.
+     * @param port The port number to be used. Default is 5100.
+     * @param timeout The timeout duration in seconds. Default is 120.
+     */
     VslInteg(T* p_model, const int port=5100, const int timeout=120);
     ~VslInteg();
 
@@ -93,6 +136,17 @@ public:
     inline const VerilatedContext* context() {return p_context;}
 
     /**
+     * @brief Set the optional finish time for the simulation
+     * 
+     * This function is only useful if the verilated testbench does not contain
+     * any $finish statement.
+     *
+     * @param time Finish time value
+     * @param unit Time unit
+     */
+    void set_finish_time(const double time, const char* unit);
+
+    /**
      * @brief Run Verisocks FSM
      *
      * This is the main function to be used from the top-level C++ testbench
@@ -102,6 +156,22 @@ public:
      * testbench simulation.
      */
     int run();
+
+    /**
+     * @brief Register a clock variable
+     * 
+     * @param name Name of the clock
+     * @param datap Pointer to the corresponding Verilator variable
+     * @param period Period of the clock
+     * @param unit Time unit used for the clock period parameter
+     * @param duty_cycle Clock duty cycle
+     */
+    inline void register_clock(const char* name, std::any datap,
+        const double period, const char* unit, const double duty_cycle) {
+            clock_map.add_clock(
+                name, datap, period, unit, duty_cycle, p_context
+            );
+    }
 
     /**
      * @brief Register a scalar variable
@@ -187,6 +257,7 @@ private:
     sub_cmd_handlers_map {};
 
     VslVarMap var_map {};          //Map of Verilator variables
+    VslClockMap clock_map {};      //Map of clock variables
 
     T* p_model;                    //Pointer to verilated model instance
     VerilatedContext* p_context;   //Pointer to Verilator context
@@ -200,9 +271,13 @@ private:
     /* Callbacks management */
     bool b_has_time_callback {false};
     bool b_has_value_callback {false};
-    uint64_t cb_time {0u};
+    vsl_time_t cb_time {0ull};
     std::string cb_value_path;
-    double cb_value {0.0f};
+    double cb_value {0.0};
+
+    /* Simulation (optional) finish time */
+    bool b_has_finish_time {false};
+    vsl_time_t finish_time {0};
 
     /* State machine functions */
     void main_init();
@@ -229,7 +304,7 @@ private:
 
     /* Callback functions*/
     int register_value_callback(const char* path, const double value);
-    int register_time_callback(const uint64_t time);
+    int register_time_callback(const vsl_time_t time);
     void clear_callbacks() {
         b_has_time_callback = false;
         b_has_value_callback = false;
@@ -241,6 +316,11 @@ private:
     inline const bool has_value_callback() {return b_has_value_callback;}
     inline const bool has_time_callback() {return b_has_time_callback;}
     const bool check_value_callback();
+
+    /* Simulation control wrappers functions */
+    void eval();
+    const bool has_events_pending() const;
+    const vsl_time_t next_event_time() const;
 
     /* Utility functions */
     VslVar* get_registered_variable(std::string str_path) {
@@ -275,6 +355,9 @@ private:
     static void VSL_CMD_HANDLER(run_until_change);
     static void VSL_CMD_HANDLER(run_to_next);
     static void VSL_CMD_HANDLER(set);
+    static void VSL_CMD_HANDLER(set_value);
+    static void VSL_CMD_HANDLER(set_clk_en);
+    static void VSL_CMD_HANDLER(set_clk_cfg);
     static void VSL_CMD_HANDLER(not_supported);
 };
 
@@ -308,6 +391,9 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     sub_cmd_handlers_map["get_sim_time"]     = VSL_CMD_HANDLER_NAME(get_sim_time);
     sub_cmd_handlers_map["get_type"]         = VSL_CMD_HANDLER_NAME(not_supported);
     sub_cmd_handlers_map["get_value"]        = VSL_CMD_HANDLER_NAME(get_value);
+    sub_cmd_handlers_map["set_value"]        = VSL_CMD_HANDLER_NAME(set_value);
+    sub_cmd_handlers_map["set_clk_en"]       = VSL_CMD_HANDLER_NAME(set_clk_en);
+    sub_cmd_handlers_map["set_clk_cfg"]      = VSL_CMD_HANDLER_NAME(set_clk_cfg);
     sub_cmd_handlers_map["run_for_time"]     = VSL_CMD_HANDLER_NAME(run_for_time);
     sub_cmd_handlers_map["run_to_next"]      = VSL_CMD_HANDLER_NAME(run_to_next);
     sub_cmd_handlers_map["run_until_time"]   = VSL_CMD_HANDLER_NAME(run_until_time);
@@ -341,10 +427,15 @@ int VslInteg<T>::run() {
     std::printf("* Copyright (c) 2024-2025 Jérémie Chabloz *\n");
     std::printf("*******************************************\n");
 
+    #ifdef VSL_TIMING
+    vs_log_mod_info("vsl", "Verilated with timing extension");
+    #else
+    vs_log_mod_info("vsl", "Verilated without timing extension");
+    #endif
+
     while(true) {
         switch (_state) {
         case VSL_STATE_INIT:
-            p_model->eval(); //Initial model evaluation
             main_init();
             break;
         case VSL_STATE_CONNECT:
@@ -419,6 +510,9 @@ void VslInteg<T>::main_init() {
         (socket_address.address & 0x000000ff)
     );
     vs_log_mod_info("vsl", "Port: %d", socket_address.port);
+
+    /* Initial model evaluation*/
+    // eval();
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -565,11 +659,6 @@ void VslInteg<T>::main_process() {
 
 /******************************************************************************
 Main finite state-machine - Simulation ongoing
-Methods that can be used:
-vx.p_model->eval();
-vx.p_model->eventsPending();
-vx.p_model->nextTimeSlot();
-vx.p_context->time()
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim() {
@@ -577,7 +666,7 @@ void VslInteg<T>::main_sim() {
 
     while (!p_context->gotFinish()) {
         /* Evaluate model */
-        p_model->eval();
+        eval();
 
         /* Check if value-based callback has been reached */
         if (check_value_callback()) {
@@ -590,16 +679,27 @@ void VslInteg<T>::main_sim() {
         }
 
         /* If no more pending events remaining ... finish simulation */
-        if (!p_model->eventsPending()) {
+        if (!has_events_pending()) {
+            if (has_time_callback()) {
+                p_context->time(cb_time);
+                // eval();
+                clear_callbacks();
+                vs_msg_return(fd_client_socket, "ack",
+                    "Reached callback without other events pending",
+                    &uuid
+                );
+                _state = VSL_STATE_WAITING;
+                return;
+            }
             vs_log_mod_warning(
-                "vsl", "Exiting without $finish; no events left");
+                "vsl", "Exiting without $finish; no events nor callbacks left");
             break;
         }
 
         /* If there is a time-based callback */
-        if (has_time_callback() && (p_model->nextTimeSlot() >= cb_time)) {
+        if (has_time_callback() && (next_event_time() >= cb_time)) {
             p_context->time(cb_time);
-            //p_model->eval(); //TBC
+            // eval(); // To be checked
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
                 "Reached callback - Getting back to Verisocks main loop",
@@ -608,8 +708,8 @@ void VslInteg<T>::main_sim() {
             return;
         }
 
-        /* Advance time */
-        p_context->time(p_model->nextTimeSlot());
+        /* Advance time to the next time to be evaluated */
+        p_context->time(next_event_time());
     }
     /* If there is a callback hanging, it means that the Verisocks client is
     expecting a return message... in this case, an error is returned */
@@ -626,10 +726,43 @@ Main finite state-machine - Simulation finishing
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim_finish() {
+    eval();
     p_model->final();
     p_context->statsPrintSummary();
     _state = VSL_STATE_EXIT;
     return;
+}
+
+/******************************************************************************
+Wrapper simulation management functions
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::eval() {
+    clock_map.eval(p_context->time());
+    p_model->eval();
+}
+
+template<typename T>
+const bool VslInteg<T>::has_events_pending() const {
+    #ifdef VSL_TIMING
+    return p_model->eventsPending() || clock_map.has_next_event();
+    #else
+    return clock_map.has_next_event();
+    #endif
+}
+
+template<typename T>
+const vsl_time_t VslInteg<T>::next_event_time() const {
+    #ifdef VSL_TIMING
+    if (clock_map.has_next_event()) {
+        if (clock_map.get_next_event() <= p_model->nextTimeSlot()) {
+            return clock_map.get_next_event();
+        }
+    }
+    return p_model->nextTimeSlot();
+    #else
+        return clock_map.get_next_event();
+    #endif
 }
 
 /******************************************************************************
@@ -655,7 +788,7 @@ not found in registered variables - Discarding");
 }
 
 template<typename T>
-int VslInteg<T>::register_time_callback(uint64_t time)
+int VslInteg<T>::register_time_callback(vsl_time_t time)
 {
     if (has_callback()) {
         vs_log_mod_error("vsl", "Could not register new time callback as \
@@ -697,9 +830,15 @@ this type of variable - Discarding");
 /******************************************************************************
 Utility functions
 ******************************************************************************/
+template<typename T>
+void VslInteg<T>::set_finish_time(const double time, const char* unit) {
+    finish_time = double_to_time(time, unit, p_context);
+    b_has_finish_time = true;
+}
+
 /**
  * @brief Get Verilated variable from path
- * 
+ *
  * @param str_path Variable path
  * @return (VerilatedVar*) Pointer to variable
  */

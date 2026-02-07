@@ -1,3 +1,33 @@
+
+/***************************************************************************//**
+ @file vsl_integ_cmd.hpp
+ @brief Command handler implementations for Verisocks integration.
+
+ This header defines the command handler member functions for the
+ `vsl::VslInteg` template class, which process various simulation control
+ commands received via JSON messages. Supported commands include "info",
+ "exit", "stop", "finish", and a generic handler for unsupported commands.
+
+ Each handler function processes the incoming command, performs the required
+ simulation or system actions, sends appropriate acknowledgements or error
+ messages back to the client, and updates the simulation state accordingly.
+
+ Command Handlers:
+ - info:   Logs and acknowledges informational messages from the client.
+ - exit:   Gracefully terminates the simulation and exits Verisocks.
+ - stop:   Pauses or stops the simulation, awaiting further commands.
+ - finish: Signals simulation termination and finalizes the model.
+ - not_supported: Handles unsupported commands with a warning response.
+
+ Dependencies:
+ - cJSON for JSON parsing
+ - Verilator simulation context and model
+ - Verisocks server, logging, and messaging utilities
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+ ******************************************************************************/
 /*
 MIT License
 

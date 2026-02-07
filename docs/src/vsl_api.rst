@@ -70,7 +70,8 @@ code.
 
 The methods :cpp:func:`vsl::VslInteg::register_scalar`,
 :cpp:func:`vsl::VslInteg::register_param`,
-:cpp:func:`vsl::VslInteg::register_array` and
+:cpp:func:`vsl::VslInteg::register_array`,
+:cpp:func:`vsl::VslInteg::register_clock`, and
 :cpp:func:`vsl::VslInteg::register_event` described below are all useful to
 declare internal specific variables to be accessible with Verisocks commands
 such as :keyword:`get <sec_tcp_cmd_get>`, :keyword:`set <sec_tcp_cmd_set>` or
@@ -130,4 +131,18 @@ using a dedicated verilator configuration file.
     This function shall be used from within the top-level C++ testbench code
     scope in order to register a named event variable to be accessible with
     Verisocks commands.
+
+.. cpp:function:: void register_clock(const char* name, std::any datap, \
+    const double period, const char* unit, const double duty_cycle)
+
+    :param name: Name of the clock variable as registered by Verisocks and how
+        it will be used as *path* within Verisocks commands
+    :param datap: Pointer to the clock variable in the verilated C++ code
+    :param period: Clock period value
+    :param unit: Clock period value unit
+    :param duty_cycle: Clock duty cycle (between 0.0 and 1.0)
+
+    This function shall be used from within the top-level C++ testbench code
+    scope in order to register a clock variable to be accessible with Verisocks
+    commands.
 

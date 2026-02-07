@@ -49,6 +49,7 @@ $(BUILDDIR)/%.o: %.c
 
 docs:
 	$(MAKE) -C $(DOCSDIR) html
+	$(MAKE) -C $(DOCSDIR) doxygen
 
 clean:
 	-$(RM) $(OBJS)

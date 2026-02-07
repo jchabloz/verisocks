@@ -68,9 +68,18 @@ are paths can be relative to the configuration file location.
       use_tracing: <bool>       # If true, tracing is enabled
       use_fst: <bool>           # (optional if use_tracing is false) If true,
                                 # the FST format is used for the traces file
+      use_timing: <bool>        # (optional) If true (default), the sources are
+                                # verilated with the timing option
       log_level: <text>         # (optional) Logging level
                                 # [info, debug, warning, error, critical]
     variables:                  # (optional) Public variables
+      clocks:                   # (optional) List of clock variables
+      - path: <text>            # Name/alias to be used for the variable
+        module: <text>          # Name of the module in which is the variable
+        period: <number>        # Clock period
+        unit: <text>            # Time unit used for clock period [fs, ps, ns, us, ms, s]
+        duty_cycle: <number>    # Clock duty cycle, in ]0,1[
+      # ...
       scalars:                  # (optional) List of scalar variables
       - path: <text>            # Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable

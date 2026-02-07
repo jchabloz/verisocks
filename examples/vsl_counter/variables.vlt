@@ -1,0 +1,6 @@
+//Note: This file has been generated from the template templates/variables.vlt.mako
+`verilator_config
+public -module "counter" -var "clk"
+public -module "counter" -var "arst_b"
+public -module "counter" -var "count"
+public -module "counter" -var "clk"

@@ -1,3 +1,32 @@
+/*****************************************************************************
+ @file vsl_integ_cmd_run.hpp
+ @brief Command handlers implementations for "run" operations in the
+ vsl::VslInteg class template.
+
+ This header defines template implementations for handling various "run"
+ commands in the vsl::VslInteg class template.
+
+Main handlers:
+   - VSL_CMD_HANDLER(run): Dispatches sub-commands based on the "cb" field in
+     the JSON message.
+   - VSL_CMD_HANDLER(run_for_time): Runs the simulation for a specified time
+     duration.
+   - VSL_CMD_HANDLER(run_to_next): Runs the simulation until the next event
+     time slot.
+   - VSL_CMD_HANDLER(run_until_time): Runs the simulation until a specified
+     absolute simulation time.
+   - VSL_CMD_HANDLER(run_until_change): Runs the simulation until a variable or
+     event changes to a specified value.
+
+ Each handler performs input validation, error handling, and registers
+ appropriate callbacks to control simulation flow. The handlers interact with
+ the simulation context, variable registry, and utilize cJSON for parsing
+ command arguments.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 Copyright (c) 2024-2025 Jérémie Chabloz
 
@@ -167,13 +196,18 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_to_next) {
 
     vs_log_mod_info("vsl", "Command \"run(cb=to_next)\" received.");
 
+    /* Evaluate model */
+    vx.eval();
+
     /* Check if next time slot exists */
-    if (!vx.p_model->eventsPending()) {
+    if (!vx.has_events_pending()) {
+        vs_log_mod_warning(
+            "vsl", "No pending event(s) - run(to_next) not possible");
         handle_error();
         return;
     }
 
-    uint64_t cb_time = vx.p_model->nextTimeSlot();
+    uint64_t cb_time = vx.next_event_time();
     if (0 > vx.register_time_callback(cb_time)) {
         handle_error();
         return;

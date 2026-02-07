@@ -6,6 +6,10 @@ VERILATOR ?= /usr/local/bin/verilator
 VERILATOR_ROOT ?= /usr/local/share/verilator
 VSL_DIR ?= ../../..
 
+# Use timing option with Verilator
+VL_USER_FLAGS += --timing
+CPP_USER_FLAGS += -DVSL_TIMING
+
 # Design prefix
 VM_PREFIX = hello_world
 

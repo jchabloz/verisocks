@@ -1,3 +1,32 @@
+/*****************************************************************************
+ @file vsl_integ_cmd_get.hpp
+ @brief Command handlers implementations for "get" operations in the
+ vsl::VslInteg class template.
+
+ This header defines the implementation of the "get" command and its
+ sub-commands for the vsl::VslInteg class template, which is part of the
+ verisocks simulation integration. The handlers process JSON-based commands
+ received from a client, extract relevant arguments, and return requested
+ simulation information or variable values.
+
+ Main handlers:
+ - VSL_CMD_HANDLER(get): Dispatches "get" commands to the appropriate
+   sub-command handler based on the "sel" field in the JSON message.
+ - VSL_CMD_HANDLER(get_sim_info): Returns simulator and model information
+   such as product name, version, model name, hierarchy, and time
+   unit/precision.
+ - VSL_CMD_HANDLER(get_sim_time): Returns the current simulation time in
+   seconds.
+ - VSL_CMD_HANDLER(get_value): Returns the value of a requested variable or
+   array, supporting optional range selection for arrays.
+
+ Error handling is performed via lambda functions that send error messages to
+ the client and reset the simulation state as needed.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
 /*
 MIT License
 
@@ -84,7 +113,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get) {
     vs_log_mod_error("vsl", "Handler for sub-command %s not found",
         sel_key.c_str());
     vs_msg_return(vx.fd_client_socket, "error",
-        "Could not find handler for command. Discarding.", &vx.uuid);
+        "Could not find handler for sub-command. Discarding.", &vx.uuid);
     vx._state = VSL_STATE_WAITING;
     return;
 }
