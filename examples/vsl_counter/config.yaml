@@ -1,0 +1,36 @@
+# Define configuration
+# Note: if relative paths are defined, they are considered as relative to this
+# file's own location.
+config:
+  prefix: Vcounter          # Prefix
+  top: counter              # Name of top module
+  verilog_src_files:        # List of Verilog source files
+  - counter.v
+  verisocks_root: ../..  # Verisocks root path
+  verilator_path: /usr/local/bin/verilator
+  verilator_root: /usr/local/share/verilator
+  use_tracing: false
+  use_fst: false
+  use_timing: false
+  log_level: debug
+
+variables:
+  clocks:
+    - path: clk
+      module: counter
+      period: 1.4
+      unit: us
+      duty_cycle: 0.6
+  scalars:
+    - path: arst_b
+      module: counter
+      type: uint8
+      width: 1
+    - path: count
+      module: counter
+      type: uint16
+      width: 10
+    - path: clk
+      module: counter
+      type: uint8
+      width: 1
