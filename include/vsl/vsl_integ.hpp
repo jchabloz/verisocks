@@ -137,7 +137,7 @@ public:
 
     /**
      * @brief Set the optional finish time for the simulation
-     * 
+     *
      * This function is only useful if the verilated testbench does not contain
      * any $finish statement.
      *
@@ -159,7 +159,7 @@ public:
 
     /**
      * @brief Register a clock variable
-     * 
+     *
      * @param name Name of the clock
      * @param datap Pointer to the corresponding Verilator variable
      * @param period Period of the clock
@@ -668,6 +668,12 @@ void VslInteg<T>::main_sim() {
         /* Evaluate model */
         eval();
 
+        /* An extra evaluation of gotFinish is necessary from Verilator 5.046
+        as the relationship between $finish and the simulation time has been
+        modified (see https://github.com/verilator/verilator/issues/7095)
+        */
+        if (p_context->gotFinish()) break;
+
         /* Check if value-based callback has been reached */
         if (check_value_callback()) {
             clear_callbacks();
@@ -681,8 +687,8 @@ void VslInteg<T>::main_sim() {
         /* If no more pending events remaining ... finish simulation */
         if (!has_events_pending()) {
             if (has_time_callback()) {
+                p_model->eval_end_step();
                 p_context->time(cb_time);
-                // eval();
                 clear_callbacks();
                 vs_msg_return(fd_client_socket, "ack",
                     "Reached callback without other events pending",
@@ -698,8 +704,8 @@ void VslInteg<T>::main_sim() {
 
         /* If there is a time-based callback */
         if (has_time_callback() && (next_event_time() >= cb_time)) {
+            p_model->eval_end_step();
             p_context->time(cb_time);
-            // eval(); // To be checked
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
                 "Reached callback - Getting back to Verisocks main loop",
@@ -709,6 +715,7 @@ void VslInteg<T>::main_sim() {
         }
 
         /* Advance time to the next time to be evaluated */
+        p_model->eval_end_step();
         p_context->time(next_event_time());
     }
     /* If there is a callback hanging, it means that the Verisocks client is
