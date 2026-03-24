@@ -8,6 +8,8 @@ test/build/
 test/*.xml
 *.swp
 *.vvp
+*.vcd
+*.fst
 tags
 /Makefile
 include/vpi_config.h
