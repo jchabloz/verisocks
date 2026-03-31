@@ -308,7 +308,7 @@ def test_set(vs):
     assert answer["type"] == "result"
     assert answer["value"] == list(range(16))
 
-    answer = vs.set(path="main.count_memory[6]", value=37)
+    answer = vs.set(sel="value", path="main.count_memory[6]", value=37)
     assert answer["type"] == "ack"
     answer = vs.get(sel="value", path="main.count_memory[6]")
     assert answer["type"] == "result"
@@ -320,7 +320,8 @@ def test_set(vs):
     assert answer["type"] == "result"
     assert answer["value"] == [17, 234, 126]
 
-    answer = vs.set(path="main.count_memory[4:6]", value=[17, 234, 126])
+    answer = vs.set(
+        sel="value", path="main.count_memory[4:6]", value=[17, 234, 126])
     assert answer["type"] == "ack"
     answer = vs.get(sel="value", path="main.count_memory[6:4]")
     assert answer["type"] == "result"
