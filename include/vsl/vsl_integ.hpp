@@ -687,7 +687,6 @@ void VslInteg<T>::main_sim() {
         /* If no more pending events remaining ... finish simulation */
         if (!has_events_pending()) {
             if (has_time_callback()) {
-                p_model->eval_end_step();
                 p_context->time(cb_time);
                 clear_callbacks();
                 vs_msg_return(fd_client_socket, "ack",
@@ -704,7 +703,6 @@ void VslInteg<T>::main_sim() {
 
         /* If there is a time-based callback */
         if (has_time_callback() && (next_event_time() >= cb_time)) {
-            p_model->eval_end_step();
             p_context->time(cb_time);
             clear_callbacks();
             vs_msg_return(fd_client_socket, "ack",
@@ -715,7 +713,6 @@ void VslInteg<T>::main_sim() {
         }
 
         /* Advance time to the next time to be evaluated */
-        p_model->eval_end_step();
         p_context->time(next_event_time());
     }
     /* If there is a callback hanging, it means that the Verisocks client is
