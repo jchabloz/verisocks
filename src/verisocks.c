@@ -47,6 +47,8 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_cb_exit(p_cb_data cb_data);
+static PLI_INT32 verisocks_cb_poll(p_cb_data cb_data);
+
 
 void verisocks_register_tf()
 {
@@ -432,6 +434,41 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     return 0;
 }
 
+PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
+{
+    vs_vpi_log_debug("Reached interrupt polling callback");
+
+    /* Retrieve stored instance data */
+    vs_vpi_data_t *p_vpi_data = NULL;
+    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
+    if (NULL == p_vpi_data) {
+        vs_vpi_log_error("Could not get stored data - Aborting callback");
+        return -1;
+    }
+
+    // TODO: Check if pending interrupt command
+
+    /* Return to verisocks main loop */
+    if (VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) {
+        if (0 > verisocks_main(p_vpi_data)) {goto error;}
+    }
+    vs_vpi_log_debug("Returning control to simulator");
+    return 0;
+
+    /* Error management */
+    error:
+    if (NULL != p_vpi_data) {
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+        if (0 <= p_vpi_data->fd_server_socket) {
+            close(p_vpi_data->fd_server_socket);
+            p_vpi_data->fd_server_socket = -1;
+        }
+    }
+    vs_vpi_log_info("Aborting simulation");
+    vpi_control(vpiFinish, 1);
+    return -1;
+}
+
 /**
  * @brief State machine main loop
  *
@@ -444,6 +481,10 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
         vs_vpi_log_error("NULL pointer to user data");
         p_vpi_data->state = VS_VPI_STATE_ERROR;
     }
+
+    s_cb_data cb_poll_data;
+    s_vpi_time cb_time;
+    vpiHandle h_cb_poll;
 
     while(1) {
         switch (p_vpi_data->state) {
@@ -474,6 +515,18 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             latest processed instruction, it may be called again later from a
             callback handler function or not, normally with the state updated
             to VS_VPI_STATE_WAITING.*/
+
+            /* Register polling callback */
+            cb_time = vs_utils_double_to_time(1, "us");
+            cb_poll_data.reason = cbAfterDelay;
+            cb_poll_data.time = &cb_time;
+            cb_poll_data.obj = NULL;
+            cb_poll_data.value = NULL;
+            cb_poll_data.index = 0;
+            cb_poll_data.user_data = (PLI_BYTE8*) p_vpi_data;
+            cb_poll_data.cb_rtn = verisocks_cb_poll;
+            h_cb_poll = vpi_register_cb(&cb_poll_data);
+            vpi_free_object(h_cb_poll);
             return 0;
         case VS_VPI_STATE_EXIT:
             if (0 <= p_vpi_data->fd_server_socket) {
