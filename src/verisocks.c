@@ -47,7 +47,9 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_cb_exit(p_cb_data cb_data);
+#ifdef ENABLE_ITX_POLLING
 static PLI_INT32 verisocks_cb_poll(p_cb_data cb_data);
+#endif
 
 
 void verisocks_register_tf()
@@ -434,6 +436,7 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     return 0;
 }
 
+#ifdef ENABLE_ITX_POLLING
 PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
 {
     vs_vpi_log_debug("Reached interrupt polling callback");
@@ -468,6 +471,7 @@ PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
     vpi_control(vpiFinish, 1);
     return -1;
 }
+#endif
 
 /**
  * @brief State machine main loop
@@ -482,9 +486,11 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
         p_vpi_data->state = VS_VPI_STATE_ERROR;
     }
 
+    #ifdef ENABLE_ITX_POLLING
     s_cb_data cb_poll_data;
     s_vpi_time cb_time;
     vpiHandle h_cb_poll;
+    #endif
 
     while(1) {
         switch (p_vpi_data->state) {
@@ -517,6 +523,7 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             to VS_VPI_STATE_WAITING.*/
 
             /* Register polling callback */
+            #ifdef ENABLE_ITX_POLLING
             cb_time = vs_utils_double_to_time(1, "us");
             cb_poll_data.reason = cbAfterDelay;
             cb_poll_data.time = &cb_time;
@@ -527,7 +534,10 @@ static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data)
             cb_poll_data.cb_rtn = verisocks_cb_poll;
             h_cb_poll = vpi_register_cb(&cb_poll_data);
             vpi_free_object(h_cb_poll);
+            #endif
+
             return 0;
+
         case VS_VPI_STATE_EXIT:
             if (0 <= p_vpi_data->fd_server_socket) {
                 close(p_vpi_data->fd_server_socket);
