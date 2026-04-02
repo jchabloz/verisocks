@@ -112,8 +112,11 @@ VS_VPI_CMD_HANDLER(run_for_time)
         vs_vpi_log_error("Could not register callback");
         goto error;
     }
-    vpi_free_object(h_cb);
-    p_data->h_cb = NULL;
+    p_data->h_cb = h_cb;
+
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -189,8 +192,11 @@ VS_VPI_CMD_HANDLER(run_until_time)
         vs_vpi_log_error("Could not register callback");
         goto error;
     }
-    vpi_free_object(h_cb);
-    p_data->h_cb = NULL;
+    p_data->h_cb = h_cb;
+
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -298,6 +304,10 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
     p_data->h_cb = h_cb;
+
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;

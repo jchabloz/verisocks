@@ -213,6 +213,16 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value,
  */
 int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
 
+/**
+ * @brief Checks (non-blocking) if there is anything to read from the socket
+ * file descriptor.
+ * 
+ * @param fd I/O descriptor
+ * @return Returns 1 if there is something to read, 0 if there is nothing, -1 in
+ * case of error
+ */
+int vs_msg_peek(int fd);
+
 #ifdef __cplusplus
 }
 #endif

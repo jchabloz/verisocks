@@ -35,6 +35,10 @@ SOFTWARE.
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #include "vs_logging.h"
 #include "vs_msg.h"
 
@@ -672,6 +676,44 @@ Socket probably disconnected");
 
     /* Return received message total length */
     return total_len;
+}
+
+int vs_msg_peek(int fd)
+{
+    // Note: could use poll() or select() instead of relying upon recv() with
+    // MSG_PEEK. In our case, since we have only one file descriptor to check,
+    // I think it is more efficient to do it this way.
+
+    char read_buffer[3u];
+    ssize_t retval;
+    int flags;
+
+    flags = fcntl(fd, F_GETFL);
+    if (0 > flags) {
+        vs_log_mod_perror(
+            "vs_msg", "Error while getting descriptor's flags");
+        return -1;
+    }
+    if (0 > fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+        vs_log_mod_perror(
+            "vs_msg", "Error while setting descriptor as non-blocking");
+        return -1;
+    }
+    retval = recv(fd, read_buffer, 2u, MSG_PEEK);
+    if (0 > fcntl(fd, F_SETFL, flags)) {
+        vs_log_mod_perror(
+            "vs_msg", "Error while restoring descriptor's flags");
+        return -1;
+    }
+    if (0 > retval) {
+        if (EWOULDBLOCK == errno) {
+            return 0;
+        }
+        vs_log_mod_perror("vs_msg", "Cannot peek into message");
+        return -1;
+    }
+    if (retval < 2) return 0;
+    return retval;
 }
 
 //EOF
