@@ -450,6 +450,9 @@ PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
     }
 
     // TODO: Check if pending interrupt command
+    if (0 < vs_msg_peek(p_vpi_data->fd_client_socket)) {
+        vs_vpi_log_debug("Something can be read on socket descriptor");
+    }
 
     /* Return to verisocks main loop */
     if (VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) {
