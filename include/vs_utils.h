@@ -62,6 +62,11 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
 
 /**
+ * @brief Get current simulation time
+ */
+double vs_utils_get_sim_time();
+
+/**
  * @brief Get the Verisocks interface format of choice to represent the value
  * for a given object.
  *

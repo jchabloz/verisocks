@@ -680,6 +680,10 @@ Socket probably disconnected");
 
 int vs_msg_peek(int fd)
 {
+    // Note: could use poll() or select() instead of relying upon recv() with
+    // MSG_PEEK. In our case, since we have only one file descriptor to check,
+    // I think it is more efficient to do it this way.
+
     char read_buffer[3u];
     ssize_t retval;
     int flags;

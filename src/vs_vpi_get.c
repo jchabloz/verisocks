@@ -147,7 +147,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 {
     cJSON *p_msg;
     char *str_msg = NULL;
-    double sim_time_sec;
+    //double sim_time_sec;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
@@ -162,15 +162,11 @@ VS_VPI_CMD_HANDLER(get_sim_time)
         goto error;
     }
 
-    vs_vpi_log_debug("Getting simulator time...");
-    s_vpi_time s_time;
-    s_time.type = vpiSimTime;
-    vpi_get_time(NULL, &s_time);
-    sim_time_sec = vs_utils_time_to_double(s_time, NULL);
-    vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
+    //sim_time_sec = vs_utils_get_sim_time();
+    vs_vpi_log_debug("Sim time: %.6f us", p_data->sim_time_sec*1.0e6);
 
     if (NULL == cJSON_AddNumberToObject(p_msg, "time",
-        sim_time_sec)) {
+        p_data->sim_time_sec)) {
         vs_log_mod_error("vs_vpi", "Could not add number to object");
         goto error;
     }
