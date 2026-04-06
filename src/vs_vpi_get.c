@@ -202,9 +202,7 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 VS_VPI_CMD_HANDLER(get_value)
 {
     cJSON *p_msg;
-    cJSON *p_item_path;
     char *str_msg = NULL;
-    char *str_path;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
@@ -220,16 +218,7 @@ VS_VPI_CMD_HANDLER(get_value)
     }
 
     /* Get the object path from the JSON message content */
-    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    if (NULL == p_item_path) {
-        vs_vpi_log_error("Command field \"path\" invalid/not found");
-        goto error;
-    }
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("Command field \"path\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_STR(p_data->p_cmd, path);
 
     /* Attempt to get the object handle */
     vpiHandle h_obj;
@@ -315,8 +304,6 @@ VS_VPI_CMD_HANDLER(get_value)
 VS_VPI_CMD_HANDLER(get_type)
 {
     cJSON *p_msg;
-    cJSON *p_item_path;
-    char *str_path;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
@@ -333,16 +320,8 @@ VS_VPI_CMD_HANDLER(get_type)
     }
 
     /* Get the object path from the JSON message content */
-    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    if (NULL == p_item_path) {
-        vs_vpi_log_error("Command field \"path\" invalid/not found");
-        goto error;
-    }
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("Command field \"path\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_STR(p_data->p_cmd, path);
+
     /* Attempt to get the object handle */
     vpiHandle h_obj;
     h_obj = vpi_handle_by_name(str_path, NULL);

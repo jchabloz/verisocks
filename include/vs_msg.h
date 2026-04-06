@@ -223,6 +223,86 @@ int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
  */
 int vs_msg_peek(int fd);
 
+/**
+ * @brief Helper macro to read a numerical field from a JSON command
+ * 
+ * This macro assumes the existence of an "error" label.
+ * 
+ * @param obj Pointer to the command cJSON object
+ * @param name Name of the field
+ * @param var Variable to store the value (double)
+ */
+#define VS_MSG_READ_NUM_NO_DECL(obj, name, var) \
+    do { \
+        cJSON *p_item_ ## name; \
+        p_item_ ## name = cJSON_GetObjectItem(obj, #name); \
+        if (NULL == p_item_ ## name) { \
+            vs_vpi_log_error("Numerical field " #name " invalid/not found"); \
+            goto error; \
+        } \
+        var = cJSON_GetNumberValue(p_item_ ## name); \
+        if (isnan(var)) { \
+            vs_vpi_log_error("Numerical field " #name " invalid (NaN)"); \
+            goto error; \
+        } \
+    } while (0)
+
+/**
+ * @brief Helper macro to read a numerical field from a JSON command
+ * 
+ * This macro declares a double name_value variable within the current scope.
+ * If the name_value variable shall have a wide scope, use rather the macro
+ * VS_MSG_READ_NUM_NO_DECL instead.
+ * 
+ * This macro assumes the existence of an "error" label.
+ * 
+ * @param obj Pointer to the command cJSON object
+ * @param name Name of the field
+ */
+#define VS_MSG_READ_NUM(obj, name) \
+    double name ## _value; \
+    VS_MSG_READ_NUM_NO_DECL(obj, name, name ## _value)
+
+/**
+ * @brief Helper macro to read a text field from a JSON command
+ * 
+ * This macro assumes the existence of an "error" label.
+ * 
+ * @param obj Pointer to the command cJSON object
+ * @param name Name of the field
+ * @param var Variable to store the read text (char*)
+ */
+#define VS_MSG_READ_STR_NO_DECL(obj, name, var) \
+    do { \
+        cJSON *p_item_ ## name; \
+        p_item_ ## name = cJSON_GetObjectItem(obj, #name); \
+        if (NULL == p_item_ ## name) { \
+            vs_vpi_log_error("String field " #name " invalid/not found"); \
+            goto error; \
+        } \
+        var = cJSON_GetStringValue(p_item_ ## name); \
+        if ((NULL == var) || (strcmp(var, "") == 0)) { \
+            vs_vpi_log_error("String field " #name " NULL or empty"); \
+            goto error; \
+        } \
+    } while (0)
+
+/**
+ * @brief Helper macro to read a text field from a JSON command
+ * 
+ * This macro declares a char *str_name variable within the current scope.
+ * If the name_value variable shall have a wide scope, use rather the macro
+ * VS_MSG_READ_STR_NO_DECL instead.
+ * 
+ * This macro assumes the existence of an "error" label.
+ * 
+ * @param obj Pointer to the command cJSON object
+ * @param name Name of the field
+ */
+#define VS_MSG_READ_STR(obj, name) \
+    char *str_ ## name; \
+    VS_MSG_READ_STR_NO_DECL(obj, name, str_ ## name)
+
 #ifdef __cplusplus
 }
 #endif
