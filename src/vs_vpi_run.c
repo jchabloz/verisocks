@@ -39,6 +39,9 @@ SOFTWARE.
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
+#undef __MOD__
+#define __MOD__ "vs_vpi_run"
+
 
 /* Declare prototypes for command handler functions so that they can be used
  * in the following command tables. Commands are implemented at the end of this

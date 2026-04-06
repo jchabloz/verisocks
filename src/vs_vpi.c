@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@ SOFTWARE.
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
+#undef __MOD__
+#define __MOD__ "vs_vpi"
 
 /* Declare prototypes for command handler functions so that they can be used
  * in the following command tables. Commands are implemented at the end of this
@@ -80,7 +82,7 @@ static const vs_vpi_cmd_t vs_vpi_cmd_table[] =
 cmd_handler_t vs_vpi_get_cmd_handler(
     const vs_vpi_cmd_t *p_cmd_table, const char *str_cmd)
 {
-    vs_log_mod_debug("vs_vpi", "Looking for command with key %s", str_cmd);
+    vs_log_mod_debug(__MOD__, "Looking for command with key %s", str_cmd);
     while(p_cmd_table->cmd_name != NULL) {
         if (
             ((NULL == p_cmd_table->cmd_key) &&
@@ -101,11 +103,11 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
 
     /* Sanity check on parameters */
     if (NULL == p_data) {
-        vs_vpi_log_error("NULL pointer to data");
+        vs_log_mod_error(__MOD__, "NULL pointer to data");
         return -1;
     }
     if (NULL == p_data->p_cmd) {
-        vs_vpi_log_error("NULL pointer to cJSON cmd");
+        vs_log_mod_error(__MOD__, "NULL pointer to cJSON cmd");
         goto error;
     }
 
@@ -155,30 +157,30 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 
     p_msg = cJSON_CreateObject();
     if (NULL == p_msg) {
-        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
+        vs_log_mod_error(__MOD__, "Could not create cJSON object");
         return -1;
     }
 
     if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        vs_log_mod_error(__MOD__, "Could not add string to object");
         goto error;
     }
 
     if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
+        vs_log_mod_error(__MOD__, "Could not add string to object");
         goto error;
     }
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
-        vs_log_mod_error("vs_vpi", "NULL pointer");
+        vs_log_mod_error(__MOD__, "NULL pointer");
         goto error;
     }
 
     int retval;
     retval = vs_msg_write(fd, str_msg);
     if (0 > retval) {
-        vs_log_mod_error("vs_vpi", "Error writing return message");
+        vs_log_mod_error(__MOD__, "Error writing return message");
         goto error;
     }
 
@@ -366,16 +368,18 @@ corresponds to a named event.", str_path);
     if (vpiMemory == vpi_get(vpiType, h_obj)) {
         p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
         if (NULL == p_item_val) {
-            vs_vpi_log_error("Command field \"value\" invalid/not found");
+            vs_log_mod_error(__MOD__,
+                "Command field \"value\" invalid/not found");
             goto error;
         }
         if (!cJSON_IsArray(p_item_val)) {
-            vs_vpi_log_error("Command field \"value\" should be an array");
+            vs_log_mod_error(__MOD__,
+                "Command field \"value\" should be an array");
             goto error;
         }
         PLI_INT32 mem_size = vpi_get(vpiSize, h_obj);
         if (mem_size != cJSON_GetArraySize(p_item_val)) {
-            vs_vpi_log_error(
+            vs_log_mod_error(__MOD__,
                 "Command field \"value\" should be an array of length %d",
                 mem_size);
             goto error;
@@ -386,7 +390,7 @@ Target path corresponds to a memory array.", str_path);
         vpiHandle h_mem_word;
         mem_iter = vpi_iterate(vpiMemoryWord, h_obj);
         if (NULL == mem_iter) {
-            vs_log_mod_error("vs_vpi", "Could not initialize memory iterator");
+            vs_log_mod_error(__MOD__, "Could not initialize memory iterator");
             goto error;
         }
 
@@ -413,12 +417,12 @@ Target path corresponds to a memory array.", str_path);
     /* Get the value from the JSON message content */
     p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
     if (NULL == p_item_val) {
-        vs_vpi_log_error("Command field \"value\" invalid/not found");
+        vs_log_mod_error(__MOD__, "Command field \"value\" invalid/not found");
         goto error;
     }
     value = cJSON_GetNumberValue(p_item_val);
     if (isnan(value)) {
-        vs_vpi_log_error("Command field \"value\" invalid (NaN)");
+        vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
         goto error;
     }
     vs_vpi_log_info("Command \"set(path=%s, value=%f)\" received.",

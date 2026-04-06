@@ -68,7 +68,7 @@ extern const char* VS_MSG_TYPES[VS_MSG_ENUM_LEN];
 
 /**
  * @brief Transaction UUID type
- * 
+ *
  * This structure is used to define a type for a transaction UUID. If the valid
  * flag is > 0, the value member corresponds to a 16-byte UUID value.
  */
@@ -216,7 +216,7 @@ int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
 /**
  * @brief Checks (non-blocking) if there is anything to read from the socket
  * file descriptor.
- * 
+ *
  * @param fd I/O descriptor
  * @return Returns 1 if there is something to read, 0 if there is nothing, -1 in
  * case of error
@@ -225,9 +225,9 @@ int vs_msg_peek(int fd);
 
 /**
  * @brief Helper macro to read a numerical field from a JSON command
- * 
+ *
  * This macro assumes the existence of an "error" label.
- * 
+ *
  * @param obj Pointer to the command cJSON object
  * @param name Name of the field
  * @param var Variable to store the value (double)
@@ -249,13 +249,13 @@ int vs_msg_peek(int fd);
 
 /**
  * @brief Helper macro to read a numerical field from a JSON command
- * 
+ *
  * This macro declares a double name_value variable within the current scope.
  * If the name_value variable shall have a wide scope, use rather the macro
  * VS_MSG_READ_NUM_NO_DECL instead.
- * 
+ *
  * This macro assumes the existence of an "error" label.
- * 
+ *
  * @param obj Pointer to the command cJSON object
  * @param name Name of the field
  */
@@ -265,9 +265,9 @@ int vs_msg_peek(int fd);
 
 /**
  * @brief Helper macro to read a text field from a JSON command
- * 
+ *
  * This macro assumes the existence of an "error" label.
- * 
+ *
  * @param obj Pointer to the command cJSON object
  * @param name Name of the field
  * @param var Variable to store the read text (char*)
@@ -277,31 +277,57 @@ int vs_msg_peek(int fd);
         cJSON *p_item_ ## name; \
         p_item_ ## name = cJSON_GetObjectItem(obj, #name); \
         if (NULL == p_item_ ## name) { \
-            vs_vpi_log_error("String field " #name " invalid/not found"); \
+            vs_log_mod_error(__MOD__, "String field " #name " invalid/not found"); \
             goto error; \
         } \
         var = cJSON_GetStringValue(p_item_ ## name); \
         if ((NULL == var) || (strcmp(var, "") == 0)) { \
-            vs_vpi_log_error("String field " #name " NULL or empty"); \
+            vs_log_mod_error(__MOD__, "String field " #name " NULL or empty"); \
             goto error; \
         } \
     } while (0)
 
 /**
  * @brief Helper macro to read a text field from a JSON command
- * 
+ *
  * This macro declares a char *str_name variable within the current scope.
  * If the name_value variable shall have a wide scope, use rather the macro
  * VS_MSG_READ_STR_NO_DECL instead.
- * 
+ *
  * This macro assumes the existence of an "error" label.
- * 
+ *
  * @param obj Pointer to the command cJSON object
  * @param name Name of the field
  */
 #define VS_MSG_READ_STR(obj, name) \
     char *str_ ## name; \
     VS_MSG_READ_STR_NO_DECL(obj, name, str_ ## name)
+
+#define VS_MSG(msg) \
+    cJSON* msg; \
+    do { \
+        msg = cJSON_CreateObject(); \
+        if (NULL == msg) { \
+            vs_log_mod_error(__MOD__, "Could not create cJSON object"); \
+            goto error; \
+        } \
+    } while (0)
+
+#define VS_MSG_ADD_STR(msg, key, val) \
+    do { \
+        if (NULL == cJSON_AddStringToObject(msg, key, val)) { \
+            vs_log_mod_error(__MOD__, "Could not add string to object"); \
+            goto error; \
+        } \
+    } while (0)
+
+#define VS_MSG_ADD_NUM(msg, key, val) \
+    do { \
+        if (NULL == cJSON_AddNumberToObject(msg, key, val)) { \
+            vs_log_mod_error(__MOD__, "Could not add number to object"); \
+            goto error; \
+        } \
+    } while (0)
 
 #ifdef __cplusplus
 }
