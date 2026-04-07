@@ -237,12 +237,14 @@ int vs_msg_peek(int fd);
         cJSON *p_item_ ## name; \
         p_item_ ## name = cJSON_GetObjectItem(obj, #name); \
         if (NULL == p_item_ ## name) { \
-            vs_vpi_log_error("Numerical field " #name " invalid/not found"); \
+            vs_log_mod_error(__MOD__, \
+                "Numerical field " #name " invalid/not found"); \
             goto error; \
         } \
         var = cJSON_GetNumberValue(p_item_ ## name); \
         if (isnan(var)) { \
-            vs_vpi_log_error("Numerical field " #name " invalid (NaN)"); \
+            vs_log_mod_error(__MOD__, \
+                "Numerical field " #name " invalid (NaN)"); \
             goto error; \
         } \
     } while (0)
@@ -277,12 +279,14 @@ int vs_msg_peek(int fd);
         cJSON *p_item_ ## name; \
         p_item_ ## name = cJSON_GetObjectItem(obj, #name); \
         if (NULL == p_item_ ## name) { \
-            vs_log_mod_error(__MOD__, "String field " #name " invalid/not found"); \
+            vs_log_mod_error(__MOD__, \
+                "String field " #name " invalid/not found"); \
             goto error; \
         } \
         var = cJSON_GetStringValue(p_item_ ## name); \
         if ((NULL == var) || (strcmp(var, "") == 0)) { \
-            vs_log_mod_error(__MOD__, "String field " #name " NULL or empty"); \
+            vs_log_mod_error(__MOD__, \
+                "String field " #name " NULL or empty"); \
             goto error; \
         } \
     } while (0)

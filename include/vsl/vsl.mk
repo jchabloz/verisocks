@@ -56,7 +56,8 @@ VSL_HEADERS = \
     $(VSL_DIR)/include/vsl/vsl_integ_cmd_run.hpp \
     $(VSL_DIR)/include/vsl/vsl_utils.hpp \
     $(VSL_DIR)/include/vsl/vsl_types.hpp \
-    $(VSL_DIR)/include/vsl/vsl_clocks.hpp
+    $(VSL_DIR)/include/vsl/vsl_clocks.hpp \
+    $(VSL_DIR)/include/vsl/vsl_macros.hpp
 
 VSL_INCDIRS = \
 	$(VSL_DIR)/include \
