@@ -7,13 +7,6 @@ VERILATOR_ROOT ?= /usr/local/share/verilator
 VSL_DIR ?= ../..
 
 
-# Setup traceing - use $dump() in testbench
-CPP_USER_FLAGS += -DDUMP_FILE
-
-# Using VCD traceing
-VL_USER_FLAGS += --trace
-VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
-
 # Design prefix
 VM_PREFIX = Vcounter
 

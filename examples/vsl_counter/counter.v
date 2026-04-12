@@ -18,13 +18,5 @@ module counter #(
 	end
 	assign count = counter;
 
-	`ifdef DUMP_FILE
-	initial
-	begin
-		$dumpfile(`DUMP_FILE);
-        $dumpvars(0, counter);
-	end
-	`endif
-
 endmodule
 // EOF

@@ -42,18 +42,15 @@ CPP_USER_FLAGS += -DVSL_TIMING
 
 % if use_tracing:
 # Setup traceing - use $dump() in testbench
-CPP_USER_FLAGS += -DDUMP_FILE
 % if use_fst:
-
 # Using FST traceing (slower due to compression)
+CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_FST
 VL_USER_FLAGS += --trace-fst
-VL_USER_FLAGS += -DDUMP_FILE=\"test.fst\"
 USER_LDLIBS = -lz
 % else:
-
 # Using VCD traceing
+CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_VCD
 VL_USER_FLAGS += --trace
-VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 % endif
 
 % endif
