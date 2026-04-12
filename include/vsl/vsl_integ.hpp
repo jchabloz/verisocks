@@ -60,6 +60,7 @@ SOFTWARE.
 #include "verilated_syms.h"
 #include "vsl/vsl_types.hpp"
 #include "vsl/vsl_clocks.hpp"
+#include "vsl/vsl_dump.hpp"
 
 #include <cstdio>
 #include <functional>
@@ -69,7 +70,6 @@ SOFTWARE.
 
 #undef __MOD__
 #define __MOD__ "vsl"
-
 
 /**
  * @brief Helper macro to declare a command handler function prototype
@@ -86,7 +86,6 @@ SOFTWARE.
  * @param cmd Command short name
  */
 #define VSL_CMD_HANDLER_NAME(cmd) VSL_ ## cmd ## _cmd_handler
-
 
 namespace vsl{
 
@@ -271,6 +270,12 @@ private:
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
 
+    #ifdef DUMP_FST
+    VerilatedFstC* p_trace;
+    #elifdef DUMP_VCD
+    VerilatedVcdC* p_trace;
+    #endif
+
     /* Callbacks management */
     bool b_has_time_callback {false};
     bool b_has_value_callback {false};
@@ -380,6 +385,17 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
 
+
+    #ifdef DUMP_FST
+    p_trace = new VerilatedFstC;
+    p_model->trace(p_trace, DUMP_LEVELS);
+    p_trace->open("dump.fst");
+    #elifdef DUMP_VCD
+    p_trace = new VerilatedVcdC;
+    p_model->trace(p_trace, DUMP_LEVELS);
+    p_trace->open("dump.vcd");
+    #endif
+
     // Add commands handler functions to the relevant maps
     cmd_handlers_map["info"]   = VSL_CMD_HANDLER_NAME(info);
     cmd_handlers_map["get"]    = VSL_CMD_HANDLER_NAME(get);
@@ -410,6 +426,9 @@ Destructor
 template<typename T>
 VslInteg<T>::~VslInteg() {
     vs_log_mod_debug(__MOD__, "Destructor called (%s)", __FILE__);
+    #ifdef DUMP_FILE
+    if (nullptr != p_trace) p_trace->close();
+    #endif
     if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
     if (nullptr != p_cmd) cJSON_Delete(p_cmd);
     return;
@@ -748,6 +767,9 @@ template<typename T>
 void VslInteg<T>::eval() {
     clock_map.eval(p_context->time());
     p_model->eval();
+    #ifdef DUMP_FILE
+    p_trace->dump(p_context->time());
+    #endif
 }
 
 template<typename T>

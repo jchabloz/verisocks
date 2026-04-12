@@ -57,6 +57,7 @@ VSL_HEADERS = \
     $(VSL_DIR)/include/vsl/vsl_utils.hpp \
     $(VSL_DIR)/include/vsl/vsl_types.hpp \
     $(VSL_DIR)/include/vsl/vsl_clocks.hpp \
+    $(VSL_DIR)/include/vsl/vsl_dump.hpp \
     $(VSL_DIR)/include/vsl/vsl_macros.hpp
 
 VSL_INCDIRS = \
@@ -124,7 +125,7 @@ clean:
 	$(RM) $(VK_OBJS) $(VK_GLOBAL_OBJS)
 	$(RM) $(VM_PREFIX)__ALL.*
 	$(RM) $(VM_PREFIX)
-	$(RM) *.d
+	$(RM) *.d *.o
 	$(RM) *.fst *.vcd
 	$(RM) *.log
 	$(RM) -r __pycache__
