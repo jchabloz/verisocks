@@ -67,6 +67,7 @@ SOFTWARE.
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <memory>
 
 #undef __MOD__
 #define __MOD__ "vsl"
@@ -271,9 +272,9 @@ private:
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
 
     #ifdef DUMP_FST
-    VerilatedFstC* p_trace;
+    std::unique_ptr<VerilatedFstC> p_trace;
     #elifdef DUMP_VCD
-    VerilatedVcdC* p_trace;
+    std::unique_ptr<VerilatedVcdC> p_trace;
     #endif
 
     /* Callbacks management */
@@ -387,12 +388,12 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
 
 
     #ifdef DUMP_FST
-    p_trace = new VerilatedFstC;
-    p_model->trace(p_trace, DUMP_LEVELS);
+    p_trace = std::unique_ptr<VerilatedFstC>{new VerilatedFstC};
+    p_model->trace(p_trace.get(), DUMP_LEVELS);
     p_trace->open("dump.fst");
     #elifdef DUMP_VCD
-    p_trace = new VerilatedVcdC;
-    p_model->trace(p_trace, DUMP_LEVELS);
+    p_trace = std::unique_ptr<VerilatedVcdC>{new VerilatedVcdC};
+    p_model->trace(p_trace.get(), DUMP_LEVELS);
     p_trace->open("dump.vcd");
     #endif
 
