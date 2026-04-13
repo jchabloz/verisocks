@@ -34,6 +34,10 @@ SOFTWARE.
 #ifndef VS_LOGGING_NO_VA_H
 #define VS_LOGGING_NO_VA_H
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
+
 #include <stdio.h>
 
 /******************************************************************************/

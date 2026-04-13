@@ -18,7 +18,7 @@ def setup_test(port=5100, timeout=10):
         f"{port}",
         f"{timeout}"
     ]
-    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=False)
+    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
 
 

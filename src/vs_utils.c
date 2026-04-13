@@ -146,7 +146,7 @@ s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit)
     return vpi_time;
 }
 
-double vs_utils_get_sim_time()
+double vs_utils_get_sim_time(void)
 {
     double sim_time_sec;
     s_vpi_time s_time;

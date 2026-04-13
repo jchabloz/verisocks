@@ -48,7 +48,7 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data);
 static PLI_INT32 verisocks_cb_exit(p_cb_data cb_data);
 
-void verisocks_register_tf()
+void verisocks_register_tf(void)
 {
     s_vpi_systf_data tf_data;
 

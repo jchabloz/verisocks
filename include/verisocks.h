@@ -50,7 +50,7 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data);
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
 
 /** VPI register function */
-void verisocks_register_tf();
+void verisocks_register_tf(void);
 
 #ifdef __cplusplus
 }
