@@ -6,7 +6,7 @@
  This header defines template implementations for handling various "run"
  commands in the vsl::VslInteg class template.
 
-Main handlers:
+ Main handlers:
    - VSL_CMD_HANDLER(run): Dispatches sub-commands based on the "cb" field in
      the JSON message.
    - VSL_CMD_HANDLER(run_for_time): Runs the simulation for a specified time
@@ -24,11 +24,11 @@ Main handlers:
  command arguments.
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2024-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 *******************************************************************************/
 /*
-Copyright (c) 2024-2025 Jérémie Chabloz
+Copyright (c) 2024-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

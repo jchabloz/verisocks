@@ -1,3 +1,38 @@
+/***************************************************************************//**
+ @file vsl_macros.hpp
+ @brief Verisocks integration header with utility macros.
+ 
+ This header defines several useful macros to be used in the various command
+ handler functions.
+
+ @author Jérémie Chabloz
+ @copyright Copyright (c) 2026 Jérémie Chabloz Distributed under the MIT
+ License. See file for details.
+*******************************************************************************/
+/*
+MIT License
+
+Copyright (c) 2026 Jérémie Chabloz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #ifndef VSL_MACROS_HPP
 #define VSL_MACROS_HPP
 

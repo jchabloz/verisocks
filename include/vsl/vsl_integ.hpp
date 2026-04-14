@@ -22,13 +22,13 @@
  - Call `run()` to start the FSM and handle remote commands.
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2024-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 *******************************************************************************/
 /*
 MIT License
 
-Copyright (c) 2024-2025 Jérémie Chabloz
+Copyright (c) 2024-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -447,7 +447,7 @@ int VslInteg<T>::run() {
     std::printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/   *\n");
     std::printf("*                                         *\n");
     std::printf("*          Verilator integration          *\n");
-    std::printf("* Copyright (c) 2024-2025 Jérémie Chabloz *\n");
+    std::printf("* Copyright (c) 2024-2026 Jérémie Chabloz *\n");
     std::printf("*******************************************\n");
 
     #ifdef VSL_TIMING
