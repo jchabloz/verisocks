@@ -1,5 +1,11 @@
-<%page args = "prefix, variables, log_level"/>\
+<%page args = "prefix, variables, log_level, exec_version, exec_doc,
+    bug_address"
+/>\
 <%
+import datetime
+import verisocks
+today = datetime.datetime.today()
+
 VLVT_TYPES = {
     "uint8":  "VLVT_UINT8",
     "uint16": "VLVT_UINT16",
@@ -18,7 +24,7 @@ LOG_LEVELS = {
 /*
 Note: this file has been generated from the template ${template_filename}
 
-Copyright (c) 2025 Jérémie Chabloz
+Copyright (c) 2025-${today.year} Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -45,20 +51,71 @@ SOFTWARE.
 #include "${prefix}__Syms.h"
 
 #include <cstdlib>
+#include <cstdio>
 #include <memory>
+
+#include <argp.h>
+
+// Argp configuration
+% if exec_version:
+const char* argp_program_version = "${exec_version}";
+% endif
+% if bug_address:
+const char* argp_program_bug_address = "<${bug_address}>";
+% endif
+% if exec_doc:
+static const char* argp_doc = "${exec_doc}";
+% endif
+static const struct argp_option argp_options[] = {
+    {"port",    'p', "PORT",    0, "Use socket port number PORT (default: 5100)"},
+    {"timeout", 't', "TIMEOUT", 0, "Use socket TIMEOUT (seconds) (default: 5s)"},
+    {0}
+};
+
+// Arguments structure
+typedef struct arguments {
+    int port_number;
+    int timeout;
+} arguments_t;
+
+// Arguments parsing function
+static error_t argp_parse_opt (int key, char* arg, struct argp_state* state) {
+    arguments_t* arguments = (arguments_t*) (state->input);
+    switch (key) {
+        case 'p':
+            arguments->port_number = std::atoi(arg);
+            if (0 > arguments->port_number) {
+                argp_error(state, "Invalid argument for PORT\n");
+            }
+            break;
+        case 't':
+            arguments->timeout = std::atoi(arg);
+            if (0 >= arguments->timeout) {
+                argp_error(state, "Invalid argument for TIMEOUT\n");
+            }
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+% if exec_doc:
+static const struct argp argp = {argp_options, argp_parse_opt, 0, argp_doc};
+% else:
+static const struct argp argp = {argp_options, argp_parse_opt, 0, 0};
+% endif
 
 //======================
 
 int main(int argc, char** argv, char**) {
 
-    //Get arguments for port number and timeout
-    int port_number {5100};
-    int timeout {5};
-    if (argc > 1) {
-        port_number = std::atoi(argv[1]);
-    }
-    if (argc > 2) {
-        timeout = std::atoi(argv[2]);
+    // Initialize arguments with default values
+    arguments_t arguments {5100, 5};
+
+    // Parse arguments
+    if (0 != argp_parse(&argp, argc, argv, 0, 0, &arguments)) {
+        return -1;
     }
 
     // Setup context, defaults, and parse command line
@@ -77,13 +134,14 @@ int main(int argc, char** argv, char**) {
 	% if (LOG_LEVELS[log_level] < 20):
     // Dump public variables
     contextp->internalsDump();
-	% endif
 
+    % endif
     // Create top VSL instance
-    vsl::VslInteg<${prefix}> vslx{topp.get(), port_number, timeout};
+    vsl::VslInteg<${prefix}> vslx{
+        topp.get(), arguments.port_number, arguments.timeout};
 
-    // Register public variables
     % if variables:
+    // Register public variables
     % if 'clocks' in variables:
     // Clocks
     % for clk in variables['clocks']:
@@ -124,8 +182,8 @@ int main(int argc, char** argv, char**) {
         &topp->${var['path'].replace(".", "->")});
     % endfor
     % endif
-    % endif
 
+    % endif
     // Run simulation
     int retval = vslx.run();
 

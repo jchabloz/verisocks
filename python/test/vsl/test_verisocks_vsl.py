@@ -30,8 +30,8 @@ def setup_test(port, timeout, capture_output=True,
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         os.path.join(cwd, "Vmain"),
-        f"{port}",
-        f"{timeout}"
+        "-p", f"{port}",
+        "-t", f"{timeout}"
     ]
     pop = setup_sim_run(
         elab_cmd,

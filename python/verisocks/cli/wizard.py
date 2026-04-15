@@ -112,10 +112,17 @@ option is being used)")
     template_cpp = join(args.templates_dir, "test_main.cpp.mako")
     template_vlt = join(args.templates_dir, "variables.vlt.mako")
 
-    # Load JSON configuration file
+    # Load YAML configuration file
     logging.info(f"Loading configuration file {args.config}")
     with open(args.config, 'r') as f:
         cfg = yaml.safe_load(f)
+
+    # Default values for optional arguments
+    for k in ['exec_version', 'exec_doc', 'bug_address']:
+        if not (k in cfg['config']):
+            cfg['config'][k] = None
+    if not ('use_tracing' in cfg['config']):
+        cfg['config']['use_tracing'] = False
 
     # Format relative paths in config file
     def format_path(x):

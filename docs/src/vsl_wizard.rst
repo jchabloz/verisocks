@@ -65,13 +65,17 @@ are paths can be relative to the configuration file location.
       verisocks_root: <path>    # Path to Verisocks root directory
       verilator_path: <path>    # Path to the verilator binary
       verilator_root: <path>    # Path to Verilator root
-      use_tracing: <bool>       # If true, tracing is enabled
+      use_tracing: <bool>       # (optional) Enable tracing if true.
       use_fst: <bool>           # (optional if use_tracing is false) If true,
-                                # the FST format is used for the traces file
+                                #  the FST format is used for the traces file
       use_timing: <bool>        # (optional) If true (default), the sources are
-                                # verilated with the timing option
+                                #  verilated with the timing option
       log_level: <text>         # (optional) Logging level
                                 # [info, debug, warning, error, critical]
+      exec_version: <text>      # (optional) Version of generated executable
+      exec_doc: <text>          # (optional) Doc for generated executable help
+      bug_address: <text>       # (optional) Address for bugs for generated
+                                #  executable help
     variables:                  # (optional) Public variables
       clocks:                   # (optional) List of clock variables
       - path: <text>            # Name/alias to be used for the variable

@@ -15,8 +15,8 @@ def setup_test(port=5100, timeout=10):
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         join(cwd, "hello_world"),
-        f"{port}",
-        f"{timeout}"
+        "-p", f"{port}",
+        "-t", f"{timeout}"
     ]
     pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
