@@ -78,7 +78,20 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True,
     """
 
     if elab_cmd:
-        subprocess.check_call(elab_cmd)
+        if capture_output:
+            subprocess.check_call(
+                elab_cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        elif capture_logfile:
+            subprocess.check_call(
+                elab_cmd,
+                stdout=capture_logfile,
+                stderr=capture_logfile
+            )
+        else:
+            subprocess.check_call(elab_cmd)
 
     if sim_cmd is None:
         raise ValueError("Simulation command and arguments is mandatory")
@@ -89,12 +102,14 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
+    elif capture_logfile:
+        pop = subprocess.Popen(
+            sim_cmd,
+            stdout=capture_logfile,
+            stderr=capture_logfile
+        )
     else:
-        if capture_logfile:
-            pop = subprocess.Popen(
-                sim_cmd, stdout=capture_logfile, stderr=capture_logfile)
-        else:
-            pop = subprocess.Popen(sim_cmd)
+        pop = subprocess.Popen(sim_cmd)
 
     logging.info(f"Launched simulation with PID {pop.pid}")
     return pop
