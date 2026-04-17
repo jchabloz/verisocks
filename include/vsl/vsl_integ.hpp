@@ -163,6 +163,9 @@ public:
     /**
      * @brief Register a clock variable
      *
+     * The clock is also registered as a scalar 1-bit wide variable within the
+     * variable map and can thus be accessed as a variable as well.
+     *
      * @param name Name of the clock
      * @param datap Pointer to the corresponding Verilator variable
      * @param period Period of the clock
@@ -174,6 +177,7 @@ public:
             clock_map.add_clock(
                 name, datap, period, unit, duty_cycle, p_context
             );
+            register_variable(name, datap, VLVT_UINT8, VSL_TYPE_SCALAR, 1u);
     }
 
     /**

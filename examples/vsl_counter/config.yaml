@@ -9,8 +9,8 @@ config:
   verisocks_root: ../..  # Verisocks root path
   verilator_path: /usr/local/bin/verilator
   verilator_root: /usr/local/share/verilator
-  use_tracing: false
-  use_fst: false
+  use_tracing: true
+  use_fst: true
   use_timing: false
   log_level: debug
 
@@ -30,7 +30,7 @@ variables:
       module: counter
       type: uint16
       width: 10
-    - path: clk
-      module: counter
-      type: uint8
-      width: 1
+#    - path: clk
+#      module: counter
+#      type: uint8
+#      width: 1

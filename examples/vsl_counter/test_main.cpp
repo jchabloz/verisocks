@@ -115,9 +115,6 @@ int main(int argc, char** argv, char**) {
     vslx.register_scalar("count",
         &topp->count,
         VLVT_UINT16, 10u);
-    vslx.register_scalar("clk",
-        &topp->clk,
-        VLVT_UINT8, 1u);
 
     // Run simulation
     int retval = vslx.run();
