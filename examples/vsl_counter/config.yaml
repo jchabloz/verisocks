@@ -30,7 +30,3 @@ variables:
       module: counter
       type: uint16
       width: 10
-#    - path: clk
-#      module: counter
-#      type: uint8
-#      width: 1
