@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2022-2025 Jérémie Chabloz
+# Copyright (c) 2022-2026 Jérémie Chabloz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 import argparse
 import pathlib
 import yaml
+import logging
 from os.path import isabs, abspath, dirname, join, relpath
 from mako.template import Template
 
@@ -79,7 +80,25 @@ option is being used)")
     parser.add_argument('--vlt-only', action='store_true',
                         help="Render variables file only (unless any other \
 *-only option is being used)")
+    parser.add_argument(
+        '--log-level', type=str,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Logging level (default: INFO)"
+    )
+
+    # Parse arguments
     args = parser.parse_args()
+
+    # Configure logging
+    if args.log_level:
+        numeric_level = getattr(logging, args.log_level.upper(), None)
+        if not isinstance(numeric_level, int):
+            raise ValueError(f'Invalid log level: {args.log_level}')
+        logging.basicConfig(
+            format='[%(levelname)s][%(module)s] %(message)s',
+            level=numeric_level
+        )
 
     render_makefile = args.makefile_only or (
         not args.tb_only and not args.vlt_only)
@@ -93,15 +112,24 @@ option is being used)")
     template_cpp = join(args.templates_dir, "test_main.cpp.mako")
     template_vlt = join(args.templates_dir, "variables.vlt.mako")
 
-    # Load JSON configuration file
+    # Load YAML configuration file
+    logging.info(f"Loading configuration file {args.config}")
     with open(args.config, 'r') as f:
         cfg = yaml.safe_load(f)
+
+    # Default values for optional arguments
+    for k in ['exec_version', 'exec_doc', 'bug_address']:
+        if not (k in cfg['config']):
+            cfg['config'][k] = None
+    if not ('use_tracing' in cfg['config']):
+        cfg['config']['use_tracing'] = False
 
     # Format relative paths in config file
     def format_path(x):
         if isabs(x):
             return x
         return abspath(join(dirname(args.config), x))
+
     for k in ["verisocks_root", "verilator_root", "verilator_path"]:
         format_path(cfg['config'][k])
 
@@ -110,6 +138,11 @@ option is being used)")
         cfg['config']['cpp_src_files'] = []
     cfg['config']['cpp_src_files'] = (
         [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
+
+    if 'verilog_inc_dirs' not in cfg['config']:
+        cfg['config']['verilog_inc_dirs'] = []
+    if 'verilator_arg_files' not in cfg['config']:
+        cfg['config']['verilator_arg_files'] = []
 
     # Add verilator configuration file for public variables at the front of the
     # Verilog sources list
@@ -128,6 +161,7 @@ option is being used)")
                         tb_file=str(args.testbench_file),
                         vlt_file=vlt_file,
                         **cfg['config'])
+        logging.info(f"Rendered {args.makefile}")
     if render_tb:
         if 'variables' in cfg:
             render_template(template_cpp, args.testbench_file,
@@ -135,9 +169,11 @@ option is being used)")
         else:
             render_template(template_cpp, args.testbench_file,
                             **cfg['config'], variables=None)
+        logging.info(f"Rendered {args.testbench_file}")
     if render_vlt and ('variables' in cfg):
         render_template(template_vlt, args.variables_file,
                         variables=cfg['variables'])
+        logging.info(f"Rendered {args.variables_file}")
 
 
 if __name__ == "__main__":

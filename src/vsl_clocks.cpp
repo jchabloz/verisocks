@@ -33,6 +33,9 @@ SOFTWARE.
 #include "vs_logging.h"
 #include <algorithm>
 
+#undef __MOD__
+#define __MOD__ "vsl_clocks"
+
 namespace vsl{
 
     /***************************************************************************
@@ -70,10 +73,10 @@ namespace vsl{
                 prev_event_time = time;
                 next_event_time = time + period_high;
                 set_value(1.0);
-                vs_log_mod_debug("vsl_clocks", "Enabled clock");
+                vs_log_mod_debug(__MOD__, "Enabled clock");
             }
         } else {
-            vs_log_mod_debug("vsl_clocks", "Clock already enabled");
+            vs_log_mod_debug(__MOD__, "Clock already enabled");
         }
     }
 
@@ -88,13 +91,13 @@ namespace vsl{
                 next_event_time = 0ul;
                 // prev_event_time = 0ul;
                 b_is_enabled = false;
-                vs_log_mod_debug("vsl_clocks", "Disabled clock");
+                vs_log_mod_debug(__MOD__, "Disabled clock");
             } else {
                 b_wait_dis = true;
-                vs_log_mod_debug("vsl_clocks", "Set clocks to be disabled after next falling edge");
+                vs_log_mod_debug(__MOD__, "Set clocks to be disabled after next falling edge");
             }
         } else {
-            vs_log_mod_debug("vsl_clocks", "Clock already disabled");
+            vs_log_mod_debug(__MOD__, "Clock already disabled");
         }
     }
 

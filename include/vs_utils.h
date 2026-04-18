@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2025 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,11 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
  * @return s_vpi_time struct with vpiSimTime type
  */
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
+
+/**
+ * @brief Get current simulation time
+ */
+double vs_utils_get_sim_time(void);
 
 /**
  * @brief Get the Verisocks interface format of choice to represent the value

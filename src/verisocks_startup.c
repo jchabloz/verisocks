@@ -31,7 +31,7 @@ SOFTWARE.
 #include "verisocks.h"
 #include "vpi_config.h"
 
-void (*vlog_startup_routines[])() =
+void (*vlog_startup_routines[])(void) =
 {
     verisocks_register_tf,
     0

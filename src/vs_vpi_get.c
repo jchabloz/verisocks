@@ -39,6 +39,9 @@ SOFTWARE.
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
+#undef __MOD__
+#define __MOD__ "vs_vpi_get"
+
 /* Declare prototypes for command handler functions so that they can be used
  * in the following command tables. Commands are implemented at the end of this
  * file.
@@ -64,21 +67,13 @@ const vs_vpi_cmd_t vs_vpi_cmd_get_table[] =
 
 VS_VPI_CMD_HANDLER(get_sim_info)
 {
-    cJSON *p_msg;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
-    p_msg = cJSON_CreateObject();
-    if (NULL == p_msg) {
-        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
-        goto error;
-    }
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG(p_msg);
+    VS_MSG_ADD_STR(p_msg, "type", "result");
 
     vs_vpi_log_debug("Get simulator info...");
     s_vpi_vlog_info vlog_info;
@@ -86,34 +81,17 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not get vlog_info");
         goto error;
     }
-    if (NULL == cJSON_AddStringToObject(p_msg, "product",
-                                        vlog_info.product)) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
-    if (NULL == cJSON_AddStringToObject(p_msg, "version",
-                                        vlog_info.version)) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "product", vlog_info.product);
+    VS_MSG_ADD_STR(p_msg, "version", vlog_info.version);
 
     PLI_INT32 time_unit;
     time_unit = vpi_get(vpiTimeUnit, NULL);
-    if (NULL == cJSON_AddStringToObject(
-        p_msg, "time_unit", vs_utils_get_time_unit(time_unit))
-    ) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "time_unit", vs_utils_get_time_unit(time_unit));
 
     PLI_INT32 time_precision;
     time_precision = vpi_get(vpiTimePrecision, NULL);
-    if (NULL == cJSON_AddStringToObject(
-        p_msg, "time_precision", vs_utils_get_time_unit(time_precision))
-    ) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "time_precision",
+        vs_utils_get_time_unit(time_precision));
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
@@ -145,35 +123,17 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 
 VS_VPI_CMD_HANDLER(get_sim_time)
 {
-    cJSON *p_msg;
     char *str_msg = NULL;
-    double sim_time_sec;
+    //double sim_time_sec;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
-    p_msg = cJSON_CreateObject();
-    if (NULL == p_msg) {
-        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
-        goto error;
-    }
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG(p_msg);
+    VS_MSG_ADD_STR(p_msg, "type", "result");
 
-    vs_vpi_log_debug("Getting simulator time...");
-    s_vpi_time s_time;
-    s_time.type = vpiSimTime;
-    vpi_get_time(NULL, &s_time);
-    sim_time_sec = vs_utils_time_to_double(s_time, NULL);
-    vs_vpi_log_debug("Sim time: %.6f us", sim_time_sec*1.0e6);
-
-    if (NULL == cJSON_AddNumberToObject(p_msg, "time",
-        sim_time_sec)) {
-        vs_log_mod_error("vs_vpi", "Could not add number to object");
-        goto error;
-    }
+    vs_vpi_log_debug("Sim time: %.6f us", p_data->sim_time_sec*1.0e6);
+    VS_MSG_ADD_NUM(p_msg, "time", p_data->sim_time_sec);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
@@ -205,35 +165,16 @@ VS_VPI_CMD_HANDLER(get_sim_time)
 
 VS_VPI_CMD_HANDLER(get_value)
 {
-    cJSON *p_msg;
-    cJSON *p_item_path;
     char *str_msg = NULL;
-    char *str_path;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
-    p_msg = cJSON_CreateObject();
-    if (NULL == p_msg) {
-        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
-        goto error;
-    }
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG(p_msg);
+    VS_MSG_ADD_STR(p_msg, "type", "result");
 
     /* Get the object path from the JSON message content */
-    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    if (NULL == p_item_path) {
-        vs_vpi_log_error("Command field \"path\" invalid/not found");
-        goto error;
-    }
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("Command field \"path\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_STR(p_data->p_cmd, path);
 
     /* Attempt to get the object handle */
     vpiHandle h_obj;
@@ -318,35 +259,17 @@ VS_VPI_CMD_HANDLER(get_value)
 
 VS_VPI_CMD_HANDLER(get_type)
 {
-    cJSON *p_msg;
-    cJSON *p_item_path;
-    char *str_path;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
     /* Create return message object */
-    p_msg = cJSON_CreateObject();
-    if (NULL == p_msg) {
-        vs_log_mod_error("vs_vpi", "Could not create cJSON object");
-        goto error;
-    }
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", "result")) {
-        vs_log_mod_error("vs_vpi", "Could not add string to object");
-        goto error;
-    }
+    VS_MSG(p_msg);
+    VS_MSG_ADD_STR(p_msg, "type", "result");
 
     /* Get the object path from the JSON message content */
-    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    if (NULL == p_item_path) {
-        vs_vpi_log_error("Command field \"path\" invalid/not found");
-        goto error;
-    }
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("Command field \"path\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_STR(p_data->p_cmd, path);
+
     /* Attempt to get the object handle */
     vpiHandle h_obj;
     h_obj = vpi_handle_by_name(str_path, NULL);
@@ -354,12 +277,7 @@ VS_VPI_CMD_HANDLER(get_type)
         vs_vpi_log_error("Attempt to get handle to %s unsuccessful", str_path);
         goto error;
     }
-
-    if (NULL == cJSON_AddNumberToObject(
-            p_msg, "vpi_type", vpi_get(vpiType, h_obj))) {
-        vs_log_mod_error("vs_vpi", "Could not add value to object");
-        goto error;
-    }
+    VS_MSG_ADD_NUM(p_msg, "vpi_type", vpi_get(vpiType, h_obj));
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {

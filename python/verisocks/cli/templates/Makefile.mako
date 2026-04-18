@@ -7,6 +7,7 @@ args = "
 	prefix,
 	top,
 	verilog_src_files,
+	verilator_arg_files,
 	verisocks_root,
 	cpp_src_files,
 	verilator_path = '/usr/local/bin/verilator',
@@ -42,18 +43,15 @@ CPP_USER_FLAGS += -DVSL_TIMING
 
 % if use_tracing:
 # Setup traceing - use $dump() in testbench
-CPP_USER_FLAGS += -DDUMP_FILE
 % if use_fst:
-
 # Using FST traceing (slower due to compression)
+CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_FST
 VL_USER_FLAGS += --trace-fst
-VL_USER_FLAGS += -DDUMP_FILE=\"test.fst\"
 USER_LDLIBS = -lz
 % else:
-
 # Using VCD traceing
+CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_VCD
 VL_USER_FLAGS += --trace
-VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
 % endif
 
 % endif
@@ -63,6 +61,26 @@ VM_PREFIX = ${prefix}
 # Top module
 VL_TOP = ${top}
 
+% if len(verilog_inc_dirs) > 0:
+VL_INCDIRS = \\
+
+% for argf in verilog_inc_dirs[:-1]:
+	${argf} \\
+
+% endfor
+	${verilog_inc_dirs[-1]}
+
+% endif
+% if len(verilator_arg_files) > 0:
+VL_ARGS_FILES = \\
+
+% for argf in verilator_arg_files[:-1]:
+	${argf} \\
+
+% endfor
+	${verilator_arg_files[-1]}
+
+% endif
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \\
 

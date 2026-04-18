@@ -8,11 +8,10 @@ VSL_DIR ?= ../..
 
 
 # Setup traceing - use $dump() in testbench
-CPP_USER_FLAGS += -DDUMP_FILE
-
-# Using VCD traceing
-VL_USER_FLAGS += --trace
-VL_USER_FLAGS += -DDUMP_FILE=\"test.vcd\"
+# Using FST traceing (slower due to compression)
+CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_FST
+VL_USER_FLAGS += --trace-fst
+USER_LDLIBS = -lz
 
 # Design prefix
 VM_PREFIX = Vcounter

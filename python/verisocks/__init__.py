@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2022-2025 Jérémie Chabloz
+# Copyright (c) 2022-2026 Jérémie Chabloz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,4 +23,4 @@
 """Verisocks Python client API
 """
 
-__version__ = "1.5.0"
+__version__ = "1.6.0-dev"
