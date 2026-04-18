@@ -139,6 +139,8 @@ option is being used)")
     cfg['config']['cpp_src_files'] = (
         [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
 
+    if 'verilog_inc_dirs' not in cfg['config']:
+        cfg['config']['verilog_inc_dirs'] = []
     if 'verilator_arg_files' not in cfg['config']:
         cfg['config']['verilator_arg_files'] = []
 

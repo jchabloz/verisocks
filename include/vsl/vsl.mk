@@ -30,6 +30,7 @@ VSL_BUILD_DIR   ?= vsl_build
 VL_FLAGS = --cc
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP) --prefix $(VM_PREFIX)
+VL_FLAGS += $(patsubst %, -I%, $(VL_INCDIRS))
 VL_FLAGS += $(VL_USER_FLAGS)
 VL_FLAGS += $(patsubst %, -f %, $(VL_ARGS_FILES))
 
@@ -84,7 +85,7 @@ verilate: $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 
 $(VL_OBJ_DIR)/%.mk: $(VL_SRCS) $(VL_ARGS_FILES)
 	@mkdir -p $(VL_OBJ_DIR)
-	$(VERILATOR) $(VL_FLAGS) $^
+	$(VERILATOR) $(VL_FLAGS) $(VL_SRCS)
 VPATH += $(VL_OBJ_DIR)
 
 $(VSL_BUILD_DIR)/%.o: %.cpp $(VSL_HEADERS)
@@ -115,7 +116,6 @@ link_deps = $(link_args) $(VSL_HEADERS)
 $(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
-.PHONY: default clean verilate
 clean:
 	$(RM) -r $(VSL_BUILD_DIR)
 	$(RM) -r $(VL_OBJ_DIR)
@@ -126,3 +126,6 @@ clean:
 	$(RM) *.fst *.vcd
 	$(RM) *.log
 	$(RM) -r __pycache__
+
+.PHONY: default clean verilate
+

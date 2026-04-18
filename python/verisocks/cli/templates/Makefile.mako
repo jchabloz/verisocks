@@ -61,6 +61,16 @@ VM_PREFIX = ${prefix}
 # Top module
 VL_TOP = ${top}
 
+% if len(verilog_inc_dirs) > 0:
+VL_INCDIRS = \\
+
+% for argf in verilog_inc_dirs[:-1]:
+	${argf} \\
+
+% endfor
+	${verilog_inc_dirs[-1]}
+
+% endif
 % if len(verilator_arg_files) > 0:
 VL_ARGS_FILES = \\
 
