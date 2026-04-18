@@ -4,6 +4,7 @@
 <%
 import datetime
 import verisocks
+from math import ceil
 today = datetime.datetime.today()
 
 VLVT_TYPES = {
@@ -13,6 +14,7 @@ VLVT_TYPES = {
     "uint64": "VLVT_UINT64",
     "real":   "VLVT_REAL"
 }
+
 LOG_LEVELS = {
 	"debug":    10,
 	"info":     20,
@@ -20,6 +22,20 @@ LOG_LEVELS = {
 	"error":    40,
 	"critical": 50
 }
+
+def get_var_type(var):
+    type = var['type']
+    if (type == "int"):
+        width = var['width']
+        nbytes = ceil(width/8.0)
+        if (nbytes > 8):
+            raise VerisocksError("Variable width > 64 bits - Not supported yet")
+        key = "uint{:d}".format(nbytes*8)
+        return VLVT_TYPES[key]
+    elif (type in VLVT_TYPES):
+        return VLVT_TYPES[type]
+    else:
+        raise VerisocksError(f"Unknown variable type {type}")
 %>\
 /*
 Note: this file has been generated from the template ${template_filename}
@@ -156,7 +172,11 @@ int main(int argc, char** argv, char**) {
 	% for var in variables['scalars']:
     vslx.register_scalar("${var['path']}",
         &topp->${var['path'].replace(".", "->")},
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
+    % if var['type'] == "real":
+        ${get_var_type(var)}, 0u);
+    % else:
+        ${get_var_type(var)}, ${var['width']}u);
+    % endif
     % endfor
     % endif
     % if 'arrays' in variables:
@@ -164,7 +184,7 @@ int main(int argc, char** argv, char**) {
     % for var in variables['arrays']:
     vslx.register_array("${var['path']}",
         topp->${var['path'].replace(".", "->")}.m_storage,
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u, ${var['depth']}u);
+        ${get_var_type(var)}, ${var['width']}u, ${var['depth']}u);
     % endfor
     % endif
     % if 'params' in variables:
@@ -172,7 +192,11 @@ int main(int argc, char** argv, char**) {
     % for var in variables['params']:
     vslx.register_param("${var['path']}",
         &topp->${var['path'].replace(".", "->")},
-        ${VLVT_TYPES[var['type']]}, ${var['width']}u);
+    % if var['type'] == "real":
+        ${get_var_type(var)}, 0u);
+    % else:
+        ${get_var_type(var)}, ${var['width']}u);
+    % endif
     % endfor
     % endif
     % if 'events' in variables:

@@ -139,6 +139,9 @@ option is being used)")
     cfg['config']['cpp_src_files'] = (
         [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
 
+    if 'verilator_arg_files' not in cfg['config']:
+        cfg['config']['verilator_arg_files'] = []
+
     # Add verilator configuration file for public variables at the front of the
     # Verilog sources list
     if 'variables' in cfg:

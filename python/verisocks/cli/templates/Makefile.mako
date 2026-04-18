@@ -7,6 +7,7 @@ args = "
 	prefix,
 	top,
 	verilog_src_files,
+	verilator_arg_files,
 	verisocks_root,
 	cpp_src_files,
 	verilator_path = '/usr/local/bin/verilator',
@@ -60,6 +61,16 @@ VM_PREFIX = ${prefix}
 # Top module
 VL_TOP = ${top}
 
+% if len(verilator_arg_files) > 0:
+VL_ARGS_FILES = \\
+
+% for argf in verilator_arg_files[:-1]:
+	${argf} \\
+
+% endfor
+	${verilator_arg_files[-1]}
+
+% endif
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \\
 

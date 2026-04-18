@@ -58,10 +58,10 @@ are paths can be relative to the configuration file location.
       top: <text>               # Name of top module
       verilog_src_files:        # List of Verilog source files
       - <path>
-      # ...
+      verilator_arg_files:      # (optional) List of Verilator arguments files
+      - <path>
       cpp_src_files:            # (optional) List of C++ extra files
       - <path>
-      # ...
       verisocks_root: <path>    # Path to Verisocks root directory
       verilator_path: <path>    # Path to the verilator binary
       verilator_root: <path>    # Path to Verilator root
@@ -83,30 +83,33 @@ are paths can be relative to the configuration file location.
         period: <number>        # Clock period
         unit: <text>            # Time unit used for clock period [fs, ps, ns, us, ms, s]
         duty_cycle: <number>    # Clock duty cycle, in ]0,1[
-      # ...
       scalars:                  # (optional) List of scalar variables
       - path: <text>            # Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
-        width: <number>         # Width of the variable
-      # ...
+        type: <text>            # Variable type [int (integral type), real]
+        width: <number>         # Width of the variable (optional if type: real)
       arrays:                   # (optional) List of array variables
       - path: <text>            # Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
+        type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
         depth: <number>         # Depth of the array
-      # ...
       params:                   # (optional) List of parameter variables
       - path: <text>            # Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
+        type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
-      # ...
       events:                   # (optional) List of events
       - path: <text>            # Name/alias to be used for the event
         module: <text>          # Name of the module in which is the event
-      # ...
+
+.. note::
+
+    From version 1.6.0, the ``type`` argument for variables in the YAML
+    configuration file needs only to be defined as either *integral* (``int``)
+    or *real* (``real``). The previous values ``uint8``, ``uint16``, ``uint32``
+    and ``uint64`` are still supported but should be considered as deprecated.
+
 
 Optional arguments
 ------------------
