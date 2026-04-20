@@ -55,7 +55,7 @@ $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
-.PHONY: clean all docs
+.PHONY: clean all docs clean-docs
 
 docs:
 	$(MAKE) -C $(DOCSDIR) html
@@ -64,3 +64,6 @@ docs:
 clean:
 	-$(RM) $(OBJS)
 	-$(RM) $(LIBVPI)
+
+clean-docs:
+	$(MAKE) -C $(DOCSDIR) clean
