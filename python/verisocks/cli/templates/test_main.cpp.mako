@@ -36,6 +36,11 @@ def get_var_type(var):
         return VLVT_TYPES[type]
     else:
         raise VerisocksError(f"Unknown variable type {type}")
+
+def get_var_name(var):
+    if 'name' in var:
+        return var['name']
+    return var['path']
 %>\
 /*
 Note: this file has been generated from the template ${template_filename}
@@ -161,7 +166,7 @@ int main(int argc, char** argv, char**) {
     % if 'clocks' in variables:
     // Clocks
     % for clk in variables['clocks']:
-    vslx.register_clock("${clk['path']}",
+    vslx.register_clock("${get_var_name(clk)}",
         &topp->${clk['path'].replace(".", "->")},
         ${clk['period']}, "${clk['unit']}", ${clk['duty_cycle']}
     );
@@ -170,7 +175,7 @@ int main(int argc, char** argv, char**) {
     % if 'scalars' in variables:
     // Scalar variables
 	% for var in variables['scalars']:
-    vslx.register_scalar("${var['path']}",
+    vslx.register_scalar("${get_var_name(var)}",
         &topp->${var['path'].replace(".", "->")},
     % if var['type'] == "real":
         ${get_var_type(var)}, 0u);
@@ -182,7 +187,7 @@ int main(int argc, char** argv, char**) {
     % if 'arrays' in variables:
     // Array variables
     % for var in variables['arrays']:
-    vslx.register_array("${var['path']}",
+    vslx.register_array("${get_var_name(var)}",
         topp->${var['path'].replace(".", "->")}.m_storage,
         ${get_var_type(var)}, ${var['width']}u, ${var['depth']}u);
     % endfor
@@ -190,7 +195,7 @@ int main(int argc, char** argv, char**) {
     % if 'params' in variables:
     // Parameters
     % for var in variables['params']:
-    vslx.register_param("${var['path']}",
+    vslx.register_param("${get_var_name(var)}",
         &topp->${var['path'].replace(".", "->")},
     % if var['type'] == "real":
         ${get_var_type(var)}, 0u);
@@ -202,7 +207,7 @@ int main(int argc, char** argv, char**) {
     % if 'events' in variables:
     // Named events
     % for var in variables['events']:
-    vslx.register_event("${var['path']}",
+    vslx.register_event("${get_var_name(var)}",
         &topp->${var['path'].replace(".", "->")});
     % endfor
     % endif

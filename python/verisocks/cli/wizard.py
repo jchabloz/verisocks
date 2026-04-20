@@ -123,26 +123,41 @@ option is being used)")
             cfg['config'][k] = None
     if not ('use_tracing' in cfg['config']):
         cfg['config']['use_tracing'] = False
+    if not 'build_dir' in cfg['config']:
+        cfg['config']['build_dir'] = "."
+    if not 'verilog_inc_dirs' in cfg['config']:
+        cfg['config']['verilog_inc_dirs'] = []
+    if not 'verilator_arg_files' in cfg['config']:
+        cfg['config']['verilator_arg_files'] = []
 
-    # Format relative paths in config file
-    def format_path(x):
+    # Format all relative paths in config file to be related to the config file
+    # position itself
+    def format_path(x, start=None):
         if isabs(x):
             return x
-        return abspath(join(dirname(args.config), x))
+        return relpath(abspath(join(dirname(args.config), x)), start)
 
-    for k in ["verisocks_root", "verilator_root", "verilator_path"]:
-        format_path(cfg['config'][k])
+    def format_config_paths(k):
+        if k in cfg['config']:
+            if isinstance(cfg['config'][k], list):
+                cfg['config'][k] = [format_path(x) for x in cfg['config'][k]]
+            else:
+                cfg['config'][k] = format_path(cfg['config'][k])
+
+    format_config_paths("build_dir")
+    format_config_paths("verilog_src_files")
+    format_config_paths("verilog_inc_dirs")
+    format_config_paths("verilator_arg_files")
+    format_config_paths("cpp_src_files")
+    format_config_paths("verisocks_root")
+    format_config_paths("verilator_path")
+    format_config_paths("verilator_root")
 
     # Add C++ top testbench file at the front of C++ sources list
     if 'cpp_src_files' not in cfg['config']:
         cfg['config']['cpp_src_files'] = []
     cfg['config']['cpp_src_files'] = (
         [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
-
-    if 'verilog_inc_dirs' not in cfg['config']:
-        cfg['config']['verilog_inc_dirs'] = []
-    if 'verilator_arg_files' not in cfg['config']:
-        cfg['config']['verilator_arg_files'] = []
 
     # Add verilator configuration file for public variables at the front of the
     # Verilog sources list
@@ -155,7 +170,7 @@ option is being used)")
             vlt_file = str(args.variables_file)
         else:
             vlt_file = None
-        render_template(template_mk, args.makefile,
+        render_template(template_mk, str(args.makefile),
                         target_file=str(args.makefile),
                         config_file=str(args.config),
                         tb_file=str(args.testbench_file),

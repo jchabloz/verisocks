@@ -47,8 +47,17 @@ such that the wizard script can simply be evoked as follows:
     Path to YAML configuration file
 
 The content and structure of the YAML configuration file shall be as described
-below. Unless specifically mentioned, all fields are mandatory. Entries which
-are paths can be relative to the configuration file location.
+below.
+
+.. important::
+
+    All items in the configuration files which are not specifically indicated as
+    *optional* in the description above are mandatory!
+
+.. note::
+
+    All relative paths defined in the configuration file are considered to be
+    relative to the location of the configuration file itself.
 
 .. code-block:: yaml
 
@@ -57,11 +66,13 @@ are paths can be relative to the configuration file location.
                                 # become the name of the executable)
       top: <text>               # Name of top module
       verilog_src_files:        # List of Verilog source files
-      - <path>
+      - <path>                  #
+      verilog_inc_dirs:         # (optional) List of Verilog include paths
+      - <path>                  # (to be processed with -I option by verilator)
       verilator_arg_files:      # (optional) List of Verilator arguments files
-      - <path>
+      - <path>                  # (to be processed with -f option by verilator)
       cpp_src_files:            # (optional) List of C++ extra files
-      - <path>
+      - <path>                  #
       verisocks_root: <path>    # Path to Verisocks root directory
       verilator_path: <path>    # Path to the verilator binary
       verilator_root: <path>    # Path to Verilator root
@@ -78,32 +89,37 @@ are paths can be relative to the configuration file location.
                                 #  executable help
     variables:                  # (optional) Public variables
       clocks:                   # (optional) List of clock variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Clock path
+        name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
         period: <number>        # Clock period
         unit: <text>            # Time unit used for clock period [fs, ps, ns, us, ms, s]
         duty_cycle: <number>    # Clock duty cycle, in ]0,1[
       scalars:                  # (optional) List of scalar variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Variable path
+        name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
         type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable (optional if type: real)
       arrays:                   # (optional) List of array variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Variable path
+        name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
         type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
         depth: <number>         # Depth of the array
       params:                   # (optional) List of parameter variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Parameter path
+        name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
         type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
       events:                   # (optional) List of events
-      - path: <text>            # Name/alias to be used for the event
+      - path: <text>            # Event path
+        name: <text>            # (optional) Name/alias to be used for the event
         module: <text>          # Name of the module in which is the event
 
-.. note::
+.. attention::
 
     From version 1.6.0, the ``type`` argument for variables in the YAML
     configuration file needs only to be defined as either *integral* (``int``)
