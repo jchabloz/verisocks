@@ -6,7 +6,6 @@ VERILATOR ?= /usr/local/bin/verilator
 VERILATOR_ROOT ?= /usr/local/share/verilator
 VSL_DIR ?= ../..
 
-
 # Setup traceing - use $dump() in testbench
 # Using FST traceing (slower due to compression)
 CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_FST
@@ -32,27 +31,12 @@ TB_CPP_SRCS = \
 VL_OBJ_DIR = vl_obj_dir
 VSL_BUILD_DIR = vsl_build
 
-VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
+VS_LOG_LEVEL = $(LOG_LEVEL_INFO)
 
 #*****************************************************************************
 # Top rule
 #*****************************************************************************
-all: Makefile test_main.cpp variables.vlt default
-
-#*****************************************************************************
-# Wizard-generated files
-#*****************************************************************************
-Makefile: config.yaml
-	@echo "Re-generating Makefile"
-	vsl-wizard --makefile-only --makefile $@ $<
-
-test_main.cpp: config.yaml
-	@echo "Re-generating top-level testbench file"
-	vsl-wizard --tb-only --testbench-file $@ $<
-
-variables.vlt: config.yaml
-	@echo "Re-generating variables file"
-	vsl-wizard --vlt-only --variables-file $@ $<
+all: default
 
 #*****************************************************************************
 # Include generic Makefile

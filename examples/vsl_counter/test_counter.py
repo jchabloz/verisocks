@@ -11,14 +11,14 @@ TIMEOUT = 10
 cwd = relpath(dirname(abspath(__file__)))
 
 
-def setup_test(port=5100, timeout=10):
+def setup_test(port=5100, timeout=10, capture_output=True):
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         join(cwd, "Vcounter"),
         "-p", f"{port}",
         "-t", f"{timeout}"
     ]
-    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
+    pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=capture_output)
     return pop
 
 
@@ -48,7 +48,7 @@ def test_counter(vs):
     sim_time = t0_us
 
     # Set the active-low async reset signal
-    answer = vs.set("arst_b", value=1)
+    answer = vs.set("resetb", value=1)
     assert (answer["type"] == "ack")
 
     # Run the simulation for some time and verify that the simulation time is
@@ -113,7 +113,7 @@ def test_counter(vs):
 
 if __name__ == "__main__":
     port = find_free_port()
-    setup_test(port, TIMEOUT)
+    setup_test(port, TIMEOUT, True)
 
     with Verisocks(HOST, port) as vs_cli:
         test_counter(vs_cli)

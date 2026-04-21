@@ -24,7 +24,8 @@ import argparse
 import pathlib
 import yaml
 import logging
-from os.path import isabs, abspath, dirname, join, relpath
+from os.path import isabs, abspath, dirname, join, relpath, exists, curdir
+from os import mkdir
 from mako.template import Template
 
 
@@ -40,6 +41,9 @@ def render_template(template_file, output_file, **kwargs):
         output_file (str): Path to rendered output file
         kwargs: Keyword arguments required by the template
     """
+    outdir = dirname(output_file)
+    if outdir and not exists(outdir):
+        mkdir(outdir)
     tmpl = Template(filename=template_file)
     tmpl_rendered = tmpl.render_unicode(
         template_filename=relpath(template_file, cwd), **kwargs)
@@ -55,14 +59,22 @@ and a Verilator configuration file to declare public variables for using
 Verilator while integrating Verisocks. The files are generated based on Mako
 templates and a YAML configuration file.
 """)
+
     parser.add_argument('config', type=pathlib.Path,
                         help="YAML configuration file")
+    parser.add_argument('--build-dir', '-b', type=pathlib.Path,
+                        default=".",
+                        help="Build directory (default=build)")
     parser.add_argument('--templates-dir', '-t', type=pathlib.Path,
                         default=tmpl_path,
                         help="Templates directory if alternative \
 templates shall be used")
+    parser.add_argument('--makefile-top', type=pathlib.Path,
+                        default="Makefile",
+                        help="Rendered top makefile name (default: Makefile)")
     parser.add_argument('--makefile', type=pathlib.Path, default="Makefile",
-                        help="Rendered makefile name (default: Makefile)")
+                        help="Rendered makefile name in BUILD_DIR \
+(default: Makefile)")
     parser.add_argument('--testbench-file', type=pathlib.Path,
                         default="test_main.cpp",
                         help="Rendered C++ testbench file (default: \
@@ -108,6 +120,7 @@ option is being used)")
         not args.makefile_only and not args.tb_only)
 
     # Format paths to templates relative to this file
+    template_top_mk = join(args.templates_dir, "Makefile_top.mako")
     template_mk = join(args.templates_dir, "Makefile.mako")
     template_cpp = join(args.templates_dir, "test_main.cpp.mako")
     template_vlt = join(args.templates_dir, "variables.vlt.mako")
@@ -121,13 +134,11 @@ option is being used)")
     for k in ['exec_version', 'exec_doc', 'bug_address']:
         if not (k in cfg['config']):
             cfg['config'][k] = None
-    if not ('use_tracing' in cfg['config']):
+    if ('use_tracing' not in cfg['config']):
         cfg['config']['use_tracing'] = False
-    if not 'build_dir' in cfg['config']:
-        cfg['config']['build_dir'] = "."
-    if not 'verilog_inc_dirs' in cfg['config']:
+    if 'verilog_inc_dirs' not in cfg['config']:
         cfg['config']['verilog_inc_dirs'] = []
-    if not 'verilator_arg_files' in cfg['config']:
+    if 'verilator_arg_files' not in cfg['config']:
         cfg['config']['verilator_arg_files'] = []
 
     # Format all relative paths in config file to be related to the config file
@@ -144,7 +155,6 @@ option is being used)")
             else:
                 cfg['config'][k] = format_path(cfg['config'][k])
 
-    format_config_paths("build_dir")
     format_config_paths("verilog_src_files")
     format_config_paths("verilog_inc_dirs")
     format_config_paths("verilator_arg_files")
@@ -165,30 +175,53 @@ option is being used)")
         cfg['config']['verilog_src_files'] = (
             [str(args.variables_file)] + cfg['config']['verilog_src_files'])
 
+    # Rendered files paths
+    makefile = join(args.build_dir, args.makefile)
+    top_mk_file = str(args.makefile_top)
+    tb_file = str(args.testbench_file)
+    config_file = str(args.config)
+
+    if 'variables' in cfg:
+        vlt_file = str(args.variables_file)
+    else:
+        vlt_file = None
+
+    # Render Makefile(s)
     if render_makefile:
-        if 'variables' in cfg:
-            vlt_file = str(args.variables_file)
-        else:
-            vlt_file = None
-        render_template(template_mk, str(args.makefile),
-                        target_file=str(args.makefile),
-                        config_file=str(args.config),
-                        tb_file=str(args.testbench_file),
+        if (relpath(args.build_dir) != curdir):
+            render_template(template_top_mk,
+                            top_mk_file,
+                            top_mk_file=top_mk_file,
+                            mk_file=makefile,
+                            config_file=config_file,
+                            tb_file=tb_file,
+                            vlt_file=vlt_file,
+                            build_dir=str(args.build_dir))
+            logging.info(f"Rendered {top_mk_file}")
+        render_template(template_mk, makefile,
+                        target_file=makefile,
+                        config_file=config_file,
+                        tb_file=tb_file,
                         vlt_file=vlt_file,
+                        build_dir=str(args.build_dir),
                         **cfg['config'])
-        logging.info(f"Rendered {args.makefile}")
+        logging.info(f"Rendered {makefile}")
+
+    # Render testbench main file
     if render_tb:
         if 'variables' in cfg:
-            render_template(template_cpp, args.testbench_file,
+            render_template(template_cpp, tb_file,
                             **cfg['config'], variables=cfg['variables'])
         else:
-            render_template(template_cpp, args.testbench_file,
+            render_template(template_cpp, tb_file,
                             **cfg['config'], variables=None)
-        logging.info(f"Rendered {args.testbench_file}")
+        logging.info(f"Rendered {tb_file}")
+
+    # Render variables configuration file
     if render_vlt and ('variables' in cfg):
-        render_template(template_vlt, args.variables_file,
+        render_template(template_vlt, vlt_file,
                         variables=cfg['variables'])
-        logging.info(f"Rendered {args.variables_file}")
+        logging.info(f"Rendered {vlt_file}")
 
 
 if __name__ == "__main__":

@@ -95,9 +95,6 @@ int main(int argc, char** argv, char**) {
     Verilated::traceEverOn(true);
     #endif
 
-    // Dump public variables
-    contextp->internalsDump();
-
     // Create top VSL instance
     vsl::VslInteg<Vcounter> vslx{
         topp.get(), arguments.port_number, arguments.timeout};
@@ -109,7 +106,7 @@ int main(int argc, char** argv, char**) {
         1.4, "us", 0.6
     );
     // Scalar variables
-    vslx.register_scalar("arst_b",
+    vslx.register_scalar("resetb",
         &topp->arst_b,
         VLVT_UINT8, 1u);
     vslx.register_scalar("count",

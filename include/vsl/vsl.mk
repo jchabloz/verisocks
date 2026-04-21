@@ -83,9 +83,10 @@ default: verilate $(VM_PREFIX)
 
 verilate: $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 
-$(VL_OBJ_DIR)/%.mk: $(VL_SRCS) $(VL_ARGS_FILES)
+$(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk: $(VL_SRCS) $(VL_ARGS_FILES)
 	@mkdir -p $(VL_OBJ_DIR)
 	$(VERILATOR) $(VL_FLAGS) $(VL_SRCS)
+
 VPATH += $(VL_OBJ_DIR)
 
 $(VSL_BUILD_DIR)/%.o: %.cpp $(VSL_HEADERS)

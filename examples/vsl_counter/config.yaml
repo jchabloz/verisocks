@@ -12,7 +12,7 @@ config:
   use_tracing: true
   use_fst: true
   use_timing: false
-  log_level: debug
+  log_level: info
 
 variables:
   clocks:
@@ -23,6 +23,7 @@ variables:
       duty_cycle: 0.6
   scalars:
     - path: arst_b
+      name: resetb
       module: counter
       type: uint8
       width: 1

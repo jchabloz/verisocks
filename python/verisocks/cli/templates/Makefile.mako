@@ -6,6 +6,7 @@ args = "
 	vlt_file,
 	prefix,
 	top,
+	build_dir,
 	verilog_src_files,
 	verilator_arg_files,
 	verisocks_root,
@@ -19,6 +20,13 @@ args = "
 "
 />\
 <%
+from os.path import isabs, relpath
+
+def format_path(path):
+	if isabs(path):
+		return path
+	return relpath(path, build_dir)
+
 LOG_LEVELS = {
 	"debug":    "$(LOG_LEVEL_DEBUG)",
 	"info":     "$(LOG_LEVEL_INFO)",
@@ -31,16 +39,16 @@ LOG_LEVELS = {
 #*****************************************************************************
 # Configuration
 #*****************************************************************************
-VERILATOR ?= ${verilator_path}
-VERILATOR_ROOT ?= ${verilator_root}
-VSL_DIR ?= ${verisocks_root}
+VERILATOR ?= ${format_path(verilator_path)}
+VERILATOR_ROOT ?= ${format_path(verilator_root)}
+VSL_DIR ?= ${format_path(verisocks_root)}
 
 % if use_timing:
 # Use timing option with Verilator
 VL_USER_FLAGS += --timing
 CPP_USER_FLAGS += -DVSL_TIMING
-% endif
 
+% endif
 % if use_tracing:
 # Setup traceing - use $dump() in testbench
 % if use_fst:
@@ -65,39 +73,39 @@ VL_TOP = ${top}
 VL_INCDIRS = \\
 
 % for argf in verilog_inc_dirs[:-1]:
-	${argf} \\
+	${format_path(argf)} \\
 
 % endfor
-	${verilog_inc_dirs[-1]}
+	${format_path(verilog_inc_dirs[-1])}
 
 % endif
 % if len(verilator_arg_files) > 0:
 VL_ARGS_FILES = \\
 
 % for argf in verilator_arg_files[:-1]:
-	${argf} \\
+	${format_path(argf)} \\
 
 % endfor
-	${verilator_arg_files[-1]}
+	${format_path(verilator_arg_files[-1])}
 
 % endif
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \\
 
 % for src in verilog_src_files[:-1]:
-	${src} \\
+	${format_path(src)} \\
 
 % endfor
-	${verilog_src_files[-1]}
+	${format_path(verilog_src_files[-1])}
 
 # Testbench C++ source files
 TB_CPP_SRCS = \\
 
 % for src in cpp_src_files[:-1]:
-	${src} \\
+	${format_path(src)} \\
 
 % endfor
-	${cpp_src_files[-1]}
+	${format_path(cpp_src_files[-1])}
 
 # Build folders
 VL_OBJ_DIR = vl_obj_dir
@@ -108,28 +116,7 @@ VS_LOG_LEVEL = ${LOG_LEVELS[log_level]}
 #*****************************************************************************
 # Top rule
 #*****************************************************************************
-% if vlt_file:
-all: ${target_file} ${tb_file} ${vlt_file} default
-% else:
-all: ${target_file} ${tb_file} default
-% endif
-
-#*****************************************************************************
-# Wizard-generated files
-#*****************************************************************************
-${target_file}: ${config_file}
-	@echo "Re-generating Makefile"
-	vsl-wizard --makefile-only --makefile $@ $<
-
-${tb_file}: ${config_file}
-	@echo "Re-generating top-level testbench file"
-	vsl-wizard --tb-only --testbench-file $@ $<
-
-% if vlt_file:
-${vlt_file}: ${config_file}
-	@echo "Re-generating variables file"
-	vsl-wizard --vlt-only --variables-file $@ $<
-% endif
+all: default
 
 #*****************************************************************************
 # Include generic Makefile

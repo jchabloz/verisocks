@@ -35,10 +35,11 @@ such that the wizard script can simply be evoked as follows:
 
 .. code:: text
 
-    usage: vsl-wizard [-h] [--templates-dir TEMPLATES_DIR]
+    usage: vsl-wizard [-h] [--build-dir BUILD_DIR]
+        [--templates-dir TEMPLATES_DIR] [--makefile-top MAKEFILE_TOP]
         [--makefile MAKEFILE] [--testbench-file TESTBENCH_FILE]
         [--variables-file VARIABLES_FILE] [--makefile-only] [--tb-only]
-        [--vlt-only] config
+        [--vlt-only] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] config
 
 .. program:: vsl-wizard
 
@@ -134,10 +135,25 @@ Optional arguments
 
     Displays help content
 
+.. option:: --build-dir <BUILD_DIR>, -b <BUILD_DIR>
+
+    Path to build directory (default: current directory). If a different folder
+    than the current working directory is used, a folder BUILD_DIR is created
+    with a Makefile MAKEFILE inside. Another "top-level" Makefile MAKEFILE_TOP
+    is created in the current directory that will launch the one in the
+    BUILD_DIR folder. This option can be typically useful to help avoid having
+    a clutter of built object files in the current working directory, or to
+    allow having different build directories for different config YAML files.
+
 .. option:: --templates-dir <TEMPLATES_DIR>, -t <TEMPLATES_DIR>
 
     Path to templates directory if alternatives templates shall be used instead
     of the default ones
+
+.. option:: --makefile-top <MAKEFILE_TOP>
+
+    Rendered "top-level" makefile name (default: :code:`Makefile`). See
+    description for ``--build-dir`` option.
 
 .. option:: --makefile <MAKEFILE>
 
