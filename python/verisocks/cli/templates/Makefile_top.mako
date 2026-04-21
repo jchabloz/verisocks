@@ -1,11 +1,6 @@
 <%page
 args = "
-	build_dir,
-	top_mk_file,
-	mk_file,
-	config_file,
-	tb_file,
-	vlt_file
+	build_dir
 "
 />\
 #******************************************************************************

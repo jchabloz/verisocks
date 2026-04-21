@@ -63,7 +63,6 @@ templates and a YAML configuration file.
     parser.add_argument('config', type=pathlib.Path,
                         help="YAML configuration file")
     parser.add_argument('--build-dir', '-b', type=pathlib.Path,
-                        default=".",
                         help="Build directory (default=build)")
     parser.add_argument('--templates-dir', '-t', type=pathlib.Path,
                         default=tmpl_path,
@@ -163,6 +162,24 @@ option is being used)")
     format_config_paths("verilator_path")
     format_config_paths("verilator_root")
 
+    # Build directory - Priorization
+    # - Build directory provided as wizard argument overrides one defined in
+    #   the configuration YAML file
+    # - If undefined, default is "."
+    if args.build_dir:
+        logging.info(
+            f"Build directory: {args.build_dir} (defined in arguments)")
+        build_dir = str(args.build_dir)
+        del cfg['config']['build_dir']
+    elif 'build_dir' in cfg['config']:
+        build_dir = format_path(cfg['config']['build_dir'])
+        logging.info(
+            f"Build directory: {build_dir} (defined in {args.config})")
+        del cfg['config']['build_dir']
+    else:
+        build_dir = "."
+        logging.info(f"Build directory: {build_dir} (default)")
+
     # Add C++ top testbench file at the front of C++ sources list
     if 'cpp_src_files' not in cfg['config']:
         cfg['config']['cpp_src_files'] = []
@@ -176,7 +193,7 @@ option is being used)")
             [str(args.variables_file)] + cfg['config']['verilog_src_files'])
 
     # Rendered files paths
-    makefile = join(args.build_dir, args.makefile)
+    makefile = join(build_dir, args.makefile)
     top_mk_file = str(args.makefile_top)
     tb_file = str(args.testbench_file)
     config_file = str(args.config)
@@ -188,22 +205,17 @@ option is being used)")
 
     # Render Makefile(s)
     if render_makefile:
-        if (relpath(args.build_dir) != curdir):
+        if (relpath(build_dir) != curdir):
             render_template(template_top_mk,
                             top_mk_file,
-                            top_mk_file=top_mk_file,
-                            mk_file=makefile,
-                            config_file=config_file,
-                            tb_file=tb_file,
-                            vlt_file=vlt_file,
-                            build_dir=str(args.build_dir))
+                            build_dir=build_dir)
             logging.info(f"Rendered {top_mk_file}")
         render_template(template_mk, makefile,
                         target_file=makefile,
                         config_file=config_file,
                         tb_file=tb_file,
                         vlt_file=vlt_file,
-                        build_dir=str(args.build_dir),
+                        build_dir=build_dir,
                         **cfg['config'])
         logging.info(f"Rendered {makefile}")
 

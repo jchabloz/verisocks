@@ -28,11 +28,12 @@ VSL_BUILD_DIR   ?= vsl_build
 # Verilation
 #*****************************************************************************
 VL_FLAGS = --cc
+VL_FLAGS += -Wno-fatal
 VL_FLAGS += -Mdir $(VL_OBJ_DIR)
 VL_FLAGS += --top $(VL_TOP) --prefix $(VM_PREFIX)
 VL_FLAGS += $(patsubst %, -I%, $(VL_INCDIRS))
 VL_FLAGS += $(VL_USER_FLAGS)
-VL_FLAGS += $(patsubst %, -f %, $(VL_ARGS_FILES))
+VL_FLAGS += $(patsubst %, -F %, $(VL_ARGS_FILES))
 
 #*****************************************************************************
 # Verisocks integration

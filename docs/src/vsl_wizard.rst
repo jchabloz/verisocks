@@ -77,6 +77,10 @@ below.
       verisocks_root: <path>    # Path to Verisocks root directory
       verilator_path: <path>    # Path to the verilator binary
       verilator_root: <path>    # Path to Verilator root
+      build_dir: <path>         # (optional) Build directory. Default is the
+                                # current working directory. This value can be
+                                # overriden by the --build-dir command line
+                                # option
       use_tracing: <bool>       # (optional) Enable tracing if true.
       use_fst: <bool>           # (optional if use_tracing is false) If true,
                                 #  the FST format is used for the traces file
@@ -137,13 +141,14 @@ Optional arguments
 
 .. option:: --build-dir <BUILD_DIR>, -b <BUILD_DIR>
 
-    Path to build directory (default: current directory). If a different folder
-    than the current working directory is used, a folder BUILD_DIR is created
-    with a Makefile MAKEFILE inside. Another "top-level" Makefile MAKEFILE_TOP
-    is created in the current directory that will launch the one in the
-    BUILD_DIR folder. This option can be typically useful to help avoid having
-    a clutter of built object files in the current working directory, or to
-    allow having different build directories for different config YAML files.
+    Path to build directory (default: path provided in the config YAML file or
+    current directory if not defined). If a different folder than the current
+    working directory is defined, a folder <BUILD_DIR> is created with a
+    Makefile <MAKEFILE> inside. Another "top-level" Makefile <MAKEFILE_TOP> is
+    created in the current directory that will launch the one in the <BUILD_DIR>
+    folder. This option can be typically useful to help avoid having a clutter
+    of built object files in the current working directory, or to allow having
+    different build directories for different config YAML files.
 
 .. option:: --templates-dir <TEMPLATES_DIR>, -t <TEMPLATES_DIR>
 
