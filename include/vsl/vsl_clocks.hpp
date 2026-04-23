@@ -71,13 +71,7 @@ public:
     * @param duty_cycle Duty cycle
     */
     VslClock(const char* namep, std::any datap, const vsl_time_t period,
-        const double duty_cycle) :
-        VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
-        {
-            set_period(period, duty_cycle);
-            set_value(0);
-            enable(0ul); // Enable by default
-        };
+        const double duty_cycle);
 
     /**
      * @brief Constructs a new Vsl Clock object
@@ -91,13 +85,22 @@ public:
      */
     VslClock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
-        VerilatedContext* const p_context) :
-        VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
-        {
-            set_period(period, unit, duty_cycle, p_context);
-            set_value(0);
-            enable(0ul); // Enable by default
-        };
+        VerilatedContext* const p_context);
+
+    /**
+     * @brief Constructs a new Vsl Clock object
+     *
+     * @param namep Variable name
+     * @param datap Pointer to Verilator variable
+     * @param period Period in real value
+     * @param unit Period time unit
+     * @param duty_cycle Duty cycle
+     * @param p_context Simulation context
+     * @param enable Enable clock
+     */
+    VslClock(const char* namep, std::any datap, const double period,
+        const char* unit, const double duty_cycle,
+        VerilatedContext* const p_context, const bool enable);
 
     /**
     * @brief Set period and duty cycle
@@ -127,8 +130,11 @@ public:
      * If the clock is already enabled, this function won't have any effect.
      *
      * @param time Time from which the clock has to be enabled
+     *
+     * @return 0 No errors
+     * @return -1 Errors
      */
-    void enable(const vsl_time_t time);
+    int enable(const vsl_time_t time);
 
     /**
      * @brief Enable clock
@@ -136,8 +142,11 @@ public:
      * If the clock is already enabled, this method won't have any effect.
      *
      * @param p_context Pointer to the current simulation context
+     *
+     * @return 0 No errors
+     * @return -1 Errors
      */
-    void enable(VerilatedContext* const p_context);
+    int enable(VerilatedContext* const p_context);
 
     /**
      * @brief Disable clock
@@ -181,19 +190,32 @@ public:
      * @return true: The clock is enabled
      * @return false: The clock is disabled
      */
-    inline bool is_enabled() const {return b_is_enabled;};
+    inline bool is_enabled(void) const {
+        return b_is_enabled;
+    };
 
     /**
      * @brief Get next event time
      *
      * @return Simulation time at next event for the given clock
      */
-    inline vsl_time_t get_next_event() const {return next_event_time;};
+    inline vsl_time_t get_next_event(void) const {return next_event_time;};
 
-    // Define < operator to allow using sorting algorithms
-    bool operator<(const VslClock& other) const {
-        if (!b_is_enabled) return false; // Disabled clocks at the back
-        return next_event_time < other.next_event_time;
+    /**
+     * @brief "Smaller than" operator
+     *
+     * Defining the < operator is one possible way to allow using the
+     * std::list::sort() sorting method.
+     * 
+     * @note Note that it is necessary for the operator to be logically complete
+     * as it shall also be usable to infer the inverse proposition (if it is not
+     * smaller, then it means that it is larger or equal). If it is not the
+     * case, then the sorting algorithm will yield correct results.
+     */
+    bool operator<(const VslClock& clk) const {
+        if (!b_is_enabled && clk.b_is_enabled) {return false;}
+        if (b_is_enabled && !clk.b_is_enabled) {return true;}
+        return next_event_time < clk.next_event_time;
     }
 
 private:
@@ -253,10 +275,14 @@ public:
     /**
      * @brief Checks if any of the registered clock is enabled
      * 
+     * This function checks that there is at least one clock registered that is
+     * currently properly constructed AND enabled. If the clock map is empty,
+     * this function also returns false.
+     * 
      * @return true At least one of the clocks is enabled
      * @return false None of the clocks are enabled
      */
-    const bool has_next_event() const;
+    const bool has_next_event(void) const;
 
     /**
      * @brief Get the time at which the next event shall occur for registered
@@ -264,7 +290,7 @@ public:
      *
      * @return vsl_time_t Next event (simulation) time
      */
-    const vsl_time_t get_next_event() const;
+    const vsl_time_t get_next_event(void) const;
 
     /**
      * @brief Evaluate all clocks at a given simulation time
@@ -290,7 +316,7 @@ public:
      * @return true No clock registered
      * @return false Clocks registered
      */
-    inline const bool empty() const {return clock_list.empty();}
+    inline const bool empty(void) const {return clock_list.empty();}
 
     /**
      * @brief Checks if a clock by a given name exists in the clocks list
@@ -313,7 +339,14 @@ public:
 
 private:
 
+    /* Clock list */
     std::list<VslClock> clock_list;
+
+    /* Sort clock list */
+    inline void sort(void) {clock_list.sort();}
+    
+    /* For debug purposes, print the clock list content */
+    void display_list(void);
 };
 
 } // namespace vsl

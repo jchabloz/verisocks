@@ -25,13 +25,20 @@ SOFTWARE.
 #ifndef VSL_DUMP_HPP
 #define VSL_DUMP_HPP
 
+//#ifdef DUMP_FILE
+//#ifdef DUMP_FST
+//#include "verilated_fst_c.h"
+//#elifdef DUMP_VCD
+//#include "verilated_vcd_c.h"
+//#else
+//#error "At least one of DUMP_FST or DUMP_VCD macros shall be defined"
+//#endif
+
 #ifdef DUMP_FILE
-#ifdef DUMP_FST
-#include "verilated_fst_c.h"
-#elifdef DUMP_VCD
-#include "verilated_vcd_c.h"
-#else
+#ifndef DUMP_FST
+#ifndef DUMP_VCD
 #error "At least one of DUMP_FST or DUMP_VCD macros shall be defined"
+#endif
 #endif
 #else // DUMP_FILE undefined
 #ifdef DUMP_FST

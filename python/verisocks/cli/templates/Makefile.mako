@@ -59,7 +59,7 @@ USER_LDLIBS = -lz
 % else:
 # Using VCD traceing
 CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_VCD
-VL_USER_FLAGS += --trace
+VL_USER_FLAGS += --trace-vcd
 % endif
 
 % endif

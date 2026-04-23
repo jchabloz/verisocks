@@ -108,7 +108,12 @@ void VslInteg<T>::VSL_CMD_HANDLER(exit) {
 
     /* Simulate until $finish */
     while (!vx.p_context->gotFinish()) {
-        vx.p_model->eval();
+        vx.eval();
+        /* An extra evaluation of gotFinish is necessary from Verilator 5.046
+        as the relationship between $finish and the simulation time has been
+        modified (see https://github.com/verilator/verilator/issues/7095)
+        */
+        if (vx.p_context->gotFinish()) break;
         if (!vx.p_model->eventsPending()) break;
         vx.p_context->time(vx.p_model->nextTimeSlot());
     }

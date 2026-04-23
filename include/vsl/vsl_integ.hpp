@@ -275,11 +275,11 @@ private:
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
 
-    #ifdef DUMP_FST
-    std::unique_ptr<VerilatedFstC> p_trace;
-    #elifdef DUMP_VCD
-    std::unique_ptr<VerilatedVcdC> p_trace;
-    #endif
+    //#ifdef DUMP_FST
+    //std::unique_ptr<VerilatedFstC> p_trace;
+    //#elifdef DUMP_VCD
+    //std::unique_ptr<VerilatedVcdC> p_trace;
+    //#endif
 
     /* Callbacks management */
     bool b_has_time_callback {false};
@@ -390,16 +390,15 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     num_port = port;
     num_timeout_sec = timeout;
 
-
-    #ifdef DUMP_FST
-    p_trace = std::unique_ptr<VerilatedFstC>{new VerilatedFstC};
-    p_model->trace(p_trace.get(), DUMP_LEVELS);
-    p_trace->open("dump.fst");
-    #elifdef DUMP_VCD
-    p_trace = std::unique_ptr<VerilatedVcdC>{new VerilatedVcdC};
-    p_model->trace(p_trace.get(), DUMP_LEVELS);
-    p_trace->open("dump.vcd");
-    #endif
+    //#ifdef DUMP_FST
+    //p_trace = std::unique_ptr<VerilatedFstC>{new VerilatedFstC};
+    //p_model->trace(p_trace.get(), DUMP_LEVELS);
+    //p_trace->open("dump.fst");
+    //#elifdef DUMP_VCD
+    //p_trace = std::unique_ptr<VerilatedVcdC>{new VerilatedVcdC};
+    //p_model->trace(p_trace.get(), DUMP_LEVELS);
+    //p_trace->open("dump.vcd");
+    //#endif
 
     // Add commands handler functions to the relevant maps
     cmd_handlers_map["info"]   = VSL_CMD_HANDLER_NAME(info);
@@ -431,9 +430,9 @@ Destructor
 template<typename T>
 VslInteg<T>::~VslInteg() {
     vs_log_mod_debug(__MOD__, "Destructor called (%s)", __FILE__);
-    #ifdef DUMP_FILE
-    if (nullptr != p_trace) p_trace->close();
-    #endif
+    //#ifdef DUMP_FILE
+    //if (nullptr != p_trace) p_trace->close();
+    //#endif
     if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
     if (nullptr != p_cmd) cJSON_Delete(p_cmd);
     return;
@@ -537,9 +536,6 @@ void VslInteg<T>::main_init() {
         (socket_address.address & 0x000000ff)
     );
     vs_log_mod_info(__MOD__, "Port: %d", socket_address.port);
-
-    /* Initial model evaluation*/
-    // eval();
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -770,11 +766,12 @@ Wrapper simulation management functions
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::eval() {
+    p_model->eval();
     clock_map.eval(p_context->time());
     p_model->eval();
-    #ifdef DUMP_FILE
-    p_trace->dump(p_context->time());
-    #endif
+    //#ifdef DUMP_FILE
+    //p_trace->dump(p_context->time());
+    //#endif
 }
 
 template<typename T>
@@ -796,7 +793,7 @@ const vsl_time_t VslInteg<T>::next_event_time() const {
     }
     return p_model->nextTimeSlot();
     #else
-        return clock_map.get_next_event();
+    return clock_map.get_next_event();
     #endif
 }
 
