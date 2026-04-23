@@ -766,7 +766,7 @@ Wrapper simulation management functions
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::eval() {
-    p_model->eval();
+    //p_model->eval();
     clock_map.eval(p_context->time());
     p_model->eval();
     //#ifdef DUMP_FILE
