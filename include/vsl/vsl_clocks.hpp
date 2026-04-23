@@ -3,11 +3,11 @@
  @brief Clock class definition
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2025-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 *******************************************************************************/
 /*
-Copyright (c) 2025 Jérémie Chabloz
+Copyright (c) 2025-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -199,7 +199,7 @@ public:
      *
      * @return Simulation time at next event for the given clock
      */
-    inline vsl_time_t get_next_event(void) const {return next_event_time;};
+    inline vsl_time_t get_next_event(void) const {return next_clk_event_time;};
 
     /**
      * @brief "Smaller than" operator
@@ -215,16 +215,20 @@ public:
     bool operator<(const VslClock& clk) const {
         if (!b_is_enabled && clk.b_is_enabled) {return false;}
         if (b_is_enabled && !clk.b_is_enabled) {return true;}
-        return next_event_time < clk.next_event_time;
+        return next_clk_event_time < clk.next_clk_event_time;
     }
+
+    inline vsl_time_t get_period_low(void) const {return period_low;};
+    inline vsl_time_t get_period_high(void) const {return period_high;};
+    inline bool is_waiting_disable(void) const {return b_wait_dis;};
 
 private:
 
     bool b_is_enabled {false};       // Enabled flag
     bool b_wait_dis {false};         // Flag: waiting to get disabled
     uint32_t cycles_counter {0u};    // Number of cycles that occured since last enable
-    vsl_time_t prev_event_time {0u}; // Time of the latest, previous event
-    vsl_time_t next_event_time {0u}; // Time of the next, upcoming event
+    vsl_time_t prev_clk_event_time {0u}; // Time of the latest, previous event
+    vsl_time_t next_clk_event_time {0u}; // Time of the next, upcoming event
     double duty_cycle {0.5f};        // Duty cycle of the clock (must be >0 and <1)
     vsl_time_t period;               // Period (in simulation time unit)
     vsl_time_t period_low;           // Low portion of the period
@@ -343,7 +347,7 @@ private:
     std::list<VslClock> clock_list;
 
     /* Sort clock list */
-    inline void sort(void) {clock_list.sort();}
+    inline void sort_clocks(void) {clock_list.sort();}
     
     /* For debug purposes, print the clock list content */
     void display_list(void);

@@ -688,7 +688,9 @@ void VslInteg<T>::main_sim() {
     vs_log_mod_info(__MOD__, "Simulation ongoing");
 
     while (!p_context->gotFinish()) {
+
         /* Evaluate model */
+        vs_log_mod_debug(__MOD__, "Evaluate model");
         eval();
 
         /* An extra evaluation of gotFinish is necessary from Verilator 5.046
@@ -766,7 +768,7 @@ Wrapper simulation management functions
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::eval() {
-    //p_model->eval();
+    //p_model->eval(); // TO BE CHECKED - mix of NBA and BA ?!
     clock_map.eval(p_context->time());
     p_model->eval();
     //#ifdef DUMP_FILE

@@ -3,11 +3,11 @@
  @brief Clocks class and methods for Verisocks Verilator integration
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2025-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 ******************************************************************************/
 /*
-Copyright (c) 2025 Jérémie Chabloz
+Copyright (c) 2025-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -32,6 +32,8 @@ SOFTWARE.
 #include "vsl/vsl_utils.hpp"
 #include "vs_logging.h"
 #include <algorithm>
+#include <any>
+#include <string>
 
 #undef __MOD__
 #define __MOD__ "vsl_clocks"
@@ -41,8 +43,8 @@ namespace vsl{
     /***************************************************************************
     VslClock class constructors
     ***************************************************************************/
-    VslClock::VslClock(const char* namep, std::any datap, const vsl_time_t period,
-        const double duty_cycle) :
+    VslClock::VslClock(const char* namep, std::any datap,
+        const vsl_time_t period, const double duty_cycle) :
         VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
         {
             if (0 > set_period(period, duty_cycle)) {return;}
@@ -100,13 +102,14 @@ namespace vsl{
                 cycles_counter = 0u; // Reset events counter
                 b_is_enabled = true; // Set enabled flag
                 b_wait_dis = false;
-                prev_event_time = time;
-                next_event_time = time + period_high;
+                prev_clk_event_time = time;
+                next_clk_event_time = time + period_high;
                 set_value(1.0);
                 vs_log_mod_debug(__MOD__, "Enabled clock %s",
                     get_name().c_str());
                 return 0;
             }
+            // else
             vs_log_mod_error(__MOD__,
                 "Inconsistent period values for clock %s",
                 get_name().c_str());
@@ -126,7 +129,7 @@ namespace vsl{
     void VslClock::disable() {
         if (b_is_enabled) {
             if (0.0 == get_value()) {
-                next_event_time = 0ul;
+                next_clk_event_time = 0ul;
                 b_is_enabled = false;
                 vs_log_mod_debug(__MOD__, "Disabled clock %s",
                     get_name().c_str());
@@ -145,31 +148,43 @@ namespace vsl{
 
     int VslClock::eval(const vsl_time_t time) {
         vs_log_mod_debug(__MOD__,
-            "Evaluate clock %s, time: %ld, next event: %ld",
-            get_name().c_str(), time, next_event_time);
-        if (!b_is_enabled || time < next_event_time) {
-            vs_log_mod_debug(__MOD__, "Evaluate clock - Disabled or no event");
+            "Evaluate clock %s, time: %ld, prev event: %ld, next event: %ld",
+            get_name().c_str(), time, prev_clk_event_time, next_clk_event_time);
+        if (!b_is_enabled) {
+            vs_log_mod_debug(__MOD__, "Evaluate clock - Disabled");
             return 0;
         }
-        if (time == next_event_time) {
-            prev_event_time = next_event_time;
+        if (time < next_clk_event_time) {
+            vs_log_mod_debug(__MOD__, "Evaluate clock - No event at this time");
+            return 0;
+        }
+        if (time == prev_clk_event_time) {
+            vs_log_mod_error(__MOD__, "Evaluate clock - Time has not changed!");
+            return -1;
+        }
+        if (time == next_clk_event_time) {
+            prev_clk_event_time = time;
             if (0.0 == get_value()) {
-                vs_log_mod_debug(__MOD__, "Evaluate clock - Rising edge");
                 // Rising edge
                 set_value(1.0);
-                next_event_time += period_high;
+                next_clk_event_time += period_high;
+                vs_log_mod_debug(__MOD__,
+                    "Evaluate clock - Rising edge - Next event %ld",
+                    next_clk_event_time);
                 return 1;
             }
             // Falling edge
-            vs_log_mod_debug(__MOD__, "Evaluate clock - Falling edge");
             if (b_wait_dis) {
-                next_event_time = 0ul;
+                next_clk_event_time = 0ul;
                 b_is_enabled = false;
                 b_wait_dis = false;
             } else {
-                next_event_time += period_low;
+                next_clk_event_time += period_low;
             }
             set_value(0.0);
+            vs_log_mod_debug(__MOD__,
+                "Evaluate clock - Falling edge - Next event %ld",
+                next_clk_event_time);
             cycles_counter += 1;
             return 2;
         }
@@ -182,7 +197,7 @@ namespace vsl{
     ***************************************************************************/
     void VslClockMap::add_clock(const char* namep, std::any datap) {
         clock_list.push_front(VslClock {namep, datap, 2ul, 0.5});
-        sort();
+        sort_clocks();
     }
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
@@ -190,7 +205,7 @@ namespace vsl{
     {
         clock_list.push_front(
             VslClock {namep, datap, period, duty_cycle});
-        sort();
+        sort_clocks();
     }
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
@@ -199,19 +214,14 @@ namespace vsl{
     {
         clock_list.push_front(
             VslClock {namep, datap, period, unit, duty_cycle, p_context});
-        sort();
+        sort_clocks();
     }
 
     const bool VslClockMap::has_next_event(void) const {
         // Check that there is at least one clock enabled
         if (clock_list.empty()) {return false;}
         for (VslClock clock : clock_list) {
-            if (clock.is_enabled()) {
-                vs_log_mod_debug(__MOD__,
-                    "At least clock %s is enabled",
-                    clock.get_name().c_str());
-                return true;
-            }
+            if (clock.is_enabled()) {return true;}
         }
         return false;
     }
@@ -227,14 +237,14 @@ namespace vsl{
         unsigned int total_evals = 0u;
         int eval_status = 0;
         if (clock_list.empty()) {return 0;}
-        // display_list();
+        // Evaluate all clocks in the list that should be evaluated at this
+        // time step
         do {
-            auto clk = clock_list.front();
-            vs_log_mod_debug(__MOD__, "First clock: %s", clk.get_name().c_str());
+            VslClock& clk = clock_list.front();
             eval_status = clk.eval(time);
             if (eval_status > 0) {total_evals++;}
-            sort();
-        } while (eval_status > 0);
+            sort_clocks();
+        } while (eval_status > 0 && total_evals < clock_list.size());
         return total_evals;
     }
 
@@ -257,15 +267,21 @@ namespace vsl{
 
     void VslClockMap::display_list(void) {
         if (clock_list.empty()) {return;}
-        fprintf(stderr, "Name,Enabled?,Next event\n");
-        fprintf(stderr, "************************\n");
+        fprintf(stderr, "*****************************************************\n");
+        fprintf(stderr, "Name,Enabled?,Wait dis,Value,Next event,Period low,Period high\n");
+        fprintf(stderr, "*****************************************************\n");
         for (VslClock clock : clock_list) {
-            fprintf(stderr, "%s,%d,%lu\n",
+            fprintf(stderr, "%s,%d,%d,%d,%lu,%lu,%lu\n",
                 clock.get_name().c_str(),
                 clock.is_enabled(),
-                clock.get_next_event()
+                clock.is_waiting_disable(),
+                static_cast<int>(clock.get_value()),
+                clock.get_next_event(),
+                clock.get_period_low(),
+                clock.get_period_high()
             );
         }
+        fprintf(stderr, "*****************************************************\n");
         return;
     }
 
