@@ -103,7 +103,7 @@ int main(int argc, char** argv, char**) {
     // Clocks
     vslx.register_clock("clk",
         &topp->clk,
-        1.4, "us", 0.6
+        1.4, "us", 0.6, true
     );
     // Scalar variables
     vslx.register_scalar("resetb",

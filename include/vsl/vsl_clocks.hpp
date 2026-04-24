@@ -100,7 +100,7 @@ public:
      */
     VslClock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
-        VerilatedContext* const p_context, const bool enable);
+        VerilatedContext* const p_context, const bool enable = false);
 
     /**
     * @brief Set period and duty cycle
@@ -274,7 +274,7 @@ public:
      */
     void add_clock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
-        VerilatedContext* const p_context);
+        VerilatedContext* const p_context, const bool enable);
 
     /**
      * @brief Checks if any of the registered clock is enabled

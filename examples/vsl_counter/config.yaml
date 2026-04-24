@@ -21,6 +21,7 @@ variables:
       period: 1.4
       unit: us
       duty_cycle: 0.6
+      enable: true
   scalars:
     - path: arst_b
       name: resetb

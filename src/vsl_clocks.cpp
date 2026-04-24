@@ -210,10 +210,11 @@ namespace vsl{
 
     void VslClockMap::add_clock(const char* namep, std::any datap,
         const double period, const char* unit, const double duty_cycle,
-        VerilatedContext* const p_context)
+        VerilatedContext* const p_context, const bool enable)
     {
         clock_list.push_front(
-            VslClock {namep, datap, period, unit, duty_cycle, p_context});
+            VslClock {namep, datap, period, unit, duty_cycle, p_context,
+                      enable});
         sort_clocks();
     }
 

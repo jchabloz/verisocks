@@ -80,7 +80,9 @@ VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
 #*****************************************************************************
 # Rules
 #*****************************************************************************
-default: verilate $(VM_PREFIX)
+.PHONY: default clean verilate
+
+default: $(VM_PREFIX)
 
 verilate: $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 
@@ -112,9 +114,10 @@ VM_SP_OR_SC = $(VM_SC)
 include $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 include $(VERILATOR_ROOT)/include/verilated.mk
 
-### Link rules
+### Link final executable rules
 link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
 link_deps = $(link_args) $(VSL_HEADERS)
+
 $(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 
@@ -128,6 +131,3 @@ clean:
 	$(RM) *.fst *.vcd
 	$(RM) *.log
 	$(RM) -r __pycache__
-
-.PHONY: default clean verilate
-

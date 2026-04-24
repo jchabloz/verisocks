@@ -25,7 +25,7 @@ VL_SRCS = \
 
 # Testbench C++ source files
 TB_CPP_SRCS = \
-	test_main.cpp
+	test_main.cpp 
 
 # Build folders
 VL_OBJ_DIR = vl_obj_dir

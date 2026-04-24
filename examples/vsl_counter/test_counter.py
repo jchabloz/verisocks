@@ -116,6 +116,12 @@ def test_counter(vs):
 
 
 if __name__ == "__main__":
+
+    logging.basicConfig(
+        format='[%(levelname)s] %(message)s',
+        level=logging.DEBUG
+    )
+
     port = find_free_port()
     setup_test(port, TIMEOUT, True)
 

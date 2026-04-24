@@ -38,9 +38,22 @@ def get_var_type(var):
         raise VerisocksError(f"Unknown variable type {type}")
 
 def get_var_name(var):
+    """Get variable name/alias"""
     if 'name' in var:
         return var['name']
     return var['path']
+
+def get_clk_dc(clk):
+    """Get clock variable duty cycle value"""
+    if 'duty_cycle' in clk:
+        return clk['duty_cycle']
+    return 0.5
+
+def bool_py2c(x):
+    if (x):
+        return "true"
+    else:
+        return "false"
 %>\
 /*
 Note: this file has been generated from the template ${template_filename}
@@ -168,8 +181,14 @@ int main(int argc, char** argv, char**) {
     % for clk in variables['clocks']:
     vslx.register_clock("${get_var_name(clk)}",
         &topp->${clk['path'].replace(".", "->")},
-        ${clk['period']}, "${clk['unit']}", ${clk['duty_cycle']}
+        ${clk['period']}, "${clk['unit']}", ${get_clk_dc(clk)}\
+% if 'enable' in clk:
+, ${bool_py2c(clk['enable'])}
     );
+% else:
+, false
+    );
+    % endif
     % endfor
     % endif
     % if 'scalars' in variables:

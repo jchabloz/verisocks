@@ -92,6 +92,10 @@ VL_ARGS_FILES = \\
 # List all Verilog/SystemVerilog source files to be verilated
 VL_SRCS = \\
 
+% if vlt_file:
+	${vlt_file} \\
+% endif
+
 % for src in verilog_src_files[:-1]:
 	${format_path(src)} \\
 
@@ -101,11 +105,18 @@ VL_SRCS = \\
 # Testbench C++ source files
 TB_CPP_SRCS = \\
 
+	${tb_file} \
+% if cpp_src_files:
+\\
+
 % for src in cpp_src_files[:-1]:
 	${format_path(src)} \\
 
 % endfor
 	${format_path(cpp_src_files[-1])}
+
+% endif
+
 
 # Build folders
 VL_OBJ_DIR = vl_obj_dir

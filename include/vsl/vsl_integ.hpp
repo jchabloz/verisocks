@@ -173,9 +173,10 @@ public:
      * @param duty_cycle Clock duty cycle
      */
     inline void register_clock(const char* name, std::any datap,
-        const double period, const char* unit, const double duty_cycle) {
+        const double period, const char* unit, const double duty_cycle,
+        const bool enable = false) {
             clock_map.add_clock(
-                name, datap, period, unit, duty_cycle, p_context
+                name, datap, period, unit, duty_cycle, p_context, enable
             );
             register_variable(name, datap, VLVT_UINT8, VSL_TYPE_SCALAR, 1u);
     }
@@ -706,6 +707,8 @@ void VslInteg<T>::main_sim() {
                 "Reached callback - Getting back to Verisocks main loop",
                 &uuid);
             _state = VSL_STATE_WAITING;
+            // TODO: maybe add p_trace->flush() here? We could also have flush
+            // as a command instead?
             return;
         }
 
@@ -719,6 +722,7 @@ void VslInteg<T>::main_sim() {
                     &uuid
                 );
                 _state = VSL_STATE_WAITING;
+                // TODO: maybe add p_trace->flush() here?
                 return;
             }
             vs_log_mod_warning(
@@ -735,6 +739,7 @@ void VslInteg<T>::main_sim() {
                 "Reached callback - Getting back to Verisocks main loop",
                 &uuid);
             _state = VSL_STATE_WAITING;
+            // TODO: maybe add p_trace->flush() here?
             return;
         }
 

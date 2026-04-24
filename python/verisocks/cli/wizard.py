@@ -83,8 +83,8 @@ test_main.cpp)")
                         help="Rendered Verilator configuration file for \
 public variables (default:variables.vlt)")
     parser.add_argument('--makefile-only', action='store_true',
-                        help="Render makefile only (unless any other *-only \
-option is being used)")
+                        help="Render makefile(s) only (unless any other \
+*-only option is being used)")
     parser.add_argument('--tb-only', action='store_true',
                         help="Render tesbench file only (unless any other \
 *-only option is being used)")
@@ -170,7 +170,8 @@ option is being used)")
         logging.info(
             f"Build directory: {args.build_dir} (defined in arguments)")
         build_dir = str(args.build_dir)
-        del cfg['config']['build_dir']
+        if 'build_dir' in cfg['config']:
+            del cfg['config']['build_dir']
     elif 'build_dir' in cfg['config']:
         build_dir = format_path(cfg['config']['build_dir'])
         logging.info(
@@ -182,39 +183,36 @@ option is being used)")
 
     # Add C++ top testbench file at the front of C++ sources list
     if 'cpp_src_files' not in cfg['config']:
-        cfg['config']['cpp_src_files'] = []
-    cfg['config']['cpp_src_files'] = (
-        [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
-
-    # Add verilator configuration file for public variables at the front of the
-    # Verilog sources list
-    if 'variables' in cfg:
-        cfg['config']['verilog_src_files'] = (
-            [str(args.variables_file)] + cfg['config']['verilog_src_files'])
+        cfg['config']['cpp_src_files'] = None
 
     # Rendered files paths
     makefile = join(build_dir, args.makefile)
+    tb_file = join(build_dir, str(args.testbench_file))
     top_mk_file = str(args.makefile_top)
-    tb_file = str(args.testbench_file)
     config_file = str(args.config)
 
     if 'variables' in cfg:
-        vlt_file = str(args.variables_file)
+        vlt_file = join(build_dir, str(args.variables_file))
     else:
         vlt_file = None
 
     # Render Makefile(s)
     if render_makefile:
         if (relpath(build_dir) != curdir):
-            render_template(template_top_mk,
-                            top_mk_file,
-                            build_dir=build_dir)
-            logging.info(f"Rendered {top_mk_file}")
+            if not exists(top_mk_file):
+                render_template(template_top_mk,
+                                top_mk_file,
+                                build_dir=build_dir)
+                logging.info(f"Rendered {top_mk_file}")
+            else:
+                logging.warning(
+                    f"Makefile {top_mk_file} already exists! \
+It shall not be overwritten")
         render_template(template_mk, makefile,
                         target_file=makefile,
                         config_file=config_file,
-                        tb_file=tb_file,
-                        vlt_file=vlt_file,
+                        tb_file=relpath(tb_file, build_dir),
+                        vlt_file=relpath(vlt_file, build_dir),
                         build_dir=build_dir,
                         **cfg['config'])
         logging.info(f"Rendered {makefile}")
