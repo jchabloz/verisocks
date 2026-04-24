@@ -124,7 +124,7 @@ VS_VPI_CMD_HANDLER(get_sim_info)
 VS_VPI_CMD_HANDLER(get_sim_time)
 {
     char *str_msg = NULL;
-    //double sim_time_sec;
+    double sim_time_sec;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, &p_data->uuid);
 
@@ -132,8 +132,9 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     VS_MSG(p_msg);
     VS_MSG_ADD_STR(p_msg, "type", "result");
 
-    vs_vpi_log_debug("Sim time: %.6f us", p_data->sim_time_sec*1.0e6);
-    VS_MSG_ADD_NUM(p_msg, "time", p_data->sim_time_sec);
+    /* Get simulation time in seconds */
+    sim_time_sec = vs_utils_get_sim_time_sec();
+    VS_MSG_ADD_NUM(p_msg, "time", sim_time_sec);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {

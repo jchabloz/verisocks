@@ -148,11 +148,6 @@ cJSON* vs_msg_create_header(const void *p_msg, vs_msg_info_t *p_msg_info)
 
     /* Create header JSON object, including calculated message length*/
     VS_MSG(p_header);
-    // p_header = cJSON_CreateObject();
-    // if (NULL == p_header) {
-    //     vs_log_mod_error(__MOD__, "Failed to create header JSON object");
-    //     return NULL;
-    // }
 
     /* Create header depending on message type */
     switch (p_msg_info->type) {
@@ -515,26 +510,16 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value,
 {
     vs_log_mod_debug(__MOD__, "Function vs_msg_return");
 
-    cJSON *p_msg;
+    // cJSON *p_msg;
     char *str_msg = NULL;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
     vs_msg_copy_uuid(&msg_info, p_uuid);
 
-    p_msg = cJSON_CreateObject();
-    if (NULL == p_msg) {
-        vs_log_mod_error(__MOD__, "Could not create cJSON object");
-        return -1;
-    }
+    VS_MSG(p_msg);
 
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
-        vs_log_mod_error(__MOD__, "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "type", str_type);
 
-    if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
-        vs_log_mod_error(__MOD__, "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "value", str_value);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {

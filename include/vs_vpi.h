@@ -68,7 +68,8 @@ typedef struct vs_vpi_data {
     vpiHandle h_cb_poll;    ///Callback handle ("polling" callback)
     s_vpi_value value;      ///Value (used for value change callback)
     vs_uuid_t uuid;         ///Current transaction UUID
-    double sim_time_sec;    ///Current simulation time in seconds
+    vs_time_def_t time_def; ///Timescale definition
+    uint64_t sim_time;      ///Current simulation time
 } vs_vpi_data_t;
 
 /**

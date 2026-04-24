@@ -41,35 +41,34 @@ SOFTWARE.
 #define PLI_UINT64 uint64_t
 #endif
 
-
 static const vs_time_def_t TIME_DEF_TABLE[] = {
-    {0, "s"},
-    {-3, "ms"},
-    {-6, "us"},
-    {-9, "ns"},
-    {-12, "ps"},
-    {-15, "fs"},
-    {0, NULL}
+    {0,   "s",  1, "s" },
+    {-3,  "ms", 1, "ms"},
+    {-6,  "us", 1, "us"},
+    {-9,  "ns", 1, "ns"},
+    {-12, "ps", 1, "ps"},
+    {-15, "fs", 1, "fs"},
+    {0, NULL, 0, NULL}
 };
 
 static const vs_time_def_t TIME_DEF_TABLE_FULL[] = {
-    {0,   "s"},
-    {-1,  "100ms"},
-    {-2,  "10ms"},
-    {-3,  "ms"},
-    {-4,  "100us"},
-    {-5,  "10us"},
-    {-6,  "us"},
-    {-7,  "100ns"},
-    {-8,  "10ns"},
-    {-9,  "ns"},
-    {-10, "100ps"},
-    {-11, "10ps"},
-    {-12, "ps"},
-    {-14, "100fs"},
-    {-13, "10fs"},
-    {-15, "fs"},
-    {0, NULL}
+    {0,   "s",     1,   "s" },
+    {-1,  "100ms", 100, "ms"},
+    {-2,  "10ms",  10,  "ms"},
+    {-3,  "ms",    1,   "ms"},
+    {-4,  "100us", 100, "us"},
+    {-5,  "10us",  10,  "us"},
+    {-6,  "us",    1,   "us"},
+    {-7,  "100ns", 100, "ns"},
+    {-8,  "10ns",  10,  "ns"},
+    {-9,  "ns",    1,   "ns"},
+    {-10, "100ps", 100, "ps"},
+    {-11, "10ps",  10,  "ps"},
+    {-12, "ps",    1,   "ps"},
+    {-14, "100fs", 100, "fs"},
+    {-13, "10fs",  10,  "fs"},
+    {-15, "fs",    1,   "fs"},
+    {0, NULL, 0, NULL}
 };
 
 static PLI_INT32 get_time_factor(const char *time_unit)
@@ -85,17 +84,27 @@ static PLI_INT32 get_time_factor(const char *time_unit)
     return 0;
 }
 
-const char* vs_utils_get_time_unit(const PLI_INT32 time_factor)
+const vs_time_def_t* vs_utils_get_time_def(const PLI_INT32 time_factor)
 {
     const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE_FULL;
     while(ptr_tdef->name != NULL) {
         if (ptr_tdef->factor == time_factor) {
-            return ptr_tdef->name;
+            return ptr_tdef;
         }
         ptr_tdef++;
     }
     vs_log_mod_error("vs_utils", "Could not find time unit");
     return NULL;
+}
+
+const char* vs_utils_get_time_unit(const PLI_INT32 time_factor)
+{
+    const vs_time_def_t *ptr_tdef = vs_utils_get_time_def(time_factor);
+    if (NULL == ptr_tdef) {
+        vs_log_mod_error("vs_utils", "Could not find time unit");
+        return NULL;
+    }
+    return ptr_tdef->name;
 }
 
 double vs_utils_time_to_double(s_vpi_time time, const char *time_unit)
@@ -146,7 +155,7 @@ s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit)
     return vpi_time;
 }
 
-double vs_utils_get_sim_time(void)
+double vs_utils_get_sim_time_sec(void)
 {
     double sim_time_sec;
     s_vpi_time s_time;
@@ -154,6 +163,28 @@ double vs_utils_get_sim_time(void)
     vpi_get_time(NULL, &s_time);
     sim_time_sec = vs_utils_time_to_double(s_time, NULL);
     return sim_time_sec;
+}
+
+PLI_UINT64 vs_utils_get_sim_time(const vs_time_def_t time_def)
+{
+    s_vpi_time s_time;
+    s_time.type = vpiSimTime;
+    vpi_get_time(NULL, &s_time);
+    PLI_UINT64 time_value =
+        (PLI_UINT64) s_time.low + ((PLI_UINT64) s_time.high << 32u);
+    time_value = time_value * time_def.repr_factor;
+    return time_value;
+}
+
+vs_time_def_t vs_utils_get_sim_time_def(void)
+{
+    PLI_INT32 time_precision = vpi_get(vpiTimePrecision, NULL);
+    vs_time_def_t null_time_def = {0, NULL, 0, NULL};
+    const vs_time_def_t* p_time_def = vs_utils_get_time_def(time_precision);
+    if (NULL == p_time_def) {
+        return null_time_def;
+    }
+    return *p_time_def;
 }
 
 typedef struct s_obj_format {

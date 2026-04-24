@@ -210,7 +210,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->h_cb_poll = NULL;
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
-    p_vpi_data->sim_time_sec = 0.0;
+    p_vpi_data->time_def = vs_utils_get_sim_time_def();
     memcpy(&p_vpi_data->uuid.value, null_uuid_value, VS_UUID_LEN);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
@@ -318,12 +318,11 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
     }
     
     /* Update sim time state variable */
-    p_vpi_data->sim_time_sec = vs_utils_get_sim_time();
+    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 
     /* Signalling that the callback function has been reached */
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
-    vs_vpi_log_debug("Sim time: %.6f us", p_vpi_data->sim_time_sec*1.0e6);
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
         "Reached callback - Getting back to Verisocks main loop",
         &(p_vpi_data->uuid)
@@ -375,7 +374,7 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     }
 
     /* Update sim time state variable */
-    p_vpi_data->sim_time_sec = vs_utils_get_sim_time();
+    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 
     /* If the value is not the same, get back to sim until next time */
     if (vpi_get(vpiType, cb_data->obj) != vpiNamedEvent) {
@@ -397,7 +396,6 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     /* Signalling that the callback function has been reached */
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
-    vs_vpi_log_debug("Sim time: %.6f us", p_vpi_data->sim_time_sec*1.0e6);
     vs_vpi_return(p_vpi_data->fd_client_socket, "ack",
         "Reached callback - Getting back to Verisocks main loop",
         &(p_vpi_data->uuid)
@@ -439,8 +437,7 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     }
 
     /* Update sim time state variable */
-    p_vpi_data->sim_time_sec = vs_utils_get_sim_time();
-    vs_vpi_log_debug("Sim time: %.6f us", p_vpi_data->sim_time_sec*1.0e6);
+    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 
     /* Free callback handles */
     if (NULL != p_vpi_data->h_cb) {
@@ -521,8 +518,7 @@ PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
     }
 
     /* Update sim time state variable */
-    p_vpi_data->sim_time_sec = vs_utils_get_sim_time();
-    vs_vpi_log_debug("Sim time: %.6f us", p_vpi_data->sim_time_sec*1.0e6);
+    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 
     /* Check if pending request - possibly an interrupt */
     if (0 < vs_msg_peek(p_vpi_data->fd_client_socket)) {

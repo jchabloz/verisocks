@@ -161,15 +161,8 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
         return -1;
     }
 
-    if (NULL == cJSON_AddStringToObject(p_msg, "type", str_type)) {
-        vs_log_mod_error(__MOD__, "Could not add string to object");
-        goto error;
-    }
-
-    if (NULL == cJSON_AddStringToObject(p_msg, "value", str_value)) {
-        vs_log_mod_error(__MOD__, "Could not add string to object");
-        goto error;
-    }
+    VS_MSG_ADD_STR(p_msg, "type", str_type);
+    VS_MSG_ADD_STR(p_msg, "value", str_value);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
