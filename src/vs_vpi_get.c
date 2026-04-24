@@ -114,10 +114,8 @@ VS_VPI_CMD_HANDLER(get_sim_info)
     if (NULL != p_msg) cJSON_Delete(p_msg);
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=sim_info) - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command get(sel=sim_info) - Discarding");
     return -1;
 }
 
@@ -157,10 +155,8 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     if (NULL != p_msg) cJSON_Delete(p_msg);
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=sim_time) - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command get(sel=sim_time) - Discarding");
     return -1;
 }
 
@@ -251,10 +247,8 @@ VS_VPI_CMD_HANDLER(get_value)
     if (NULL != p_msg) cJSON_Delete(p_msg);
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=value) - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command get(sel=value) - Discarding");
     return -1;
 }
 
@@ -301,9 +295,7 @@ VS_VPI_CMD_HANDLER(get_type)
     if (NULL != p_msg) cJSON_Delete(p_msg);
     if (NULL != str_msg) cJSON_free(str_msg);
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get(sel=value) - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command get(sel=value) - Discarding");
     return -1;
 }

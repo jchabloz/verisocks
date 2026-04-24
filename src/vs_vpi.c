@@ -134,10 +134,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
 
     /* Error handling - Discard and wait for new command */
     warning:
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command. Discarding.",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error", "Error processing command. Discarding.");
     p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 
@@ -148,7 +145,7 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
 }
 
 int vs_vpi_return(int fd, const char *str_type, const char *str_value,
-    const vs_uuid_t *p_uuid)
+    const vs_uuid_t *p_uuid, const uint64_t time, const char* time_unit)
 {
     cJSON *p_msg;
     char *str_msg = NULL;
@@ -163,6 +160,8 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 
     VS_MSG_ADD_STR(p_msg, "type", str_type);
     VS_MSG_ADD_STR(p_msg, "value", str_value);
+    VS_MSG_ADD_NUM(p_msg, "time", time);
+    VS_MSG_ADD_STR(p_msg, "time_unit", time_unit);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
@@ -201,8 +200,7 @@ VS_VPI_CMD_HANDLER(info)
     vs_vpi_log_info("%s", str_value);
 
     /* Return an acknowledgement */
-    vs_vpi_return(p_data->fd_client_socket, "ack", "command info received",
-        &(p_data->uuid));
+    VS_VPI_RETURN(p_data, "ack", "command info received");
 
     /* Set state to "waiting next command" */
     p_data->state = VS_VPI_STATE_WAITING;
@@ -210,10 +208,8 @@ VS_VPI_CMD_HANDLER(info)
 
     /* Error handling */
     error:
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command info - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command info - Discarding");
     p_data->state = VS_VPI_STATE_WAITING;
     return -1;
 }
@@ -224,10 +220,8 @@ Finish command handler
 VS_VPI_CMD_HANDLER(finish)
 {
     vs_vpi_log_info("Command \"finish\" received. Terminating simulation...");
-    vs_vpi_return(p_data->fd_client_socket, "ack",
-        "Processing finish command - Terminating simulation.",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "ack",
+        "Processing finish command - Terminating simulation.");
     vpi_control(vpiFinish);
     p_data->state = VS_VPI_STATE_EXIT;
     return 0;
@@ -240,10 +234,8 @@ VS_VPI_CMD_HANDLER(stop)
 {
     vs_vpi_log_info("Command \"stop\" received. Stopping simulation and \
 relaxing control to simulator...");
-    vs_vpi_return(p_data->fd_client_socket, "ack",
-        "Processing stop command - Stopping simulation.",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "ack",
+        "Processing stop command - Stopping simulation.");
     vpi_control(vpiStop);
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
     return 0;
@@ -255,10 +247,8 @@ Exit command handler
 VS_VPI_CMD_HANDLER(exit)
 {
     vs_vpi_log_info("Command \"exit\" received. Quitting Verisocks ...");
-    vs_vpi_return(p_data->fd_client_socket, "ack",
-        "Processing exit command - Quitting Verisocks.",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "ack",
+        "Processing exit command - Quitting Verisocks.");
     p_data->state = VS_VPI_STATE_EXIT;
     return 0;
 }
@@ -286,10 +276,8 @@ VS_VPI_CMD_HANDLER(run)
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command run - Discarding");
     return -1;
 }
 
@@ -317,10 +305,8 @@ VS_VPI_CMD_HANDLER(get)
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command get - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command get - Discarding");
     return -1;
 }
 
@@ -346,10 +332,7 @@ VS_VPI_CMD_HANDLER(set)
         vs_vpi_log_info("Command \"set(path=%s)\" received. Target path \
 corresponds to a named event.", str_path);
         vpi_put_value(h_obj, NULL, NULL, vpiNoDelay);
-        vs_vpi_return(p_data->fd_client_socket, "ack",
-            "Processed command \"set\"",
-            &(p_data->uuid)
-        );
+        VS_VPI_RETURN(p_data, "ack", "Processed command \"set\"");
         return 0;
     }
 
@@ -398,10 +381,7 @@ Target path corresponds to a memory array.", str_path);
         }
 
         vpi_free_object(mem_iter);
-        vs_vpi_return(p_data->fd_client_socket, "ack",
-            "Processed command \"set\"",
-            &(p_data->uuid)
-        );
+        VS_VPI_RETURN(p_data, "ack", "Processed command \"set\"");
         return 0;
     }
 
@@ -423,18 +403,13 @@ Target path corresponds to a memory array.", str_path);
 
     if (0 > vs_utils_set_value(h_obj, value)) goto error;
 
-    vs_vpi_return(p_data->fd_client_socket, "ack",
-        "Processed command \"set\"",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "ack", "Processed command \"set\"");
     return 0;
 
     /* Error handling */
     error:
     p_data->state = VS_VPI_STATE_WAITING;
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command set - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command set - Discarding");
     return -1;
 }

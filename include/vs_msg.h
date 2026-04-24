@@ -193,10 +193,13 @@ int vs_msg_write(int fd, const char *str_msg);
  * @param str_type Type
  * @param str_value Value
  * @param pointer to UUID struct
+ * @param time Current time
+ * @param time_unit Current time unit
  * @return Returns 0 if successful, -1 if an error occurred
  */
 int vs_msg_return(int fd, const char *str_type, const char *str_value,
 	const vs_uuid_t *p_uuid);
+	// const vs_uuid_t *p_uuid, const uint64_t time, const char *time_unit);
 
 /**
  * @brief Reads formatted message from the given descriptor.

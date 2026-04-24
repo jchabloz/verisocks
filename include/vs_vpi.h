@@ -40,6 +40,12 @@ SOFTWARE.
 extern "C" {
 #endif
 
+#define VS_VPI_RETURN(p_vpi_data, type, msg) \
+    vs_vpi_return(p_vpi_data->fd_client_socket, type, msg, \
+        &(p_vpi_data->uuid), p_vpi_data->sim_time, \
+        p_vpi_data->time_def.repr_unit \
+    )
+
 /**
  * @brief Enum state
  */
@@ -87,10 +93,12 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data);
  * @param str_type Type
  * @param str_value Value
  * @param p_uuid Pointer to UUID structure (valid or not)
+ * @param time Current (simulation) time
+ * @param time_unit Current time unit
  * @return Returns 0 if successful, -1 if an error occurred
  */
 int vs_vpi_return(int fd, const char *str_type, const char *str_value,
-    const vs_uuid_t *p_uuid);
+    const vs_uuid_t *p_uuid, const uint64_t time, const char* time_unit);
 
 PLI_INT32 verisocks_cb(p_cb_data cb_data);
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);

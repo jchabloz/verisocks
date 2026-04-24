@@ -507,6 +507,7 @@ int vs_msg_write(int fd, const char *str_msg)
  *****************************************************************************/
 int vs_msg_return(int fd, const char *str_type, const char *str_value,
     const vs_uuid_t *p_uuid)
+    // const vs_uuid_t *p_uuid, const uint64_t time, const char *time_unit)
 {
     vs_log_mod_debug(__MOD__, "Function vs_msg_return");
 
@@ -516,10 +517,10 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value,
     vs_msg_copy_uuid(&msg_info, p_uuid);
 
     VS_MSG(p_msg);
-
     VS_MSG_ADD_STR(p_msg, "type", str_type);
-
     VS_MSG_ADD_STR(p_msg, "value", str_value);
+    // VS_MSG_ADD_NUM(p_msg, "time", time);
+    // VS_MSG_ADD_STR(p_msg, "time_unit", time_unit);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
