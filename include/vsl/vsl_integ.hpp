@@ -22,13 +22,13 @@
  - Call `run()` to start the FSM and handle remote commands.
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2024-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 *******************************************************************************/
 /*
 MIT License
 
-Copyright (c) 2024-2025 Jérémie Chabloz
+Copyright (c) 2024-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -60,13 +60,17 @@ SOFTWARE.
 #include "verilated_syms.h"
 #include "vsl/vsl_types.hpp"
 #include "vsl/vsl_clocks.hpp"
+#include "vsl/vsl_dump.hpp"
 
 #include <cstdio>
 #include <functional>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <memory>
 
+#undef __MOD__
+#define __MOD__ "vsl"
 
 /**
  * @brief Helper macro to declare a command handler function prototype
@@ -83,7 +87,6 @@ SOFTWARE.
  * @param cmd Command short name
  */
 #define VSL_CMD_HANDLER_NAME(cmd) VSL_ ## cmd ## _cmd_handler
-
 
 namespace vsl{
 
@@ -160,6 +163,9 @@ public:
     /**
      * @brief Register a clock variable
      *
+     * The clock is also registered as a scalar 1-bit wide variable within the
+     * variable map and can thus be accessed as a variable as well.
+     *
      * @param name Name of the clock
      * @param datap Pointer to the corresponding Verilator variable
      * @param period Period of the clock
@@ -167,10 +173,12 @@ public:
      * @param duty_cycle Clock duty cycle
      */
     inline void register_clock(const char* name, std::any datap,
-        const double period, const char* unit, const double duty_cycle) {
+        const double period, const char* unit, const double duty_cycle,
+        const bool enable = false) {
             clock_map.add_clock(
-                name, datap, period, unit, duty_cycle, p_context
+                name, datap, period, unit, duty_cycle, p_context, enable
             );
+            register_variable(name, datap, VLVT_UINT8, VSL_TYPE_SCALAR, 1u);
     }
 
     /**
@@ -267,6 +275,12 @@ private:
     int fd_client_socket {-1};     //File descriptor, connected client socket
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
+
+    //#ifdef DUMP_FST
+    //std::unique_ptr<VerilatedFstC> p_trace;
+    //#elifdef DUMP_VCD
+    //std::unique_ptr<VerilatedVcdC> p_trace;
+    //#endif
 
     /* Callbacks management */
     bool b_has_time_callback {false};
@@ -366,7 +380,7 @@ Constructor
 ******************************************************************************/
 template<typename T>
 VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
-    vs_log_mod_debug("vsl", "Constructor called (%s)", __FILE__);
+    vs_log_mod_debug(__MOD__, "Constructor called (%s)", __FILE__);
 
     /* Check that the type parameter corresponds to a verilated model */
     static_assert(std::is_base_of<VerilatedModel,T>::value,
@@ -376,6 +390,16 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     p_context = p_model->contextp();
     num_port = port;
     num_timeout_sec = timeout;
+
+    //#ifdef DUMP_FST
+    //p_trace = std::unique_ptr<VerilatedFstC>{new VerilatedFstC};
+    //p_model->trace(p_trace.get(), DUMP_LEVELS);
+    //p_trace->open("dump.fst");
+    //#elifdef DUMP_VCD
+    //p_trace = std::unique_ptr<VerilatedVcdC>{new VerilatedVcdC};
+    //p_model->trace(p_trace.get(), DUMP_LEVELS);
+    //p_trace->open("dump.vcd");
+    //#endif
 
     // Add commands handler functions to the relevant maps
     cmd_handlers_map["info"]   = VSL_CMD_HANDLER_NAME(info);
@@ -406,7 +430,10 @@ Destructor
 ******************************************************************************/
 template<typename T>
 VslInteg<T>::~VslInteg() {
-    vs_log_mod_debug("vsl", "Destructor called (%s)", __FILE__);
+    vs_log_mod_debug(__MOD__, "Destructor called (%s)", __FILE__);
+    //#ifdef DUMP_FILE
+    //if (nullptr != p_trace) p_trace->close();
+    //#endif
     if (0 < fd_server_socket) vs_server_close_socket(fd_server_socket);
     if (nullptr != p_cmd) cJSON_Delete(p_cmd);
     return;
@@ -424,13 +451,13 @@ int VslInteg<T>::run() {
     std::printf("*    \\_/\\___|_| |_/__/\\___/\\__|_\\_\\/__/   *\n");
     std::printf("*                                         *\n");
     std::printf("*          Verilator integration          *\n");
-    std::printf("* Copyright (c) 2024-2025 Jérémie Chabloz *\n");
+    std::printf("* Copyright (c) 2024-2026 Jérémie Chabloz *\n");
     std::printf("*******************************************\n");
 
     #ifdef VSL_TIMING
-    vs_log_mod_info("vsl", "Verilated with timing extension");
+    vs_log_mod_info(__MOD__, "Verilated with timing extension");
     #else
-    vs_log_mod_info("vsl", "Verilated without timing extension");
+    vs_log_mod_info(__MOD__, "Verilated without timing extension");
     #endif
 
     while(true) {
@@ -465,7 +492,7 @@ int VslInteg<T>::run() {
             return 0;
         case VSL_STATE_ERROR:
         default:
-            vs_log_mod_error("vsl",
+            vs_log_mod_error(__MOD__,
                 "Exiting Verisocks main loop (error state)");
             if (0 <= fd_server_socket) {
                 vs_server_close_socket(fd_server_socket);
@@ -486,7 +513,7 @@ void VslInteg<T>::main_init() {
 
     /* Check state consistency */
     if (_state != VSL_STATE_INIT) {
-        vs_log_mod_error("vsl", "Wrong state in init function %d", _state);
+        vs_log_mod_error(__MOD__, "Wrong state in init function %d", _state);
         _state = VSL_STATE_ERROR;
         return;
     }
@@ -494,7 +521,7 @@ void VslInteg<T>::main_init() {
     /* Create server socket */
     fd_server_socket = vs_server_make_socket(num_port);
     if (0 > fd_server_socket) {
-        vs_log_mod_error("vsl", "Issue making socket at port %d", num_port);
+        vs_log_mod_error(__MOD__, "Issue making socket at port %d", num_port);
         _state = VSL_STATE_ERROR;
         return;
     }
@@ -503,16 +530,13 @@ void VslInteg<T>::main_init() {
     vs_sock_addr_t socket_address = vs_server_get_address(fd_server_socket);
 
     /* Logs server address and port number */
-    vs_log_mod_info("vsl", "Server address: %d.%d.%d.%d",
+    vs_log_mod_info(__MOD__, "Server address: %d.%d.%d.%d",
         (socket_address.address & 0xff000000) >> 24u,
         (socket_address.address & 0x00ff0000) >> 16u,
         (socket_address.address & 0x0000ff00) >> 8u,
         (socket_address.address & 0x000000ff)
     );
-    vs_log_mod_info("vsl", "Port: %d", socket_address.port);
-
-    /* Initial model evaluation*/
-    // eval();
+    vs_log_mod_info(__MOD__, "Port: %d", socket_address.port);
 
     /* Update state */
     _state = VSL_STATE_CONNECT;
@@ -530,17 +554,17 @@ void VslInteg<T>::main_connect() {
     timeout.tv_usec = 0;
 
     vs_log_mod_info(
-        "vsl",
+        __MOD__,
         "Waiting for a client to connect (%ds timeout) ...",
         (int) timeout.tv_sec);
     fd_client_socket = vs_server_accept(
         fd_server_socket, hostname_buffer, sizeof(hostname_buffer), &timeout);
     if (0 > fd_client_socket) {
-        vs_log_mod_error("vsl", "Failed to connect");
+        vs_log_mod_error(__MOD__, "Failed to connect");
         _state = VSL_STATE_ERROR;
         return;
     }
-    vs_log_mod_info("vsl", "Connected to %s", hostname_buffer);
+    vs_log_mod_info(__MOD__, "Connected to %s", hostname_buffer);
     _state = VSL_STATE_WAITING;
     return;
 }
@@ -560,7 +584,7 @@ void VslInteg<T>::main_wait() {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
         vs_log_mod_info(
-            "vsl",
+            __MOD__,
             "Lost connection. Waiting for a client to (re-)connect ..."
         );
         _state = VSL_STATE_CONNECT;
@@ -573,7 +597,7 @@ void VslInteg<T>::main_wait() {
     if (msg_len >= (int) sizeof(read_buffer)) {
         read_buffer[sizeof(read_buffer) - 1] = '\0';
         vs_log_mod_warning(
-            "vsl",
+            __MOD__,
             "Received message longer than RX buffer, discarding it"
         );
         vs_msg_return(fd_client_socket, "error",
@@ -583,7 +607,7 @@ void VslInteg<T>::main_wait() {
     else {
         read_buffer[msg_len] = '\0';
     }
-    vs_log_mod_debug("vsl", "Message: %s", &read_buffer[2]);
+    vs_log_mod_debug(__MOD__, "Message: %s", &read_buffer[2]);
     if (nullptr != p_cmd) {
         cJSON_Delete(p_cmd);
     }
@@ -593,7 +617,7 @@ void VslInteg<T>::main_wait() {
         return;
     }
     vs_log_mod_warning(
-        "vsl",
+        __MOD__,
         "Received message content cannot be interpreted as a valid JSON \
 content. Discarding it."
     );
@@ -614,7 +638,7 @@ void VslInteg<T>::main_process() {
     /* Get the command field from the JSON message content */
     p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
     if (nullptr == p_item_cmd) {
-        vs_log_mod_error("vsl", "Command field invalid/not found");
+        vs_log_mod_error(__MOD__, "Command field invalid/not found");
         vs_msg_return(fd_client_socket, "error",
             "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
@@ -624,7 +648,7 @@ void VslInteg<T>::main_process() {
     /* Get the command as a string */
     c_str_cmd = cJSON_GetStringValue(p_item_cmd);
     if (nullptr == c_str_cmd) {
-        vs_log_mod_error("vsl", "Command field invalid");
+        vs_log_mod_error(__MOD__, "Command field invalid");
         vs_msg_return(fd_client_socket, "error",
             "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
@@ -633,13 +657,13 @@ void VslInteg<T>::main_process() {
 
     str_cmd = std::string(c_str_cmd);
     if (str_cmd.empty() == true) {
-        vs_log_mod_error("vsl", "Command field empty/null");
+        vs_log_mod_error(__MOD__, "Command field empty/null");
         vs_msg_return(fd_client_socket, "error",
             "Error processing command. Discarding.", &uuid);
         _state = VSL_STATE_WAITING;
         return;
     }
-    vs_log_mod_debug("vsl", "Processing command %s", str_cmd.c_str());
+    vs_log_mod_debug(__MOD__, "Processing command %s", str_cmd.c_str());
 
     /* Look up and execute command handler */
     auto search = cmd_handlers_map.find(str_cmd);
@@ -649,7 +673,7 @@ void VslInteg<T>::main_process() {
     }
 
     /* Handle case for which the command handler is not found */
-    vs_log_mod_error("vsl", "Handler for command %s not found",
+    vs_log_mod_error(__MOD__, "Handler for command %s not found",
         str_cmd.c_str());
     vs_msg_return(fd_client_socket, "error",
         "Could not find handler for command. Discarding.", &uuid);
@@ -662,10 +686,12 @@ Main finite state-machine - Simulation ongoing
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_sim() {
-    vs_log_mod_info("vsl", "Simulation ongoing");
+    vs_log_mod_info(__MOD__, "Simulation ongoing");
 
     while (!p_context->gotFinish()) {
+
         /* Evaluate model */
+        vs_log_mod_debug(__MOD__, "Evaluate model");
         eval();
 
         /* An extra evaluation of gotFinish is necessary from Verilator 5.046
@@ -681,6 +707,8 @@ void VslInteg<T>::main_sim() {
                 "Reached callback - Getting back to Verisocks main loop",
                 &uuid);
             _state = VSL_STATE_WAITING;
+            // TODO: maybe add p_trace->flush() here? We could also have flush
+            // as a command instead?
             return;
         }
 
@@ -694,10 +722,12 @@ void VslInteg<T>::main_sim() {
                     &uuid
                 );
                 _state = VSL_STATE_WAITING;
+                // TODO: maybe add p_trace->flush() here?
                 return;
             }
             vs_log_mod_warning(
-                "vsl", "Exiting without $finish; no events nor callbacks left");
+                __MOD__,
+                "Exiting without $finish; no events nor callbacks left");
             break;
         }
 
@@ -709,6 +739,7 @@ void VslInteg<T>::main_sim() {
                 "Reached callback - Getting back to Verisocks main loop",
                 &uuid);
             _state = VSL_STATE_WAITING;
+            // TODO: maybe add p_trace->flush() here?
             return;
         }
 
@@ -742,8 +773,12 @@ Wrapper simulation management functions
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::eval() {
+    //p_model->eval(); // TO BE CHECKED - mix of NBA and BA ?!
     clock_map.eval(p_context->time());
     p_model->eval();
+    //#ifdef DUMP_FILE
+    //p_trace->dump(p_context->time());
+    //#endif
 }
 
 template<typename T>
@@ -765,7 +800,7 @@ const vsl_time_t VslInteg<T>::next_event_time() const {
     }
     return p_model->nextTimeSlot();
     #else
-        return clock_map.get_next_event();
+    return clock_map.get_next_event();
     #endif
 }
 
@@ -776,14 +811,14 @@ template<typename T>
 int VslInteg<T>::register_value_callback(const char* path, const double value)
 {
     if (has_callback()) {
-        vs_log_mod_error("vsl", "Could not register new value callback as \
+        vs_log_mod_error(__MOD__, "Could not register new value callback as \
 another callback is already registered - Discarding");
         return -1;
     }
     cb_value_path = std::string(path);
     if (nullptr == get_registered_variable(cb_value_path)) {
-        vs_log_mod_error("vsl", "Could not register new value callback - Path \
-not found in registered variables - Discarding");
+        vs_log_mod_error(__MOD__, "Could not register new value callback - \
+Path not found in registered variables - Discarding");
         return -1;
     }
     cb_value = value;
@@ -795,13 +830,13 @@ template<typename T>
 int VslInteg<T>::register_time_callback(vsl_time_t time)
 {
     if (has_callback()) {
-        vs_log_mod_error("vsl", "Could not register new time callback as \
+        vs_log_mod_error(__MOD__, "Could not register new time callback as \
 another callback is already registered - Discarding");
         return -1;
     }
 
     if (time <= p_context->time()) {
-        vs_log_mod_error("vsl", "Could not register new time callback - \
+        vs_log_mod_error(__MOD__, "Could not register new time callback - \
 Time value is not in the future - Discarding");
         return -1;
     }
@@ -823,8 +858,8 @@ const bool VslInteg<T>::check_value_callback() {
                 if (p_var->get_value() == 1.0f) return true;
                 return false;
             default:
-                vs_log_mod_warning("vsl", "Value callback not supported with \
-this type of variable - Discarding");
+                vs_log_mod_warning(__MOD__, "Value callback not supported \
+with this type of variable - Discarding");
                 return false;
         }
     }
@@ -867,12 +902,14 @@ VerilatedVar* VslInteg<T>::get_var(std::string str_path) {
 
     const VerilatedScope* p_xscope = p_context->scopeFind(str_scope.c_str());
     if (nullptr == p_xscope) {
-        vs_log_mod_error("vsl", "Could not find scope %s", str_scope.c_str());
+        vs_log_mod_error(
+            __MOD__, "Could not find scope %s", str_scope.c_str());
         return nullptr;
     }
     VerilatedVar* p_xvar = p_xscope->varFind(str_var.c_str());
     if (nullptr == p_xvar) {
-        vs_log_mod_error("vsl", "Could not find variable %s", str_var.c_str());
+        vs_log_mod_error(
+            __MOD__, "Could not find variable %s", str_var.c_str());
         return nullptr;
     }
     return p_xvar;

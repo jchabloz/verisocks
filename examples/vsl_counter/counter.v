@@ -1,3 +1,4 @@
+`timescale 1us/1ns
 
 module counter #(
 	parameter integer LENGTH = 10	// Counter register length
@@ -18,13 +19,10 @@ module counter #(
 	end
 	assign count = counter;
 
-	`ifdef DUMP_FILE
-	initial
-	begin
-		$dumpfile(`DUMP_FILE);
-        $dumpvars(0, counter);
-	end
-	`endif
+    initial begin
+    $dumpfile("test.fst");
+    $dumpvars(0);
+    end
 
 endmodule
 // EOF

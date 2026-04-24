@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2022-2025 Jérémie Chabloz
+# Copyright (c) 2022-2026 Jérémie Chabloz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,9 @@
 import argparse
 import pathlib
 import yaml
-from os.path import isabs, abspath, dirname, join, relpath
+import logging
+from os.path import isabs, abspath, dirname, join, relpath, exists, curdir
+from os import mkdir
 from mako.template import Template
 
 
@@ -39,6 +41,9 @@ def render_template(template_file, output_file, **kwargs):
         output_file (str): Path to rendered output file
         kwargs: Keyword arguments required by the template
     """
+    outdir = dirname(output_file)
+    if outdir and not exists(outdir):
+        mkdir(outdir)
     tmpl = Template(filename=template_file)
     tmpl_rendered = tmpl.render_unicode(
         template_filename=relpath(template_file, cwd), **kwargs)
@@ -54,14 +59,21 @@ and a Verilator configuration file to declare public variables for using
 Verilator while integrating Verisocks. The files are generated based on Mako
 templates and a YAML configuration file.
 """)
+
     parser.add_argument('config', type=pathlib.Path,
                         help="YAML configuration file")
+    parser.add_argument('--build-dir', '-b', type=pathlib.Path,
+                        help="Build directory (default=build)")
     parser.add_argument('--templates-dir', '-t', type=pathlib.Path,
                         default=tmpl_path,
                         help="Templates directory if alternative \
 templates shall be used")
+    parser.add_argument('--makefile-top', type=pathlib.Path,
+                        default="Makefile",
+                        help="Rendered top makefile name (default: Makefile)")
     parser.add_argument('--makefile', type=pathlib.Path, default="Makefile",
-                        help="Rendered makefile name (default: Makefile)")
+                        help="Rendered makefile name in BUILD_DIR \
+(default: Makefile)")
     parser.add_argument('--testbench-file', type=pathlib.Path,
                         default="test_main.cpp",
                         help="Rendered C++ testbench file (default: \
@@ -71,15 +83,33 @@ test_main.cpp)")
                         help="Rendered Verilator configuration file for \
 public variables (default:variables.vlt)")
     parser.add_argument('--makefile-only', action='store_true',
-                        help="Render makefile only (unless any other *-only \
-option is being used)")
+                        help="Render makefile(s) only (unless any other \
+*-only option is being used)")
     parser.add_argument('--tb-only', action='store_true',
                         help="Render tesbench file only (unless any other \
 *-only option is being used)")
     parser.add_argument('--vlt-only', action='store_true',
                         help="Render variables file only (unless any other \
 *-only option is being used)")
+    parser.add_argument(
+        '--log-level', type=str,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Logging level (default: INFO)"
+    )
+
+    # Parse arguments
     args = parser.parse_args()
+
+    # Configure logging
+    if args.log_level:
+        numeric_level = getattr(logging, args.log_level.upper(), None)
+        if not isinstance(numeric_level, int):
+            raise ValueError(f'Invalid log level: {args.log_level}')
+        logging.basicConfig(
+            format='[%(levelname)s][%(module)s] %(message)s',
+            level=numeric_level
+        )
 
     render_makefile = args.makefile_only or (
         not args.tb_only and not args.vlt_only)
@@ -89,55 +119,119 @@ option is being used)")
         not args.makefile_only and not args.tb_only)
 
     # Format paths to templates relative to this file
+    template_top_mk = join(args.templates_dir, "Makefile_top.mako")
     template_mk = join(args.templates_dir, "Makefile.mako")
     template_cpp = join(args.templates_dir, "test_main.cpp.mako")
     template_vlt = join(args.templates_dir, "variables.vlt.mako")
 
-    # Load JSON configuration file
+    # Load YAML configuration file
+    logging.info(f"Loading configuration file {args.config}")
     with open(args.config, 'r') as f:
         cfg = yaml.safe_load(f)
 
-    # Format relative paths in config file
-    def format_path(x):
+    # Default values for optional arguments
+    for k in ['exec_version', 'exec_doc', 'bug_address']:
+        if not (k in cfg['config']):
+            cfg['config'][k] = None
+    if ('use_tracing' not in cfg['config']):
+        cfg['config']['use_tracing'] = False
+    if 'verilog_inc_dirs' not in cfg['config']:
+        cfg['config']['verilog_inc_dirs'] = []
+    if 'verilator_arg_files' not in cfg['config']:
+        cfg['config']['verilator_arg_files'] = []
+
+    # Format all relative paths in config file to be related to the config file
+    # position itself
+    def format_path(x, start=None):
         if isabs(x):
             return x
-        return abspath(join(dirname(args.config), x))
-    for k in ["verisocks_root", "verilator_root", "verilator_path"]:
-        format_path(cfg['config'][k])
+        return relpath(abspath(join(dirname(args.config), x)), start)
+
+    def format_config_paths(k):
+        if k in cfg['config']:
+            if isinstance(cfg['config'][k], list):
+                cfg['config'][k] = [format_path(x) for x in cfg['config'][k]]
+            else:
+                cfg['config'][k] = format_path(cfg['config'][k])
+
+    format_config_paths("verilog_src_files")
+    format_config_paths("verilog_inc_dirs")
+    format_config_paths("verilator_arg_files")
+    format_config_paths("cpp_src_files")
+    format_config_paths("verisocks_root")
+    format_config_paths("verilator_path")
+    format_config_paths("verilator_root")
+
+    # Build directory - Priorization
+    # - Build directory provided as wizard argument overrides one defined in
+    #   the configuration YAML file
+    # - If undefined, default is "."
+    if args.build_dir:
+        logging.info(
+            f"Build directory: {args.build_dir} (defined in arguments)")
+        build_dir = str(args.build_dir)
+        if 'build_dir' in cfg['config']:
+            del cfg['config']['build_dir']
+    elif 'build_dir' in cfg['config']:
+        build_dir = format_path(cfg['config']['build_dir'])
+        logging.info(
+            f"Build directory: {build_dir} (defined in {args.config})")
+        del cfg['config']['build_dir']
+    else:
+        build_dir = "."
+        logging.info(f"Build directory: {build_dir} (default)")
 
     # Add C++ top testbench file at the front of C++ sources list
     if 'cpp_src_files' not in cfg['config']:
-        cfg['config']['cpp_src_files'] = []
-    cfg['config']['cpp_src_files'] = (
-        [str(args.testbench_file)] + cfg['config']['cpp_src_files'])
+        cfg['config']['cpp_src_files'] = None
 
-    # Add verilator configuration file for public variables at the front of the
-    # Verilog sources list
+    # Rendered files paths
+    makefile = join(build_dir, args.makefile)
+    tb_file = join(build_dir, str(args.testbench_file))
+    top_mk_file = str(args.makefile_top)
+    config_file = str(args.config)
+
     if 'variables' in cfg:
-        cfg['config']['verilog_src_files'] = (
-            [str(args.variables_file)] + cfg['config']['verilog_src_files'])
+        vlt_file = join(build_dir, str(args.variables_file))
+    else:
+        vlt_file = None
 
+    # Render Makefile(s)
     if render_makefile:
-        if 'variables' in cfg:
-            vlt_file = str(args.variables_file)
-        else:
-            vlt_file = None
-        render_template(template_mk, args.makefile,
-                        target_file=str(args.makefile),
-                        config_file=str(args.config),
-                        tb_file=str(args.testbench_file),
-                        vlt_file=vlt_file,
+        if (relpath(build_dir) != curdir):
+            if not exists(top_mk_file):
+                render_template(template_top_mk,
+                                top_mk_file,
+                                build_dir=build_dir)
+                logging.info(f"Rendered {top_mk_file}")
+            else:
+                logging.warning(
+                    f"Makefile {top_mk_file} already exists! \
+It shall not be overwritten")
+        render_template(template_mk, makefile,
+                        target_file=makefile,
+                        config_file=config_file,
+                        tb_file=relpath(tb_file, build_dir),
+                        vlt_file=relpath(vlt_file, build_dir),
+                        build_dir=build_dir,
                         **cfg['config'])
+        logging.info(f"Rendered {makefile}")
+
+    # Render testbench main file
     if render_tb:
         if 'variables' in cfg:
-            render_template(template_cpp, args.testbench_file,
+            render_template(template_cpp, tb_file,
                             **cfg['config'], variables=cfg['variables'])
         else:
-            render_template(template_cpp, args.testbench_file,
+            render_template(template_cpp, tb_file,
                             **cfg['config'], variables=None)
+        logging.info(f"Rendered {tb_file}")
+
+    # Render variables configuration file
     if render_vlt and ('variables' in cfg):
-        render_template(template_vlt, args.variables_file,
+        render_template(template_vlt, vlt_file,
                         variables=cfg['variables'])
+        logging.info(f"Rendered {vlt_file}")
 
 
 if __name__ == "__main__":

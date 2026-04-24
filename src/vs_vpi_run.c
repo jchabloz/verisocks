@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2024 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,9 @@ SOFTWARE.
 #include "vs_utils.h"
 #include "vs_vpi.h"
 
+#undef __MOD__
+#define __MOD__ "vs_vpi_run"
+
 
 /* Declare prototypes for command handler functions so that they can be used
  * in the following command tables. Commands are implemented at the end of this
@@ -68,32 +71,11 @@ VS_VPI_CMD_HANDLER(run_for_time)
     s_vpi_time cb_time;
     s_cb_data cb_data;
     vpiHandle h_cb;
-    cJSON *p_item_time;
-    cJSON *p_item_unit;
-    char *str_time_unit;
-    double time_value;
 
     /* Get the time field from the JSON message content */
-    p_item_time = cJSON_GetObjectItem(p_data->p_cmd, "time");
-    if (NULL == p_item_time) {
-        vs_vpi_log_error("Command field \"time\" invalid/not found");
-        goto error;
-    }
-    time_value = cJSON_GetNumberValue(p_item_time);
-    if (time_value <= 0.0) {
-        vs_vpi_log_error("Command field \"time\" <= 0.0");
-        goto error;
-    }
-    p_item_unit = cJSON_GetObjectItem(p_data->p_cmd, "time_unit");
-    if (NULL == p_item_unit) {
-        vs_vpi_log_error("Command field \"time_unit\" invalid/not found");
-        goto error;
-    }
-    str_time_unit = cJSON_GetStringValue(p_item_unit);
-    if ((NULL == str_time_unit) || (strcmp(str_time_unit, "") == 0)) {
-        vs_vpi_log_error("Command field \"time_unit\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_NUM(p_data->p_cmd, time);
+    VS_MSG_READ_STR(p_data->p_cmd, time_unit);
+
     vs_vpi_log_info("Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, str_time_unit);
 
@@ -112,8 +94,11 @@ VS_VPI_CMD_HANDLER(run_for_time)
         vs_vpi_log_error("Could not register callback");
         goto error;
     }
-    vpi_free_object(h_cb);
-    p_data->h_cb = NULL;
+    p_data->h_cb = h_cb;
+
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -124,42 +109,21 @@ VS_VPI_CMD_HANDLER(run_for_time)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_log_warning(
         "Error processing command run(for_time) - Discarding");
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command run - Discarding");
     return -1;
 }
 
 VS_VPI_CMD_HANDLER(run_until_time)
 {
-    cJSON *p_item_time;
     s_vpi_time cb_time;
-    double time_value;
-    cJSON *p_item_unit;
-    char *str_time_unit;
     s_vpi_time s_time;
     double time_sim;
     s_cb_data cb_data;
     vpiHandle h_cb;
 
-    /* Get the time field from the JSON message content */
-    p_item_time = cJSON_GetObjectItem(p_data->p_cmd, "time");
-    if (NULL == p_item_time) {
-        vs_vpi_log_error("Command field \"time\" invalid/not found");
-        goto error;
-    }
-    time_value = cJSON_GetNumberValue(p_item_time);
-    p_item_unit = cJSON_GetObjectItem(p_data->p_cmd, "time_unit");
-    if (NULL == p_item_unit) {
-        vs_vpi_log_error("Command field \"time_unit\" invalid/not found");
-        goto error;
-    }
-    str_time_unit = cJSON_GetStringValue(p_item_unit);
-    if ((NULL == str_time_unit) || (strcmp(str_time_unit, "") == 0)) {
-        vs_vpi_log_error("Command field \"time_unit\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_NUM(p_data->p_cmd, time);
+    VS_MSG_READ_STR(p_data->p_cmd, time_unit);
 
     vs_vpi_log_info(
         "Command \"run(cb=until_time, time=%f %s)\" received.",
@@ -189,8 +153,11 @@ VS_VPI_CMD_HANDLER(run_until_time)
         vs_vpi_log_error("Could not register callback");
         goto error;
     }
-    vpi_free_object(h_cb);
-    p_data->h_cb = NULL;
+    p_data->h_cb = h_cb;
+
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
@@ -201,20 +168,15 @@ VS_VPI_CMD_HANDLER(run_until_time)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_log_warning(
         "Error processing command run(until_time) - Discarding");
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command run - Discarding");
     return -1;
 }
 
 VS_VPI_CMD_HANDLER(run_until_change)
 {
-    cJSON *p_item_path;
-    char *str_path;
     vpiHandle h_obj;
     double value = NAN;
-    cJSON *p_item_val;
     PLI_INT32 format;
     s_vpi_value target_value;
     s_vpi_value cb_value;
@@ -223,16 +185,7 @@ VS_VPI_CMD_HANDLER(run_until_change)
     vpiHandle h_cb;
 
     /* Get the object path from the JSON message content */
-    p_item_path = cJSON_GetObjectItem(p_data->p_cmd, "path");
-    if (NULL == p_item_path) {
-        vs_vpi_log_error("Command field \"path\" invalid/not found");
-        goto error;
-    }
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((NULL == str_path) || (strcmp(str_path, "") == 0)) {
-        vs_vpi_log_error("Command field \"path\" NULL or empty");
-        goto error;
-    }
+    VS_MSG_READ_STR(p_data->p_cmd, path);
 
     /* Attempt to get the object handle */
     h_obj = vpi_handle_by_name(str_path, NULL);
@@ -243,16 +196,7 @@ VS_VPI_CMD_HANDLER(run_until_change)
 
     if (vpi_get(vpiType, h_obj) != vpiNamedEvent) {
         /* Get the value from the JSON message content */
-        p_item_val = cJSON_GetObjectItem(p_data->p_cmd, "value");
-        if (NULL == p_item_val) {
-            vs_vpi_log_error("Command field \"value\" invalid/not found");
-            goto error;
-        }
-        value = cJSON_GetNumberValue(p_item_val);
-        if (isnan(value)) {
-            vs_vpi_log_error("Command field \"value\" invalid (NaN)");
-            goto error;
-        }
+        VS_MSG_READ_NUM_NO_DECL(p_data->p_cmd, value, value);
         vs_vpi_log_info(
             "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
             str_path, value);
@@ -299,6 +243,10 @@ VS_VPI_CMD_HANDLER(run_until_change)
     }
     p_data->h_cb = h_cb;
 
+    #ifdef ENABLE_ITX_POLLING
+    verisocks_register_cb_poll(p_data);
+    #endif
+
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;
     return 0;
@@ -308,10 +256,8 @@ VS_VPI_CMD_HANDLER(run_until_change)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_log_warning(
         "Error processing command run(until_change) - Discarding");
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command run - Discarding");
     return -1;
 }
 
@@ -349,9 +295,7 @@ VS_VPI_CMD_HANDLER(run_to_next)
     p_data->state = VS_VPI_STATE_WAITING;
     vs_vpi_log_warning(
         "Error processing command run(to_next) - Discarding");
-    vs_vpi_return(p_data->fd_client_socket, "error",
-        "Error processing command run - Discarding",
-        &(p_data->uuid)
-    );
+    VS_VPI_RETURN(p_data, "error",
+        "Error processing command run - Discarding");
     return -1;
 }

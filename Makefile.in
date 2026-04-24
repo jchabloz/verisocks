@@ -17,9 +17,19 @@ CFLAGS += -fPIC
 CFLAGS += -Wall
 CFLAGS += -Wextra -Wpedantic
 CFLAGS += $(addprefix -I,$(INCDIRS))
-CFLAGS += -DVS_LOG_LEVEL=30
-CFLAGS += -DVS_VPI_LOG_LEVEL=20
 LDFLAGS += $(addprefix -L,$(LIBDIRS)) -shared
+
+# Configure logging levels
+LOG_DEBUG    = 10
+LOG_INFO     = 20
+LOG_WARNING  = 30
+LOG_ERROR    = 40
+LOG_CRITICAL = 50
+CFLAGS += -DVS_LOG_LEVEL=$(LOG_INFO)
+CFLAGS += -DVS_VPI_LOG_LEVEL=$(LOG_INFO)
+
+# Optional features
+CFLAGS += -DENABLE_ITX_POLLING
 
 VPATH = $(SRCDIR)/src
 
@@ -45,7 +55,7 @@ $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(BUILDDIR)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
-.PHONY: clean all docs
+.PHONY: clean all docs clean-docs
 
 docs:
 	$(MAKE) -C $(DOCSDIR) html
@@ -54,3 +64,6 @@ docs:
 clean:
 	-$(RM) $(OBJS)
 	-$(RM) $(LIBVPI)
+
+clean-docs:
+	$(MAKE) -C $(DOCSDIR) clean

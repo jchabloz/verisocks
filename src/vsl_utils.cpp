@@ -4,7 +4,7 @@
 @brief Utilities for Verisocks Verilator integration
 ******************************************************************************/
 /*
-Copyright (c) 2024-2025 Jérémie Chabloz
+Copyright (c) 2024-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,9 @@ SOFTWARE.
 #include <map>
 #include <string>
 #include <regex>
+
+#undef __MOD__
+#define __MOD__ "vsl_utils"
 
 namespace vsl{
 
@@ -72,11 +75,11 @@ uint64_t double_to_time(double time_value, const char* time_unit,
                       VerilatedContext* p_context)
 {
     if (time_value <= 0.0f) {
-        vs_log_mod_warning("vsl_utils", "Time value nul or negative");
+        vs_log_mod_warning(__MOD__, "Time value nul or negative");
         return 0u;
     }
-    vs_log_mod_debug("vsl_utils", "Time value: %f", time_value);
-    vs_log_mod_debug("vsl_utils", "Time unit: %s", time_unit);
+    vs_log_mod_debug(__MOD__, "Time value: %f", time_value);
+    vs_log_mod_debug(__MOD__, "Time unit: %s", time_unit);
     double time_precision = static_cast<double>(p_context->timeprecision());
     double time_factor = static_cast<double>(get_time_factor(time_unit));
     time_value *= std::pow(10.0, time_factor - time_precision);

@@ -4,13 +4,13 @@
  support without VA_OPT
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2022-2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2022-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
  ******************************************************************************/
 /*
 MIT License
 
-Copyright (c) 2022-2025 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,10 @@ SOFTWARE.
 
 #ifndef VS_LOGGING_NO_VA_H
 #define VS_LOGGING_NO_VA_H
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
 
 #include <stdio.h>
 

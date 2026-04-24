@@ -35,10 +35,11 @@ such that the wizard script can simply be evoked as follows:
 
 .. code:: text
 
-    usage: vsl-wizard [-h] [--templates-dir TEMPLATES_DIR]
+    usage: vsl-wizard [-h] [--build-dir BUILD_DIR]
+        [--templates-dir TEMPLATES_DIR] [--makefile-top MAKEFILE_TOP]
         [--makefile MAKEFILE] [--testbench-file TESTBENCH_FILE]
         [--variables-file VARIABLES_FILE] [--makefile-only] [--tb-only]
-        [--vlt-only] config
+        [--vlt-only] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] config
 
 .. program:: vsl-wizard
 
@@ -47,8 +48,19 @@ such that the wizard script can simply be evoked as follows:
     Path to YAML configuration file
 
 The content and structure of the YAML configuration file shall be as described
-below. Unless specifically mentioned, all fields are mandatory. Entries which
-are paths can be relative to the configuration file location.
+below.
+
+.. important::
+
+    All items in the configuration files which are not specifically indicated
+    as *optional* in the description above are mandatory! For items indicated
+    as ``(optional, ***)``, the ``***`` stands for the equivalent value or
+    equivalent behavior if the item is not defined.
+
+.. note::
+
+    All relative paths defined in the configuration file are considered to be
+    relative to the location of the configuration file itself.
 
 .. code-block:: yaml
 
@@ -57,52 +69,70 @@ are paths can be relative to the configuration file location.
                                 # become the name of the executable)
       top: <text>               # Name of top module
       verilog_src_files:        # List of Verilog source files
-      - <path>
-      # ...
+      - <path>                  #
+      verilog_inc_dirs:         # (optional) List of Verilog include paths
+      - <path>                  # (to be processed with -I option by verilator)
+      verilator_arg_files:      # (optional) List of Verilator arguments files
+      - <path>                  # (to be processed with -F option by verilator)
       cpp_src_files:            # (optional) List of C++ extra files
-      - <path>
-      # ...
+      - <path>                  #
       verisocks_root: <path>    # Path to Verisocks root directory
       verilator_path: <path>    # Path to the verilator binary
       verilator_root: <path>    # Path to Verilator root
-      use_tracing: <bool>       # If true, tracing is enabled
-      use_fst: <bool>           # (optional if use_tracing is false) If true,
-                                # the FST format is used for the traces file
-      use_timing: <bool>        # (optional) If true (default), the sources are
-                                # verilated with the timing option
-      log_level: <text>         # (optional) Logging level
+      build_dir: <path>         # (optional, .) Build directory. Default is the
+                                # current working directory. This value can be
+                                # overriden by the --build-dir command line
+                                # option
+      use_tracing: <bool>       # (optional, false) Enable tracing if true.
+      use_fst: <bool>           # (optional, true) Use FST format for the traces file
+      use_timing: <bool>        # (optional, true) If true, the sources are
+                                #  verilated with the timing option
+      log_level: <text>         # (optional, info) Logging level
                                 # [info, debug, warning, error, critical]
+      exec_version: <text>      # (optional) Version of generated executable
+      exec_doc: <text>          # (optional) Doc for generated executable help
+      bug_address: <text>       # (optional) Address for bugs for generated
+                                #  executable help
     variables:                  # (optional) Public variables
       clocks:                   # (optional) List of clock variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Clock path
+        name: <text>            # (optional, path) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
         period: <number>        # Clock period
         unit: <text>            # Time unit used for clock period [fs, ps, ns, us, ms, s]
-        duty_cycle: <number>    # Clock duty cycle, in ]0,1[
-      # ...
+        duty_cycle: <number>    # (optional, 0.5) Clock duty cycle, in ]0,1[
+        enable: <bool>          # (optional, false) Clock is enabled
       scalars:                  # (optional) List of scalar variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Variable path
+        name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
-        width: <number>         # Width of the variable
-      # ...
+        type: <text>            # Variable type [int (integral type), real]
+        width: <number>         # Width of the variable (optional if type: real)
       arrays:                   # (optional) List of array variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Variable path
+        name: <text>            # (optional, path) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
+        type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
         depth: <number>         # Depth of the array
-      # ...
       params:                   # (optional) List of parameter variables
-      - path: <text>            # Name/alias to be used for the variable
+      - path: <text>            # Parameter path
+        name: <text>            # (optional, path) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [uint8, uint16, uint32, uint64, real]
+        type: <text>            # Variable type [int (integral type), real]
         width: <number>         # Width of the variable
-      # ...
       events:                   # (optional) List of events
-      - path: <text>            # Name/alias to be used for the event
+      - path: <text>            # Event path
+        name: <text>            # (optional, path) Name/alias to be used for the event
         module: <text>          # Name of the module in which is the event
-      # ...
+
+.. attention::
+
+    From version 1.6.0, the ``type`` argument for variables in the YAML
+    configuration file needs only to be defined as either *integral* (``int``)
+    or *real* (``real``). The previous values ``uint8``, ``uint16``, ``uint32``
+    and ``uint64`` are still supported but should be considered as deprecated.
+
 
 Optional arguments
 ------------------
@@ -111,27 +141,47 @@ Optional arguments
 
     Displays help content
 
+.. option:: --build-dir <BUILD_DIR>, -b <BUILD_DIR>
+
+    Path to build directory (default: path provided in the config YAML file or
+    current directory if not defined). If a different folder than the current
+    working directory is defined, a folder <BUILD_DIR> is created with a
+    Makefile <MAKEFILE> inside. Another "top-level" Makefile <MAKEFILE_TOP> is
+    created in the current directory that will launch the one in the <BUILD_DIR>
+    folder. This option can be typically useful to help avoid having a clutter
+    of built object files in the current working directory, or to allow having
+    different build directories for different config YAML files.
+
 .. option:: --templates-dir <TEMPLATES_DIR>, -t <TEMPLATES_DIR>
 
     Path to templates directory if alternatives templates shall be used instead
     of the default ones
 
+.. option:: --makefile-top <MAKEFILE_TOP>
+
+    Rendered "top-level" makefile name (default: :code:`Makefile`). See
+    description for ``--build-dir`` option.
+
 .. option:: --makefile <MAKEFILE>
 
-    Rendered makefile name (default: :code:`Makefile`)
+    Rendered makefile name (default: :code:`Makefile`). This file will be
+    rendered in <BUILD_DIR>.
 
 .. option:: --testbench-file <TESTBENCH_FILE>
 
-    Rendered C++ testbench file (default: :code:`test_main.cpp`)
+    Rendered C++ testbench file (default: :code:`test_main.cpp`). This file
+    will be rendered in <BUILD_DIR>.
 
 .. option:: --variables-file <VARIABLES_FILE>
 
     Rendered Verilator configuration file for public variables (default:
-    :code:`variables.vlt`)
+    :code:`variables.vlt`). This file will be rendered in <BUILD_DIR>.
 
 .. option:: --makefile-only
 
-    Render makefile only (unless any other \*-only option is being used)
+    Render makefile only (unless any other \*-only option is being used).
+    Depending on the configuration, both <MAKEFILE> and <MAKEFILE_TOP> shall be
+    rendered.
 
 .. option:: --tb-only
 

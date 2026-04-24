@@ -6,7 +6,7 @@
  This header defines template implementations for handling various "run"
  commands in the vsl::VslInteg class template.
 
-Main handlers:
+ Main handlers:
    - VSL_CMD_HANDLER(run): Dispatches sub-commands based on the "cb" field in
      the JSON message.
    - VSL_CMD_HANDLER(run_for_time): Runs the simulation for a specified time
@@ -24,11 +24,11 @@ Main handlers:
  command arguments.
 
  @author Jérémie Chabloz
- @copyright Copyright (c) 2024-2025 Jérémie Chabloz Distributed under the MIT
+ @copyright Copyright (c) 2024-2026 Jérémie Chabloz Distributed under the MIT
  License. See file for details.
 *******************************************************************************/
 /*
-Copyright (c) 2024-2025 Jérémie Chabloz
+Copyright (c) 2024-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -61,6 +61,9 @@ SOFTWARE.
 
 #include <string>
 
+#undef __MOD__
+#define __MOD__ "vsl"
+
 namespace vsl{
 
 /******************************************************************************
@@ -70,27 +73,10 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(run) {
 
     /* Error handler lambda function */
-    auto handle_error = [&]() {
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run - Discarding", &vx.uuid);
-        vx._state = VSL_STATE_WAITING;
-    };
+    VSL_ERROR_HANDLER(vx, "Error processing command run - Discarding");
 
     /* Get the callback field from the JSON message content */
-    cJSON *p_item_cb = cJSON_GetObjectItem(vx.p_cmd, "cb");
-    if (nullptr == p_item_cb) {
-        vs_log_mod_error("vsl", "Command field \"cb\" invalid/not found");
-        handle_error();
-        return;
-    }
-
-    /* Get the run command argument cb as a string */
-    char* cstr_cb = cJSON_GetStringValue(p_item_cb);
-    if ((nullptr == cstr_cb) || std::string(cstr_cb).empty()) {
-        vs_log_mod_error("vsl", "Command field \"cb\" NULL or empty");
-        handle_error();
-        return;
-    }
+    VSL_MSG_READ_STR(vx.p_cmd, cb);
 
     /* Look up and execute sub-command handler */
     std::string cb_key = "run_";
@@ -102,7 +88,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(run) {
     }
 
     /* Error case - sub-command handler function not found */
-    vs_log_mod_error("vsl", "Handler for sub-command %s not found",
+    vs_log_mod_error(__MOD__, "Handler for sub-command %s not found",
         cb_key.c_str());
     vs_msg_return(vx.fd_client_socket, "error",
         "Could not find handler for sub-command. Discarding.", &vx.uuid);
@@ -116,61 +102,41 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
     /* Error handler lambda function */
     auto handle_error = [&]() {
         vs_log_mod_warning(
-            "vsl", "Error processing command run(for_time) - Discarding");
+            __MOD__, "Error processing command run(for_time) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
             "Error processing command run(for time) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
     /* Get the time field from the JSON message content */
-    cJSON* p_item_time;
-    p_item_time = cJSON_GetObjectItem(vx.p_cmd, "time");
-    if (nullptr == p_item_time) {
-        vs_log_mod_error("vsl", "Command field \"time\" invalid/not found");
-        handle_error();
-        return;
-    }
     double time_value;
-    time_value = cJSON_GetNumberValue(p_item_time);
+    VSL_MSG_READ_NUM_NO_DECL(vx.p_cmd, time, time_value);
     if (time_value <= 0.0) {
-        vs_log_mod_error("vsl", "Command field \"time\" <= 0.0");
+        vs_log_mod_error(__MOD__, "Command field \"time\" <= 0.0");
         handle_error();
         return;
     }
 
-    cJSON* p_item_unit;
-    p_item_unit = cJSON_GetObjectItem(vx.p_cmd, "time_unit");
-    if (nullptr == p_item_unit) {
+    VSL_MSG_READ_STR(vx.p_cmd, time_unit);
+    if (!check_time_unit(str_time_unit)) {
         vs_log_mod_error(
-            "vsl", "Command field \"time_unit\" invalid/not found");
-        handle_error();
-        return;
-    }
-    char* str_time_unit;
-    str_time_unit = cJSON_GetStringValue(p_item_unit);
-    if ((nullptr == str_time_unit) || std::string(str_time_unit).empty()) {
-        vs_log_mod_error("vsl", "Command field \"time_unit\" NULL or empty");
-        handle_error();
-        return;
-    }
-    if (!check_time_unit(std::string(str_time_unit))) {
-        vs_log_mod_error("vsl", "Wrong time unit identifier: %s", str_time_unit);
+            __MOD__, "Wrong time unit identifier: %s", cstr_time_unit);
         handle_error();
         return;
     }
     vs_log_mod_info(
-        "vsl", "Command \"run(cb=for_time, time=%f %s)\" received.",
-        time_value, str_time_unit);
+        __MOD__, "Command \"run(cb=for_time, time=%f %s)\" received.",
+        time_value, cstr_time_unit);
 
     if (time_value <= 0.0f) {
-        vs_log_mod_error("vsl", "Invalid time value %f", time_value);
+        vs_log_mod_error(__MOD__, "Invalid time value %f", time_value);
         handle_error();
         return;
     }
 
     /* Register callback */
     uint64_t cb_time;
-    cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
+    cb_time = double_to_time(time_value, cstr_time_unit, vx.p_context);
     cb_time += vx.p_context->time();
     if (0 > vx.register_time_callback(cb_time)) {
         handle_error();
@@ -188,13 +154,13 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_to_next) {
     /* Error handler lambda function */
     auto handle_error = [&]() {
         vs_log_mod_warning(
-            "vsl", "Error processing command run(to_next) - Discarding");
+            __MOD__, "Error processing command run(to_next) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
             "Error processing command run(to_next) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
-    vs_log_mod_info("vsl", "Command \"run(cb=to_next)\" received.");
+    vs_log_mod_info(__MOD__, "Command \"run(cb=to_next)\" received.");
 
     /* Evaluate model */
     vx.eval();
@@ -224,55 +190,35 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_time) {
     /* Error handler lambda function */
     auto handle_error = [&]() {
         vs_log_mod_warning(
-            "vsl", "Error processing command run(until_time) - Discarding");
+            __MOD__, "Error processing command run(until_time) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
             "Error processing command run(until_time) - Discarding", &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
     /* Get the time field from the JSON message content */
-    cJSON* p_item_time;
-    p_item_time = cJSON_GetObjectItem(vx.p_cmd, "time");
-    if (nullptr == p_item_time) {
-        vs_log_mod_error("vsl", "Command field \"time\" invalid/not found");
-        handle_error();
-        return;
-    }
     double time_value;
-    time_value = cJSON_GetNumberValue(p_item_time);
+    VSL_MSG_READ_NUM_NO_DECL(vx.p_cmd, time, time_value);
     if (time_value <= 0.0) {
-        vs_log_mod_error("vsl", "Command field \"time\" <= 0.0");
+        vs_log_mod_error(__MOD__, "Command field \"time\" <= 0.0");
         handle_error();
         return;
     }
 
     /* Get the time unit field from the JSON message content */
-    cJSON* p_item_unit;
-    p_item_unit = cJSON_GetObjectItem(vx.p_cmd, "time_unit");
-    if (nullptr == p_item_unit) {
+    VSL_MSG_READ_STR(vx.p_cmd, time_unit);
+    if (!check_time_unit(str_time_unit)) {
         vs_log_mod_error(
-            "vsl", "Command field \"time_unit\" invalid/not found");
-        handle_error();
-        return;
-    }
-    char* str_time_unit;
-    str_time_unit = cJSON_GetStringValue(p_item_unit);
-    if ((nullptr == str_time_unit) || std::string(str_time_unit).empty()) {
-        vs_log_mod_error("vsl", "Command field \"time_unit\" NULL or empty");
-        handle_error();
-        return;
-    }
-    if (!check_time_unit(std::string(str_time_unit))) {
-        vs_log_mod_error("vsl", "Wrong time unit identifier: %s", str_time_unit);
+            __MOD__, "Wrong time unit identifier: %s", cstr_time_unit);
         handle_error();
         return;
     }
     vs_log_mod_info(
-        "vsl", "Command \"run(cb=until_time, time=%f %s)\" received.",
-        time_value, str_time_unit);
+        __MOD__, "Command \"run(cb=until_time, time=%f %s)\" received.",
+        time_value, cstr_time_unit);
 
     uint64_t cb_time;
-    cb_time = double_to_time(time_value, str_time_unit, vx.p_context);
+    cb_time = double_to_time(time_value, cstr_time_unit, vx.p_context);
     if (0 > vx.register_time_callback(cb_time)) {
         handle_error();
         return;
@@ -289,32 +235,20 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     /* Error handler lambda function */
     auto handle_error = [&]() {
         vs_log_mod_warning(
-            "vsl", "Error processing command run(until_change) - Discarding");
+            __MOD__, "Error processing command run(until_change) - Discarding");
         vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command run(until_change) - Discarding", &vx.uuid);
+            "Error processing command run(until_change) - Discarding",
+            &vx.uuid);
         vx._state = VSL_STATE_WAITING;
     };
 
     /* Get the object path from the JSON message content */
-    cJSON* p_item_path;
-    p_item_path = cJSON_GetObjectItem(vx.p_cmd, "path");
-    if (nullptr == p_item_path) {
-        vs_log_mod_error("vsl", "Command field \"path\" invalid/not found");
-        handle_error();
-        return;
-    }
-    char* str_path;
-    str_path = cJSON_GetStringValue(p_item_path);
-    if ((nullptr == str_path) || std::string(str_path).empty()) {
-        vs_log_mod_error("vsl", "Command field \"path\" NULL or empty");
-        handle_error();
-        return;
-    }
+    VSL_MSG_READ_STR(vx.p_cmd, path);
 
     /* Check if the path corresponds to a valid, registered variable */
-    VslVar* p_var = vx.get_registered_variable(std::string(str_path));
+    VslVar* p_var = vx.get_registered_variable(str_path);
     if (nullptr == p_var) {
-        vs_log_mod_error("vsl", "Could not access to variable %s", str_path);
+        vs_log_mod_error(__MOD__, "Could not access to variable %s", cstr_path);
         handle_error();
         return;
     }
@@ -325,32 +259,32 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     if (p_var->get_type() == VSL_TYPE_SCALAR) {
         p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
         if (nullptr == p_item_val) {
-            vs_log_mod_error("vsl",
+            vs_log_mod_error(__MOD__,
                 "Command field \"value\" invalid/not found");
             handle_error();
             return;
         }
         value = cJSON_GetNumberValue(p_item_val);
         if (std::isnan(value)) {
-            vs_log_mod_error("vsl", "Command field \"value\" invalid (NaN)");
+            vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
             handle_error();
             return;
         }
-        vs_log_mod_info("vsl",
+        vs_log_mod_info(__MOD__,
             "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
-            str_path, value);
+            cstr_path, value);
     } else if (p_var->get_type() == VSL_TYPE_EVENT) {
         value = 1.0f;
-        vs_log_mod_info("vsl",
-            "Command \"run(cb=until_change, path=%s)\" received.", str_path);
+        vs_log_mod_info(__MOD__,
+            "Command \"run(cb=until_change, path=%s)\" received.", cstr_path);
     } else {
-        vs_log_mod_error("vsl", "Variable type not supported for callback");
+        vs_log_mod_error(__MOD__, "Variable type not supported for callback");
         handle_error();
         return;
     }
 
     /* Register callback */
-    if (0 > vx.register_value_callback(str_path, value)) {
+    if (0 > vx.register_value_callback(cstr_path, value)) {
         handle_error();
         return;
     }
