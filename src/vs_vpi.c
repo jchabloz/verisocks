@@ -160,8 +160,8 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 
     VS_MSG_ADD_STR(p_msg, "type", str_type);
     VS_MSG_ADD_STR(p_msg, "value", str_value);
-    VS_MSG_ADD_NUM(p_msg, "time", time);
-    VS_MSG_ADD_STR(p_msg, "time_unit", time_unit);
+    VS_MSG_ADD_NUM(p_msg, "sim_time", time);
+    VS_MSG_ADD_STR(p_msg, "sim_time_unit", time_unit);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {

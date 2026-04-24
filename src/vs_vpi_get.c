@@ -93,6 +93,8 @@ VS_VPI_CMD_HANDLER(get_sim_info)
     VS_MSG_ADD_STR(p_msg, "time_precision",
         vs_utils_get_time_unit(time_precision));
 
+    VS_MSG_ADD_TIMESTAMP(p_msg, p_data);
+
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
         vs_log_mod_error("vs_vpi", "NULL pointer");
@@ -133,6 +135,8 @@ VS_VPI_CMD_HANDLER(get_sim_time)
     /* Get simulation time in seconds */
     sim_time_sec = vs_utils_get_sim_time_sec();
     VS_MSG_ADD_NUM(p_msg, "time", sim_time_sec);
+
+    VS_MSG_ADD_TIMESTAMP(p_msg, p_data);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
@@ -225,6 +229,8 @@ VS_VPI_CMD_HANDLER(get_value)
         }
     }
 
+    VS_MSG_ADD_TIMESTAMP(p_msg, p_data);
+
     /* Create message */
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
@@ -273,6 +279,8 @@ VS_VPI_CMD_HANDLER(get_type)
         goto error;
     }
     VS_MSG_ADD_NUM(p_msg, "vpi_type", vpi_get(vpiType, h_obj));
+
+    VS_MSG_ADD_TIMESTAMP(p_msg, p_data);
 
     str_msg = vs_msg_create_message(p_msg, &msg_info);
     if (NULL == str_msg) {
