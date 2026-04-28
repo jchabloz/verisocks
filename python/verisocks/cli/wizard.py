@@ -24,8 +24,9 @@ import argparse
 import pathlib
 import yaml
 import logging
+import re
 from os.path import isabs, abspath, dirname, join, relpath, exists, curdir
-from os import mkdir
+from os import mkdir, environ
 from mako.template import Template
 
 
@@ -49,6 +50,10 @@ def render_template(template_file, output_file, **kwargs):
         template_filename=relpath(template_file, cwd), **kwargs)
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(tmpl_rendered)
+
+
+def env_subst(str_input):
+    return re.sub('[$][A-Za-z_]+', lambda mo:environ[mo.group(0)[1:]], str_input)
 
 
 def main():
@@ -143,6 +148,7 @@ public variables (default:variables.vlt)")
     # Format all relative paths in config file to be related to the config file
     # position itself
     def format_path(x, start=None):
+        x = env_subst(x)
         if isabs(x):
             return x
         return relpath(abspath(join(dirname(args.config), x)), start)
