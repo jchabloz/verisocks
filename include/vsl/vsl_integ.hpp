@@ -60,6 +60,7 @@ SOFTWARE.
 #include "verilated_syms.h"
 #include "vsl/vsl_types.hpp"
 #include "vsl/vsl_clocks.hpp"
+#include "vsl/vsl_macros.hpp"
 #include "vsl/vsl_dump.hpp"
 
 #include <cstdio>
@@ -276,6 +277,15 @@ private:
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
 
+    /* Simulation time representation for timestamps*/
+    VslTimeDef time_def{0, nullptr, 0, nullptr}; //Sim time definition
+    inline const uint64_t sim_time(void) {
+        return time_def.repr_factor * p_context->time();
+    }
+    inline const char* sim_time_unit(void) {
+        return time_def.repr_unit;
+    }
+
     //#ifdef DUMP_FST
     //std::unique_ptr<VerilatedFstC> p_trace;
     //#elifdef DUMP_VCD
@@ -290,7 +300,7 @@ private:
     double cb_value {0.0};
 
     /* Simulation (optional) finish time */
-    bool b_has_finish_time {false};
+    bool b_has_finish_time {false}; // TODO - not used at all - fix or remove?
     vsl_time_t finish_time {0};
 
     /* State machine functions */
@@ -390,6 +400,7 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     p_context = p_model->contextp();
     num_port = port;
     num_timeout_sec = timeout;
+    time_def = get_sim_time_def(p_context);
 
     //#ifdef DUMP_FST
     //p_trace = std::unique_ptr<VerilatedFstC>{new VerilatedFstC};
@@ -600,8 +611,7 @@ void VslInteg<T>::main_wait() {
             __MOD__,
             "Received message longer than RX buffer, discarding it"
         );
-        vs_msg_return(fd_client_socket, "error",
-            "Message too long - Discarding", &uuid);
+        VSL_MSG_RETURN_VX("error", "Message too long - Discarding");
         return;
     }
     else {
@@ -621,8 +631,7 @@ void VslInteg<T>::main_wait() {
         "Received message content cannot be interpreted as a valid JSON \
 content. Discarding it."
     );
-    vs_msg_return(fd_client_socket, "error",
-        "Invalid message content - Discarding", &uuid);
+    VSL_MSG_RETURN_VX("error", "Invalid message content - Discarding");
     return;
 }
 
@@ -639,8 +648,7 @@ void VslInteg<T>::main_process() {
     p_item_cmd = cJSON_GetObjectItem(p_cmd, "command");
     if (nullptr == p_item_cmd) {
         vs_log_mod_error(__MOD__, "Command field invalid/not found");
-        vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.", &uuid);
+        VSL_MSG_RETURN_VX("error", "Error processing command. Discarding.");
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -649,8 +657,7 @@ void VslInteg<T>::main_process() {
     c_str_cmd = cJSON_GetStringValue(p_item_cmd);
     if (nullptr == c_str_cmd) {
         vs_log_mod_error(__MOD__, "Command field invalid");
-        vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.", &uuid);
+        VSL_MSG_RETURN_VX("error", "Error processing command. Discarding.");
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -658,8 +665,7 @@ void VslInteg<T>::main_process() {
     str_cmd = std::string(c_str_cmd);
     if (str_cmd.empty() == true) {
         vs_log_mod_error(__MOD__, "Command field empty/null");
-        vs_msg_return(fd_client_socket, "error",
-            "Error processing command. Discarding.", &uuid);
+        VSL_MSG_RETURN_VX("error", "Error processing command. Discarding.");
         _state = VSL_STATE_WAITING;
         return;
     }
@@ -675,8 +681,8 @@ void VslInteg<T>::main_process() {
     /* Handle case for which the command handler is not found */
     vs_log_mod_error(__MOD__, "Handler for command %s not found",
         str_cmd.c_str());
-    vs_msg_return(fd_client_socket, "error",
-        "Could not find handler for command. Discarding.", &uuid);
+    VSL_MSG_RETURN_VX("error",
+        "Could not find handler for command. Discarding.");
     _state = VSL_STATE_WAITING;
     return;
 }
@@ -703,9 +709,8 @@ void VslInteg<T>::main_sim() {
         /* Check if value-based callback has been reached */
         if (check_value_callback()) {
             clear_callbacks();
-            vs_msg_return(fd_client_socket, "ack",
-                "Reached callback - Getting back to Verisocks main loop",
-                &uuid);
+            VSL_MSG_RETURN_VX("ack",
+                "Reached callback - Getting back to Verisocks main loop");
             _state = VSL_STATE_WAITING;
             // TODO: maybe add p_trace->flush() here? We could also have flush
             // as a command instead?
@@ -717,10 +722,8 @@ void VslInteg<T>::main_sim() {
             if (has_time_callback()) {
                 p_context->time(cb_time);
                 clear_callbacks();
-                vs_msg_return(fd_client_socket, "ack",
-                    "Reached callback without other events pending",
-                    &uuid
-                );
+                VSL_MSG_RETURN_VX("ack",
+                    "Reached callback without other events pending");
                 _state = VSL_STATE_WAITING;
                 // TODO: maybe add p_trace->flush() here?
                 return;
@@ -735,9 +738,8 @@ void VslInteg<T>::main_sim() {
         if (has_time_callback() && (next_event_time() >= cb_time)) {
             p_context->time(cb_time);
             clear_callbacks();
-            vs_msg_return(fd_client_socket, "ack",
-                "Reached callback - Getting back to Verisocks main loop",
-                &uuid);
+            VSL_MSG_RETURN_VX("ack",
+                "Reached callback - Getting back to Verisocks main loop");
             _state = VSL_STATE_WAITING;
             // TODO: maybe add p_trace->flush() here?
             return;
@@ -749,8 +751,8 @@ void VslInteg<T>::main_sim() {
     /* If there is a callback hanging, it means that the Verisocks client is
     expecting a return message... in this case, an error is returned */
     if (has_callback()) {
-        vs_msg_return(fd_client_socket, "error",
-            "Exiting Verisocks due to end of simulation", &uuid);
+        VSL_MSG_RETURN_VX("error",
+            "Exiting Verisocks due to end of simulation");
     }
     _state = VSL_STATE_SIM_FINISH;
     return;

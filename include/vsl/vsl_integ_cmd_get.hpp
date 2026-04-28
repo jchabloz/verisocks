@@ -97,8 +97,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get) {
     /* Error case - sub-command handler function not found */
     vs_log_mod_error(__MOD__, "Handler for sub-command %s not found",
         sel_key.c_str());
-    vs_msg_return(vx.fd_client_socket, "error",
-        "Could not find handler for sub-command. Discarding.", &vx.uuid);
+    VSL_MSG_RETURN(vx, "error",
+        "Could not find handler for sub-command. Discarding.");
     vx._state = VSL_STATE_WAITING;
     return;
 }
@@ -118,9 +118,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
         if (nullptr != p_msg) cJSON_Delete(p_msg);
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=sim_info) - Discarding",
-			&vx.uuid);
+        VSL_MSG_RETURN(vx, "error",
+            "Error processing command get(sel=sim_info) - Discarding");
     };
 
     /* Create return message object */
@@ -159,9 +158,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
         if (nullptr != p_msg) cJSON_Delete(p_msg);
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=sim_time) - Discarding",
-			&vx.uuid);
+        VSL_MSG_RETURN(vx, "error",
+            "Error processing command get(sel=sim_time) - Discarding");
     };
 
     /* Create return message object */
@@ -203,8 +201,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_value) {
         if (nullptr != p_msg) cJSON_Delete(p_msg);
         if (nullptr != str_msg) cJSON_free(str_msg);
         vx._state = VSL_STATE_WAITING;
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Error processing command get(sel=value) - Discarding", &vx.uuid);
+        VSL_MSG_RETURN(vx, "error",
+            "Error processing command get(sel=value) - Discarding");
     };
 
     /* Create return message object */

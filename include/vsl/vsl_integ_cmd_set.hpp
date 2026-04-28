@@ -63,9 +63,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(set) {
         /* Error case - sub-command handler function not found */
         vs_log_mod_error(__MOD__, "Handler for sub-command %s not found",
             sel_key.c_str());
-        vs_msg_return(vx.fd_client_socket, "error",
-            "Could not find handler for sub-command. Discarding.",
-            &vx.uuid);
+        VSL_MSG_RETURN(vx, "error",
+            "Could not find handler for sub-command. Discarding.");
         vx._state = VSL_STATE_WAITING;
         return;   
     }
@@ -194,8 +193,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set_value) {
         return;
     }
 
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processed command \"set\"", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack", "Processed command \"set\"");
 
     /* Normal exit */
     vx._state = VSL_STATE_WAITING;
@@ -235,8 +233,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set_clk_en) {
         vs_log_mod_debug(__MOD__, "Clock with path \"%s\" disabled", cstr_path);
     }
 
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processed command \"set(sel=clk_en)\"", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack", "Processed command \"set(sel=clk_en)\"");
 
     /* Normal exit */
     vx._state = VSL_STATE_WAITING;
@@ -272,8 +269,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(set_clk_cfg) {
     vx.clock_map.get_clock(str_path).set_period(
         period, cstr_unit, dc, vx.p_context);
 
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processed command \"set(sel=clk_cfg)\"", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack", "Processed command \"set(sel=clk_cfg)\"");
 
     /* Normal exit */
     vx._state = VSL_STATE_WAITING;

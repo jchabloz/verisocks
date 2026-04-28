@@ -110,6 +110,17 @@ bool has_range(const std::string& path);
  */
 VslArrayRange get_range(const std::string& path);
 
+struct VslTimeDef {
+    int16_t factor;         ///> Time precision, power of 10 exponent
+    const char *name;       ///> Time precision IEEE name
+    uint64_t repr_factor;   ///> Multiplication factor for timestamps
+    const char *repr_unit;  ///> Unit to use for timestamps
+};
+
+VslTimeDef get_sim_time_def(VerilatedContext* p_context);
+
+inline uint64_t get_sim_time(VerilatedContext* p_context, VslTimeDef time_def);
+
 } //namespace vsl
 
 #endif //VSL_SIGNALS_HPP

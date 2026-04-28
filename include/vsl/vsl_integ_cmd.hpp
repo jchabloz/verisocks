@@ -60,7 +60,7 @@ SOFTWARE.
 #include "vs_logging.h"
 #include "vs_msg.h"
 #include "verilated.h"
-#include "vsl_macros.hpp"
+#include "vsl/vsl_macros.hpp"
 
 #include <cstdio>
 #include <string>
@@ -88,8 +88,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(info) {
     vs_log_info("%s", cstr_value);
 
     /* Return an acknowledgement */
-    vs_msg_return(
-        vx.fd_client_socket, "ack", "command info received", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack", "command info received");
 
     /* Set state to "waiting next command" */
     vx._state = VSL_STATE_WAITING;
@@ -103,8 +102,7 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(exit) {
     vs_log_mod_info(
         __MOD__, "Command \"exit\" received. Quitting Verisocks ...");
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing exit command - Quitting Verisocks.", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack", "Processing exit command - Quitting Verisocks.");
 
     /* Simulate until $finish */
     while (!vx.p_context->gotFinish()) {
@@ -134,8 +132,8 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(stop) {
     vs_log_mod_info(
         __MOD__, "Command \"stop\" received");
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing stop command - Simulation stopped/paused", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack",
+        "Processing stop command - Simulation stopped/paused");
 
     vx._state = VSL_STATE_WAITING;
     return;
@@ -148,8 +146,8 @@ template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(finish) {
     vs_log_mod_info(
         __MOD__, "Command \"finish\" received. Terminating simulation...");
-    vs_msg_return(vx.fd_client_socket, "ack",
-        "Processing finish command - Terminating simulation.", &vx.uuid);
+    VSL_MSG_RETURN(vx, "ack",
+        "Processing finish command - Terminating simulation.");
 
     vx.p_context->gotFinish(true);
     vx._state = VSL_STATE_SIM_FINISH;
@@ -161,8 +159,8 @@ Not supported
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::VSL_CMD_HANDLER(not_supported) {
-    vs_msg_return(vx.fd_client_socket, "warning",
-        "This command is not (yet) supported. Discarding...", &vx.uuid);
+    VSL_MSG_RETURN(vx, "warning",
+        "This command is not (yet) supported. Discarding...");
     vx._state = VSL_STATE_WAITING;
     return;
 }
