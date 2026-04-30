@@ -28,9 +28,16 @@ def get_var_type(var):
     if (type == "int"):
         width = var['width']
         nbytes = ceil(width/8.0)
+        nbits = 8
+        if (nbytes > 1):
+            nbits = 16
+        if (nbytes > 2):
+            nbits = 32
+        if (nbytes > 4):
+            nbits = 64
         if (nbytes > 8):
             raise VerisocksError("Variable width > 64 bits - Not supported yet")
-        key = "uint{:d}".format(nbytes*8)
+        key = "uint{:d}".format(nbits)
         return VLVT_TYPES[key]
     elif (type in VLVT_TYPES):
         return VLVT_TYPES[type]
