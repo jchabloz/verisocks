@@ -116,7 +116,7 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
 link_deps = $(link_args) $(VSL_HEADERS)
 
-$(VM_PREFIX): verilate $(link_deps)
+$(VM_PREFIX): $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
 endif
 
