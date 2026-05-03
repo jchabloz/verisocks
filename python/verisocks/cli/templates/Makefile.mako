@@ -20,12 +20,30 @@ args = "
 "
 />\
 <%
+import re
 from os.path import isabs, relpath
 
 def format_path(path):
-	if isabs(path):
-		return path
-	return relpath(path, build_dir)
+	"""Format paths to be fit for use in the Makefile
+
+	- Format environment variables used in path according to Make variables
+	  format $()
+	- If the path is absolute or if it starts with a variable, it is returned
+	  as is.
+	- If the path is relative, its starting point is set to be relative to the
+	  build directory (*build_dir*)
+
+	Args:
+		path (str): Un-formatted path
+	
+	Returns:
+		str: Formatted path
+	"""
+	# Substitute all env variables in paths acc to Make variable format $()
+	p = re.sub(r"\$(\w+)", r"$(\1)", path)
+	if isabs(p) or re.match(r"^\$", p):
+		return p
+	return relpath(p, build_dir)
 
 LOG_LEVELS = {
 	"debug":    "$(LOG_LEVEL_DEBUG)",
@@ -94,8 +112,8 @@ VL_SRCS = \\
 
 % if vlt_file:
 	${vlt_file} \\
-% endif
 
+% endif
 % for src in verilog_src_files[:-1]:
 	${format_path(src)} \\
 
