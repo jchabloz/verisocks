@@ -72,7 +72,7 @@ VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
 CPPFLAGS += -DVS_LOG_LEVEL=$(VS_LOG_LEVEL)
-CPPFLAGS += -O3
+# CPPFLAGS += -O3
 CPPFLAGS += $(CPP_USER_FLAGS)
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
@@ -100,9 +100,6 @@ $(VSL_BUILD_DIR)/%.o: %.c $(VSL_HEADERS)
 	@mkdir -p $(VSL_BUILD_DIR)
 	$(CXX) -o $@ -c $(CPPFLAGS) $<
 
-#VM_USER_CFLAGS = \
-#	-DVL_TIME_CONTEXT \
-
 ### Default rules...
 # C++ code coverage  0/1 (from --prof-c)
 VM_PROFC = 0
@@ -111,6 +108,7 @@ VM_SC = 0
 # Legacy or SystemC output mode?  0/1 (from --sc)
 VM_SP_OR_SC = $(VM_SC)
 
+ifeq ($(filter $(MAKECMDGOALS),clean),)
 include $(VL_OBJ_DIR)/$(VM_PREFIX)_classes.mk
 include $(VERILATOR_ROOT)/include/verilated.mk
 
@@ -118,8 +116,9 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 link_args = $(VSL_OBJS) $(VK_GLOBAL_OBJS) $(VM_PREFIX)__ALL.a $(VM_HIER_LIBS)
 link_deps = $(link_args) $(VSL_HEADERS)
 
-$(VM_PREFIX): $(link_deps)
+$(VM_PREFIX): verilate $(link_deps)
 	$(LINK) $(LDFLAGS) $(link_args) $(LDLIBS) $(LIBS) $(SC_LIBS) -o $@
+endif
 
 clean:
 	$(RM) -r $(VSL_BUILD_DIR)
