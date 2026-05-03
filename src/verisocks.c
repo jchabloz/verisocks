@@ -211,6 +211,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
     p_vpi_data->time_def = vs_utils_get_sim_time_def();
+    p_vpi_data->sim_time = 0ull;
     memcpy(&p_vpi_data->uuid.value, null_uuid_value, VS_UUID_LEN);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 

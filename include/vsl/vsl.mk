@@ -72,7 +72,7 @@ VSL_OBJS += $(addprefix $(VSL_BUILD_DIR)/,$(subst .cpp,.o,$(VSL_SRCS)))
 CPPFLAGS += $(addprefix -I,$(VSL_INCDIRS) $(VL_OBJ_DIR))
 CPPFLAGS += -Wall
 CPPFLAGS += -DVS_LOG_LEVEL=$(VS_LOG_LEVEL)
-# CPPFLAGS += -O3
+CPPFLAGS += -O3
 CPPFLAGS += $(CPP_USER_FLAGS)
 
 VPATH += $(VSL_DIR)/cjson $(VSL_DIR)/src
