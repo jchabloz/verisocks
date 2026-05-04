@@ -207,7 +207,9 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
     p_vpi_data->h_cb = NULL;
+    #ifdef ENABLE_ITX_POLLING
     p_vpi_data->h_cb_poll = NULL;
+    #endif
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
     p_vpi_data->time_def = vs_utils_get_sim_time_def();
@@ -307,10 +309,12 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
     }
 
     /* Disable polling callback if it exists */
+    #ifdef ENABLE_ITX_POLLING
     if (NULL != p_vpi_data->h_cb_poll) {
         vpi_remove_cb(p_vpi_data->h_cb_poll);
         p_vpi_data->h_cb_poll = NULL;
     }
+    #endif
 
     /* Check state */
     if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
@@ -387,10 +391,12 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     vpi_remove_cb(p_vpi_data->h_cb);
 
     /* Disable polling callback if it exists */
+    #ifdef ENABLE_ITX_POLLING
     if (NULL != p_vpi_data->h_cb_poll) {
         vpi_remove_cb(p_vpi_data->h_cb_poll);
         p_vpi_data->h_cb_poll = NULL;
     }
+    #endif
 
     /* Signalling that the callback function has been reached */
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
@@ -442,10 +448,14 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
         p_vpi_data->h_cb = NULL;
 
     }
+
+    /* Disable polling callback if it exists */
+    #ifdef ENABLE_ITX_POLLING
     if (NULL != p_vpi_data->h_cb_poll) {
         vpi_free_object(p_vpi_data->h_cb_poll);
         p_vpi_data->h_cb_poll = NULL;
     }
+    #endif
 
     /* Return something on socket in case client is expecting something */
     if ((VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) ||

@@ -33,6 +33,7 @@ SOFTWARE.
 
 #include "vpi_config.h"
 #include "vs_msg.h"
+#include "vs_utils.h"
 #include "cJSON.h"
 #include <stdint.h>
 
@@ -71,7 +72,9 @@ typedef struct vs_vpi_data {
     int fd_client_socket;   ///File descriptor for currently open connection
     cJSON *p_cmd;           ///Pointer to current/latest command
     vpiHandle h_cb;         ///Callback handle ("main" callback)
+    #ifdef ENABLE_ITX_POLLING
     vpiHandle h_cb_poll;    ///Callback handle ("polling" callback)
+    #endif
     s_vpi_value value;      ///Value (used for value change callback)
     vs_uuid_t uuid;         ///Current transaction UUID
     vs_time_def_t time_def; ///Timescale definition
