@@ -197,7 +197,6 @@ public variables (default:variables.vlt)")
 
     if 'variables' in cfg:
         vlt_file = join(build_dir, str(args.variables_file))
-        vlt_file = relpath(vlt_file, build_dir)
     else:
         vlt_file = None
 

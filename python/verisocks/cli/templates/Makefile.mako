@@ -111,7 +111,7 @@ VL_ARGS_FILES = \\
 VL_SRCS = \\
 
 % if vlt_file:
-	${vlt_file} \\
+	${format_path(vlt_file)} \\
 
 % endif
 % for src in verilog_src_files[:-1]:

@@ -174,6 +174,8 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_time) {
     vs_log_mod_debug(__MOD__, "Sim time: %.6e s", sim_time_sec);
     VSL_MSG_ADD_NUM(p_msg, "time", sim_time_sec);
 
+    VSL_MSG_ADD_NUM(p_msg, "sim_time", vx.sim_time());
+    VSL_MSG_ADD_STR(p_msg, "sim_time_unit", vx.sim_time_unit());
     VSL_MSG_CREATE(str_msg, p_msg, msg_info);
     VSL_MSG_WRITE(str_msg, vx);
 

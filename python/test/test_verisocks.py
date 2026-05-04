@@ -185,11 +185,15 @@ def test_run_for_time(vs):
     # Get initial time
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
+    assert answer["sim_time"] == 0
+    assert answer["sim_time_unit"] == "ps"
     prev_sim_time = answer["time"]
 
     # For time in ps
     answer = vs.run(cb="for_time", time=6, time_unit="ps")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 6
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(6e-12)
@@ -198,6 +202,8 @@ def test_run_for_time(vs):
     # For time in ns
     answer = vs.run(cb="for_time", time=7, time_unit="ns")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 7006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(7e-9)
@@ -206,6 +212,8 @@ def test_run_for_time(vs):
     # For time in us
     answer = vs.run(cb="for_time", time=8, time_unit="us")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 8007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(8e-6)
@@ -214,6 +222,8 @@ def test_run_for_time(vs):
     # For time in ms
     answer = vs.run(cb="for_time", time=0.23, time_unit="ms")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 238007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(0.23e-3)
@@ -222,6 +232,8 @@ def test_run_for_time(vs):
     # For time in s
     answer = vs.run(cb="for_time", time=0.00017, time_unit="s")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 408007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(0.17e-3)
