@@ -72,9 +72,6 @@ typedef struct vs_vpi_data {
     int fd_client_socket;   ///File descriptor for currently open connection
     cJSON *p_cmd;           ///Pointer to current/latest command
     vpiHandle h_cb;         ///Callback handle ("main" callback)
-    #ifdef ENABLE_ITX_POLLING
-    vpiHandle h_cb_poll;    ///Callback handle ("polling" callback)
-    #endif
     s_vpi_value value;      ///Value (used for value change callback)
     vs_uuid_t uuid;         ///Current transaction UUID
     vs_time_def_t time_def; ///Timescale definition
@@ -105,10 +102,6 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 
 PLI_INT32 verisocks_cb(p_cb_data cb_data);
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
-#ifdef ENABLE_ITX_POLLING
-PLI_INT32 verisocks_cb_poll(p_cb_data cb_data);
-void verisocks_register_cb_poll(vs_vpi_data_t *p_vpi_data);
-#endif
 
 /**
  * @brief Type for a command handler function pointer

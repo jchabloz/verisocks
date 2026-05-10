@@ -207,9 +207,6 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
     p_vpi_data->h_cb = NULL;
-    #ifdef ENABLE_ITX_POLLING
-    p_vpi_data->h_cb_poll = NULL;
-    #endif
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
     p_vpi_data->time_def = vs_utils_get_sim_time_def();
@@ -308,14 +305,6 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
         p_vpi_data->h_cb = NULL;
     }
 
-    /* Disable polling callback if it exists */
-    #ifdef ENABLE_ITX_POLLING
-    if (NULL != p_vpi_data->h_cb_poll) {
-        vpi_remove_cb(p_vpi_data->h_cb_poll);
-        p_vpi_data->h_cb_poll = NULL;
-    }
-    #endif
-
     /* Check state */
     if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
         vs_vpi_log_error("Inconsistent state");
@@ -390,14 +379,6 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     /* Remove callback and free handle */
     vpi_remove_cb(p_vpi_data->h_cb);
 
-    /* Disable polling callback if it exists */
-    #ifdef ENABLE_ITX_POLLING
-    if (NULL != p_vpi_data->h_cb_poll) {
-        vpi_remove_cb(p_vpi_data->h_cb_poll);
-        p_vpi_data->h_cb_poll = NULL;
-    }
-    #endif
-
     /* Signalling that the callback function has been reached */
     vs_vpi_log_info("Reached callback - Verisocks taking over and waiting \
 for command ...");
@@ -449,14 +430,6 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
 
     }
 
-    /* Disable polling callback if it exists */
-    #ifdef ENABLE_ITX_POLLING
-    if (NULL != p_vpi_data->h_cb_poll) {
-        vpi_free_object(p_vpi_data->h_cb_poll);
-        p_vpi_data->h_cb_poll = NULL;
-    }
-    #endif
-
     /* Return something on socket in case client is expecting something */
     if ((VS_VPI_STATE_SIM_RUNNING == p_vpi_data->state) ||
         (VS_VPI_STATE_PROCESSING == p_vpi_data->state)) {
@@ -472,89 +445,10 @@ PLI_INT32 verisocks_cb_exit(p_cb_data cb_data)
     if (NULL != p_vpi_data->p_cmd) {
         cJSON_Delete(p_vpi_data->p_cmd);
         p_vpi_data->p_cmd = NULL;
-        //free(p_vpi_data);  //Will be freed in exit callback handler
+        free(p_vpi_data);
     }
     return 0;
 }
-
-#ifdef ENABLE_ITX_POLLING
-void verisocks_register_cb_poll(vs_vpi_data_t *p_vpi_data)
-{
-    s_cb_data cb_poll_data;
-    s_vpi_time cb_time;
-    vpiHandle h_cb_poll;
-
-    cb_time = vs_utils_double_to_time(2.0, "us"); //TODO: adjust
-    cb_poll_data.reason = cbAfterDelay;
-    cb_poll_data.time = &cb_time;
-    cb_poll_data.obj = NULL;
-    cb_poll_data.value = NULL;
-    cb_poll_data.index = 0;
-    cb_poll_data.user_data = (PLI_BYTE8*) p_vpi_data;
-    cb_poll_data.cb_rtn = verisocks_cb_poll;
-    h_cb_poll = vpi_register_cb(&cb_poll_data);
-    p_vpi_data->h_cb_poll = h_cb_poll;
-}
-#endif
-
-#ifdef ENABLE_ITX_POLLING
-PLI_INT32 verisocks_cb_poll(p_cb_data cb_data)
-{
-    vs_vpi_log_debug("Reached interrupt polling callback");
-
-    /* Retrieve stored instance data */
-    vs_vpi_data_t *p_vpi_data = NULL;
-    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
-    if (NULL == p_vpi_data) {
-        vs_vpi_log_error("Could not get stored data - Aborting callback");
-        return -1;
-    }
-
-    /* Free callback handle */
-    if (NULL != p_vpi_data->h_cb_poll) {
-        vpi_free_object(p_vpi_data->h_cb_poll);
-        p_vpi_data->h_cb_poll = NULL;
-    }
-
-    /* Check state */
-    if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
-        vs_vpi_log_error("Inconsistent state - Aborting callback");
-        goto error;
-    }
-
-    /* Update sim time state variable */
-    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
-
-    /* Check if pending request - possibly an interrupt */
-    if (0 < vs_msg_peek(p_vpi_data->fd_client_socket)) {
-        vs_vpi_log_debug("Something can be read on socket descriptor");
-
-        //TODO vpi_remove_cb(p_vpi_data->h_cb);
-
-    } else {
-        vs_vpi_log_debug("Nothing to be read on socket descriptor");
-        verisocks_register_cb_poll(p_vpi_data);
-    }
-
-    /* Return to verisocks main loop and continue running simulation */
-    if (0 > verisocks_main(p_vpi_data)) {goto error;}
-    vs_vpi_log_debug("Returning control to simulator");
-    return 0;
-
-    /* Error management */
-    error:
-    if (NULL != p_vpi_data) {
-        p_vpi_data->state = VS_VPI_STATE_ERROR;
-        if (0 <= p_vpi_data->fd_server_socket) {
-            close(p_vpi_data->fd_server_socket);
-            p_vpi_data->fd_server_socket = -1;
-        }
-    }
-    vs_vpi_log_info("Aborting simulation");
-    vpi_control(vpiFinish, 1);
-    return -1;
-}
-#endif
 
 /**
  * @brief State machine main loop
