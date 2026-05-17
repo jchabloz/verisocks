@@ -310,7 +310,7 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
         vs_vpi_log_error("Inconsistent state");
         goto error;
     }
-    
+
     /* Update sim time state variable */
     p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 

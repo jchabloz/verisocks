@@ -24,7 +24,12 @@ LOG_LEVELS = {
 }
 
 def get_var_type(var):
-    type = var['type']
+    # Default type is int
+    if 'type' in var:
+        type = var['type']
+    else:
+        type = 'int'
+
     if (type == "int"):
         width = var['width']
         nbytes = ceil(width/8.0)

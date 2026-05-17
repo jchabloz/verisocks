@@ -12,7 +12,7 @@ config:
   verilator_path: /usr/local/bin/verilator
   verilator_root: /usr/local/share/verilator
   build_dir: build
-  use_tracing: true
+  use_tracing: false
   use_fst: true
   use_timing: false
   log_level: debug
