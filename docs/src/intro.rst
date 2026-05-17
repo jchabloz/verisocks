@@ -108,34 +108,37 @@ Why Verisocks? I have been using the `Icarus Verilog
 <https://steveicarus.github.io/iverilog/>`_ simulator for quite some time now.
 It is a quite complete and performant tool that enables to perform verification
 of simple verilog modules but also of complete systems. However, there are a
-few things that are still potentially missing in the picture:
+few things that are still potentially missing in the picture for a real,
+professional usage:
 
 * How to **efficiently organize test cases and test suites**, ideally
   interfacing with existing test frameworks so as not to reinvent the wheel?
-* How to define and perform **regression tests**?
+* How to define and perform **regression tests**, again, without having to
+  reinvent stuff that already works well elsewhere?
 * How to establish **traceability**, typically with a set of requirements
 * Etc...
 
 And to top all of these considerations, I would like to be able to use Python
 to do all of it... No justification, just my preferred tool of the moment.
-However, a good solution shall be easy to interface with any other standard
-scripting/programming language.
+However, a good solution should be easy to interface with almost any other
+standard scripting/programming language.
 
 .. note::
 
-  As I was looking for solutions, I found out that `cocotb
+  As far as possible solutions are going, `cocotb
   <https://docs.cocotb.org/en/stable/>`_ proposes a nice approach and could
-  definitely fit the bill. While it is definitely a rising star in the
-  verification world, I was not completely satisfied, though. I could make a
-  detailed list of whys, but it is not the goal to position Verisocks against
-  cocotb; it just approaches the same needs in different ways.
+  definitely fit most of, if not the whole bill. While it is definitely a
+  rising star in the verification world, I was not completely satisfied,
+  though. I could make a detailed list of whys, but it is not the goal to
+  position Verisocks against cocotb; it just approaches the same needs in
+  different ways. Plus, I would anyway be looking for excuses...
 
 
 All in all, I decided to try and implement my own solution (it's more fun
 anyway); re-write from scratch a simple-to-use (emphasis on *simple*) interface
 using the standardized `Verilog Procedural Interface (VPI)
 <https://en.wikipedia.org/wiki/Verilog_Procedural_Interface>`_ in order to make
-it possible to control externally an Icarus simulation.
+it possible to control externally any Icarus simulation.
 
 .. highlights::
 
@@ -169,9 +172,8 @@ interface (as defined in `IEEE Std 1364
 commercial simulators.
 
 .. note::
-    I will gladly accept any contribution to test Verisocks with other
-    simulators.
-    As of now, I have only successfully tested it with Cadence's XCelium 64
-    29.03. As soon as I get more material, I will make a short tutorial for it.
-    My next target will be Tachyon's CVC. If anybody is able to test it with
-    QuestaSim...
+
+  I will gladly accept any contribution to test Verisocks with other simulators
+  than Icarus. As of now, I have only successfully used it with Cadence's
+  XCelium 64, version 29.03. As soon as I get more material, I will make a
+  short tutorial for it.

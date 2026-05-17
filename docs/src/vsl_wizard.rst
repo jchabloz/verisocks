@@ -69,7 +69,8 @@ below.
                                 # become the name of the executable)
       top: <text>               # Name of top module
       verilog_src_files:        # List of Verilog source files
-      - <path>                  #
+      - <path>                  # If required, this shall also comprise files
+                                # with verilator configuration statements
       verilog_inc_dirs:         # (optional) List of Verilog include paths
       - <path>                  # (to be processed with -I option by verilator)
       verilator_arg_files:      # (optional) List of Verilator arguments files
@@ -106,20 +107,20 @@ below.
       - path: <text>            # Variable path
         name: <text>            # (optional) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [int (integral type), real]
+        type: <text>            # (optional, int) Variable type [int (integral type), real]
         width: <number>         # Width of the variable (optional if type: real)
       arrays:                   # (optional) List of array variables
       - path: <text>            # Variable path
         name: <text>            # (optional, path) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [int (integral type), real]
+        type: <text>            # (optional, int) Variable type [int (integral type), real]
         width: <number>         # Width of the variable
         depth: <number>         # Depth of the array
       params:                   # (optional) List of parameter variables
       - path: <text>            # Parameter path
         name: <text>            # (optional, path) Name/alias to be used for the variable
         module: <text>          # Name of the module in which is the variable
-        type: <text>            # Variable type [int (integral type), real]
+        type: <text>            # (optional, int) Variable type [int (integral type), real]
         width: <number>         # Width of the variable
       events:                   # (optional) List of events
       - path: <text>            # Event path

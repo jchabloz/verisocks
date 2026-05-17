@@ -1,5 +1,8 @@
-
 .. _sec_release_notes:
+.. role:: yaml(code)
+    :language: yaml
+.. role:: json(code)
+    :language: json
 
 Release notes
 #############
@@ -19,6 +22,47 @@ Releases of documentation and code are using the same version numbers.
 
 1.6.0 - Ongoing
 ***************
+
+* TCP protocol
+
+  * New: All returned message now include :json:`"sim_time"` and
+    :json:`"sim_time_unit"` fields. This provides a timestamp on the simulation
+    timescale.
+
+* Python client
+  
+  * Bug fix: capture output for elaboration command in
+    :py:meth:`setup_sim_run() <verisocks.utils.setup_sim_run>` function
+
+* Verilator integration
+
+  * Modified: The clock registration function
+    :cpp:func:`vsl::VslInteg::register_clock` also directly registers the
+    corresponding variable so that it can be publicly accessed by protocol
+    commands.
+  * Bug fix: Corrected serious bug within the clock evaluation algorithm which
+    could end up in an infinite loop when using multiple clocks.
+
+* New features or changes for :ref:`CLI wizard configuration script
+  <sec_vsl_wizard>`:
+
+  * New: :yaml:`verilog_inc_dirs` configuration parameter in YAML file
+  * New: :yaml:`verilog_arg_files` configuration parameter in YAML file
+  * New: :yaml:`name` variable parameter in YAML file
+  * New: :yaml:`build_dir` configuration parameter in YAML file or as CLI
+    option.
+  * New: :yaml:`--makefile-top` CLI option
+  * New: :yaml:`--log-level` CLI option
+  * New: :yaml:`enable` optional clock variable parameter in YAML configuration
+    file
+  * New: optional :yaml:`exec_version`, :yaml:`exec_doc` and
+    :yaml:`bug_address` configuration parameter in YAML file
+  * Modified: In the configuration file, the choices for the variables type is
+    limited to either :yaml:`int` or :yaml:`real`. Detailed type is inferred by
+    the script from the value of :yaml:`width`. It is also now optional, the
+    default being :yaml:`int`.
+  * Modified: For the clock variables definition, the fields :yaml:`duty_cycle`
+    is now optional and defaults to :yaml:`0.5`.
 
 
 1.5.0 - 2026-02-07

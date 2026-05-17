@@ -425,12 +425,16 @@ its own *return message* with a specific, expected content in case of normal
 execution of the command. All return messages are expected to contain at least
 the following field:
 
-  * :json:`"type":` (text): Specifies which is the type of the returned message. It can
-    be either :json:`"ack"` (the returned message is an *acknowledgement*) or
-    :json:`"result"` (the returned message provides a *result*)
+  * :json:`"type":` (text): Specifies which is the type of the returned
+    message. It can be either:
+
+    * :json:`"ack"` (the returned message is an *acknowledgement*), which
+      confirms the good execution of a command that is not expected to return a
+      specific result
+    * :json:`"result"` (the returned message provides a *result*)
 
 Other fields in return messages are dependent of the initating command for the
-given transaction and are documented for commands in the section
+given transaction and are documented for each commands in the previous section
 :ref:`sec_tcp_commands`.
 
 From version ``1.6.0``, the following fields shall also be available for each
