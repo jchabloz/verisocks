@@ -208,7 +208,7 @@ int main(int argc, char** argv, char**) {
 	% for var in variables['scalars']:
     vslx.register_scalar("${get_var_name(var)}",
         &topp->${var['path'].replace(".", "->")},
-    % if var['type'] == "real":
+    % if 'type' in var and var['type'] == "real":
         ${get_var_type(var)}, 0u);
     % else:
         ${get_var_type(var)}, ${var['width']}u);
@@ -228,7 +228,7 @@ int main(int argc, char** argv, char**) {
     % for var in variables['params']:
     vslx.register_param("${get_var_name(var)}",
         &topp->${var['path'].replace(".", "->")},
-    % if var['type'] == "real":
+    % if 'type' in var and var['type'] == "real":
         ${get_var_type(var)}, 0u);
     % else:
         ${get_var_type(var)}, ${var['width']}u);
