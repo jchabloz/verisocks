@@ -296,6 +296,15 @@ public:
      */
     VslVar* get_var(const std::string& str_path);
 
+    /**
+     * @brief Add all available variable names to a cJSON object
+     *
+     * @param p_msg Pointer to cJSON message object
+     * @param key Key to be used in the cJSON object
+     * @return Returns 0 in case of success, -1 otherwise
+     */
+    int add_var_names_to_msg(cJSON* p_msg, const char* key);
+
 private:
     std::unordered_map<std::string, VslVar> var_map;
 };

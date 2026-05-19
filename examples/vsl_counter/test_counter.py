@@ -42,6 +42,10 @@ def vs():
 
 def test_counter(vs):
 
+    answer = vs.get("variables")
+    assert (answer["type"] == "result")
+    logging.info(f"Available variables: {answer['value']}")
+
     # Run the simulation for some time and verify that the returned answer is
     # an acknowledgement
     t0_us = 1.1
@@ -119,7 +123,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         format='[%(levelname)s] %(message)s',
-        level=logging.DEBUG
+        level=logging.INFO
     )
 
     port = find_free_port()
