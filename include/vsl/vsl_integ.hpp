@@ -303,6 +303,9 @@ private:
     bool b_has_finish_time {false}; // TODO - not used at all - fix or remove?
     vsl_time_t finish_time {0};
 
+    /* Model evaluation state */
+    bool b_eval_required {true};
+
     /* State machine functions */
     void main_init();
     void main_connect();
@@ -721,6 +724,7 @@ void VslInteg<T>::main_sim() {
         if (!has_events_pending()) {
             if (has_time_callback()) {
                 p_context->time(cb_time);
+                b_eval_required = true;
                 clear_callbacks();
                 VSL_MSG_RETURN_VX("ack",
                     "Reached callback without other events pending");
@@ -737,6 +741,7 @@ void VslInteg<T>::main_sim() {
         /* If there is a time-based callback */
         if (has_time_callback() && (next_event_time() >= cb_time)) {
             p_context->time(cb_time);
+            b_eval_required = true;
             clear_callbacks();
             VSL_MSG_RETURN_VX("ack",
                 "Reached callback - Getting back to Verisocks main loop");
@@ -747,6 +752,7 @@ void VslInteg<T>::main_sim() {
 
         /* Advance time to the next time to be evaluated */
         p_context->time(next_event_time());
+        b_eval_required = true;
     }
     /* If there is a callback hanging, it means that the Verisocks client is
     expecting a return message... in this case, an error is returned */
@@ -775,9 +781,11 @@ Wrapper simulation management functions
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::eval() {
-    //p_model->eval(); // TO BE CHECKED - mix of NBA and BA ?!
-    clock_map.eval(p_context->time());
-    p_model->eval();
+    if (b_eval_required) {
+        clock_map.eval(p_context->time());
+        p_model->eval();
+        b_eval_required = false;
+    }
     //#ifdef DUMP_FILE
     //p_trace->dump(p_context->time());
     //#endif

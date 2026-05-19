@@ -114,6 +114,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(exit) {
         if (vx.p_context->gotFinish()) break;
         if (!vx.p_model->eventsPending()) break;
         vx.p_context->time(vx.p_model->nextTimeSlot());
+        vx.b_eval_required = true;
     }
     if (!vx.p_context->gotFinish()) {
         vs_log_mod_debug(__MOD__, "Exiting without $finish; no events left");
@@ -150,6 +151,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(finish) {
         "Processing finish command - Terminating simulation.");
 
     vx.p_context->gotFinish(true);
+    vx.b_eval_required = true;
     vx._state = VSL_STATE_SIM_FINISH;
     return;
 }
