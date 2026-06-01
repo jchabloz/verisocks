@@ -35,6 +35,7 @@ SRCS = \
 	cJSON.c \
 	vs_msg.c \
 	vs_server.c \
+	vs_itx.c \
 	vs_vpi.c \
 	vs_vpi_get.c \
 	vs_vpi_run.c \

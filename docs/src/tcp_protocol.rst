@@ -432,6 +432,8 @@ the following field:
       confirms the good execution of a command that is not expected to return a
       specific result
     * :json:`"result"` (the returned message provides a *result*)
+    * :json:`"itx"` (the returned message signals an *interrupt*, either
+      *blocking* or *non-blocking*)
 
 Other fields in return messages are dependent of the initating command for the
 given transaction and are documented for each commands in the previous section

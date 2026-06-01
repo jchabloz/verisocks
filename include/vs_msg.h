@@ -335,6 +335,14 @@ int vs_msg_peek(int fd);
         } \
     } while (0)
 
+#define VS_MSG_ADD_BOOL(msg, key, val) \
+    do { \
+        if (NULL == cJSON_AddBoolToObject(msg, key, val)) { \
+            vs_log_mod_error(__MOD__, "Could not add number to object"); \
+            goto error; \
+        } \
+    } while (0)
+
 #define VS_MSG_ADD_TIMESTAMP(msg, p_vpi_data) \
     VS_MSG_ADD_NUM(msg, "sim_time", p_vpi_data->sim_time); \
     VS_MSG_ADD_STR(msg, "sim_time_unit", p_vpi_data->time_def.repr_unit)

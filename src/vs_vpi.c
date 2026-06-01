@@ -37,6 +37,7 @@ SOFTWARE.
 #include "vs_msg.h"
 #include "vs_server.h"
 #include "vs_utils.h"
+#include "vs_itx.h"
 #include "vs_vpi.h"
 
 #undef __MOD__
@@ -144,6 +145,9 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data)
     return -1;
 }
 
+/******************************************************************************
+Return message
+******************************************************************************/
 int vs_vpi_return(int fd, const char *str_type, const char *str_value,
     const vs_uuid_t *p_uuid, const uint64_t time, const char* time_unit)
 {
@@ -411,5 +415,106 @@ Target path corresponds to a memory array.", str_path);
     p_data->state = VS_VPI_STATE_WAITING;
     VS_VPI_RETURN(p_data, "error",
         "Error processing command set - Discarding");
+    return -1;
+}
+
+/******************************************************************************
+Register interrupt
+******************************************************************************/
+int vs_vpi_register_in_time_itx(
+    const char *name, const double time, const char *time_unit,
+    vs_vpi_itx_flags_t flags, vs_vpi_data_t *p_vpi_data)
+{
+    vs_vpi_itx_t *p_itx;
+    s_vpi_time cb_time;
+    s_cb_data cb_data;
+    vpiHandle h_cb;
+
+    /* Try and find a free slot in the interrupts table */
+    p_itx = find_free_itx_slot(p_vpi_data->itx_table);
+    if (NULL == p_itx) {
+        vs_log_mod_error(__MOD__, "Could not find a free itx slot");
+        return -1;
+    }
+    memcpy(p_itx->name, name, strlen(name)); 
+    p_itx->type = VS_VPI_ITX_IN_TIME;
+    p_itx->flags = flags | VS_VPI_ITX_ACTIVE;
+    p_itx->user_data = (PLI_BYTE8*) p_vpi_data;
+
+    /* Register callback */
+    cb_time = vs_utils_double_to_time(time, time_unit);
+    cb_data.reason = cbAfterDelay;
+    cb_data.time = &cb_time;
+    cb_data.obj = NULL;
+    cb_data.value = NULL;
+    cb_data.index = 0;
+    cb_data.user_data = (PLI_BYTE8*) p_itx;
+    cb_data.cb_rtn = verisocks_cb_itx;
+    h_cb = vpi_register_cb(&cb_data);
+    p_itx->h_cb = h_cb;
+    if (NULL == h_cb) {
+        vs_log_mod_error(__MOD__, "Could not register callback");
+        return -1;
+    }
+    return 0;
+}
+
+/******************************************************************************
+Return message for interrupts
+******************************************************************************/
+int vs_vpi_itx_return(const vs_vpi_itx_t *p_itx)
+{
+    cJSON *p_msg;
+    char *str_msg = NULL;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_vpi_data_t *p_vpi_data = NULL;
+
+    p_vpi_data = (vs_vpi_data_t*) p_itx->user_data;
+    if (NULL == p_vpi_data) {
+        vs_log_mod_error(__MOD__, "Could not retrive user data");
+        return -1;
+    }
+
+    vs_msg_copy_uuid(&msg_info, &(p_vpi_data->uuid));
+
+    p_msg = cJSON_CreateObject();
+    if (NULL == p_msg) {
+        vs_log_mod_error(__MOD__, "Could not create cJSON object");
+        return -1;
+    }
+
+    /* Add message content */
+    VS_MSG_ADD_STR(p_msg, "type", "itx");
+    VS_MSG_ADD_STR(p_msg, "name", p_itx->name);
+    if (itx_is_blocking(p_itx)) {
+        VS_MSG_ADD_BOOL(p_msg, "non-blocking", cJSON_False);
+    }
+    else {
+        VS_MSG_ADD_BOOL(p_msg, "non-blocking", cJSON_True);
+    }
+    VS_MSG_ADD_TIMESTAMP(p_msg, p_vpi_data);
+
+    str_msg = vs_msg_create_message(p_msg, &msg_info);
+    if (NULL == str_msg) {
+        vs_log_mod_error(__MOD__, "NULL pointer");
+        goto error;
+    }
+
+    int retval;
+    retval = vs_msg_write(p_vpi_data->fd_client_socket, str_msg);
+    if (0 > retval) {
+        vs_log_mod_error(__MOD__, "Error writing return message");
+        goto error;
+    }
+
+    /* Normal return */
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
+    return 0;
+
+    /* Error handling*/
+    error:
+    if (NULL != p_msg) cJSON_Delete(p_msg);
+    if (NULL != str_msg) cJSON_free(str_msg);
     return -1;
 }
