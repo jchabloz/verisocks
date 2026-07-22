@@ -28,6 +28,9 @@ Releases of documentation and code are using the same version numbers.
   * New: All returned message now include :json:`"sim_time"` and
     :json:`"sim_time_unit"` fields. This provides a timestamp on the simulation
     timescale.
+  * New: Added command :ref:`get(variables) <sec_tcp_cmd_get>` which returns
+    all publicly available variables (only for the Verilator integration
+    version)
 
 * Python client
   
@@ -63,7 +66,7 @@ Releases of documentation and code are using the same version numbers.
     default being :yaml:`int`.
   * Modified: For the clock variables definition, the fields :yaml:`duty_cycle`
     is now optional and defaults to :yaml:`0.5`.
-
+  * New: :yaml:`sub_files` optional entry in YAML file
 
 1.5.0 - 2026-02-07
 ******************

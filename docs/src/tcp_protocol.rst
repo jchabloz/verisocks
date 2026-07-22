@@ -303,6 +303,8 @@ This command can be used to get pieces of information from the simulator.
     * :json:`"sel": "sim_time"` - The simulator (absolute) time is returned,
     * :json:`"sel": "value"` - The value of a simulator variable is returned,
     * :json:`"sel": "type"` - The VPI type of a simulator variable is returned.
+    * :json:`"sel": "variables"` - The list of public variables is returned
+      (Verilator integration only)
 
   If the ``"sel"`` field is ``"value"`` or ``"type"``, the following field is
   required in the command frame:
@@ -347,6 +349,12 @@ This command can be used to get pieces of information from the simulator.
 
   Note that this selection value is currently not supported by the Verilator
   integration API version of Verisocks. A warning message will be returned.
+
+* Returned frame (for :json:`"sel": "variables"`):
+
+  * :json:`"type": "result"`
+  * :json:`"value":` (array): List of publicly available variables (Verilator
+    integration only)
 
 With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.get() <verisocks.verisocks.Verisocks.get>`

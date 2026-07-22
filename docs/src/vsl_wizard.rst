@@ -94,6 +94,12 @@ below.
       exec_doc: <text>          # (optional) Doc for generated executable help
       bug_address: <text>       # (optional) Address for bugs for generated
                                 #  executable help
+
+    sub_files:                  # (optional) List of other YAML files that will
+    - <path>                    # be merged with this file. For example, all
+                                # variables could be listed in another YAML file
+                                # that is shared by several possible configurations.
+
     variables:                  # (optional) Public variables
       clocks:                   # (optional) List of clock variables
       - path: <text>            # Clock path

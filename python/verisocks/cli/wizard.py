@@ -130,6 +130,25 @@ public variables (default:variables.vlt)")
     with open(args.config, 'r') as f:
         cfg = yaml.safe_load(f)
 
+    # Format all relative paths in config file to be related to the config file
+    # position itself
+    def format_path(x, start=None):
+        if isabs(x) or re.match(r"^\$", x):
+            return x
+        return relpath(
+            abspath(join(dirname(args.config), x)),
+            start
+        )
+
+    # Load optional YAML sub-files
+    if 'sub_files' in cfg:
+        for sub_file in cfg['sub_files']:
+            sub_file_path = format_path(sub_file)
+            logging.info(f"Loading sub-file {sub_file_path}")
+            with open(sub_file_path, 'r') as f:
+                cfg_update = yaml.safe_load(f)
+            cfg.update(cfg_update)
+
     # Default values for optional arguments
     for k in ['exec_version', 'exec_doc', 'bug_address']:
         if not (k in cfg['config']):
@@ -140,16 +159,6 @@ public variables (default:variables.vlt)")
         cfg['config']['verilog_inc_dirs'] = []
     if 'verilator_arg_files' not in cfg['config']:
         cfg['config']['verilator_arg_files'] = []
-
-    # Format all relative paths in config file to be related to the config file
-    # position itself
-    def format_path(x, start=None):
-        if isabs(x) or re.match(r"^\$", x):
-            return x
-        return relpath(
-            abspath(join(dirname(args.config), x)),
-            start
-        )
 
     def format_config_paths(k):
         if k in cfg['config']:
