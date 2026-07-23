@@ -45,6 +45,7 @@ def test_hello_world(vs):
     assert answer['type'] == "result"
     print(f"Simulator: {answer['product']}")
     print(f"Version: {answer['version']}")
+    print(f"User info: {answer['user_info']}")
 
     answer = vs.info("Hello World!")
     assert answer['type'] == "ack"

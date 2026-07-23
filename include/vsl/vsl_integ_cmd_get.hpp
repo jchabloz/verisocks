@@ -127,6 +127,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
     VSL_MSG_ADD_STR(p_msg, "type", "result");
     VSL_MSG_ADD_STR(p_msg, "product", Verilated::productName());
     VSL_MSG_ADD_STR(p_msg, "version", Verilated::productVersion());
+    VSL_MSG_ADD_STR(p_msg, "user_info", vx.sim_user_info.c_str());
     VSL_MSG_ADD_STR(p_msg, "model_name", vx.p_model->modelName());
     VSL_MSG_ADD_STR(p_msg, "model_hier_name", vx.p_model->hierName());
     VSL_MSG_ADD_STR(p_msg, "time_unit", vx.p_context->timeunitString());

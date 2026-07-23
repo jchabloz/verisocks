@@ -253,6 +253,10 @@ public:
         register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
     }
 
+    void set_user_sim_info(const char* txt) {
+        sim_user_info = std::string {txt};
+    }
+
 private:
     VslState _state {VSL_STATE_INIT}; //Verisocks state
     cJSON* p_cmd {nullptr}; //Pointer to current/latest command
@@ -276,6 +280,7 @@ private:
     int fd_client_socket {-1};     //File descriptor, connected client socket
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
+    std::string sim_user_info;     //User-provided info provided as sim info
 
     /* Simulation time representation for timestamps*/
     VslTimeDef time_def{0, nullptr, 0, nullptr}; //Sim time definition

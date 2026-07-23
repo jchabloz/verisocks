@@ -105,6 +105,8 @@ int main(int argc, char** argv, char**) {
     vsl::VslInteg<hello_world> vslx{
         topp.get(), arguments.port_number, arguments.timeout};
 
+    vslx.set_user_sim_info("Toto and tutu");
+
     // Run simulation
     int retval = vslx.run();
 
