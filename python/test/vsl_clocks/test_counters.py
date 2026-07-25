@@ -51,6 +51,20 @@ def get_value(vs, path):
     return answer['value']
 
 
+def test_get_clocks(vs):
+
+    answer = vs.get(sel="clocks")
+    assert answer['type'] == "result"
+    clocks = answer['value']
+    assert len(clocks) == 2
+    assert clocks[0]['name'] == "clk1"
+    assert clocks[0]['period'] == 1_400_000
+    assert clocks[0]['duty_cycle'] == 0.4
+    assert clocks[1]['name'] == "clk2"
+    assert clocks[1]['period'] == 20_000_000
+    assert clocks[1]['duty_cycle'] == 0.6
+
+
 def test_clk_config(vs):
 
     reset(vs, 100)
@@ -124,6 +138,7 @@ if __name__ == "__main__":
     setup_test(port, TIMEOUT, False)
 
     with Verisocks(HOST, port) as vs_cli:
+        test_get_clocks(vs_cli)
         test_clk_config(vs_cli)
         test_clk_enable_disable(vs_cli)
         vs_cli.finish()

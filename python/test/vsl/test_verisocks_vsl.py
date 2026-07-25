@@ -170,6 +170,15 @@ def test_get_type(vs):
     logging.info(repr(answer))
 
 
+def test_get_variables(vs):
+    """Tests Verisocks get(sel="variables") function"""
+    answer = vs.get(sel="variables")
+    assert answer['type'] == "result"
+    variables = answer['value']
+    assert len(variables) == 6
+    assert variables[-1] == "main.clk"
+
+
 def test_run_for_time(vs):
     """Tests Verisocks run(cb="for_time") function"""
 
