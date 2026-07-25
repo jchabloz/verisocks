@@ -31,6 +31,8 @@ Releases of documentation and code are using the same version numbers.
   * New: Added command :ref:`get(variables) <sec_tcp_cmd_get>` which returns
     all publicly available variables (only for the Verilator integration
     version)
+  * New: Added command :ref:`get(clocks) <sec_tcp_cmd_get>` which returns all
+    registered clocks (only for the Verilator integration version)
 
 * Python client
   

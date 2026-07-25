@@ -621,6 +621,10 @@ Still {self._rx_expected} messages expected.")
               with the keywords :code:`"time"`, in seconds.
             * ``"value"``: Gets the value for a verilog object.
             * ``"type"``: Gets the VPI type value for a verilog object.
+            * ``"variables"``: Gets the list of registered variables (Verilator
+              integration only).
+            * ``"type"``: Gets the list of registered clocks (Verilator
+              integration only)
 
         Returns:
             JSON object: Content of returned message

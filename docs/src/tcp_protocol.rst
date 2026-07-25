@@ -303,7 +303,9 @@ This command can be used to get pieces of information from the simulator.
     * :json:`"sel": "sim_time"` - The simulator (absolute) time is returned,
     * :json:`"sel": "value"` - The value of a simulator variable is returned,
     * :json:`"sel": "type"` - The VPI type of a simulator variable is returned.
-    * :json:`"sel": "variables"` - The list of public variables is returned
+    * :json:`"sel": "variables"` - The list of registered variables is returned
+      (Verilator integration only)
+    * :json:`"sel": "clocks"` - The list of registered clocks is returned
       (Verilator integration only)
 
   If the ``"sel"`` field is ``"value"`` or ``"type"``, the following field is
@@ -355,6 +357,12 @@ This command can be used to get pieces of information from the simulator.
   * :json:`"type": "result"`
   * :json:`"value":` (array): List of publicly available variables (Verilator
     integration only)
+
+* Returned frame (for :json:`"sel": "clocks"`):
+
+  * :json:`"type": "result"`
+  * :json:`"value":` (array): List of regitstered, available clocks, including
+    period, duty cycle and enabled flag status (Verilator integration only)
 
 With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.get() <verisocks.verisocks.Verisocks.get>`
