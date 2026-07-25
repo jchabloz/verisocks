@@ -387,6 +387,7 @@ private:
     static void VSL_CMD_HANDLER(get_sim_time);
     static void VSL_CMD_HANDLER(get_value);
     static void VSL_CMD_HANDLER(get_variables);
+    static void VSL_CMD_HANDLER(get_clocks);
     static void VSL_CMD_HANDLER(finish);
     static void VSL_CMD_HANDLER(stop);
     static void VSL_CMD_HANDLER(exit);
@@ -444,6 +445,7 @@ VslInteg<T>::VslInteg(T* p_model, const int port, const int timeout) {
     sub_cmd_handlers_map["get_type"]         = VSL_CMD_HANDLER_NAME(not_supported);
     sub_cmd_handlers_map["get_value"]        = VSL_CMD_HANDLER_NAME(get_value);
     sub_cmd_handlers_map["get_variables"]    = VSL_CMD_HANDLER_NAME(get_variables);
+    sub_cmd_handlers_map["get_clocks"]       = VSL_CMD_HANDLER_NAME(get_clocks);
     sub_cmd_handlers_map["set_value"]        = VSL_CMD_HANDLER_NAME(set_value);
     sub_cmd_handlers_map["set_clk_en"]       = VSL_CMD_HANDLER_NAME(set_clk_en);
     sub_cmd_handlers_map["set_clk_cfg"]      = VSL_CMD_HANDLER_NAME(set_clk_cfg);

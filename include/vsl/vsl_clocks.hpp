@@ -32,6 +32,7 @@ SOFTWARE.
 
 #include "vsl/vsl_types.hpp"
 #include <string>
+#include <any>
 #include <list>
 
 namespace vsl {
@@ -218,6 +219,8 @@ public:
         return next_clk_event_time < clk.next_clk_event_time;
     }
 
+    inline vsl_time_t get_period(void) const {return period;};
+    inline double get_duty_cycle(void) const {return duty_cycle;};
     inline vsl_time_t get_period_low(void) const {return period_low;};
     inline vsl_time_t get_period_high(void) const {return period_high;};
     inline bool is_waiting_disable(void) const {return b_wait_dis;};
@@ -340,6 +343,15 @@ public:
      * @return Clock
      */
     VslClock& get_clock(const std::string name);
+
+    /**
+     * @brief Add registered clocks to a JSON message
+     * 
+     * @param p_msg Pointer to cJSON message object
+     * @param key Key to be used in the cJSON object
+     * @return Returns 0 in case of success, -1 otherwise
+     */
+    int add_clocks_to_msg(cJSON* p_msg, const char* key);
 
 private:
 

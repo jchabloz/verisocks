@@ -1,7 +1,7 @@
 /***************************************************************************//**
  @file vsl_macros.hpp
  @brief Verisocks integration header with utility macros.
- 
+
  This header defines several useful macros to be used in the various command
  handler functions.
 
@@ -65,7 +65,7 @@ do { \
                 return; \
             } \
     } while (0)
-    
+
     /**
      * @brief Helper macro to read a numerical field from a JSON command
      *
@@ -111,7 +111,7 @@ VSL_MSG_READ_NUM_NO_DECL(obj, name, name)
             return; \
         } \
     } while (0)
-    
+
     /**
  * @brief Helper macro to read an optional text field from a JSON command
  *
@@ -139,7 +139,7 @@ VSL_MSG_READ_NUM_NO_DECL(obj, name, name)
             flag = true; \
         } \
     } while (0)
-    
+
     /**
  * @brief Helper macro to read a text field from a JSON command
  *
@@ -157,7 +157,7 @@ VSL_MSG_READ_NUM_NO_DECL(obj, name, name)
     char *cstr_ ## name; \
     VSL_MSG_READ_STR_NO_DECL(obj, name, cstr_ ## name); \
     std::string str_ ## name(cstr_ ## name);
-    
+
     /**
      * @brief Helper macro to read an optional text field from a JSON command
  *
@@ -178,7 +178,7 @@ VSL_MSG_READ_STR_NO_DECL_OPT(obj, name, cstr_ ## name, has_ ## name)
 
 /**
  * @brief Helper macro to initialize a cJSON object
- * 
+ *
  * @param obj Pointer to cJSON object
  */
 #define VSL_MSG(obj) \
@@ -193,7 +193,7 @@ do { \
 
 /**
  * @brief Helper macro to add a text field to a cJSON object
- * 
+ *
  * @param obj Pointer to cJSON object
  * @param key Key to use for the text field
  * @param val Value to use for the text field
@@ -206,10 +206,10 @@ do { \
             return; \
         } \
     } while (0)
-    
+
 /**
  * @brief Helper macro to add a numerical field to a cJSON object
- * 
+ *
  * @param obj Pointer to cJSON object
  * @param key Key to use for the numerical field
  * @param val Value to use for the numerical field
@@ -222,10 +222,10 @@ do { \
             return; \
         } \
     } while (0)
-    
+
 /**
  * @brief Helper macro to transform a cJSON object to a text
- * 
+ *
  * @param str_obj Pointer to char object
  * @param obj Pointer to cJSON object
  * @param msg_info msg_info structure
@@ -242,7 +242,7 @@ do { \
 
 /**
  * @brief Helper macro to write a return message
- * 
+ *
  * @param str_obj Pointer to char object to be written
  * @param vx Pointer to VslInteg object
  */
@@ -257,7 +257,7 @@ do { \
 
 /**
  * @brief Helper macro - Return message
- * 
+ *
  * @param vx VslInteg object
  * @param type Return message type
  * @param msg Return message
@@ -272,7 +272,7 @@ do { \
 
 /**
  * @brief Helper macro - Error handler lambda function
- * 
+ *
  * @param vx VslInteg object
  * @param message Message to be used in case of error
  */

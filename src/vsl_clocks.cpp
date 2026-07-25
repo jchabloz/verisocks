@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "vsl/vsl_clocks.hpp"
 #include "vsl/vsl_utils.hpp"
+#include "vsl/vsl_macros.hpp"
 #include "vs_logging.h"
 #include <algorithm>
 #include <any>
@@ -284,6 +285,38 @@ namespace vsl{
         }
         fprintf(stderr, "*****************************************************\n");
         return;
+    }
+
+    int VslClockMap::add_clocks_to_msg(cJSON* p_msg, const char* key) {
+        cJSON* p_obj = nullptr;
+        p_obj = cJSON_AddArrayToObject(p_msg, key);
+        if (p_obj == nullptr) {
+            vs_log_mod_error(__MOD__, "Could not create cJSON array");
+            return -1;
+        }
+
+        /* Lambda function - error handler */
+        auto handle_error = [&](){
+            if (nullptr != p_obj) cJSON_Delete(p_obj);
+            return -1;
+        };
+
+        if (!empty()) {
+            cJSON_bool retval;
+            cJSON *p_item = nullptr;
+            for (auto& it : clock_list) {
+                p_item = cJSON_CreateObject();
+                cJSON_AddStringToObject(p_item, "name", it.get_name().c_str());
+                cJSON_AddNumberToObject(p_item, "is_enabled", (double) it.is_enabled());
+                cJSON_AddNumberToObject(p_item, "period", (double) it.get_period());
+                cJSON_AddNumberToObject(p_item, "duty_cycle", it.get_duty_cycle());
+                if (1 != cJSON_AddItemToArray(p_obj, p_item)) {
+                    vs_log_mod_error(__MOD__, "Could not add clock to array");
+                    handle_error();
+                }
+            }
+        }
+        return 0;
     }
 
 } // namespace vsl

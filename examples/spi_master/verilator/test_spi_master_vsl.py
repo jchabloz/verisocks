@@ -120,4 +120,11 @@ if __name__ == "__main__":
     port = find_free_port()
     setup_test(port, TIMEOUT)
     with Verisocks(HOST, port) as vs_cli:
+        answer = vs_cli.get("sim_info")
+        print(f"Simulator: {answer['product']}")
+        print(f"Version: {answer['version']}")
+        answer = vs_cli.get("variables")
+        print("Public variables:")
+        for var in answer['value']:
+            print(f"- {var}")
         test_spi_master_simple(vs_cli)

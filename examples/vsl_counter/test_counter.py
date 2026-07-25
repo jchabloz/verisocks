@@ -42,9 +42,19 @@ def vs():
 
 def test_counter(vs):
 
+    answer = vs.get("sim_info")
+    assert (answer["type"] == "result")
+    logging.info(f"Simulator: {answer['product']}")
+    logging.info(f"Version: {answer['version']}")
+    logging.info(f"Time precision: {answer['time_precision']}")
+
     answer = vs.get("variables")
     assert (answer["type"] == "result")
     logging.info(f"Available variables: {answer['value']}")
+
+    answer = vs.get("clocks")
+    assert (answer["type"] == "result")
+    logging.info(f"Available clocks: {answer['value']}")
 
     # Run the simulation for some time and verify that the returned answer is
     # an acknowledgement

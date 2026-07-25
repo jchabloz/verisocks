@@ -328,8 +328,49 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_variables) {
     VSL_MSG_ADD_STR(p_msg, "type", "result");
 
     /* Add variables names to the message object */
-    if (0 > vx.var_map.add_var_names_to_msg(p_msg, "value")) {
+    if (0 > vx.var_map.add_vars_to_msg(p_msg, "value")) {
         vs_log_mod_error(__MOD__, "Could not add variables names to object");
+        handle_error();
+        return;
+    }
+
+    /* Finalize and send return message */
+    VSL_MSG_CREATE(str_msg, p_msg, msg_info);
+    VSL_MSG_WRITE(str_msg, vx);
+
+    /* Normal exit */
+    if (nullptr != p_msg) cJSON_Delete(p_msg);
+    if (nullptr != str_msg) cJSON_free(str_msg);
+    vx._state = VSL_STATE_WAITING;
+    return;
+}
+
+/******************************************************************************
+Get clocks sub-command handler
+******************************************************************************/
+template<typename T>
+void VslInteg<T>::VSL_CMD_HANDLER(get_clocks) {
+    cJSON *p_msg;
+    char *str_msg = nullptr;
+    vs_msg_info_t msg_info = VS_MSG_INFO_INIT_JSON;
+    vs_msg_copy_uuid(&msg_info, &vx.uuid);
+
+    /* Lambda function - error handler */
+    auto handle_error = [&](){
+        if (nullptr != p_msg) cJSON_Delete(p_msg);
+        if (nullptr != str_msg) cJSON_free(str_msg);
+        vx._state = VSL_STATE_WAITING;
+        VSL_MSG_RETURN(vx, "error",
+            "Error processing command get(sel=clocks) - Discarding");
+    };
+
+    /* Create return message object */
+    VSL_MSG(p_msg);
+    VSL_MSG_ADD_STR(p_msg, "type", "result");
+
+    /* Add variables names to the message object */
+    if (0 > vx.clock_map.add_clocks_to_msg(p_msg, "value")) {
+        vs_log_mod_error(__MOD__, "Could not add clocks to object");
         handle_error();
         return;
     }

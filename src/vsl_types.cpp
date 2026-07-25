@@ -388,7 +388,7 @@ VslVar* VslVarMap::get_var(const std::string& str_path) {
     return nullptr;
 }
 
-int VslVarMap::add_var_names_to_msg(cJSON* p_msg, const char* key) {
+int VslVarMap::add_vars_to_msg(cJSON* p_msg, const char* key) {
     cJSON* p_obj = nullptr;
     p_obj = cJSON_AddArrayToObject(p_msg, key);
     if (p_obj == nullptr) {
