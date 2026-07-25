@@ -253,6 +253,14 @@ public:
         register_variable(namep, eventp, VLVT_UINT8, VSL_TYPE_EVENT, 1u);
     }
 
+    /**
+     * @brief Sets the user sim information
+     * 
+     * The user sim info text is returned with the get(sim_info) Verisocks
+     * command in the user_info field. It can be an arbitrary text.
+     * 
+     * @param txt User information text
+     */
     void set_user_sim_info(const char* txt) {
         sim_user_info = std::string {txt};
     }

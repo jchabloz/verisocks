@@ -90,15 +90,17 @@ below.
                                 #  verilated with the timing option
       log_level: <text>         # (optional, info) Logging level
                                 # [info, debug, warning, error, critical]
+      user_sim_info: <text>     # (optional) User sim info
       exec_version: <text>      # (optional) Version of generated executable
       exec_doc: <text>          # (optional) Doc for generated executable help
       bug_address: <text>       # (optional) Address for bugs for generated
                                 #  executable help
 
     sub_files:                  # (optional) List of other YAML files that will
-    - <path>                    # be merged with this file. For example, all
-                                # variables could be listed in another YAML file
-                                # that is shared by several possible configurations.
+    - <path>                    # be merged (one one hierarchical level only!)
+                                # with this file. For example, all variables
+                                # could be listed in a separate YAML file that
+                                # is shared by several possible configurations.
 
     variables:                  # (optional) Public variables
       clocks:                   # (optional) List of clock variables

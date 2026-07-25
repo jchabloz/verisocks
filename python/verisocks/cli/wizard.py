@@ -159,6 +159,8 @@ public variables (default:variables.vlt)")
         cfg['config']['verilog_inc_dirs'] = []
     if 'verilator_arg_files' not in cfg['config']:
         cfg['config']['verilator_arg_files'] = []
+    if 'user_sim_info' not in cfg['config']:
+        cfg['config']['user_sim_info'] = None
 
     def format_config_paths(k):
         if k in cfg['config']:

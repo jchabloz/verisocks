@@ -186,6 +186,11 @@ int main(int argc, char** argv, char**) {
     vsl::VslInteg<${prefix}> vslx{
         topp.get(), arguments.port_number, arguments.timeout};
 
+    % if user_sim_info:
+    // User sim info
+    vslx.set_user_sim_info("${user_sim_info}");
+
+    % endif
     % if variables:
     // Register public variables
     % if 'clocks' in variables:

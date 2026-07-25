@@ -60,6 +60,7 @@ Releases of documentation and code are using the same version numbers.
     file
   * New: optional :yaml:`exec_version`, :yaml:`exec_doc` and
     :yaml:`bug_address` configuration parameter in YAML file
+  * New: :yaml:`user_sim_info` configuration parameter in YAML file
   * Modified: In the configuration file, the choices for the variables type is
     limited to either :yaml:`int` or :yaml:`real`. Detailed type is inferred by
     the script from the value of :yaml:`width`. It is also now optional, the
