@@ -9,7 +9,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/jchabloz/verisocks?logo=github)
 [![Builds and test CI badge](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/makefile.yml)
 [![Builds and deploy docs CI badge](https://github.com/jchabloz/verisocks/actions/workflows/builddocs.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/builddocs.yml)
-
+[![Build and publish Python Package](https://github.com/jchabloz/verisocks/actions/workflows/buildpackage.yml/badge.svg)](https://github.com/jchabloz/verisocks/actions/workflows/buildpackage.yml)
 
 Repository: [**github.com/jchabloz/verisocks**](https://github.com/jchabloz/verisocks)<br>
 Documentation: [**jchabloz.github.io/verisocks**](https://jchabloz.github.io/verisocks/)
@@ -48,6 +48,15 @@ Procedural Interface (VPI)* to make it possible to control an Icarus simulation
 (or ideally, any other Verilog simulator, commercial or not) from Python. And
 while we're at it, why not consider a solution which would enable to easily
 interface with almost any other high-level scripting language or tool?
+
+### Verilator integration
+
+As I started using initial prototypes extensively with Icarus, I quickly hit a
+limit in terms of execution time when I started running bigger designs. I
+decided to also integrate the Verisocks protocol within a Verilator-based
+application. Instead of using the VPI interface, I decided to develop a C++ API
+which enables to easily create a Verisocks server application from the
+verilated HDL design. This API is available from version 1.3.0 onwards.
 
 ## Architecture overview
 
