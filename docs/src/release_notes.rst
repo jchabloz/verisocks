@@ -20,6 +20,10 @@ Releases of documentation and code are using the same version numbers.
     3. ``PATCH`` version when you make backward compatible bug fixes
 
 
+1.7.0 - Ongoing
+***************
+
+
 1.6.0 - 2026-07-26
 ******************
 
