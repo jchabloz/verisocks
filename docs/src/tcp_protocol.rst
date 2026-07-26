@@ -261,7 +261,7 @@ gets back to Verisocks.
 
   * :json:`"time":` (number): Time value (either as a time difference or as an
     absolute simulation time). For example :json:`"time": 3.2`
-  * :json:`"time_unit":` (string): Time unit (``"s"``, ``"ms"``, ``"us"``,
+  * :json:`"time_unit":` (text): Time unit (``"s"``, ``"ms"``, ``"us"``,
     ``"ns"``, ``"ps"`` or ``"fs"``) which applies to the ``"time"`` field
     value. Be aware that depending on the simulator time resolution, the
     provided time value can be truncated.
@@ -269,7 +269,7 @@ gets back to Verisocks.
   If the ``"cb"`` field is ``"until_change"``, the following fields are further
   expected in the command frame:
 
-  * :json:`"path":` (string): Path to verilog object used for the callback
+  * :json:`"path":` (text): Path to verilog object used for the callback
   * :json:`"value":` (number): Condition on the verilog object's value for the
     callback to be executed. This argument is not required if the path
     corresponds to a named event.
@@ -303,11 +303,15 @@ This command can be used to get pieces of information from the simulator.
     * :json:`"sel": "sim_time"` - The simulator (absolute) time is returned,
     * :json:`"sel": "value"` - The value of a simulator variable is returned,
     * :json:`"sel": "type"` - The VPI type of a simulator variable is returned.
+    * :json:`"sel": "variables"` - The list of registered variables is returned
+      (Verilator integration only)
+    * :json:`"sel": "clocks"` - The list of registered clocks is returned
+      (Verilator integration only)
 
   If the ``"sel"`` field is ``"value"`` or ``"type"``, the following field is
   required in the command frame:
 
-    * :json:`"path":` (string): Path to the verilog variable
+    * :json:`"path":` (text): Path to the verilog variable
 
   For the :json:`"path":` field, selecting only a specific index of an array is
   also possible by using the :code:`[]` operator, e.g.
@@ -318,16 +322,16 @@ This command can be used to get pieces of information from the simulator.
 * Returned frame (for :json:`"sel": "sim_info"`):
 
   * :json:`"type": "result"`
-  * :json:`"product":` (string): Simulator product name
-  * :json:`"version":` (string): Simulator version
-  * :json:`"time_unit":` (string): Simulator time unit
-  * :json:`"time_precision":` (string): Simulator time precision
+  * :json:`"product":` (text): Simulator product name
+  * :json:`"version":` (text): Simulator version
+  * :json:`"time_unit":` (text): Simulator time unit
+  * :json:`"time_precision":` (text): Simulator time precision
 
   The Verilator integration API version of Verisocks further includes the
   following fields:
 
-  * :json:`"model_name":` (string): Model name
-  * :json:`"model_hier_name":` (string): Model top instance name
+  * :json:`"model_name":` (text): Model name
+  * :json:`"model_hier_name":` (text): Model top instance name
 
 * Returned frame (for :json:`"sel": "sim_time"`):
 
@@ -348,6 +352,18 @@ This command can be used to get pieces of information from the simulator.
   Note that this selection value is currently not supported by the Verilator
   integration API version of Verisocks. A warning message will be returned.
 
+* Returned frame (for :json:`"sel": "variables"`):
+
+  * :json:`"type": "result"`
+  * :json:`"value":` (array): List of publicly available variables (Verilator
+    integration only)
+
+* Returned frame (for :json:`"sel": "clocks"`):
+
+  * :json:`"type": "result"`
+  * :json:`"value":` (array): List of regitstered, available clocks, including
+    period, duty cycle and enabled flag status (Verilator integration only)
+
 With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.get() <verisocks.verisocks.Verisocks.get>`
 corresponds to this command.
@@ -362,7 +378,7 @@ This command can be used to forcefully set the value of a simulator variable.
 * JSON payload fields:
 
   * :json:`"command": "set"` Command name
-  * :json:`"sel":` (string): Sub-command selector. This field is *optional* to
+  * :json:`"sel":` (text): Sub-command selector. This field is *optional* to
     ensure back-compatibility with previous versions of the protocol. If it is
     not provided, the command `set` will behave as :json:`"sel": "value"`. The
     following values are possible:
@@ -377,7 +393,7 @@ This command can be used to forcefully set the value of a simulator variable.
   Independently of the value for the field ``"sel"``, the ``"path"`` field has
   to be provided as follows:
 
-  * :json:`"path":` (string): Path to the simulator variable to be set
+  * :json:`"path":` (text): Path to the simulator variable to be set
 
     Selecting only a specific index of an array is also possible by using the
     :code:`[]` operator, e.g. :json:`"<path_to_array>[4]"`. The Verilator
@@ -402,7 +418,7 @@ This command can be used to forcefully set the value of a simulator variable.
   ``"dc"`` shall be defined as follows:
 
     * :json:`"period":` (number): Period duration,
-    * :json:`"unit":` (string): Time unit (``"s"``, ``"ms"``, ``"us"``,
+    * :json:`"unit":` (text): Time unit (``"s"``, ``"ms"``, ``"us"``,
       ``"ns"``, ``"ps"`` or ``"fs"``) which applies to the ``"period"`` field
       value,
     * :json:`"dc":` (number): Duty cycle (shall be strictly larger than 0.0 and
@@ -416,3 +432,37 @@ This command can be used to forcefully set the value of a simulator variable.
 With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.set() <verisocks.verisocks.Verisocks.set>`
 corresponds to this command.
+
+Returned messages
+*****************
+
+As documented in the section :ref:`sec_tcp_commands`, each command shall have
+its own *return message* with a specific, expected content in case of normal
+execution of the command. All return messages are expected to contain at least
+the following field:
+
+  * :json:`"type":` (text): Specifies which is the type of the returned
+    message. It can be either:
+
+    * :json:`"ack"` (the returned message is an *acknowledgement*), which
+      confirms the good execution of a command that is not expected to return a
+      specific result
+    * :json:`"result"` (the returned message provides a *result*)
+    * :json:`"itx"` (the returned message signals an *interrupt*, either
+      *blocking* or *non-blocking*)
+
+Other fields in return messages are dependent of the initating command for the
+given transaction and are documented for each commands in the previous section
+:ref:`sec_tcp_commands`.
+
+From version ``1.6.0``, the following fields shall also be available for each
+and every return messages, such as to timestamp each return message:
+
+  * :json:`"sim_time":` (number): Current simulation time
+  * :json:`"sim_time_unit":` (text): Current simulation time unit
+
+.. note::
+    The addition of a timestamp in simlation time unit to each return message
+    makes the command :json:`{"command": "get", "sel": "sim_time"}` obviously
+    obsolete... It shall thus be considered as deprecated from version 1.6.0.
+

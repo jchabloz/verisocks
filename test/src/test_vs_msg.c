@@ -9,8 +9,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
+
 #include "vs_msg.h"
 
 

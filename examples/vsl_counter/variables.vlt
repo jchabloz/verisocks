@@ -3,4 +3,3 @@
 public -module "counter" -var "clk"
 public -module "counter" -var "arst_b"
 public -module "counter" -var "count"
-public -module "counter" -var "clk"

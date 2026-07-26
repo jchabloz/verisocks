@@ -17,6 +17,7 @@ SRC = ["spi_master.v", "spi_slave.v", "spi_master_tb.v"]
 cwd = os.path.dirname(__file__)
 dump_file = os.path.join(cwd, "spi_master_tb.fst")
 
+
 def setup_test():
     setup_sim(
         LIBVPI,

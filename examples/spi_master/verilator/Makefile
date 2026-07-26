@@ -25,7 +25,7 @@ VL_SRCS = \
 
 # Testbench C++ source files
 TB_CPP_SRCS = \
-	test_main.cpp
+	test_main.cpp 
 
 # Build folders
 VL_OBJ_DIR = vl_obj_dir
@@ -36,22 +36,7 @@ VS_LOG_LEVEL = $(LOG_LEVEL_DEBUG)
 #*****************************************************************************
 # Top rule
 #*****************************************************************************
-all: Makefile test_main.cpp variables.vlt default
-
-#*****************************************************************************
-# Wizard-generated files
-#*****************************************************************************
-Makefile: config.yaml
-	@echo "Re-generating Makefile"
-	vsl-wizard --makefile-only --makefile $@ $<
-
-test_main.cpp: config.yaml
-	@echo "Re-generating top-level testbench file"
-	vsl-wizard --tb-only --testbench-file $@ $<
-
-variables.vlt: config.yaml
-	@echo "Re-generating variables file"
-	vsl-wizard --vlt-only --variables-file $@ $<
+all: default
 
 #*****************************************************************************
 # Include generic Makefile

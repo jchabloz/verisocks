@@ -12,10 +12,17 @@ BUILDDIR      = _build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-doxygen:
+doxygen: doxygen/html/index.html
+
+doxygen/html/index.html:
 	$(MAKE) -f doxygen.mk
 
-.PHONY: help doxygen Makefile
+clean:
+	$(RM) -r doxygen
+	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	$(RM) -r $(BUILDDIR)
+
+.PHONY: help doxygen Makefile clean
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2025 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@ SOFTWARE.
 
 #include "vpi_config.h"
 #include "vs_msg.h"
+#include "vs_utils.h"
+#include "vs_itx.h"
 #include "cJSON.h"
 #include <stdint.h>
 
@@ -40,17 +42,24 @@ SOFTWARE.
 extern "C" {
 #endif
 
+#define VS_VPI_RETURN(p_vpi_data, type, msg) \
+    vs_vpi_return(p_vpi_data->fd_client_socket, type, msg, \
+        &(p_vpi_data->uuid), p_vpi_data->sim_time, \
+        p_vpi_data->time_def.repr_unit \
+    )
+
 /**
  * @brief Enum state
  */
 typedef enum {
-    VS_VPI_STATE_START,         ///Initial state, server socket not initialized
-    VS_VPI_STATE_CONNECT,       ///Socket created, bound to address, waiting for connection
-    VS_VPI_STATE_WAITING,       ///Connected and waiting to receive a command
-    VS_VPI_STATE_PROCESSING,    ///Processing a command
-    VS_VPI_STATE_SIM_RUNNING,   ///Simulation running
-    VS_VPI_STATE_EXIT,          ///Exiting Verisocks
-    VS_VPI_STATE_ERROR,         ///Error state (e.g. timed out while waiting for a connection)
+    VS_VPI_STATE_START,         ///<Initial state, server socket not initialized
+    VS_VPI_STATE_CONNECT,       ///<Socket created, bound to address, waiting for connection
+    VS_VPI_STATE_WAITING,       ///<Connected and waiting to receive a command
+    VS_VPI_STATE_PROCESSING,    ///<Processing a command
+    VS_VPI_STATE_SIM_RUNNING,   ///<Simulation running
+    VS_VPI_STATE_SIM_BLOCKED,   ///<Simulation blocked by an ITX
+    VS_VPI_STATE_EXIT,          ///<Exiting Verisocks
+    VS_VPI_STATE_ERROR,         ///<Error state (e.g. timed out while waiting for a connection)
     VS_VPI_STATE_ENUM_LEN
 } vs_vpi_state_t;
 
@@ -58,15 +67,18 @@ typedef enum {
  * @brief Structure type to hold VPI user data
  */
 typedef struct vs_vpi_data {
-    vs_vpi_state_t state;   ///Current state
-    vpiHandle h_systf;      ///VPI handle for system task instance
-    int timeout_sec;        ///Socket timeout setting in seconds
-    int fd_server_socket;   ///File descriptor for open server socket
-    int fd_client_socket;   ///File descriptor for currently open connection
-    cJSON *p_cmd;           ///Pointer to current/latest command
-    vpiHandle h_cb;         ///Callback handle (used for value change callback)
-    s_vpi_value value;      ///Value (used for value change callback)
-    vs_uuid_t uuid;         ///Current transaction UUID
+    vs_vpi_state_t state;   ///<Current state
+    vpiHandle h_systf;      ///<VPI handle for system task instance
+    int timeout_sec;        ///<Socket timeout setting in seconds
+    int fd_server_socket;   ///<File descriptor for open server socket
+    int fd_client_socket;   ///<File descriptor for currently open connection
+    cJSON *p_cmd;           ///<Pointer to current/latest command
+    vpiHandle h_cb;         ///<Callback handle ("main" callback)
+    s_vpi_value value;      ///<Value (used for value change callback)
+    vs_uuid_t uuid;         ///<Current transaction UUID
+    vs_time_def_t time_def; ///<Timescale definition
+    uint64_t sim_time;      ///<Current simulation time
+    vs_vpi_itx_t itx_table[VS_VPI_MAX_ITX]; ///<Interrupts table
 } vs_vpi_data_t;
 
 /**
@@ -84,13 +96,15 @@ int vs_vpi_process_command(vs_vpi_data_t *p_data);
  * @param str_type Type
  * @param str_value Value
  * @param p_uuid Pointer to UUID structure (valid or not)
+ * @param time Current (simulation) time
+ * @param time_unit Current time unit
  * @return Returns 0 if successful, -1 if an error occurred
  */
 int vs_vpi_return(int fd, const char *str_type, const char *str_value,
-    const vs_uuid_t *p_uuid);
+    const vs_uuid_t *p_uuid, const uint64_t time, const char* time_unit);
 
-extern PLI_INT32 verisocks_cb(p_cb_data cb_data);
-extern PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
+PLI_INT32 verisocks_cb(p_cb_data cb_data);
+PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
 
 /**
  * @brief Type for a command handler function pointer
@@ -102,9 +116,9 @@ typedef int (*cmd_handler_t)(vs_vpi_data_t*);
  * Associates a command name with a command handler function pointer
  */
 typedef struct vs_vpi_cmd {
-    cmd_handler_t cmd_handler;  // Pointer to handler function
-    const char *cmd_name;       // Command name
-    const char *cmd_key;        // Command key if not cmd_name, NULL otherwise
+    cmd_handler_t cmd_handler;  ///<Pointer to handler function
+    const char *cmd_name;       ///<Command name
+    const char *cmd_key;        ///<Command key if not cmd_name, NULL otherwise
 } vs_vpi_cmd_t;
 
 /**
@@ -142,6 +156,23 @@ cmd_handler_t vs_vpi_get_cmd_handler(
 
 extern const vs_vpi_cmd_t vs_vpi_cmd_get_table[];
 extern const vs_vpi_cmd_t vs_vpi_cmd_run_table[];
+
+/**
+ * @brief Register "in time" interrupt
+ * @param name Name of the interrupt
+ * @param time Interrupt time period
+ * @param timeunit Time unit
+ * @param flags Interrupts flags
+ * @param itx_table Interrupt table
+ */
+int vs_vpi_register_in_time_itx(
+    const char *name, const double time, const char *time_unit,
+    vs_vpi_itx_flags_t flags, vs_vpi_data_t *p_vpi_data);
+
+/**
+ * @brief Return message in case of ITX
+ */
+int vs_vpi_itx_return(const vs_vpi_itx_t *p_itx);
 
 #ifdef __cplusplus
 }

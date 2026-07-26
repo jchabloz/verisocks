@@ -42,11 +42,11 @@ initial begin
     `ifndef VERILATOR
     $display("INFO [Top]: Initializing Verisocks");
     $verisocks_init(`NUM_PORT, `VS_TIMEOUT);
-    `endif
 
     `ifdef DUMP_FILE
     $dumpfile(`DUMP_FILE);
     $dumpvars(0, main);
+    `endif
     `endif
 
     `ifdef VERILATOR

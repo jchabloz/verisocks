@@ -44,9 +44,11 @@ module spi_master_tb();
     /* Initial loop */
     initial begin
 	
+        `ifndef VERILATOR
         `ifdef DUMP_FILE
         $dumpfile(`DUMP_FILE);
         $dumpvars(0, spi_master_tb);
+        `endif
         `endif
 
         /* Launch Verisocks server after other initialization */

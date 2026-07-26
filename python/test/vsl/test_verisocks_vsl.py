@@ -30,8 +30,8 @@ def setup_test(port, timeout, capture_output=True,
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         os.path.join(cwd, "Vmain"),
-        f"{port}",
-        f"{timeout}"
+        "-p", f"{port}",
+        "-t", f"{timeout}"
     ]
     pop = setup_sim_run(
         elab_cmd,
@@ -170,12 +170,23 @@ def test_get_type(vs):
     logging.info(repr(answer))
 
 
+def test_get_variables(vs):
+    """Tests Verisocks get(sel="variables") function"""
+    answer = vs.get(sel="variables")
+    assert answer['type'] == "result"
+    variables = answer['value']
+    assert len(variables) == 6
+    assert variables[-1] == "main.clk"
+
+
 def test_run_for_time(vs):
     """Tests Verisocks run(cb="for_time") function"""
 
     # Get initial time
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
+    assert answer["sim_time"] == 0
+    assert answer["sim_time_unit"] == "ps"
     prev_sim_time = answer["time"]
 
     # For time in ps
@@ -189,6 +200,8 @@ def test_run_for_time(vs):
     # For time in ns
     answer = vs.run(cb="for_time", time=7, time_unit="ns")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 7006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(7e-9)
@@ -197,6 +210,8 @@ def test_run_for_time(vs):
     # For time in us
     answer = vs.run(cb="for_time", time=8, time_unit="us")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 8007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(8e-6)
@@ -205,6 +220,8 @@ def test_run_for_time(vs):
     # For time in ms
     answer = vs.run(cb="for_time", time=0.23, time_unit="ms")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 238007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(0.23e-3)
@@ -213,6 +230,8 @@ def test_run_for_time(vs):
     # For time in s
     answer = vs.run(cb="for_time", time=0.00017, time_unit="s")
     assert answer["type"] == "ack"
+    assert answer["sim_time"] == 408007006
+    assert answer["sim_time_unit"] == "ps"
     answer = vs.get(sel="sim_time")
     assert answer["type"] == "result"
     assert answer["time"] - prev_sim_time == pytest.approx(0.17e-3)

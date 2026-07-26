@@ -16,8 +16,8 @@ def setup_test(port=5100, timeout=10):
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         join(cwd, "Vspi_master_tb"),
-        f"{port}",
-        f"{timeout}"
+        "-p", f"{port}",
+        "-t", f"{timeout}"
     ]
     pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
@@ -120,4 +120,11 @@ if __name__ == "__main__":
     port = find_free_port()
     setup_test(port, TIMEOUT)
     with Verisocks(HOST, port) as vs_cli:
+        answer = vs_cli.get("sim_info")
+        print(f"Simulator: {answer['product']}")
+        print(f"Version: {answer['version']}")
+        answer = vs_cli.get("variables")
+        print("Public variables:")
+        for var in answer['value']:
+            print(f"- {var}")
         test_spi_master_simple(vs_cli)

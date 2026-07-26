@@ -56,6 +56,7 @@ Features
   src/intro
   src/architecture
   src/tcp_protocol
+  src/itx
   src/verilator_integ
   src/python_client
   src/examples

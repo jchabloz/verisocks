@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2022-2025 Jérémie Chabloz
+# Copyright (c) 2022-2026 Jérémie Chabloz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -621,6 +621,10 @@ Still {self._rx_expected} messages expected.")
               with the keywords :code:`"time"`, in seconds.
             * ``"value"``: Gets the value for a verilog object.
             * ``"type"``: Gets the VPI type value for a verilog object.
+            * ``"variables"``: Gets the list of registered variables (Verilator
+              integration only).
+            * ``"type"``: Gets the list of registered clocks (Verilator
+              integration only)
 
         Returns:
             JSON object: Content of returned message

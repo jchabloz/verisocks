@@ -1,0 +1,11 @@
+//Note: This file has been generated from the template templates/variables.vlt.mako
+`verilator_config
+public -module "cdc_counter" -var "clk1"
+public -module "cdc_counter" -var "clk2"
+public -module "cdc_counter" -var "arstb"
+public -module "cdc_counter" -var "clk1_count"
+public -module "cdc_counter" -var "clk2_count"
+public -module "clk_checker" -var "time_dc"
+public -module "clk_checker" -var "time_period"
+public -module "clk_checker" -var "time_dc"
+public -module "clk_checker" -var "time_period"

@@ -7,7 +7,7 @@
 /*
 MIT License
 
-Copyright (c) 2022-2025 Jérémie Chabloz
+Copyright (c) 2022-2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,16 @@ SOFTWARE.
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+/**
+ * @brief Structure for representing a time format definition.
+ */
+typedef struct s_vs_time_def {
+    int factor;
+    const char *name;
+    int repr_factor;
+    const char *repr_unit;
+} vs_time_def_t;
 
 /**
  * @brief Convert VPI time struct to a real (double) value
@@ -60,6 +70,27 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
  * @return s_vpi_time struct with vpiSimTime type
  */
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
+
+/**
+ * @brief Get current simulation time in seconds
+ * 
+ * @return Simulation time in seconds
+ */
+double vs_utils_get_sim_time_sec(void);
+
+/**
+ * @brief Get current simulation time as an integer in representation unit
+ * 
+ * @return Simulation time in representation unit
+ */
+PLI_UINT64 vs_utils_get_sim_time(const vs_time_def_t time_def);
+
+/**
+ * @brief Get simulation time definition
+ * 
+ * @return Time definition structure
+ */
+vs_time_def_t vs_utils_get_sim_time_def(void);
 
 /**
  * @brief Get the Verisocks interface format of choice to represent the value
@@ -112,22 +143,20 @@ PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value);
 PLI_INT32 vs_utils_add_value(s_vpi_value value, cJSON* p_msg, const char* key);
 
 /**
+ * @brief Returns time definition based on integer time factor
+ *
+ * @param time_factor Integer time factor
+ * @return Pointer to time definition structure
+ */
+const vs_time_def_t* vs_utils_get_time_def(const PLI_INT32 time_factor);
+
+/**
  * @brief Returns time unit based on integer time factor
  *
  * @param time_factor Integer time factor
  * @return Pointer to null-terminated string
  */
 const char* vs_utils_get_time_unit(const PLI_INT32 time_factor);
-
-/**
- * @brief Structure definition for representing a time value.
- *
- * This structure is used to store and manipulate time-related data.
- */
-typedef struct s_vs_time_def {
-    int factor;
-    const char *name;
-} vs_time_def_t;
 
 #ifdef __cplusplus
 }

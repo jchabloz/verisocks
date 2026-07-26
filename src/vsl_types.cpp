@@ -33,6 +33,9 @@ SOFTWARE.
 #include "verilated.h"
 #include <any>
 
+#undef __MOD__
+#define __MOD__ "vsl_types"
+
 namespace vsl{
 
 template <typename T>
@@ -88,7 +91,7 @@ double VslVar::get_value() {
                     return __get_value<double>(datap);
                 default:
                     vs_log_mod_warning(
-                        "vsl_types",
+                        __MOD__,
                         "Type not supported (yet) for scalar variable - \
 Returning 0.0"
                     );
@@ -176,7 +179,7 @@ int VslVar::set_value(double value) {
                     return 0;
                 default:
                     vs_log_mod_error(
-                        "vsl_types",
+                        __MOD__,
                         "Type not supported (yet) for scalar variable");
                     return -1;
             }
@@ -186,7 +189,7 @@ int VslVar::set_value(double value) {
                 return 0;
             } else {
                 vs_log_mod_error(
-                    "vsl_types",
+                    __MOD__,
                     "Type not supported for clock variable");
                 return -1;
             }
@@ -195,11 +198,11 @@ int VslVar::set_value(double value) {
             return 0;
         case VSL_TYPE_PARAM:
             vs_log_mod_error(
-                "vsl_types", "Cannot set parameter value");
+                __MOD__, "Cannot set parameter value");
             return -1;
         default:
             vs_log_mod_error(
-                "vsl_types", "Cannot set variable value (non-scalar)");
+                __MOD__, "Cannot set variable value (non-scalar)");
             return -1;
     }
 }
@@ -209,7 +212,7 @@ int VslVar::set_array_value(double value, size_t index) {
         case VSL_TYPE_ARRAY:
             if (index > (depth - 1)) {
                 vs_log_mod_error(
-                    "vsl_types", "Index exceeds array depth");
+                    __MOD__, "Index exceeds array depth");
                 return -1;
             }
             switch (vltype) {
@@ -230,12 +233,12 @@ int VslVar::set_array_value(double value, size_t index) {
                     return 0;
                 default:
                     vs_log_mod_error(
-                        "vsl_types", "Type not supported for array value");
+                        __MOD__, "Type not supported for array value");
                     return -1;
             }
         default:
             vs_log_mod_error(
-                "vsl_types", "Cannot set value (not part of an array)");
+                __MOD__, "Cannot set value (not part of an array)");
             return -1;
     }
 }
@@ -244,21 +247,21 @@ int VslVar::set_array_variable_value(cJSON* p_obj) {
     /* Detect if the variable is not an array */
     if (type != VSL_TYPE_ARRAY) {
         vs_log_mod_error(
-            "vsl_types", "Variable is not an array as expected");
+            __MOD__, "Variable is not an array as expected");
         return -1;
     }
 
     /* Detect if the JSON object is not an array object */
     if (!cJSON_IsArray(p_obj)) {
         vs_log_mod_error(
-            "vsl_types", "Command field \"value\" should be an array");
+            __MOD__, "Command field \"value\" should be an array");
         return -1;
     }
 
     /* Verify that the arrays sizes are corresponding */
     if (depth != (size_t) cJSON_GetArraySize(p_obj)) {
         vs_log_mod_error(
-            "vsl_types",
+            __MOD__,
             "Command field \"value\" should be an array of length %d",
             (int) depth);
         return -1;
@@ -294,16 +297,13 @@ int VslVar::add_value_to_msg(cJSON* p_msg, const char* key) {
                     return 0;
                 default:
                     vs_log_mod_error(
-                        "vsl_type",
+                        __MOD__,
                         "Type not supported for adding value to JSON message"
                     );
                     return -1;
             }
         default:
-            vs_log_mod_error(
-                "vsl_type",
-                "Non-scalar value"
-            );
+            vs_log_mod_error(__MOD__, "Non-scalar value");
             return -1;
     }
     return 0;
@@ -316,14 +316,14 @@ int VslVar::add_array_to_msg(cJSON* p_msg, const char* key) {
         case VSL_TYPE_ARRAY:
             if (dims != 2) {
                 vs_log_mod_error(
-                    "vsl_type",
+                    __MOD__,
                     "Variable dimension is not as expected"
                 );
                 return -1;
             }
             p_array = cJSON_AddArrayToObject(p_msg, key);
             if (p_array == nullptr) {
-                vs_log_mod_error("vsl_type", "Could not create cJSON array");
+                vs_log_mod_error(__MOD__, "Could not create cJSON array");
                 return -1;
             }
             cJSON_bool retval;
@@ -333,18 +333,14 @@ int VslVar::add_array_to_msg(cJSON* p_msg, const char* key) {
                     cJSON_CreateNumber(get_array_value(mem_index))
                 );
                 if (1 != retval) {
-                    vs_log_mod_error(
-                        "vsl_type", "Error adding number to array");
+                    vs_log_mod_error(__MOD__, "Error adding number to array");
                     return -1;
                 }
                 mem_index++;
             }
             return 0;
         default:
-            vs_log_mod_error(
-                "vsl_type",
-                "Non-array value"
-            );
+            vs_log_mod_error(__MOD__, "Non-array value");
             return -1;
     }
     return 0;
@@ -362,7 +358,7 @@ int VslVar::add_array_to_msg(cJSON* p_msg, const char* key,
     }
     p_obj = cJSON_AddArrayToObject(p_msg, key);
     if (p_obj == nullptr) {
-        vs_log_mod_error("vsl_type", "Could not create cJSON array");
+        vs_log_mod_error(__MOD__, "Could not create cJSON array");
         return -1;
     }
     cJSON_bool retval;
@@ -373,8 +369,7 @@ int VslVar::add_array_to_msg(cJSON* p_msg, const char* key,
             cJSON_CreateNumber(get_array_value(mem_index))
         );
         if (1 != retval) {
-            vs_log_mod_error(
-                "vsl_type", "Error adding number to array");
+            vs_log_mod_error(__MOD__, "Error adding number to array");
             return -1;
         }
         mem_index += range.incr;
@@ -387,10 +382,33 @@ VslVar* VslVarMap::get_var(const std::string& str_path) {
     if (search != var_map.end()) {
         return &var_map[str_path];
     }
-    vs_log_mod_error("vsl_types",
+    vs_log_mod_error(__MOD__,
         "Could not find variable %s in registered variables map",
         str_path.c_str());
     return nullptr;
+}
+
+int VslVarMap::add_vars_to_msg(cJSON* p_msg, const char* key) {
+    cJSON* p_obj = nullptr;
+    p_obj = cJSON_AddArrayToObject(p_msg, key);
+    if (p_obj == nullptr) {
+        vs_log_mod_error(__MOD__, "Could not create cJSON array");
+        return -1;
+    }
+    if (!empty()) {
+        cJSON_bool retval;
+        for (const auto& it : var_map) {
+            retval = cJSON_AddItemToArray(
+                p_obj,
+                cJSON_CreateString(it.first.c_str())
+            );
+            if (1 != retval) {
+                vs_log_mod_error(__MOD__, "Error adding string to array");
+                return -1;
+            }
+        }
+    }
+    return 0;
 }
 
 } //namespace vsl

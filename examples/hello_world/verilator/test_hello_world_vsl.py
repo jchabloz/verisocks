@@ -15,8 +15,8 @@ def setup_test(port=5100, timeout=10):
     elab_cmd = ["make", "-C", cwd]
     sim_cmd = [
         join(cwd, "hello_world"),
-        f"{port}",
-        f"{timeout}"
+        "-p", f"{port}",
+        "-t", f"{timeout}"
     ]
     pop = setup_sim_run(elab_cmd, sim_cmd, capture_output=True)
     return pop
@@ -45,6 +45,7 @@ def test_hello_world(vs):
     assert answer['type'] == "result"
     print(f"Simulator: {answer['product']}")
     print(f"Version: {answer['version']}")
+    print(f"User info: {answer['user_info']}")
 
     answer = vs.info("Hello World!")
     assert answer['type'] == "ack"

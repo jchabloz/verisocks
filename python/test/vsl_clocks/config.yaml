@@ -1,0 +1,62 @@
+# Define configuration
+# Note: if relative paths are defined, they are considered as relative to this
+# file's own location.
+config:
+  prefix: Vcounters
+  top: counters
+  verilog_src_files:
+  - counters.v
+  - rst_sync.v
+  - clk_checker.v
+  verisocks_root: ../../..  # Verisocks root path
+  verilator_path: /usr/local/bin/verilator
+  verilator_root: /usr/local/share/verilator
+  build_dir: build
+  use_tracing: false
+  use_fst: true
+  use_timing: false
+  log_level: debug
+
+variables:
+  clocks:
+    - path: clk1
+      module: cdc_counter
+      period: 1.4
+      unit: us
+      duty_cycle: 0.4
+      enable: true
+    - path: clk2
+      module: cdc_counter
+      period: 20.0
+      unit: us
+      duty_cycle: 0.6
+      enable: true
+  scalars:
+    - path: arstb
+      module: cdc_counter
+      type: int
+      width: 1
+    - path: clk1_count
+      module: cdc_counter
+      type: int
+      width: 10
+    - path: clk2_count
+      module: cdc_counter
+      type: int
+      width: 10
+    - path: counters.clk1_checker.time_dc
+      name: clk1_dc
+      module: clk_checker
+      type: real
+    - path: counters.clk1_checker.time_period
+      name: clk1_period
+      module: clk_checker
+      type: real
+    - path: counters.clk2_checker.time_dc
+      name: clk2_dc
+      module: clk_checker
+      type: real
+    - path: counters.clk2_checker.time_period
+      name: clk2_period
+      module: clk_checker
+      type: real

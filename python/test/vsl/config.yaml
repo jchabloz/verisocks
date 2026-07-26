@@ -15,26 +15,25 @@ variables:
   scalars:
   - path: main.clk
     module: main
-    type: uint8
+    type: int
     width: 1
   - path: main.count
     module: main
-    type: uint8
+    type: int
     width: 8
   arrays:
   - path: main.count_memory
     module: main
-    type: uint8
+    type: int
     width: 8
     depth: 16
   params:
   - path: main.fclk
     module: main
     type: real
-    width: 0
   - path: main.int_param
     module: main
-    type: uint32
+    type: int
     width: 32
   events:
   - path: main.counter_end
