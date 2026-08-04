@@ -23,6 +23,13 @@ Releases of documentation and code are using the same version numbers.
 1.7.0 - Ongoing
 ***************
 
+* Python client
+
+  * Added shortcut :py:func:`Verisocks.run_for() <verisocks.verisocks.Verisocks.run_for>`
+  * Added shortcut :py:func:`Verisocks.run_until() <verisocks.verisocks.Verisocks.run_until>`
+  * Added shortcut :py:func:`Verisocks.run_until_change() <verisocks.verisocks.Verisocks.run_until_change>`
+
+
 
 1.6.0 - 2026-07-26
 ******************

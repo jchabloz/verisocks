@@ -503,9 +503,72 @@ Still {self._rx_expected} messages expected.")
               required if the path corresponds to a named event.
 
             If `cb` is ``"to_next"``, no further keyword argument is required.
+
+        Note:
+            From version 1.7, it is recommended to use instead the shortcut
+            functions :py:func:`run_for`, :py:func:`run_until` and
+            :py:func:`run_until_change`.
         """
 
         return self.send(command="run", cb=cb, **kwargs)
+
+    def run_for(self, time, time_unit, timeout=None):
+        """Shortcut command for :py:func:`run` with argument ``cb='for_time'``
+
+        Args:
+            time (float): Time value
+            time_unit (str): Time unit (s, ms, us, ns, ps or fs)
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.run("for_time", time=time, time_unit=time_unit,
+                          timeout=timeout)
+        if (answer['type'] != "ack"):
+            raise VerisocksError("Command run_for() has not been acknowledged")
+
+    def run_until(self, time, time_unit, timeout=None):
+        """Shortcut command for :py:func:`run` with argument
+        ``cb='until_time'``
+
+        Args:
+            time (float): Time value
+            time_unit (str): Time unit (s, ms, us, ns, ps or fs)
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.run("until_time", time=time, time_unit=time_unit,
+                          timeout=timeout)
+        if (answer['type'] != "ack"):
+            raise VerisocksError(
+                "Command run_until() has not been acknowledged")
+
+    def run_until_change(self, path, value, timeout=None):
+        """Shortcut command for :py:func:`run` with argument
+        ``cb='until_change'``
+
+        Args:
+            path (str): Path to variable
+            value (float): Condition on the variable value
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.run("until_change", path=path, value=value,
+                          timeout=timeout)
+        if (answer['type'] != "ack"):
+            raise VerisocksError(
+                "Command run_until_change() has not been acknowledged")
 
     def set(self, path, **kwargs):
         """Sends a :keyword:`set <sec_tcp_cmd_set>` command request to the
