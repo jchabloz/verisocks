@@ -34,7 +34,6 @@ SOFTWARE.
 #include "vpi_config.h"
 #include "vs_msg.h"
 #include "vs_utils.h"
-#include "vs_itx.h"
 #include "cJSON.h"
 #include <stdint.h>
 
@@ -57,7 +56,6 @@ typedef enum {
     VS_VPI_STATE_WAITING,       ///<Connected and waiting to receive a command
     VS_VPI_STATE_PROCESSING,    ///<Processing a command
     VS_VPI_STATE_SIM_RUNNING,   ///<Simulation running
-    VS_VPI_STATE_SIM_BLOCKED,   ///<Simulation blocked by an ITX
     VS_VPI_STATE_EXIT,          ///<Exiting Verisocks
     VS_VPI_STATE_ERROR,         ///<Error state (e.g. timed out while waiting for a connection)
     VS_VPI_STATE_ENUM_LEN
@@ -78,7 +76,6 @@ typedef struct vs_vpi_data {
     vs_uuid_t uuid;         ///<Current transaction UUID
     vs_time_def_t time_def; ///<Timescale definition
     uint64_t sim_time;      ///<Current simulation time
-    vs_vpi_itx_t itx_table[VS_VPI_MAX_ITX]; ///<Interrupts table
 } vs_vpi_data_t;
 
 /**
@@ -156,23 +153,6 @@ cmd_handler_t vs_vpi_get_cmd_handler(
 
 extern const vs_vpi_cmd_t vs_vpi_cmd_get_table[];
 extern const vs_vpi_cmd_t vs_vpi_cmd_run_table[];
-
-/**
- * @brief Register "in time" interrupt
- * @param name Name of the interrupt
- * @param time Interrupt time period
- * @param timeunit Time unit
- * @param flags Interrupts flags
- * @param itx_table Interrupt table
- */
-int vs_vpi_register_in_time_itx(
-    const char *name, const double time, const char *time_unit,
-    vs_vpi_itx_flags_t flags, vs_vpi_data_t *p_vpi_data);
-
-/**
- * @brief Return message in case of ITX
- */
-int vs_vpi_itx_return(const vs_vpi_itx_t *p_itx);
 
 #ifdef __cplusplus
 }

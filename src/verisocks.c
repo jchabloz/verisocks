@@ -38,7 +38,6 @@ SOFTWARE.
 #include "vs_utils.h"
 #include "vs_server.h"
 #include "vs_msg.h"
-#include "vs_itx.h"
 #include "vs_vpi.h"
 
 #define READ_BUFFER_SIZE 4096
@@ -214,8 +213,6 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->uuid.valid = 0u;
     p_vpi_data->time_def = vs_utils_get_sim_time_def();
     p_vpi_data->sim_time = 0ull;
-    vs_vpi_itx_t itx_init_table[VS_VPI_MAX_ITX] = {VS_VPI_ITX_NULL};
-    memcpy(p_vpi_data->itx_table, itx_init_table, sizeof(itx_init_table));
     memcpy(&p_vpi_data->uuid.value, null_uuid_value, VS_UUID_LEN);
     vpi_put_userdata(h_systf, (void*) p_vpi_data);
 
@@ -612,93 +609,4 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 valid JSON content. Discarding it.");
     VS_VPI_RETURN(p_vpi_data, "error", "Invalid message content - Discarding");
     return 0;
-}
-
-PLI_INT32 verisocks_cb_itx(p_cb_data cb_data)
-{
-    vs_vpi_itx_t *p_itx = NULL;
-    vs_vpi_data_t *p_vpi_data = NULL;
-
-    /* Retrieve stored user ITX data */
-    p_itx = (vs_vpi_itx_t*) cb_data->user_data;
-    if (NULL == p_itx) {
-        vs_vpi_log_warning( 
-            "Could not get stored PLI ITX data - Aborting ITX callback");
-        /* Return to simulation without doing anything */
-        return 0;
-    }
-
-    /* Retrieve pointer to PLI application data */
-    p_vpi_data = (vs_vpi_data_t*) p_itx->user_data;
-    if (NULL == p_itx) {
-        vs_vpi_log_warning( 
-            "Could not get stored PLI ITX data - Aborting ITX callback");
-        /* Return to simulation without doing anything */
-        return 0;
-    }
-
-    /* Check state consistency */
-    if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
-        vs_vpi_log_error("Inconsistent state in callback handler");
-        return -1;
-    }
-
-    /* Update sim time state variable */
-    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
-
-    /* Logging that the callback function has been reached */
-    vs_vpi_log_info("ITX %s callback reached", p_itx->name);
-
-    /* Behavior dependent on interrupt type */
-    if (p_itx->type == VS_VPI_ITX_IN_TIME) {
-
-        /* Free callback handle */
-        if (NULL != p_itx->h_cb) {
-            vpi_free_object(p_itx->h_cb);
-            p_itx->h_cb = NULL;
-        }
-
-        /* If the ITX is recurrent ... */
-        if (itx_is_recurrent(p_itx)) {
-            /* Re-register the exact same callback, thus we keep it active and
-            just re-create and update the handle */
-            vpiHandle h_cb;
-            h_cb = vpi_register_cb(cb_data);
-            p_itx->h_cb = h_cb;
-        }
-
-        /* Blocking interrupt */
-        if (itx_is_blocking(p_itx)) {
-            /* Recurrent */
-            p_vpi_data->state = VS_VPI_STATE_SIM_BLOCKED;
-            vs_vpi_itx_return(p_itx);
-            vs_vpi_log_info("Blocking ITX - Verisocks taking over and waiting \
-for command ...");
-            if (0 > verisocks_main(p_vpi_data)) {
-                return -1;
-            }
-            vs_vpi_log_info("Releasing control back to simulator");
-            return 0;
-        }
-        /* Non-blocking interrupt */
-        else {
-        }
-    }
-    else if (p_itx->type == VS_VPI_ITX_ON_CHANGE) {
-        /* If recurrent */
-        /* Non-blocking interrupt */
-        /* Blocking interrupt - Considered as non-recurrent */
-    }
-    else if (p_itx->type == VS_VPI_ITX_AT_TIME) {
-        /* Non-blocking interrupt */
-        /* Blocking interrupt */
-    }
-
-    /* Free callback handle */
-    if (NULL != p_itx->h_cb) {
-        vpi_remove_cb(p_itx->h_cb);
-        p_itx->h_cb = NULL;
-    }
-    // error:
-    return -1;
 }
