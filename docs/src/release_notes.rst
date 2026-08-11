@@ -25,10 +25,11 @@ Releases of documentation and code are using the same version numbers.
 
 * Python client
 
-  * Added shortcut :py:func:`Verisocks.run_for() <verisocks.verisocks.Verisocks.run_for>`
-  * Added shortcut :py:func:`Verisocks.run_until() <verisocks.verisocks.Verisocks.run_until>`
-  * Added shortcut :py:func:`Verisocks.run_until_change() <verisocks.verisocks.Verisocks.run_until_change>`
-
+  * Added shortcut function :py:func:`Verisocks.run_for() <verisocks.verisocks.Verisocks.run_for>`
+  * Added shortcut function :py:func:`Verisocks.run_until() <verisocks.verisocks.Verisocks.run_until>`
+  * Added shortcut function :py:func:`Verisocks.run_until_change() <verisocks.verisocks.Verisocks.run_until_change>`
+  * Added shortcut function :py:func:`Verisocks.set_value() <verisocks.verisocks.Verisocks.set_value>`
+  * Added shortcut function :py:func:`Verisocks.get_value() <verisocks.verisocks.Verisocks.get_value>`
 
 
 1.6.0 - 2026-07-26
