@@ -72,6 +72,7 @@ typedef struct vs_vpi_data {
     int fd_client_socket;   ///<File descriptor for currently open connection
     cJSON *p_cmd;           ///<Pointer to current/latest command
     vpiHandle h_cb;         ///<Callback handle ("main" callback)
+    vpiHandle h_cb_timeout; ///<Callback handle (timeout callback)
     s_vpi_value value;      ///<Value (used for value change callback)
     vs_uuid_t uuid;         ///<Current transaction UUID
     vs_time_def_t time_def; ///<Timescale definition
@@ -102,6 +103,7 @@ int vs_vpi_return(int fd, const char *str_type, const char *str_value,
 
 PLI_INT32 verisocks_cb(p_cb_data cb_data);
 PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
+PLI_INT32 verisocks_cb_timeout(p_cb_data cb_data);
 
 /**
  * @brief Type for a command handler function pointer

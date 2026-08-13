@@ -209,6 +209,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     p_vpi_data->fd_client_socket = -1;
     p_vpi_data->p_cmd = NULL;
     p_vpi_data->h_cb = NULL;
+    p_vpi_data->h_cb_timeout = NULL;
     p_vpi_data->value = default_value;
     p_vpi_data->uuid.valid = 0u;
     p_vpi_data->time_def = vs_utils_get_sim_time_def();
@@ -307,6 +308,12 @@ PLI_INT32 verisocks_cb(p_cb_data cb_data)
         p_vpi_data->h_cb = NULL;
     }
 
+    /* If there is a timeout callback, remove it */
+    if (NULL != p_vpi_data->h_cb_timeout) {
+        vpi_remove_cb(p_vpi_data->h_cb_timeout);
+        p_vpi_data->h_cb_timeout = NULL;
+    }
+
     /* Check state */
     if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
         vs_vpi_log_error("Inconsistent state");
@@ -346,7 +353,73 @@ for command ...");
 }
 
 /**
- * @brief Callback function - Used for for_until_change
+ * @brief Callback function - Used for until_change timeout
+ *
+ * @param cb_data Pointer to s_cb_data struct
+ * @return Returns 0 if successful, -1 in case of error
+ */
+PLI_INT32 verisocks_cb_timeout(p_cb_data cb_data)
+{
+    /* Retrieve stored user data */
+    vs_vpi_data_t *p_vpi_data = NULL;
+    p_vpi_data = (vs_vpi_data_t*) cb_data->user_data;
+    if (NULL == p_vpi_data) {
+        vs_vpi_log_error("Could not get stored data - Aborting callback");
+        goto error;
+    }
+
+    /* Free callback handle */
+    if (NULL != p_vpi_data->h_cb_timeout) {
+        vpi_free_object(p_vpi_data->h_cb_timeout);
+        p_vpi_data->h_cb_timeout = NULL;
+    }
+
+    /* If there is a timeout callback, remove it */
+    if (NULL != p_vpi_data->h_cb) {
+        vpi_remove_cb(p_vpi_data->h_cb);
+        p_vpi_data->h_cb = NULL;
+    }
+
+    /* Check state */
+    if (p_vpi_data->state != VS_VPI_STATE_SIM_RUNNING) {
+        vs_vpi_log_error("Inconsistent state");
+        goto error;
+    }
+
+    /* Update sim time state variable */
+    p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
+
+    /* Signalling that the timeout callback function has been reached */
+    vs_vpi_log_info("Reached timeout callback - \
+Verisocks taking over and waiting for command ...");
+    VS_VPI_RETURN(p_vpi_data, "timeout",
+        "Reached timeout callback - Getting back to Verisocks main loop");
+
+    /* Call verisocks main loop */
+    p_vpi_data->state = VS_VPI_STATE_WAITING;
+    if (0 > verisocks_main(p_vpi_data)) {
+        goto error;
+    }
+    vs_vpi_log_info("Releasing control to simulator");
+    return 0;
+
+    /* Error management */
+    error:
+    if (NULL != p_vpi_data) {
+        p_vpi_data->state = VS_VPI_STATE_ERROR;
+        if (0 <= p_vpi_data->fd_server_socket) {
+            close(p_vpi_data->fd_server_socket);
+            p_vpi_data->fd_server_socket = -1;
+        }
+        //free(p_vpi_data);  //Will be freed in exit callback handler
+    }
+    vs_vpi_log_info("Aborting simulation");
+    vpi_control(vpiFinish, 1);
+    return -1;
+}
+
+/**
+ * @brief Callback function - Used for until_change
  *
  * @param cb_data Pointer to s_cb_data struct
  * @return Returns 0 if successful, -1 in case of error
