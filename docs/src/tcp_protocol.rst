@@ -6,12 +6,12 @@
 
 .. _sec_tcp_protocol:
 
-TCP protocol
+SCP protocol
 ############
 
-This section describes the chosen and implemented protocol for the frames sent
-and received to/from the Verisocks server TCP socket by any client that wishes
-to connect to it.
+This section describes the chosen and implemented SCP protocol for the frames
+sent and received to/from the Verisocks server TCP socket by any client that
+wishes to connect to it.
 
 
 .. note::
@@ -33,7 +33,7 @@ Frames format
 
 .. note::
 
-  The TCP message format follows the proposal for a message format in the
+  The SCP message format follows the proposal for a message format in the
   `RealPython's guide on sockets programming
   <https://realpython.com/python-sockets/>`_. It allows to deal easily with
   variable-length messages while making sure that it is possible to verify that
