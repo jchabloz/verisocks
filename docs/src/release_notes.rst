@@ -23,14 +23,25 @@ Releases of documentation and code are using the same version numbers.
 1.7.0 - Ongoing
 ***************
 
+* TCP protocol
+
+  * New: Added optional simulation timeout for the :ref:`run(until_change)
+    <sec_tcp_cmd_run>` command.
+  * New: Added the :json:`"type": "timeout"` :ref:`return message
+    <sec_tcp_ret_msg>` type.
+
 * Python client
 
-  * Added shortcut function :py:func:`Verisocks.run_for() <verisocks.verisocks.Verisocks.run_for>`
-  * Added shortcut function :py:func:`Verisocks.run_until() <verisocks.verisocks.Verisocks.run_until>`
-  * Added shortcut function :py:func:`Verisocks.run_until_change() <verisocks.verisocks.Verisocks.run_until_change>`
-  * Added shortcut function :py:func:`Verisocks.set_value() <verisocks.verisocks.Verisocks.set_value>`
-  * Added shortcut function :py:func:`Verisocks.get_value() <verisocks.verisocks.Verisocks.get_value>`
-
+  * New: Added shortcut function :py:func:`Verisocks.run_for()
+    <verisocks.verisocks.Verisocks.run_for>`
+  * New: Added shortcut function :py:func:`Verisocks.run_until()
+    <verisocks.verisocks.Verisocks.run_until>`
+  * New: Added shortcut function :py:func:`Verisocks.run_until_change()
+    <verisocks.verisocks.Verisocks.run_until_change>`
+  * New: Added shortcut function :py:func:`Verisocks.set_value()
+    <verisocks.verisocks.Verisocks.set_value>`
+  * New: Added shortcut function :py:func:`Verisocks.get_value()
+    <verisocks.verisocks.Verisocks.get_value>`
 
 1.6.0 - 2026-07-26
 ******************

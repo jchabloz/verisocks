@@ -438,6 +438,8 @@ With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.set() <verisocks.verisocks.Verisocks.set>`
 corresponds to this command.
 
+.. _sec_tcp_ret_msg:
+
 Returned messages
 *****************
 
