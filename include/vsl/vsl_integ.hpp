@@ -53,6 +53,7 @@ SOFTWARE.
 #define VSL_INTEG_HPP
 
 #include "cJSON.h"
+#include "version.h"
 #include "vs_server.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
@@ -475,6 +476,7 @@ int VslInteg<T>::run() {
     #else
     vs_log_mod_info(__MOD__, "Verilated without timing extension");
     #endif
+    vs_log_mod_info(__MOD__, "Verisocks version: " VERISOCKS_VERSION);
 
     while(true) {
         switch (_state) {

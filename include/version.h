@@ -1,13 +1,7 @@
-/**************************************************************************//**
-@file verisocks.h
-@author jchabloz
-@brief Verisocks VPI
-@date 2022-09-13
-******************************************************************************/
 /*
 MIT License
 
-Copyright (c) 2022-2026 Jérémie Chabloz
+Copyright (c) 2026 Jérémie Chabloz
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,33 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef VERISOCKS_H
-#define VERISOCKS_H
+#ifndef VERSION_H
+#define VERSION_H
 
-#include "vpi_config.h"
+#define VERISOCKS_VERSION_MAJOR 1
+#define VERISOCKS_VERSION_MINOR 7
+#define VERISOCKS_VERSION_PATCH 0-dev
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define xstr(s) str(s)
+#define str(s) #s
+#define VERISOCKS_VERSION xstr(VERISOCKS_VERSION_MAJOR) "." \
+xstr(VERISOCKS_VERSION_MINOR) "." xstr(VERISOCKS_VERSION_PATCH)
 
-/** Callback at (pseudo) compile time for user task verisock_init */
-PLI_INT32 verisocks_init_compiletf(PLI_BYTE8* user_data);
-
-/** Callback for user task verisock_init */
-PLI_INT32 verisocks_init_calltf(PLI_BYTE8* user_data);
-
-/** Non-specific runtime callback */
-PLI_INT32 verisocks_cb(p_cb_data cb_data);
-
-/** Specific runtime callback (value_change) */
-PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data);
-
-/** VPI register function */
-void verisocks_register_tf(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif //VS_VPI_H
-//EOF
+#endif // VERSION_H

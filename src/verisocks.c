@@ -34,6 +34,7 @@ SOFTWARE.
 #include <string.h>
 
 #include "verisocks.h"
+#include "version.h"
 #include "vs_logging.h"
 #include "vs_utils.h"
 #include "vs_server.h"
@@ -241,6 +242,7 @@ PLI_INT32 verisocks_init_calltf(PLI_BYTE8 *user_data)
     vpi_printf("*                                        *\n");
     vpi_printf("******************************************\n");
 
+    vs_vpi_log_info("Verisocks version: " VERISOCKS_VERSION);
     vs_vpi_log_info("Server address: %d.%d.%d.%d",
         (s_addr & 0xff000000) >> 24u,
         (s_addr & 0x00ff0000) >> 16u,

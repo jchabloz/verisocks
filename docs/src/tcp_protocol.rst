@@ -329,6 +329,7 @@ This command can be used to get pieces of information from the simulator.
   * :json:`"type": "result"`
   * :json:`"product":` (text): Simulator product name
   * :json:`"version":` (text): Simulator version
+  * :json:`"verisocks_version":` (text): Verisocks version
   * :json:`"time_unit":` (text): Simulator time unit
   * :json:`"time_precision":` (text): Simulator time precision
 
@@ -337,6 +338,7 @@ This command can be used to get pieces of information from the simulator.
 
   * :json:`"model_name":` (text): Model name
   * :json:`"model_hier_name":` (text): Model top instance name
+  * :json:`"user_info":` (text): Free user-defined text
 
 * Returned frame (for :json:`"sel": "sim_time"`):
 

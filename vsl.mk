@@ -1,4 +1,4 @@
-all:
+all: clean
 	$(MAKE) -C examples/hello_world/verilator
 	$(MAKE) -C examples/spi_master/verilator
 	$(MAKE) -C examples/vsl_counter

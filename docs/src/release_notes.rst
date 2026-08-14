@@ -29,6 +29,8 @@ Releases of documentation and code are using the same version numbers.
     <sec_tcp_cmd_run>` command.
   * New: Added the :json:`"type": "timeout"` :ref:`return message
     <sec_tcp_ret_msg>` type.
+  * New: Added :json:`"verisocks_version"` field in the return message for the
+    :ref:`get(sim_info) <sec_tcp_cmd_get>` command.
 
 * Python client
 
