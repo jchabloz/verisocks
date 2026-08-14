@@ -31,6 +31,10 @@ SOFTWARE.
 #ifndef VERISOCKS_H
 #define VERISOCKS_H
 
+#define VS_VERSION_MAJOR 1
+#define VS_VERSION_MINOR 7
+#define VS_VERSION_PATCH 0
+
 #include "vpi_config.h"
 
 #ifdef __cplusplus

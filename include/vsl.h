@@ -31,6 +31,10 @@ SOFTWARE.
 #ifndef VSL_H
 #define VSL_H
 
+#define VSL_VERSION_MAJOR 1
+#define VSL_VERSION_MINOR 7
+#define VSL_VERSION_PATCH 0
+
 #include "vsl/vsl_integ.hpp"
 #include "vsl/vsl_integ_cmd.hpp"
 #include "vsl/vsl_integ_cmd_get.hpp"
