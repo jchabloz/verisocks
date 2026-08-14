@@ -140,17 +140,6 @@ public:
     inline const VerilatedContext* context() {return p_context;}
 
     /**
-     * @brief Set the optional finish time for the simulation
-     *
-     * This function is only useful if the verilated testbench does not contain
-     * any $finish statement.
-     *
-     * @param time Finish time value
-     * @param unit Time unit
-     */
-    void set_finish_time(const double time, const char* unit);
-
-    /**
      * @brief Run Verisocks FSM
      *
      * This is the main function to be used from the top-level C++ testbench
@@ -311,10 +300,6 @@ private:
     vsl_time_t cb_time {0ull};
     std::string cb_value_path;
     double cb_value {0.0};
-
-    /* Simulation (optional) finish time */
-    bool b_has_finish_time {false}; // TODO - not used at all - fix or remove?
-    vsl_time_t finish_time {0};
 
     /* Model evaluation state */
     bool b_eval_required {true};
@@ -742,9 +727,14 @@ void VslInteg<T>::main_sim() {
             if (has_time_callback()) {
                 p_context->time(cb_time);
                 b_eval_required = true;
+                if (has_value_callback()) {
+                    VSL_MSG_RETURN_VX("timeout",
+                        "Reached timeout without other events pending");
+                } else {
+                    VSL_MSG_RETURN_VX("ack",
+                        "Reached callback without other events pending");
+                }
                 clear_callbacks();
-                VSL_MSG_RETURN_VX("ack",
-                    "Reached callback without other events pending");
                 _state = VSL_STATE_WAITING;
                 // TODO: maybe add p_trace->flush() here?
                 return;
@@ -759,9 +749,14 @@ void VslInteg<T>::main_sim() {
         if (has_time_callback() && (next_event_time() >= cb_time)) {
             p_context->time(cb_time);
             b_eval_required = true;
+            if (has_value_callback()) {
+                VSL_MSG_RETURN_VX("timeout",
+                    "Reached timeout - Getting back to Verisocks main loop");
+            } else {
+                VSL_MSG_RETURN_VX("ack",
+                    "Reached callback - Getting back to Verisocks main loop");
+            }
             clear_callbacks();
-            VSL_MSG_RETURN_VX("ack",
-                "Reached callback - Getting back to Verisocks main loop");
             _state = VSL_STATE_WAITING;
             // TODO: maybe add p_trace->flush() here?
             return;
@@ -837,7 +832,7 @@ Callbacks management
 template<typename T>
 int VslInteg<T>::register_value_callback(const char* path, const double value)
 {
-    if (has_callback()) {
+    if (b_has_value_callback) {
         vs_log_mod_error(__MOD__, "Could not register new value callback as \
 another callback is already registered - Discarding");
         return -1;
@@ -856,18 +851,16 @@ Path not found in registered variables - Discarding");
 template<typename T>
 int VslInteg<T>::register_time_callback(vsl_time_t time)
 {
-    if (has_callback()) {
+    if (b_has_time_callback) {
         vs_log_mod_error(__MOD__, "Could not register new time callback as \
 another callback is already registered - Discarding");
         return -1;
     }
-
     if (time <= p_context->time()) {
         vs_log_mod_error(__MOD__, "Could not register new time callback - \
 Time value is not in the future - Discarding");
         return -1;
     }
-
     cb_time = time;
     b_has_time_callback = true;
     return 0;
@@ -896,12 +889,6 @@ with this type of variable - Discarding");
 /******************************************************************************
 Utility functions
 ******************************************************************************/
-template<typename T>
-void VslInteg<T>::set_finish_time(const double time, const char* unit) {
-    finish_time = double_to_time(time, unit, p_context);
-    b_has_finish_time = true;
-}
-
 /**
  * @brief Get Verilated variable from path
  *

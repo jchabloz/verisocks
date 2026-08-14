@@ -31,8 +31,7 @@ def setup_test(port):
         ivl_args=[
             f"-DNUM_PORT={port}",
             f"-DVS_TIMEOUT={VS_TIMEOUT}"
-        ],
-        capture_output=False
+        ]
     )
     return pop
 

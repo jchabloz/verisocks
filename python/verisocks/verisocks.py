@@ -501,6 +501,11 @@ Still {self._rx_expected} messages expected.")
             * **value** (number): Condition on the verilog object's
               value for the callback to be executed. This argument is not
               required if the path corresponds to a named event.
+            * **sim_timeout** (number): Time duration (in simulator time) after
+              which a timeout condition is met and a *timeout* message
+              returned. This field is optional.
+            * **time_unit** (str): Time unit (s, ms, us, ns, ps or fs) for the
+              **sim_timeout** argument.
 
             If `cb` is ``"to_next"``, no further keyword argument is required.
 
@@ -560,13 +565,16 @@ Still {self._rx_expected} messages expected.")
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
-    def run_until_change(self, path, value, timeout=None):
+    def run_until_change(self, path, value, sim_timeout=None, time_unit="us",
+                         timeout=None):
         """Shortcut command for :py:func:`run` with argument
         ``cb='until_change'``
 
         Args:
             path (str): Path to variable
             value (float): Condition on the variable value
+            sim_timeout (float): Timeout duration (in simulator time)
+            time_unit (str): Time unit which applies to the timeout value
             timeout (float): Socket timeout configuration value in seconds.
                 If None (default), the class instance default value is used.
 
@@ -577,8 +585,13 @@ Still {self._rx_expected} messages expected.")
             VerisocksError: If the returned answer is not the expected
                 acknowledgement
         """
-        answer = self.run("until_change", path=path, value=value,
-                          timeout=timeout)
+        if (sim_timeout):
+            answer = self.run("until_change", path=path, value=value,
+                              sim_timeout=sim_timeout, time_unit=time_unit,
+                              timeout=timeout)
+        else:
+            answer = self.run("until_change", path=path, value=value,
+                              timeout=timeout)
         if (answer['type'] == "ack"):
             return answer
         if (answer['type' == "error"]):

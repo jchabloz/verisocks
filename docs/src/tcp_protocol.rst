@@ -273,6 +273,11 @@ gets back to Verisocks.
   * :json:`"value":` (number): Condition on the verilog object's value for the
     callback to be executed. This argument is not required if the path
     corresponds to a named event.
+  * :json:`"sim_timeout":` (number, optional): Time duration defining a
+    timeout. If the timeout duration expires before the defined condition is
+    met, the simulation pauses and a *timeout* message is returned.
+  * :json:`"time_unit":` (text): Time unit which applies to the
+    ``"sim_timeout"`` field value. See the possible values above.
 
   If the ``"cb"`` field is ``"to_next"``, no further fields are required.
 
@@ -449,8 +454,8 @@ the following field:
       specific result
     * :json:`"result"` (the returned message provides a *result*)
     * :json:`"error"` (the returned message signals an *error*)
-  
-  
+    * :json:`"timeout"` (the returned message signals a *timeout*)
+
     .. * :json:`"itx"` (the returned message signals an *interrupt*, either
       *blocking* or *non-blocking*)
 

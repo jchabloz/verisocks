@@ -46,7 +46,7 @@ def setup_test(port, timeout, capture_output=True,
 def vs(request):
     # Setup
     port = find_free_port()
-    pop = setup_test(port, VS_TIMEOUT)
+    pop = setup_test(port, VS_TIMEOUT, capture_output=False)
     _vs = Verisocks(HOST, port, use_uuid=request.param)
     _vs.connect()
     yield _vs
@@ -307,6 +307,29 @@ def test_run_until_change(vs):
     answer = vs.get(sel="value", path="main.count")
     assert answer["type"] == "result"
     assert answer["value"] == 255
+
+    # Test the timeout feature
+    prev_time = answer["sim_time"]
+    answer = vs.run(cb="until_change", path="main.count", value=300,
+                    sim_timeout=10, time_unit="us")
+    assert answer["type"] == "timeout"
+    # Note: sim_time is in ps for this simulation
+    assert answer["sim_time"] - prev_time == 10e6
+
+    # Check that normal callbacks are still working
+    answer = vs.run(cb="until_change", path="main.count", value=7)
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count")
+    assert answer["type"] == "result"
+    assert answer["value"] == 7
+
+    # Check that if the condition is met before the timeout, it exits correctly
+    answer = vs.run(cb="until_change", path="main.count", value=10,
+                    sim_timeout=500, time_unit="us")
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count")
+    assert answer["type"] == "result"
+    assert answer["value"] == 10
 
 
 def test_set(vs):
