@@ -250,6 +250,41 @@ currently not supported", val1.format);
     return 1;
 }
 
+PLI_INT32 vs_utils_compare_values_ext(s_vpi_value val1, s_vpi_value val2,
+    uint32_t mask, double tol)
+{
+    if (val1.format != val2.format) return 1;
+    switch (val1.format) {
+    case vpiIntVal:
+        if (mask != 0) {
+            if ((val1.value.integer & mask) == (val2.value.integer & mask))
+                return 0;
+        } else {
+            if ( val1.value.integer == val2.value.integer)
+                return 0;
+        }
+        break;
+    case vpiRealVal:
+        if (tol > 0.0) {
+            double diff;
+            diff = fabs(val1.value.real - val2.value.real);
+            if (val2.value.real != 0.0) {
+                if (diff/val2.value.real <= tol) return 0;
+            } else {
+                if (diff <= tol) return 0;
+            }
+            break;
+        }
+        if (val1.value.real == val2.value.real) return 0;
+        break;
+    default:
+        vs_log_mod_error("vs_utils", "vs_utils_compare_values, format %d is \
+currently not supported", val1.format);
+        return -1;
+    }
+    return 1;
+}
+
 PLI_INT32 vs_utils_set_value(vpiHandle h_obj, double value)
 {
     s_vpi_value vpi_value;
