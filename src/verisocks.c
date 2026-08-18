@@ -446,7 +446,8 @@ PLI_INT32 verisocks_cb_value_change(p_cb_data cb_data)
     p_vpi_data->sim_time = vs_utils_get_sim_time(p_vpi_data->time_def);
 
     /* If the value is not the same, get back to sim until next time */
-    if (vpi_get(vpiType, cb_data->obj) != vpiNamedEvent) {
+    // if (vpi_get(vpiType, cb_data->obj) != vpiNamedEvent) {
+    if (vpiSuppressVal != p_vpi_data->value.format) {
         if (vs_utils_compare_values(
             p_vpi_data->value, *(cb_data->value)) != 0) {
             return 0;

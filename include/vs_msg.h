@@ -237,6 +237,7 @@ int vs_msg_peek(int fd);
  */
 #define VS_MSG_READ_NUM_OPT_NO_DECL(obj, name, p_item, var) \
     do { \
+        var = NAN; \
         p_item = cJSON_GetObjectItem(obj, #name); \
         if (NULL != p_item) { \
             var = cJSON_GetNumberValue(p_item); \

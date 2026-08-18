@@ -172,7 +172,7 @@ VS_VPI_CMD_HANDLER(run_until_time)
 VS_VPI_CMD_HANDLER(run_until_change)
 {
     vpiHandle h_obj;
-    double value = NAN;
+    // double value = NAN;
     PLI_INT32 format;
     s_vpi_value target_value;
     s_vpi_value cb_value;
@@ -202,12 +202,12 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
 
-    if (vpi_get(vpiType, h_obj) != vpiNamedEvent) {
-        /* Get the value from the JSON message content */
-        VS_MSG_READ_NUM_NO_DECL(p_data->p_cmd, value, value);
+    /* Check if a value is provided */
+    VS_MSG_READ_NUM_OPT(p_data->p_cmd, value);
+    if (NULL != p_item_value) {
         vs_vpi_log_info(
             "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
-            str_path, value);
+            str_path, value_value);
     } else {
         vs_vpi_log_info(
             "Command \"run(cb=until_change, path=%s)\" received.",
@@ -216,27 +216,32 @@ VS_VPI_CMD_HANDLER(run_until_change)
 
     /* Store value as user data, depending on desired format */
     format = vs_utils_get_format(h_obj);
-    target_value.format = format;
     if (0 > format) goto error;
-    switch (format) {
-    case vpiIntVal:
-        target_value.value.integer = (PLI_INT32) value;
-        break;
-    case vpiRealVal:
-        target_value.value.real = value;
-        break;
-    case vpiSuppressVal:
-        target_value.value.real = 0;
-        break;
-    default:
-        goto error;
+    if (NULL != p_item_value && vpi_get(vpiType, h_obj) != vpiNamedEvent) {
+        cb_value.format = format;
+        target_value.format = format;
+        switch (format) {
+        case vpiIntVal:
+            target_value.value.integer = (PLI_INT32) value_value;
+            break;
+        case vpiRealVal:
+            target_value.value.real = value_value;
+            break;
+        case vpiSuppressVal:
+            target_value.value.real = 0.0;
+            break;
+        default:
+            goto error;
+        }
+    } else {
+        cb_value.format = vpiSuppressVal;
+        target_value.format = vpiSuppressVal;
+        target_value.value.real = 0.0;
     }
     p_data->value = target_value;
 
     /* Register callback */
     cb_time.type = vpiSimTime;
-    cb_value.format = format;
-
     cb_data.reason = cbValueChange;
     cb_data.time = &cb_time;
     cb_data.obj = h_obj;

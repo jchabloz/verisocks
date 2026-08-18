@@ -252,21 +252,22 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     double value;
     if (p_var->get_type() == VSL_TYPE_SCALAR) {
         p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
-        if (nullptr == p_item_val) {
-            vs_log_mod_error(__MOD__,
-                "Command field \"value\" invalid/not found");
-            handle_error();
-            return;
+        if (nullptr != p_item_val) {
+            value = cJSON_GetNumberValue(p_item_val);
+            if (std::isnan(value)) {
+                vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
+                handle_error();
+                return;
+            }
+            vs_log_mod_info(__MOD__,
+                "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
+                cstr_path, value);
+        } else {
+            value = p_var->get_value();
+            vs_log_mod_info(__MOD__,
+                "Command \"run(cb=until_change, path=%s)\" received.",
+                cstr_path);
         }
-        value = cJSON_GetNumberValue(p_item_val);
-        if (std::isnan(value)) {
-            vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
-            handle_error();
-            return;
-        }
-        vs_log_mod_info(__MOD__,
-            "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
-            cstr_path, value);
     } else if (p_var->get_type() == VSL_TYPE_EVENT) {
         value = 1.0f;
         vs_log_mod_info(__MOD__,
@@ -313,9 +314,16 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     }
 
     /* Register value callback */
-    if (0 > vx.register_value_callback(cstr_path, value)) {
-        handle_error();
-        return;
+    if (nullptr != p_item_val || p_var->get_type() == VSL_TYPE_EVENT) {
+        if (0 > vx.register_value_callback(cstr_path, value)) {
+            handle_error();
+            return;
+        }
+    } else {
+        if (0 > vx.register_change_only_callback(cstr_path, value)) {
+            handle_error();
+            return;
+        }
     }
 
     /* Return control to simulation loop */

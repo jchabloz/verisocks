@@ -298,6 +298,7 @@ private:
     /* Callbacks management */
     bool b_has_time_callback {false};
     bool b_has_value_callback {false};
+    bool b_has_change_only_callback {false};
     vsl_time_t cb_time {0ull};
     std::string cb_value_path;
     double cb_value {0.0};
@@ -329,11 +330,13 @@ private:
     }
 
     /* Callback functions*/
+    int register_change_only_callback(const char* path, const double value);
     int register_value_callback(const char* path, const double value);
     int register_time_callback(const vsl_time_t time);
     void clear_callbacks() {
         b_has_time_callback = false;
         b_has_value_callback = false;
+        b_has_change_only_callback = false;
     }
 
     inline const bool has_callback() {
@@ -832,6 +835,15 @@ const vsl_time_t VslInteg<T>::next_event_time() const {
 Callbacks management
 ******************************************************************************/
 template<typename T>
+int VslInteg<T>::register_change_only_callback(const char* path,
+    const double value)
+{
+    register_value_callback(path, value);
+    b_has_change_only_callback = true;
+    return 0;
+}
+
+template<typename T>
 int VslInteg<T>::register_value_callback(const char* path, const double value)
 {
     if (b_has_value_callback) {
@@ -847,6 +859,7 @@ Path not found in registered variables - Discarding");
     }
     cb_value = value;
     b_has_value_callback = true;
+    b_has_change_only_callback = false;
     return 0;
 }
 
@@ -874,8 +887,9 @@ const bool VslInteg<T>::check_value_callback() {
         auto p_var = get_registered_variable(cb_value_path);
         switch (p_var->get_type()) {
             case VSL_TYPE_SCALAR:
-                if (p_var->get_value() == cb_value) return true;
-                return false;
+                if (p_var->get_value() == cb_value)
+                    return !b_has_change_only_callback;
+                return b_has_change_only_callback;
             case VSL_TYPE_EVENT:
                 if (p_var->get_value() == 1.0f) return true;
                 return false;
