@@ -226,6 +226,29 @@ int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
 int vs_msg_peek(int fd);
 
 /**
+ * @brief Helper macro to read an optional numerical field from a JSON command
+ *
+ * This macro assumes the existence of an "error" label.
+ *
+ * @param obj Pointer to the command cJSON command object
+ * @param name Name of the field
+ * @param name Pointer to the cJSON item object (can be tested afterwards)
+ * @param var Variable to store the value (double)
+ */
+#define VS_MSG_READ_NUM_OPT_NO_DECL(obj, name, p_item, var) \
+    do { \
+        p_item = cJSON_GetObjectItem(obj, #name); \
+        if (NULL != p_item) { \
+            var = cJSON_GetNumberValue(p_item); \
+            if (isnan(var)) { \
+                vs_log_mod_error(__MOD__, \
+                    "Numerical field " #name " invalid (NaN)"); \
+                goto error; \
+            } \
+        } \
+    } while (0)
+
+/**
  * @brief Helper macro to read a numerical field from a JSON command
  *
  * This macro assumes the existence of an "error" label.
@@ -266,6 +289,11 @@ int vs_msg_peek(int fd);
 #define VS_MSG_READ_NUM(obj, name) \
     double name ## _value; \
     VS_MSG_READ_NUM_NO_DECL(obj, name, name ## _value)
+
+#define VS_MSG_READ_NUM_OPT(obj, name) \
+    double name ## _value; \
+    cJSON *p_item_ ## name; \
+    VS_MSG_READ_NUM_OPT_NO_DECL(obj, name, p_item_ ## name, name ## _value)
 
 /**
  * @brief Helper macro to read a text field from a JSON command

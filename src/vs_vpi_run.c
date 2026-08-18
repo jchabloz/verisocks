@@ -187,21 +187,12 @@ VS_VPI_CMD_HANDLER(run_until_change)
     VS_MSG_READ_STR(p_data->p_cmd, path);
 
     /* Check if there is timeout value in the JSON message content */
-    cJSON *p_item_timeout;
-    double timeout;
-    p_item_timeout = cJSON_GetObjectItem(p_data->p_cmd, "sim_timeout");
-    if (NULL != p_item_timeout) {
-        timeout = cJSON_GetNumberValue(p_item_timeout);
-        if (isnan(timeout)) {
-            vs_vpi_log_error("Numerical field sim_timeout invalid (NaN)");
-            goto error;
-        }
-    }
+    VS_MSG_READ_NUM_OPT(p_data->p_cmd, sim_timeout);
 
     char *str_time_unit;
-    if (NULL != p_item_timeout) {
+    if (NULL != p_item_sim_timeout) {
         VS_MSG_READ_STR_NO_DECL(p_data->p_cmd, time_unit, str_time_unit);
-        cb_timeout = vs_utils_double_to_time(timeout, str_time_unit);
+        cb_timeout = vs_utils_double_to_time(sim_timeout_value, str_time_unit);
     }
 
     /* Attempt to get the object handle */
@@ -261,7 +252,7 @@ VS_VPI_CMD_HANDLER(run_until_change)
     p_data->h_cb = h_cb;
 
     /* Register timeout callback */
-    if (NULL != p_item_timeout) {
+    if (NULL != p_item_sim_timeout) {
         cb_data_timeout.reason = cbAfterDelay;
         cb_data_timeout.time = &cb_timeout;
         cb_data_timeout.obj = NULL;
