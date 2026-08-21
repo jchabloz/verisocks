@@ -330,7 +330,6 @@ private:
     }
 
     /* Callback functions*/
-    int register_change_only_callback(const char* path, const double value);
     int register_value_callback(const char* path, const double value);
     int register_time_callback(const vsl_time_t time);
     void clear_callbacks() {
@@ -834,15 +833,6 @@ const vsl_time_t VslInteg<T>::next_event_time() const {
 /******************************************************************************
 Callbacks management
 ******************************************************************************/
-template<typename T>
-int VslInteg<T>::register_change_only_callback(const char* path,
-    const double value)
-{
-    register_value_callback(path, value);
-    b_has_change_only_callback = true;
-    return 0;
-}
-
 template<typename T>
 int VslInteg<T>::register_value_callback(const char* path, const double value)
 {

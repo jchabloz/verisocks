@@ -252,7 +252,7 @@ gets back to Verisocks.
     * :json:`"cb": "until_time"` - The simulation shall run until a certain
       (simulator) time,
     * :json:`"cb": "until_change"` - The simulation shall run until a certain
-      simulator variable changes to a given value,
+      simulator variable changes to any new value or to a specific value,
     * :json:`"cb": "to_next"` - The simulation shall run until the next
       simulation time step.
 
@@ -269,10 +269,13 @@ gets back to Verisocks.
   If the ``"cb"`` field is ``"until_change"``, the following fields are further
   expected in the command frame:
 
-  * :json:`"path":` (text): Path to verilog object used for the callback
-  * :json:`"value":` (number): Condition on the verilog object's value for the
-    callback to be executed. This argument is not required if the path
-    corresponds to a named event.
+  * :json:`"path":` (text): Path to the simulation variable used for the
+    callback
+  * :json:`"value":` (number): Condition on the simulation variable's value for
+    the callback to be executed. If this argument is missing, the callback
+    shall be executed as soon as the value of the object changes to any newer
+    value. This argument is also not required if the path corresponds to a
+    named event.
   * :json:`"sim_timeout":` (number, optional): Time duration defining a
     timeout. If the timeout duration expires before the defined condition is
     met, the simulation pauses and a *timeout* message is returned.
@@ -316,7 +319,7 @@ This command can be used to get pieces of information from the simulator.
   If the ``"sel"`` field is ``"value"`` or ``"type"``, the following field is
   required in the command frame:
 
-    * :json:`"path":` (text): Path to the verilog variable
+    * :json:`"path":` (text): Path to the simulation variable
 
   For the :json:`"path":` field, selecting only a specific index of an array is
   also possible by using the :code:`[]` operator, e.g.

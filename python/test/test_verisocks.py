@@ -240,6 +240,26 @@ def test_run_for_time(vs):
     prev_sim_time = answer["time"]
 
 
+def test_sc_run_for(vs):
+    """Tests Verisocks run_for shortcut function"""
+
+    # Get initial time
+    answer = vs.get(sel="sim_time")
+    assert answer["type"] == "result"
+    assert answer["sim_time"] == 0
+    assert answer["sim_time_unit"] == "ps"
+    prev_sim_time = answer["time"]
+
+    # For time in ps
+    answer = vs.run_for(6, "ps")
+    assert answer["sim_time"] == 6
+    assert answer["sim_time_unit"] == "ps"
+    answer = vs.get(sel="sim_time")
+    assert answer["type"] == "result"
+    assert answer["time"] - prev_sim_time == pytest.approx(6e-12)
+    prev_sim_time = answer["time"]
+
+
 def test_run_to_next(vs):
     """Tests Verisocks run(cb="to_next") function"""
 
@@ -295,6 +315,16 @@ def test_run_until_time(vs):
         assert answer["type"] == "error"
 
 
+def test_sc_run_until(vs):
+    """Tests Verisocks run_until shortcut function"""
+
+    # Until time in ps
+    vs.run_until(174, "ps")
+    answer = vs.get(sel="sim_time")
+    assert answer["type"] == "result"
+    assert answer["time"] == pytest.approx(174e-12)
+
+
 def test_run_until_change(vs):
     """Tests Verisocks run(cb="until_change") function"""
 
@@ -340,6 +370,21 @@ def test_run_until_change(vs):
     answer = vs.get(sel="value", path="main.count")
     assert answer["type"] == "result"
     assert answer["value"] == 10
+
+
+def test_sc_run_until_change(vs):
+    """Tests Verisocks run_until_change shorcut function"""
+
+    vs.run_until_change("main.count", 137)
+    assert vs.get_value("main.count") == 137
+
+    answer = vs.run_until_change("main.count")
+    assert vs.get_value("main.count") == 138
+
+    prev_time = answer["sim_time"]
+    answer = vs.run_until_change("main.count", 300, 15, "us")
+    assert answer["type"] == "timeout"
+    assert answer["sim_time"] - prev_time == 15e6
 
 
 def test_set(vs):

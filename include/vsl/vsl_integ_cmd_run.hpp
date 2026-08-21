@@ -314,16 +314,12 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     }
 
     /* Register value callback */
-    if (nullptr != p_item_val || p_var->get_type() == VSL_TYPE_EVENT) {
-        if (0 > vx.register_value_callback(cstr_path, value)) {
-            handle_error();
-            return;
-        }
-    } else {
-        if (0 > vx.register_change_only_callback(cstr_path, value)) {
-            handle_error();
-            return;
-        }
+    if (0 > vx.register_value_callback(cstr_path, value)) {
+        handle_error();
+        return;
+    }
+    if (nullptr == p_item_val && p_var->get_type() != VSL_TYPE_EVENT) {
+        vx.b_has_change_only_callback = true;
     }
 
     /* Return control to simulation loop */

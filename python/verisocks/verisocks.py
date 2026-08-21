@@ -497,10 +497,12 @@ Still {self._rx_expected} messages expected.")
             If `cb` is ``"until_change"``, the following keyword argument(s)
             are further expected:
 
-            * **path** (str): Path to verilog object used for the callback
-            * **value** (number): Condition on the verilog object's
-              value for the callback to be executed. This argument is not
-              required if the path corresponds to a named event.
+            * **path** (str): Path to simulation variable used for the callback
+            * **value** (number): Condition on the simulation variable's value
+              for the callback to be executed. If this argument is missing, the
+              callback shall be executed when the variable changes to any new
+              value. This argument is also not required if the path corresponds
+              to a named event.
             * **sim_timeout** (number): Time duration (in simulator time) after
               which a timeout condition is met and a *timeout* message
               returned. This field is optional.
@@ -565,15 +567,18 @@ Still {self._rx_expected} messages expected.")
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
-    def run_until_change(self, path, value, sim_timeout=None, time_unit="us",
-                         timeout=None):
+    def run_until_change(self, path, value=None, sim_timeout=None,
+                         time_unit="us", timeout=None):
         """Shortcut command for :py:func:`run` with argument
         ``cb='until_change'``
 
         Args:
             path (str): Path to variable
-            value (float): Condition on the variable value
-            sim_timeout (float): Timeout duration (in simulator time)
+            value (float): Condition on the variable value. If None, the
+                simulation shall stop as soon as the variable changes to a new
+                value.
+            sim_timeout (float): Timeout duration (in simulator time). If not
+                defined (None), no timeout shall be used.
             time_unit (str): Time unit which applies to the timeout value
             timeout (float): Socket timeout configuration value in seconds.
                 If None (default), the class instance default value is used.
@@ -585,14 +590,16 @@ Still {self._rx_expected} messages expected.")
             VerisocksError: If the returned answer is not the expected
                 acknowledgement
         """
+        kw_args = {"path": path, "timeout": timeout}
+        if (value):
+            kw_args['value'] = value
         if (sim_timeout):
-            answer = self.run("until_change", path=path, value=value,
-                              sim_timeout=sim_timeout, time_unit=time_unit,
-                              timeout=timeout)
-        else:
-            answer = self.run("until_change", path=path, value=value,
-                              timeout=timeout)
-        if (answer['type'] == "ack"):
+            kw_args['sim_timeout'] = sim_timeout
+            kw_args['time_unit'] = time_unit
+
+        answer = self.run("until_change", **kw_args)
+
+        if (answer['type'] == "ack" or answer['type'] == "timeout"):
             return answer
         if (answer['type' == "error"]):
             raise VerisocksError(answer['value'])
@@ -760,7 +767,7 @@ Still {self._rx_expected} messages expected.")
             * ``"type"``: Gets the VPI type value for a verilog object.
             * ``"variables"``: Gets the list of registered variables (Verilator
               integration only).
-            * ``"type"``: Gets the list of registered clocks (Verilator
+            * ``"clocks"``: Gets the list of registered clocks (Verilator
               integration only)
 
         Returns:

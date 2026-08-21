@@ -302,6 +302,14 @@ def test_run_until_change(vs):
     assert answer["type"] == "result"
     assert answer["value"] == 137
 
+    # Test without value specified - should run until next change
+    answer = vs.run(cb="until_change", path="main.count")
+    assert answer["type"] == "ack"
+    answer = vs.get(sel="value", path="main.count")
+    assert answer["type"] == "result"
+    assert answer["value"] == 138
+
+    # Test with a named event
     answer = vs.run(cb="until_change", path="main.counter_end")
     assert answer["type"] == "ack"
     answer = vs.get(sel="value", path="main.count")
