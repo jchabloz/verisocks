@@ -29,7 +29,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_logo = 'figures/vs_logo.png'
+html_logo = 'figures/vs_scp_logo.svg'
 html_favicon = 'figures/vs_logo_icon.ico'
 
 # Napoleon settings

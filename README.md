@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/vs_logo_inverted.svg" width=400px>
-  <source media="(prefers-color-scheme: light)" srcset="docs/figures/vs_logo.svg" width=400px>
-  <img alt="Verisocks logo" src="docs/figures/vs_logo.svg" width=400px>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/vs_scp_logo_inverted.svg" width=400px>
+  <source media="(prefers-color-scheme: light)" srcset="docs/figures/vs_scp_logo.svg" width=400px>
+  <img alt="Verisocks logo" src="docs/figures/vs_scp_logo.svg" width=400px>
 </picture>
 
 # *A generic socket interface for Verilog simulators*
