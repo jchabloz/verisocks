@@ -27,7 +27,7 @@ SOFTWARE.
 
 #define VERISOCKS_VERSION_MAJOR 1
 #define VERISOCKS_VERSION_MINOR 7
-#define VERISOCKS_VERSION_PATCH 0-dev
+#define VERISOCKS_VERSION_PATCH 0
 
 #define xstr(s) str(s)
 #define str(s) #s

@@ -20,8 +20,11 @@ Releases of documentation and code are using the same version numbers.
     3. ``PATCH`` version when you make backward compatible bug fixes
 
 
-1.7.0 - Ongoing
-***************
+1.7.0 - 2026-08-28
+******************
+
+* Re-branded the project from simply "Verisocks" to "Verisocks SCP", with "SCP"
+  standing for "Simulation control protocol"
 
 * TCP protocol
 
