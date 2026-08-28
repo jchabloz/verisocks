@@ -172,16 +172,28 @@ VS_VPI_CMD_HANDLER(run_until_time)
 VS_VPI_CMD_HANDLER(run_until_change)
 {
     vpiHandle h_obj;
-    double value = NAN;
+    // double value = NAN;
     PLI_INT32 format;
     s_vpi_value target_value;
     s_vpi_value cb_value;
     s_vpi_time cb_time;
+    s_vpi_time cb_timeout;
     s_cb_data cb_data;
+    s_cb_data cb_data_timeout;
     vpiHandle h_cb;
+    vpiHandle h_cb_timeout;
 
     /* Get the object path from the JSON message content */
     VS_MSG_READ_STR(p_data->p_cmd, path);
+
+    /* Check if there is timeout value in the JSON message content */
+    VS_MSG_READ_NUM_OPT(p_data->p_cmd, sim_timeout);
+
+    char *str_time_unit;
+    if (NULL != p_item_sim_timeout) {
+        VS_MSG_READ_STR_NO_DECL(p_data->p_cmd, time_unit, str_time_unit);
+        cb_timeout = vs_utils_double_to_time(sim_timeout_value, str_time_unit);
+    }
 
     /* Attempt to get the object handle */
     h_obj = vpi_handle_by_name(str_path, NULL);
@@ -190,12 +202,12 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
 
-    if (vpi_get(vpiType, h_obj) != vpiNamedEvent) {
-        /* Get the value from the JSON message content */
-        VS_MSG_READ_NUM_NO_DECL(p_data->p_cmd, value, value);
+    /* Check if a value is provided */
+    VS_MSG_READ_NUM_OPT(p_data->p_cmd, value);
+    if (NULL != p_item_value) {
         vs_vpi_log_info(
             "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
-            str_path, value);
+            str_path, value_value);
     } else {
         vs_vpi_log_info(
             "Command \"run(cb=until_change, path=%s)\" received.",
@@ -204,27 +216,32 @@ VS_VPI_CMD_HANDLER(run_until_change)
 
     /* Store value as user data, depending on desired format */
     format = vs_utils_get_format(h_obj);
-    target_value.format = format;
     if (0 > format) goto error;
-    switch (format) {
-    case vpiIntVal:
-        target_value.value.integer = (PLI_INT32) value;
-        break;
-    case vpiRealVal:
-        target_value.value.real = value;
-        break;
-    case vpiSuppressVal:
-        target_value.value.real = 0;
-        break;
-    default:
-        goto error;
+    if (NULL != p_item_value && vpi_get(vpiType, h_obj) != vpiNamedEvent) {
+        cb_value.format = format;
+        target_value.format = format;
+        switch (format) {
+        case vpiIntVal:
+            target_value.value.integer = (PLI_INT32) value_value;
+            break;
+        case vpiRealVal:
+            target_value.value.real = value_value;
+            break;
+        case vpiSuppressVal:
+            target_value.value.real = 0.0;
+            break;
+        default:
+            goto error;
+        }
+    } else {
+        cb_value.format = vpiSuppressVal;
+        target_value.format = vpiSuppressVal;
+        target_value.value.real = 0.0;
     }
     p_data->value = target_value;
 
     /* Register callback */
     cb_time.type = vpiSimTime;
-    cb_value.format = format;
-
     cb_data.reason = cbValueChange;
     cb_data.time = &cb_time;
     cb_data.obj = h_obj;
@@ -238,6 +255,23 @@ VS_VPI_CMD_HANDLER(run_until_change)
         goto error;
     }
     p_data->h_cb = h_cb;
+
+    /* Register timeout callback */
+    if (NULL != p_item_sim_timeout) {
+        cb_data_timeout.reason = cbAfterDelay;
+        cb_data_timeout.time = &cb_timeout;
+        cb_data_timeout.obj = NULL;
+        cb_data_timeout.value = NULL;
+        cb_data_timeout.index = 0;
+        cb_data_timeout.user_data = (PLI_BYTE8*) p_data;
+        cb_data_timeout.cb_rtn = verisocks_cb_timeout;
+        h_cb_timeout = vpi_register_cb(&cb_data_timeout);
+        if (NULL == h_cb_timeout) {
+            vs_vpi_log_error("Could not register timeout callback");
+            goto error;
+        }
+        p_data->h_cb_timeout = h_cb_timeout;
+    }
 
     /* Return control to simulator */
     p_data->state = VS_VPI_STATE_SIM_RUNNING;

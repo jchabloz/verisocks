@@ -97,7 +97,7 @@ below.
                                 #  executable help
 
     sub_files:                  # (optional) List of other YAML files that will
-    - <path>                    # be merged (one one hierarchical level only!)
+    - <path>                    # be merged (on one hierarchical level only!)
                                 # with this file. For example, all variables
                                 # could be listed in a separate YAML file that
                                 # is shared by several possible configurations.
@@ -139,8 +139,9 @@ below.
 
     From version 1.6.0, the ``type`` argument for variables in the YAML
     configuration file needs only to be defined as either *integral* (``int``)
-    or *real* (``real``). The previous values ``uint8``, ``uint16``, ``uint32``
-    and ``uint64`` are still supported but should be considered as deprecated.
+    or *real* (``real``), ``int`` being the default if not defined. The
+    previous values ``uint8``, ``uint16``, ``uint32`` and ``uint64`` are still
+    supported but should be considered as deprecated.
 
 
 Optional arguments

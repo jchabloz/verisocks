@@ -9,8 +9,8 @@
 project = 'Verisocks'
 copyright = '2023-2026, Jérémie Chabloz'
 author = 'Jérémie Chabloz'
-version = '1.6'
-release = '1.6.0'
+version = '1.7'
+release = '1.7.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -29,7 +29,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv']
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-html_logo = 'figures/vs_logo.png'
+html_logo = 'figures/vs_scp_logo.svg'
 html_favicon = 'figures/vs_logo_icon.ico'
 
 # Napoleon settings

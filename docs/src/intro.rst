@@ -9,8 +9,8 @@ Introduction
 Quick start
 ***********
 
-Install Verisocks from sources
-------------------------------
+Install Verisocks SCP from sources
+----------------------------------
 
 Make sure that the following pre-requisites are available on your system prior
 to trying and compile Verisocks:
@@ -30,8 +30,9 @@ to trying and compile Verisocks:
 
 .. note::
 
-    Older GCC versions will most likely complain about the variadic macros used
-    for logging purposes. These warnings can normally be safely ignored...
+    Older GCC versions, e.g. as installed on RHEL 7.x will most likely complain
+    about the variadic macros used for logging purposes. These warnings can
+    normally be safely ignored...
 
 The easiest way to get a full copy of the latest code is to clone the git
 repository:
@@ -59,10 +60,10 @@ linker argument:
     ./configure CFLAGS=-I<path to your vpi_user.h> LDFLAGS=-L<path to your libvpi.a>
 
 
-Install the reference Python client
------------------------------------
+Install the reference Python SCP client
+---------------------------------------
 
-In order to use the provided reference Python client, you can directly and
+In order to use the provided reference Python SCP client, you can directly and
 easily install it using :code:`pip`. Remember that it is considered best
 practice to use `virtual environments
 <https://docs.python.org/3/glossary.html#term-virtual-environment>`_.
@@ -146,8 +147,8 @@ it possible to control externally any Icarus simulation.
   to which it would be possible to submit *requests* via a *client*.
 
 
-The requests to be submitted to the *Verisocks simulation server* would then
-have to typically be:
+The requests to be submitted to the *Verisocks SCP server* would then have to
+typically be:
 
 * **get values** of simulation variables,
 * **set values** for simulation variables,

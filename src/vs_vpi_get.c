@@ -32,6 +32,7 @@ SOFTWARE.
 #include <string.h>
 #include <math.h>
 
+#include "version.h"
 #include "vpi_config.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
@@ -81,8 +82,10 @@ VS_VPI_CMD_HANDLER(get_sim_info)
         vs_log_mod_error("vs_vpi", "Could not get vlog_info");
         goto error;
     }
+
     VS_MSG_ADD_STR(p_msg, "product", vlog_info.product);
     VS_MSG_ADD_STR(p_msg, "version", vlog_info.version);
+    VS_MSG_ADD_STR(p_msg, "verisocks_version", VERISOCKS_VERSION);
 
     PLI_INT32 time_unit;
     time_unit = vpi_get(vpiTimeUnit, NULL);

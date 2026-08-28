@@ -124,6 +124,22 @@ PLI_INT32 vs_utils_get_value(vpiHandle h_obj, s_vpi_value* p_value);
 PLI_INT32 vs_utils_compare_values(s_vpi_value val1, s_vpi_value val2);
 
 /**
+ * @brief Compare two values (extended)
+ *
+ * @warning Currently supports only vpiIntVal and vpiRealVal values
+ * @param val1 First value
+ * @param val2 Second value (reference)
+ * @param mask If not 0, for integer values, applies as an "and" mask prior
+ * comparison
+ * @param tol If not 0.0, for real values, used as a relative tolerance for
+ * values different from 0. If 0, applies as an absolute tolerance.
+ * @return Returns 0 if val1 and val2 are equivalent, 1 otherwise, -1 if there
+ * is an error (e.g. type not supported)
+ */
+PLI_INT32 vs_utils_compare_values_ext(
+    s_vpi_value val1, s_vpi_value val2, uint32_t mask, double tol);
+
+/**
  * @brief Set value from a VPI handle and a value
  *
  * @param h_obj VPI object handle

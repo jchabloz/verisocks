@@ -129,12 +129,6 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_for_time) {
         __MOD__, "Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, cstr_time_unit);
 
-    if (time_value <= 0.0f) {
-        vs_log_mod_error(__MOD__, "Invalid time value %f", time_value);
-        handle_error();
-        return;
-    }
-
     /* Register callback */
     uint64_t cb_time;
     cb_time = double_to_time(time_value, cstr_time_unit, vx.p_context);
@@ -258,21 +252,22 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
     double value;
     if (p_var->get_type() == VSL_TYPE_SCALAR) {
         p_item_val = cJSON_GetObjectItem(vx.p_cmd, "value");
-        if (nullptr == p_item_val) {
-            vs_log_mod_error(__MOD__,
-                "Command field \"value\" invalid/not found");
-            handle_error();
-            return;
+        if (nullptr != p_item_val) {
+            value = cJSON_GetNumberValue(p_item_val);
+            if (std::isnan(value)) {
+                vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
+                handle_error();
+                return;
+            }
+            vs_log_mod_info(__MOD__,
+                "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
+                cstr_path, value);
+        } else {
+            value = p_var->get_value();
+            vs_log_mod_info(__MOD__,
+                "Command \"run(cb=until_change, path=%s)\" received.",
+                cstr_path);
         }
-        value = cJSON_GetNumberValue(p_item_val);
-        if (std::isnan(value)) {
-            vs_log_mod_error(__MOD__, "Command field \"value\" invalid (NaN)");
-            handle_error();
-            return;
-        }
-        vs_log_mod_info(__MOD__,
-            "Command \"run(cb=until_change, path=%s, value=%f)\" received.",
-            cstr_path, value);
     } else if (p_var->get_type() == VSL_TYPE_EVENT) {
         value = 1.0f;
         vs_log_mod_info(__MOD__,
@@ -283,10 +278,48 @@ void VslInteg<T>::VSL_CMD_HANDLER(run_until_change) {
         return;
     }
 
-    /* Register callback */
+    /* Check if the message has a timeout field */
+    cJSON* p_item_timeout;
+    double timeout;
+    p_item_timeout = cJSON_GetObjectItem(vx.p_cmd, "sim_timeout");
+    if (nullptr != p_item_timeout) {
+        timeout = cJSON_GetNumberValue(p_item_timeout);
+        if (std::isnan(value)) {
+            vs_log_mod_error(__MOD__,
+                "Command field \"sim_timeout\" invalid (NaN)");
+            handle_error();
+            return;
+        }
+        if (timeout <= 0.0) {
+            vs_log_mod_error(__MOD__, "Command field \"sim_timeout\" <= 0.0");
+            handle_error();
+            return;
+        }
+        VSL_MSG_READ_STR(vx.p_cmd, time_unit);
+        if (!check_time_unit(str_time_unit)) {
+            vs_log_mod_error(
+                __MOD__, "Wrong time unit identifier: %s", cstr_time_unit);
+            handle_error();
+            return;
+        }
+
+        /* Register timeout callback */
+        uint64_t cb_time;
+        cb_time = double_to_time(timeout, cstr_time_unit, vx.p_context);
+        cb_time += vx.p_context->time();
+        if (0 > vx.register_time_callback(cb_time)) {
+            handle_error();
+            return;
+        }
+    }
+
+    /* Register value callback */
     if (0 > vx.register_value_callback(cstr_path, value)) {
         handle_error();
         return;
+    }
+    if (nullptr == p_item_val && p_var->get_type() != VSL_TYPE_EVENT) {
+        vx.b_has_change_only_callback = true;
     }
 
     /* Return control to simulation loop */

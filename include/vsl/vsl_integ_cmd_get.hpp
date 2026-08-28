@@ -54,6 +54,7 @@ SOFTWARE.
 #ifndef VSL_INTEG_CMD_GET_HPP
 #define VSL_INTEG_CMD_GET_HPP
 
+#include "version.h"
 #include "cJSON.h"
 #include "vs_logging.h"
 #include "vs_msg.h"
@@ -127,6 +128,7 @@ void VslInteg<T>::VSL_CMD_HANDLER(get_sim_info) {
     VSL_MSG_ADD_STR(p_msg, "type", "result");
     VSL_MSG_ADD_STR(p_msg, "product", Verilated::productName());
     VSL_MSG_ADD_STR(p_msg, "version", Verilated::productVersion());
+    VSL_MSG_ADD_STR(p_msg, "verisocks_version", VERISOCKS_VERSION);
     VSL_MSG_ADD_STR(p_msg, "user_info", vx.sim_user_info.c_str());
     VSL_MSG_ADD_STR(p_msg, "model_name", vx.p_model->modelName());
     VSL_MSG_ADD_STR(p_msg, "model_hier_name", vx.p_model->hierName());

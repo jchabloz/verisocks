@@ -422,7 +422,7 @@ Still {self._rx_expected} messages expected.")
                 If None (default), the class instance default value is used.
 
         Returns:
-            JSON object: Content of returned message.
+            dict (JSON object): Content of returned message.
         """
 
         if "timeout" in cmd:
@@ -456,7 +456,7 @@ Still {self._rx_expected} messages expected.")
                 If None (default), the class instance default value is used.
 
         Returns:
-            JSON object: Content of returned message
+            dict (JSON object): Content of returned message
         """
         return self.send(command=command, **kwargs)
 
@@ -476,7 +476,7 @@ Still {self._rx_expected} messages expected.")
                 If None (default), the class instance default value is used.
 
         Returns:
-            JSON object: Content of returned message
+            dict (JSON object): Content of returned message
 
         Note:
             The parameter `cb` can be either:
@@ -497,15 +497,113 @@ Still {self._rx_expected} messages expected.")
             If `cb` is ``"until_change"``, the following keyword argument(s)
             are further expected:
 
-            * **path** (str): Path to verilog object used for the callback
-            * **value** (number): Condition on the verilog object's
-              value for the callback to be executed. This argument is not
-              required if the path corresponds to a named event.
+            * **path** (str): Path to simulation variable used for the callback
+            * **value** (number): Condition on the simulation variable's value
+              for the callback to be executed. If this argument is missing, the
+              callback shall be executed when the variable changes to any new
+              value. This argument is also not required if the path corresponds
+              to a named event.
+            * **sim_timeout** (number): Time duration (in simulator time) after
+              which a timeout condition is met and a *timeout* message
+              returned. This field is optional.
+            * **time_unit** (str): Time unit (s, ms, us, ns, ps or fs) for the
+              **sim_timeout** argument.
 
             If `cb` is ``"to_next"``, no further keyword argument is required.
-        """
 
+        Note:
+            From version 1.7, it is recommended to use instead the shortcut
+            functions :py:func:`run_for`, :py:func:`run_until` and
+            :py:func:`run_until_change`.
+        """
         return self.send(command="run", cb=cb, **kwargs)
+
+    def run_for(self, time, time_unit, timeout=None):
+        """Shortcut command for :py:func:`run` with argument ``cb='for_time'``
+
+        Args:
+            time (float): Time value
+            time_unit (str): Time unit (s, ms, us, ns, ps or fs)
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Returns:
+            dict (JSON object): Content of returned message
+                
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.run("for_time", time=time, time_unit=time_unit,
+                          timeout=timeout)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
+
+    def run_until(self, time, time_unit, timeout=None):
+        """Shortcut command for :py:func:`run` with argument
+        ``cb='until_time'``
+
+        Args:
+            time (float): Time value
+            time_unit (str): Time unit (s, ms, us, ns, ps or fs)
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Returns:
+            dict (JSON object): Content of returned message
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.run("until_time", time=time, time_unit=time_unit,
+                          timeout=timeout)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
+
+    def run_until_change(self, path, value=None, sim_timeout=None,
+                         time_unit="us", timeout=None):
+        """Shortcut command for :py:func:`run` with argument
+        ``cb='until_change'``
+
+        Args:
+            path (str): Path to variable
+            value (float): Condition on the variable value. If None, the
+                simulation shall stop as soon as the variable changes to a new
+                value.
+            sim_timeout (float): Timeout duration (in simulator time). If not
+                defined (None), no timeout shall be used.
+            time_unit (str): Time unit which applies to the timeout value
+            timeout (float): Socket timeout configuration value in seconds.
+                If None (default), the class instance default value is used.
+
+        Returns:
+            dict (JSON object): Content of returned message
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        kw_args = {"path": path, "timeout": timeout}
+        if (value):
+            kw_args['value'] = value
+        if (sim_timeout):
+            kw_args['sim_timeout'] = sim_timeout
+            kw_args['time_unit'] = time_unit
+
+        answer = self.run("until_change", **kw_args)
+
+        if (answer['type'] == "ack" or answer['type'] == "timeout"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def set(self, path, **kwargs):
         """Sends a :keyword:`set <sec_tcp_cmd_set>` command request to the
@@ -526,9 +624,29 @@ Still {self._rx_expected} messages expected.")
                 If None (default), the class instance default value is used.
 
         Returns:
-            JSON object: Content of returned message
+            dict (JSON object): Content of returned message
         """
         return self.send(command="set", path=path, **kwargs)
+
+    def set_value(self, path, value):
+        """Shortcut command for :py:func:`set` with argument ``sel='value'``
+
+        Args:
+            path (str): Path to variable value (float): Variable value
+
+        Returns:
+            dict (JSON object): Content of returned message
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.send(command="set", sel="value", path=path, value=value)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def enable_clock(self, path):
         """Enable a clock signal (only with Verilator)
@@ -541,9 +659,18 @@ Still {self._rx_expected} messages expected.")
             path (str): Path to the clock signal
 
         Returns:
-            JSON object: Content of the returned message
+            dict (JSON object): Content of the returned message
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
         """
-        return self.send(command="set", sel="clk_en", path=path, value=1)
+        answer = self.send(command="set", sel="clk_en", path=path, value=1)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def disable_clock(self, path):
         """Disable a clock signal (only with Verilator)
@@ -557,9 +684,18 @@ Still {self._rx_expected} messages expected.")
             path (str): Path to the clock signal
 
         Returns:
-            JSON object: Content of the returned message
+            dict (JSON object): Content of the returned message
+
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
         """
-        return self.send(command="set", sel="clk_en", path=path, value=0)
+        answer = self.send(command="set", sel="clk_en", path=path, value=0)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def configure_clock(self, path, period, unit="us", duty_cycle=0.5):
         """Configure a clock signal (only with Verilator)
@@ -574,11 +710,19 @@ Still {self._rx_expected} messages expected.")
             duty_cycle (float): Duty cycle (> 0.0 and < 1.0)
 
         Returns:
-            JSON object: Content of the returned message
-        """
+            dict (JSON object): Content of the returned message
 
-        return self.send(command="set", sel="clk_cfg",
-                         path=path, period=period, unit=unit, dc=duty_cycle)
+        Raises:
+            VerisocksError: If the returned answer is not the expected
+                acknowledgement
+        """
+        answer = self.send(command="set", sel="clk_cfg",
+                           path=path, period=period, unit=unit, dc=duty_cycle)
+        if (answer['type'] == "ack"):
+            return answer
+        if (answer['type' == "error"]):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def info(self, value):
         """Sends an :keyword:`info <sec_tcp_cmd_info>` command to the Verisocks
@@ -593,7 +737,7 @@ Still {self._rx_expected} messages expected.")
             value (str): Text to be sent to the VPI stdout
 
         Returns:
-            JSON object: Content of returned message
+            dict (JSON object): Content of returned message
         """
         return self.send(command="info", value=value)
 
@@ -623,15 +767,34 @@ Still {self._rx_expected} messages expected.")
             * ``"type"``: Gets the VPI type value for a verilog object.
             * ``"variables"``: Gets the list of registered variables (Verilator
               integration only).
-            * ``"type"``: Gets the list of registered clocks (Verilator
+            * ``"clocks"``: Gets the list of registered clocks (Verilator
               integration only)
 
         Returns:
-            JSON object: Content of returned message
+            dict (JSON object): Content of returned message
         """
         if path:
             return self.send(command="get", sel=sel, path=path)
         return self.send(command="get", sel=sel)
+
+    def get_value(self, path):
+        """Shortcut command for :py:func:`get` with argument ``sel='value'``
+
+        Args:
+            path (str): Path to variable
+
+        Returns:
+            float: Variable value
+
+        Raises:
+            VerisocksError: If the answer is not of the expected type
+        """
+        answer = self.send(command="get", sel="value", path=path)
+        if (answer['type'] == "result"):
+            return answer['value']
+        if (answer['type'] == "error"):
+            raise VerisocksError(answer['value'])
+        raise VerisocksError(json.dumps(answer))
 
     def finish(self, timeout=None):
         """Sends a :keyword:`finish <sec_tcp_cmd_finish>` command to the

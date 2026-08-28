@@ -6,12 +6,12 @@
 
 .. _sec_tcp_protocol:
 
-TCP protocol
+SCP protocol
 ############
 
-This section describes the chosen and implemented protocol for the frames sent
-and received to/from the Verisocks server TCP socket by any client that wishes
-to connect to it.
+This section describes the chosen and implemented SCP protocol for the frames
+sent and received to/from the Verisocks server TCP socket by any client that
+wishes to connect to it.
 
 
 .. note::
@@ -33,7 +33,7 @@ Frames format
 
 .. note::
 
-  The TCP message format follows the proposal for a message format in the
+  The SCP message format follows the proposal for a message format in the
   `RealPython's guide on sockets programming
   <https://realpython.com/python-sockets/>`_. It allows to deal easily with
   variable-length messages while making sure that it is possible to verify that
@@ -252,7 +252,7 @@ gets back to Verisocks.
     * :json:`"cb": "until_time"` - The simulation shall run until a certain
       (simulator) time,
     * :json:`"cb": "until_change"` - The simulation shall run until a certain
-      simulator variable changes to a given value,
+      simulator variable changes to any new value or to a specific value,
     * :json:`"cb": "to_next"` - The simulation shall run until the next
       simulation time step.
 
@@ -269,10 +269,18 @@ gets back to Verisocks.
   If the ``"cb"`` field is ``"until_change"``, the following fields are further
   expected in the command frame:
 
-  * :json:`"path":` (text): Path to verilog object used for the callback
-  * :json:`"value":` (number): Condition on the verilog object's value for the
-    callback to be executed. This argument is not required if the path
-    corresponds to a named event.
+  * :json:`"path":` (text): Path to the simulation variable used for the
+    callback
+  * :json:`"value":` (number): Condition on the simulation variable's value for
+    the callback to be executed. If this argument is missing, the callback
+    shall be executed as soon as the value of the object changes to any newer
+    value. This argument is also not required if the path corresponds to a
+    named event.
+  * :json:`"sim_timeout":` (number, optional): Time duration defining a
+    timeout. If the timeout duration expires before the defined condition is
+    met, the simulation pauses and a *timeout* message is returned.
+  * :json:`"time_unit":` (text): Time unit which applies to the
+    ``"sim_timeout"`` field value. See the possible values above.
 
   If the ``"cb"`` field is ``"to_next"``, no further fields are required.
 
@@ -311,7 +319,7 @@ This command can be used to get pieces of information from the simulator.
   If the ``"sel"`` field is ``"value"`` or ``"type"``, the following field is
   required in the command frame:
 
-    * :json:`"path":` (text): Path to the verilog variable
+    * :json:`"path":` (text): Path to the simulation variable
 
   For the :json:`"path":` field, selecting only a specific index of an array is
   also possible by using the :code:`[]` operator, e.g.
@@ -324,6 +332,7 @@ This command can be used to get pieces of information from the simulator.
   * :json:`"type": "result"`
   * :json:`"product":` (text): Simulator product name
   * :json:`"version":` (text): Simulator version
+  * :json:`"verisocks_version":` (text): Verisocks version
   * :json:`"time_unit":` (text): Simulator time unit
   * :json:`"time_precision":` (text): Simulator time precision
 
@@ -332,6 +341,7 @@ This command can be used to get pieces of information from the simulator.
 
   * :json:`"model_name":` (text): Model name
   * :json:`"model_hier_name":` (text): Model top instance name
+  * :json:`"user_info":` (text): Free user-defined text
 
 * Returned frame (for :json:`"sel": "sim_time"`):
 
@@ -433,6 +443,8 @@ With the provided Python client reference implementation, the method
 :py:meth:`Verisocks.set() <verisocks.verisocks.Verisocks.set>`
 corresponds to this command.
 
+.. _sec_tcp_ret_msg:
+
 Returned messages
 *****************
 
@@ -448,7 +460,10 @@ the following field:
       confirms the good execution of a command that is not expected to return a
       specific result
     * :json:`"result"` (the returned message provides a *result*)
-    * :json:`"itx"` (the returned message signals an *interrupt*, either
+    * :json:`"error"` (the returned message signals an *error*)
+    * :json:`"timeout"` (the returned message signals a *timeout*)
+
+    .. * :json:`"itx"` (the returned message signals an *interrupt*, either
       *blocking* or *non-blocking*)
 
 Other fields in return messages are dependent of the initating command for the

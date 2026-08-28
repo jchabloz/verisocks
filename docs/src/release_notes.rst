@@ -20,6 +20,39 @@ Releases of documentation and code are using the same version numbers.
     3. ``PATCH`` version when you make backward compatible bug fixes
 
 
+1.7.0 - 2026-08-28
+******************
+
+* Re-branded the project from simply "Verisocks" to "Verisocks SCP", with "SCP"
+  standing for "Simulation control protocol"
+
+* TCP protocol
+
+  * New: Added optional simulation timeout for the :ref:`run(until_change)
+    <sec_tcp_cmd_run>` command.
+  * New: Added new supported behavior for the :ref:`run(until_change)
+    <sec_tcp_cmd_run>` command; it can now also set the simulation to run until the
+    variable changes to any value.
+  * New: Added the :json:`"type": "timeout"` :ref:`return message
+    <sec_tcp_ret_msg>` type.
+  * New: Added :json:`"verisocks_version"` field in the return message for the
+    :ref:`get(sim_info) <sec_tcp_cmd_get>` command.
+
+* Python client
+
+  * New: Added shortcut function :py:func:`Verisocks.run_for()
+    <verisocks.verisocks.Verisocks.run_for>`
+  * New: Added shortcut function :py:func:`Verisocks.run_until()
+    <verisocks.verisocks.Verisocks.run_until>`
+  * New: Added shortcut function :py:func:`Verisocks.run_until_change()
+    <verisocks.verisocks.Verisocks.run_until_change>`
+  * New: Added shortcut function :py:func:`Verisocks.set_value()
+    <verisocks.verisocks.Verisocks.set_value>`
+  * New: Added shortcut function :py:func:`Verisocks.get_value()
+    <verisocks.verisocks.Verisocks.get_value>`
+  * New: Supported change to the :ref:`run(until_change) <sec_tcp_cmd_run>`
+    command.
+
 1.6.0 - 2026-07-26
 ******************
 
