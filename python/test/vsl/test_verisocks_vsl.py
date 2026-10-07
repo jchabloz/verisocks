@@ -389,6 +389,15 @@ def test_read_not_expected(vs):
     assert vs.read() is False
 
 
+def test_message_too_long(vs):
+    """Tests that a message longer than the server receive buffer is rejected
+    without breaking the connection"""
+    with pytest.raises(VerisocksError):
+        vs.get_value("main." + "x" * 5000)
+    vs.run_for(1, "us")
+    assert vs.get_value("main.count") > 0
+
+
 def test_sim_finishes(vs):
     """Tests the case where the simulation runs out before the specified
     callback event occurs

@@ -69,7 +69,10 @@ int main(void)
             test_vs_msg_create_message_bin)) ||
         (NULL == CU_add_test(pSuite,
             "Tests message read-write loopback",
-            test_vs_msg_read_write_loopback))
+            test_vs_msg_read_write_loopback)) ||
+        (NULL == CU_add_test(pSuite,
+            "Tests reading a message longer than the read buffer",
+            test_vs_msg_read_too_long))
     ) {
         CU_cleanup_registry();
         return CU_get_error();

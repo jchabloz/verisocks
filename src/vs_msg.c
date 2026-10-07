@@ -573,6 +573,18 @@ static int readn(int fd, size_t len, char *buffer)
     return len - read_count;
 }
 
+/* Read and discard len bytes. Returns 0 if successful. */
+static int drain(int fd, size_t len)
+{
+    char buffer[256];
+    while (len > 0) {
+        size_t chunk_len = (len < sizeof(buffer)) ? len : sizeof(buffer);
+        if (0 != readn(fd, chunk_len, buffer)) return -1;
+        len -= chunk_len;
+    }
+    return 0;
+}
+
 int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info)
 {
     vs_log_mod_debug(__MOD__, "Function vs_msg_read");
@@ -633,6 +645,12 @@ Socket probably disconnected");
     }
     if (0 != readn(fd, read_len, buffer + 2 + header_length)) {
         vs_log_mod_error(__MOD__, "Issue while reading message content");
+        return -1;
+    }
+    /* Discard the truncated part of the content, so that the next message
+    can be read */
+    if (total_len > len && 0 != drain(fd, total_len - len)) {
+        vs_log_mod_error(__MOD__, "Issue while discarding message content");
         return -1;
     }
 

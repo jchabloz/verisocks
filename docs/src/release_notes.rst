@@ -36,6 +36,10 @@ Releases of documentation and code are using the same version numbers.
     <sec_tcp_cmd_set>` command returned an acknowledgement even when the
     requested period or duty cycle was invalid and therefore not applied; it
     now returns an error return message
+  * Bug fix: a received message longer than the server receive buffer was
+    rejected, but its remaining content was left unread, which corrupted the
+    following messages and typically lost the connection. It is now discarded
+    and the connection remains usable.
 
 * Verilator integration
 

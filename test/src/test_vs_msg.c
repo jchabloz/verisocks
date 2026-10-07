@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
@@ -217,5 +218,52 @@ void test_vs_msg_read_write_loopback(void)
     cJSON_Delete(p_msg_read);
 
     free(str_msg);
+    close(fd_test);
+}
+
+void test_vs_msg_read_too_long(void)
+{
+    /* A message longer than the read buffer is truncated, and its remaining
+    content discarded so that the next message can still be read */
+    int fd_test = open("./test_long.txt",
+        O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+    CU_ASSERT(fd_test != -1);
+
+    char long_value[3 * 1024];
+    memset(long_value, 'x', sizeof(long_value) - 1);
+    long_value[sizeof(long_value) - 1] = '\0';
+    cJSON *p_msg_long = cJSON_CreateObject();
+    CU_ASSERT_PTR_NOT_NULL(
+        cJSON_AddStringToObject(p_msg_long, "value", long_value));
+
+    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_UUID_NULL}};
+    char *str_msg_long = vs_msg_create_message(p_msg_long, &msg_info);
+    CU_ASSERT_PTR_NOT_NULL(str_msg_long);
+    msg_info.len = 0u;
+    char *str_msg = vs_msg_create_message(p_msg_json, &msg_info);
+    CU_ASSERT_PTR_NOT_NULL(str_msg);
+    CU_ASSERT_EQUAL(0, vs_msg_write(fd_test, str_msg_long));
+    CU_ASSERT_EQUAL(0, vs_msg_write(fd_test, str_msg));
+    CU_ASSERT_EQUAL(0, (int) lseek(fd_test, 0, SEEK_SET));
+
+    /* First message: too long for the buffer */
+    int retval = vs_msg_read(fd_test, read_buffer, read_buffer_len,
+        &msg_info);
+    CU_ASSERT(retval > (int) read_buffer_len);
+
+    /* Second message: read correctly (only parsed if read correctly, as
+    msg_info would otherwise be inconsistent with the buffer) */
+    retval = vs_msg_read(fd_test, read_buffer, read_buffer_len, &msg_info);
+    CU_ASSERT(0 < retval && retval < (int) read_buffer_len);
+    if (0 < retval && retval < (int) read_buffer_len) {
+        cJSON *p_msg_read = vs_msg_read_json(read_buffer, &msg_info);
+        CU_ASSERT_PTR_NOT_NULL(p_msg_read);
+        CU_ASSERT(cJSON_Compare(p_msg_json, p_msg_read, cJSON_True));
+        cJSON_Delete(p_msg_read);
+    }
+
+    cJSON_Delete(p_msg_long);
+    free(str_msg);
+    free(str_msg_long);
     close(fd_test);
 }
