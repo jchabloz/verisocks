@@ -271,8 +271,14 @@ void VslInteg<T>::VSL_CMD_HANDLER(set_clk_cfg) {
     }
     VSL_MSG_READ_NUM(vx.p_cmd, dc);
 
-    vx.clock_map.get_clock(str_path).set_period(
-        period, cstr_unit, dc, vx.p_context);
+    if (0 > vx.clock_map.get_clock(str_path).set_period(
+            period, cstr_unit, dc, vx.p_context)) {
+        vs_log_mod_error(__MOD__,
+            "Invalid period (%f %s) or duty cycle (%f) for clock %s",
+            period, cstr_unit, dc, cstr_path);
+        handle_error();
+        return;
+    }
 
     VSL_MSG_RETURN(vx, "ack", "Processed command \"set(sel=clk_cfg)\"");
 

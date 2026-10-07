@@ -91,8 +91,7 @@ namespace vsl{
     {
         if (check_time_unit(unit) && 0.0 < period) {
             vsl_time_t period_int = double_to_time(period, unit, p_context);
-            set_period(period_int, duty_cycle);
-            return 0;
+            return set_period(period_int, duty_cycle);
         }
         return -1;
     }

@@ -32,6 +32,10 @@ Releases of documentation and code are using the same version numbers.
   * Bug fix: with the Verilator integration, an invalid ``unit`` field in the
     :ref:`set(sel=clk_cfg) <sec_tcp_cmd_set>` command is now rejected with an
     error return message
+  * Bug fix: with the Verilator integration, the :ref:`set(sel=clk_cfg)
+    <sec_tcp_cmd_set>` command returned an acknowledgement even when the
+    requested period or duty cycle was invalid and therefore not applied; it
+    now returns an error return message
 
 * Python client
 
