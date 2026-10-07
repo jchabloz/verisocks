@@ -176,6 +176,7 @@ void test_vs_msg_create_json_message_from_string(void)
     CU_ASSERT_PTR_NOT_NULL(str_msg);
 
     vs_msg_info_t msg_info_read;
+    CU_ASSERT_EQUAL(0, vs_msg_read_info(str_msg, &msg_info_read));
 
     char *str_msg_read = vs_msg_read_content(str_msg, &msg_info_read);
     CU_ASSERT_PTR_NOT_NULL(str_msg_read);
