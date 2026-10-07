@@ -20,6 +20,19 @@ Releases of documentation and code are using the same version numbers.
     3. ``PATCH`` version when you make backward compatible bug fixes
 
 
+1.7.1 - Ongoing
+***************
+
+* Python client
+
+  * Bug fix: :py:func:`Verisocks.run_until_change()
+    <verisocks.verisocks.Verisocks.run_until_change>` ignored a ``value`` (or
+    ``sim_timeout``) argument equal to 0, e.g. running until any change instead
+    of until the variable is 0
+  * Bug fix: shortcut functions raised a ``KeyError`` instead of a
+    :py:class:`VerisocksError <verisocks.verisocks.VerisocksError>` when
+    receiving an unexpected answer type
+
 1.7.0 - 2026-08-28
 ******************
 

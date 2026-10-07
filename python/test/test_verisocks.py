@@ -386,6 +386,38 @@ def test_sc_run_until_change(vs):
     assert answer["type"] == "timeout"
     assert answer["sim_time"] - prev_time == 15e6
 
+    # A zero value is a condition, not "any change" (count wraps to 0)
+    vs.run_until_change("main.count", 0)
+    assert vs.get_value("main.count") == 0
+
+
+def test_sc_errors(vs):
+    """Tests that shortcut functions raise VerisocksError on error answers"""
+    with pytest.raises(VerisocksError):
+        vs.run_until_change("main.no_such_variable")
+    with pytest.raises(VerisocksError):
+        vs.set_value("main.no_such_variable", 1)
+
+
+@pytest.mark.parametrize("shortcut, args", [
+    ("run_for", (1, "us")),
+    ("run_until", (1, "us")),
+    ("run_until_change", ("main.count",)),
+    ("set_value", ("main.count", 1)),
+    ("enable_clock", ("main.clk",)),
+    ("disable_clock", ("main.clk",)),
+    ("configure_clock", ("main.clk", 1.0)),
+])
+@pytest.mark.parametrize("answer_type", ["result", "error"])
+def test_sc_unexpected_answer(shortcut, args, answer_type):
+    """Tests that shortcut functions raise VerisocksError on unexpected
+    answers (no simulation needed: send() is stubbed)"""
+    vs = Verisocks(HOST, find_free_port())
+    vs.send = lambda **cmd: {"type": answer_type, "value": "unexpected"}
+    with pytest.raises(VerisocksError):
+        getattr(vs, shortcut)(*args)
+    vs.close()
+
 
 def test_set(vs):
     """Tests Verisocks set() function"""

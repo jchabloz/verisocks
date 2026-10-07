@@ -538,7 +538,7 @@ Still {self._rx_expected} messages expected.")
                           timeout=timeout)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -563,7 +563,7 @@ Still {self._rx_expected} messages expected.")
                           timeout=timeout)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -591,9 +591,9 @@ Still {self._rx_expected} messages expected.")
                 acknowledgement
         """
         kw_args = {"path": path, "timeout": timeout}
-        if (value):
+        if value is not None:
             kw_args['value'] = value
-        if (sim_timeout):
+        if sim_timeout is not None:
             kw_args['sim_timeout'] = sim_timeout
             kw_args['time_unit'] = time_unit
 
@@ -601,7 +601,7 @@ Still {self._rx_expected} messages expected.")
 
         if (answer['type'] == "ack" or answer['type'] == "timeout"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -644,7 +644,7 @@ Still {self._rx_expected} messages expected.")
         answer = self.send(command="set", sel="value", path=path, value=value)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -668,7 +668,7 @@ Still {self._rx_expected} messages expected.")
         answer = self.send(command="set", sel="clk_en", path=path, value=1)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -693,7 +693,7 @@ Still {self._rx_expected} messages expected.")
         answer = self.send(command="set", sel="clk_en", path=path, value=0)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
@@ -720,7 +720,7 @@ Still {self._rx_expected} messages expected.")
                            path=path, period=period, unit=unit, dc=duty_cycle)
         if (answer['type'] == "ack"):
             return answer
-        if (answer['type' == "error"]):
+        if (answer['type'] == "error"):
             raise VerisocksError(answer['value'])
         raise VerisocksError(json.dumps(answer))
 
