@@ -275,7 +275,11 @@ gets back to Verisocks.
     the callback to be executed. If this argument is missing, the callback
     shall be executed as soon as the value of the object changes to any newer
     value. This argument is also not required if the path corresponds to a
-    named event.
+    named event. The callback is only executed upon a *change* of the
+    variable value: if the variable already has the specified value when the
+    command is received, the simulation runs until the variable changes and
+    gets back to that value (same behavior for both the VPI and the Verilator
+    integrations).
   * :json:`"sim_timeout":` (number, optional): Time duration defining a
     timeout. If the timeout duration expires before the defined condition is
     met, the simulation pauses and a *timeout* message is returned.

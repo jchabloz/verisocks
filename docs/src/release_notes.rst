@@ -25,6 +25,12 @@ Releases of documentation and code are using the same version numbers.
 
 * TCP protocol
 
+  * Changed behavior: with the Verilator integration, the
+    :ref:`run(until_change) <sec_tcp_cmd_run>` command with a ``value`` field
+    returned immediately if the variable already had that value. As with the
+    VPI integration, the callback is now only executed when the variable
+    *changes* to that value.
+
   * Bug fix: with the VPI integration, an invalid ``time_unit`` field in the
     :ref:`run <sec_tcp_cmd_run>` command was only logged and the time value
     interpreted in seconds (typically running the simulation to its end); the

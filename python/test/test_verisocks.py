@@ -391,6 +391,18 @@ def test_run_until_change(vs):
     assert answer["value"] == 10
 
 
+def test_run_until_change_already_equal(vs):
+    """Tests that run(until_change) with a value the variable already has
+    waits for the next change to that value, rather than returning
+    immediately (here: until the 8-bit counter wraps around)"""
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    t0 = vs.get("sim_time")["time"]
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    assert vs.get("sim_time")["time"] - t0 > 200e-6
+
+
 def test_sc_run_until_change(vs):
     """Tests Verisocks run_until_change shorcut function"""
 

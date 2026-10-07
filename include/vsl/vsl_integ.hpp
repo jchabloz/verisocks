@@ -306,6 +306,7 @@ private:
     vsl_time_t cb_time {0ull};
     std::string cb_value_path;
     double cb_value {0.0};
+    double cb_prev_value {0.0};  // Variable value at previous check
 
     /* Model evaluation state */
     bool b_eval_required {true};
@@ -849,6 +850,7 @@ Path not found in registered variables - Discarding");
         return -1;
     }
     cb_value = value;
+    cb_prev_value = get_registered_variable(cb_value_path)->get_value();
     b_has_value_callback = true;
     b_has_change_only_callback = false;
     return 0;
@@ -877,10 +879,17 @@ const bool VslInteg<T>::check_value_callback() {
     if (has_value_callback()) {
         auto p_var = get_registered_variable(cb_value_path);
         switch (p_var->get_type()) {
-            case VSL_TYPE_SCALAR:
-                if (p_var->get_value() == cb_value)
-                    return !b_has_change_only_callback;
-                return b_has_change_only_callback;
+            case VSL_TYPE_SCALAR: {
+                /* Only a change of value can trigger the callback, as with
+                the VPI cbValueChange callback reason: a variable which
+                already has the target value at registration time has to
+                change and come back to it */
+                const double value = p_var->get_value();
+                const bool changed = (value != cb_prev_value);
+                cb_prev_value = value;
+                if (b_has_change_only_callback) return changed;
+                return changed && (value == cb_value);
+            }
             case VSL_TYPE_EVENT:
                 if (p_var->get_value() == 1.0f) return true;
                 return false;
