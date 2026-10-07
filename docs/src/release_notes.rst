@@ -44,6 +44,8 @@ Releases of documentation and code are using the same version numbers.
     to set large arrays in one command). Messages are now received in buffers
     sized according to their header, up to a maximum length of 16 MiB
     (``VS_MSG_MAX_LEN``, which can be overridden at compile time).
+  * Documented the order of values for array sub-ranges in the
+    :ref:`get <sec_tcp_cmd_get>` and :ref:`set <sec_tcp_cmd_set>` commands
 
 * Verilator integration
 

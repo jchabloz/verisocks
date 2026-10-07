@@ -327,6 +327,15 @@ This command can be used to get pieces of information from the simulator.
   sub-ranges, such as e.g. :json:`"<path_to_array>[6:3]"` or
   :json:`"<path_to_array>[3:6]"`.
 
+  .. note::
+
+    For a sub-range :code:`[a:b]`, the values are ordered starting from the
+    *right-hand* index :code:`b`, towards the left-hand index :code:`a`. For
+    example, :json:`"<path_to_array>[6:3]"` corresponds to the elements at
+    indexes 3, 4, 5 and 6, in this order (i.e. the same order as when reading
+    the full array), while :json:`"<path_to_array>[3:6]"` corresponds to the
+    elements at indexes 6, 5, 4 and 3, in this order.
+
 * Returned frame (for :json:`"sel": "sim_info"`):
 
   * :json:`"type": "result"`
@@ -409,6 +418,15 @@ This command can be used to forcefully set the value of a simulator variable.
     :code:`[]` operator, e.g. :json:`"<path_to_array>[4]"`. The Verilator
     integration API even supports sub-ranges, such as e.g.
     :json:`"<path_to_array>[6:3]"` or :json:`"<path_to_array>[3:6]"`.
+
+    .. note::
+
+      For a sub-range :code:`[a:b]`, the values are ordered starting from the
+      *right-hand* index :code:`b`, towards the left-hand index :code:`a`. For
+      example, setting :json:`"<path_to_array>[6:3]"` to :json:`[1, 2, 3, 4]`
+      sets the elements at indexes 3, 4, 5 and 6 to 1, 2, 3 and 4
+      respectively, while setting :json:`"<path_to_array>[3:6]"` to the same
+      value sets them to 4, 3, 2 and 1 respectively.
 
   For :json:`"sel": "value"`, the field ``"value"`` shall be defined as
   follows:

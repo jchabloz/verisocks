@@ -369,6 +369,8 @@ def test_set(vs):
     answer = vs.get(sel="value", path="main.count_memory[6:4]")
     assert answer["type"] == "result"
     assert answer["value"] == [17, 234, 126]
+    # The first value maps to the right-hand index of the sub-range
+    assert vs.get_value("main.count_memory[4]") == 17
 
     answer = vs.set(
         sel="value", path="main.count_memory[4:6]", value=[17, 234, 126])
