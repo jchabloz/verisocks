@@ -186,32 +186,31 @@ class Verisocks:
         if timeout:
             self.sock.settimeout(self._timeout)
 
-    def _write(self, num_bytes, num_trials=10):
+    def _write(self, num_bytes, num_trials=None):
         """Write TX buffer to socket (private method)
+
+        The bytes are removed from the TX buffer, whether they could be sent
+        or not.
 
         Args:
             num_bytes (int): Number of bytes to send
+            num_trials: Unused, kept for backward compatibility
 
         Raises:
-            ConnectionError: no data is written (most likely the socket is
-                closed).
+            ConnectionError: The data could not be completely sent within the
+                socket timeout, or the socket is closed. The socket connection
+                is then closed.
         """
-        sent = 0
-        trials = 0
-        while ((sent < num_bytes) and (trials < num_trials)):
-            sent += self.sock.send(self._tx_buffer[sent:num_bytes])
-            if (sent == 0):
-                self._connected = False
-                raise ConnectionError
-            trials += 1
-
-        if (sent == num_bytes):
-            self._tx_buffer = self._tx_buffer[sent:]
-            logging.debug(
-                f"Sent {num_bytes} bytes on socket in {trials} trial(s)")
-        else:
-            logging.error("Did not succeed to write message to socket")
+        data = self._tx_buffer[:num_bytes]
+        self._tx_buffer = self._tx_buffer[num_bytes:]
+        try:
+            self.sock.sendall(data)
+        except OSError as e:
+            logging.error(f"Did not succeed to write message to socket: {e}")
             self.close()
+            raise ConnectionError(
+                f"Could not send message to socket: {e}") from e
+        logging.debug(f"Sent {num_bytes} bytes on socket")
 
     def _json_encode(self, obj, encoding="utf-8"):
         """Encode a JSON object as a bytes object (private method)
@@ -401,9 +400,10 @@ Still {self._rx_expected} messages expected.")
             if not self._connected:
                 self.connect()
             if all:
-                self._write(len(self._tx_buffer))
-                self._rx_expected += len(self._tx_msg_len)
+                num_msg = len(self._tx_msg_len)
                 self._tx_msg_len.clear()
+                self._write(len(self._tx_buffer))
+                self._rx_expected += num_msg
             else:
                 self._write(self._tx_msg_len.pop(0))
                 self._rx_expected += 1

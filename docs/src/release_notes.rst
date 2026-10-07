@@ -62,6 +62,11 @@ Releases of documentation and code are using the same version numbers.
   * Bug fix: shortcut functions raised a ``KeyError`` instead of a
     :py:class:`VerisocksError <verisocks.verisocks.VerisocksError>` when
     receiving an unexpected answer type
+  * Bug fix: a message requiring more than 10 partial socket writes (e.g. a
+    long message) was silently not completely sent; the client then
+    reconnected and waited for an answer until its timeouts expired. Messages
+    are now sent completely (within the socket timeout), or a
+    ``ConnectionError`` is raised.
 
 1.7.0 - 2026-08-28
 ******************

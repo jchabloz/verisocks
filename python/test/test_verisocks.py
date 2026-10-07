@@ -76,6 +76,25 @@ def test_connect_error():
     vs.close()
 
 
+def test_write_failure():
+    """Tests that a message that cannot be completely sent raises a
+    ConnectionError, without leaving it queued nor expecting an answer (no
+    simulation needed: the peer is a plain socket which never reads)"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+        server.bind((HOST, 0))
+        server.listen(1)
+        vs = Verisocks(HOST, server.getsockname()[1], timeout=0.5)
+        vs.connect()
+        conn, _ = server.accept()
+        with pytest.raises(ConnectionError):
+            vs.send_cmd("info", value="x" * (64 * 1024 * 1024))
+        assert vs._tx_buffer == b""
+        assert vs._tx_msg_len == []
+        assert vs._rx_expected == 0
+        assert not vs._connected
+        conn.close()
+
+
 def test_info(vs):
     """Tests the info command"""
     answer = vs.info("This is a test")
@@ -478,9 +497,6 @@ def test_message_long(vs):
     assert answer["type"] == "ack"
 
 
-@pytest.mark.skip(reason="Requires sending > 16 MiB (VS_MSG_MAX_LEN), "
-                  "which the Python client cannot reliably do yet; covered "
-                  "by the C unit tests and the Verilator test")
 def test_message_too_long(vs):
     """Tests that a message longer than the server maximum message length
     (16 MiB by default) is rejected without breaking the connection"""
