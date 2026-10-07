@@ -389,11 +389,18 @@ def test_read_not_expected(vs):
     assert vs.read() is False
 
 
+def test_message_long(vs):
+    """Tests that long messages (well beyond a few kB) are accepted"""
+    answer = vs.info("x" * 100000)
+    assert answer["type"] == "ack"
+
+
 def test_message_too_long(vs):
-    """Tests that a message longer than the server receive buffer is rejected
-    without breaking the connection"""
-    with pytest.raises(VerisocksError):
-        vs.get_value("main." + "x" * 5000)
+    """Tests that a message longer than the server maximum message length
+    (reduced to 1 MiB for this test build, see Makefile) is rejected without
+    breaking the connection"""
+    with pytest.raises(VerisocksError, match="Message too long"):
+        vs.info("x" * (1200 * 1024))
     vs.run_for(1, "us")
     assert vs.get_value("main.count") > 0
 

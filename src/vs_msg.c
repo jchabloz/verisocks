@@ -561,14 +561,16 @@ static int readn(int fd, size_t len, char *buffer)
     unsigned int trials = VS_MSG_MAX_READ_TRIALS;
     ssize_t retval;
 
+    /* Only reads without progress count as failed trials, so that long
+    messages can be received in as many partial reads as needed */
     while (read_count < len && trials > 0) {
         retval = read(fd, buffer + read_count, len - read_count);
         if (0 > retval) {
             vs_log_mod_perror(__MOD__, "Cannot read message");
             return -1;
         }
+        if (0 == retval) trials --;
         read_count += retval;
-        trials --;
     }
     return len - read_count;
 }
@@ -656,6 +658,76 @@ Socket probably disconnected");
 
     /* Return received message total length */
     return total_len;
+}
+
+int vs_msg_read_alloc(int fd, char **pp_buffer, size_t max_len,
+                      vs_msg_info_t *p_msg_info)
+{
+    vs_log_mod_debug(__MOD__, "Function vs_msg_read_alloc");
+    *pp_buffer = NULL;
+
+    /* Get pre-header */
+    char pre_header[2];
+    if (0 != readn(fd, 2u, pre_header)) {
+        vs_log_mod_debug(__MOD__, "Could not read pre-header value. \
+Socket probably disconnected");
+        return -1;
+    }
+    size_t header_length = vs_msg_read_header_length(pre_header);
+    if (1 > header_length) {
+        vs_log_mod_error(__MOD__, "Issue with header length (value %d)",
+                     (int) header_length);
+        return -1;
+    }
+
+    /* Read and parse header */
+    char *buffer = (char*) malloc(header_length + 2);
+    if (NULL == buffer) {
+        vs_log_mod_perror(__MOD__, "Failed to allocate memory");
+        return -1;
+    }
+    memcpy(buffer, pre_header, 2u);
+    if (0 != readn(fd, header_length, buffer + 2)) {
+        vs_log_mod_error(__MOD__, "Issue while reading header");
+        free(buffer);
+        return -1;
+    }
+    if (0 > vs_msg_read_info(buffer, p_msg_info)) {
+        vs_log_mod_error(__MOD__, "Issue while parsing message info");
+        free(buffer);
+        return -1;
+    }
+
+    /* Discard message if too long */
+    size_t total_len = p_msg_info->len + header_length + 2;
+    if (total_len > max_len) {
+        free(buffer);
+        vs_log_mod_warning(__MOD__,
+            "Message length (%zu) exceeds maximum (%zu) - Discarding it",
+            total_len, max_len);
+        if (0 != drain(fd, p_msg_info->len)) {
+            vs_log_mod_error(__MOD__, "Issue while discarding message");
+            return -1;
+        }
+        return 0;
+    }
+
+    /* Read message content */
+    char *new_buffer = (char*) realloc(buffer, total_len + 1);
+    if (NULL == new_buffer) {
+        vs_log_mod_perror(__MOD__, "Failed to allocate memory");
+        free(buffer);
+        return -1;
+    }
+    buffer = new_buffer;
+    if (0 != readn(fd, p_msg_info->len, buffer + 2 + header_length)) {
+        vs_log_mod_error(__MOD__, "Issue while reading message content");
+        free(buffer);
+        return -1;
+    }
+    buffer[total_len] = '\0';
+    *pp_buffer = buffer;
+    return (int) total_len;
 }
 
 int vs_msg_peek(int fd)

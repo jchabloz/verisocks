@@ -9,6 +9,9 @@ VSL_DIR ?= ../../..
 # Use timing option with Verilator
 VL_USER_FLAGS += --timing
 CPP_USER_FLAGS += -DVSL_TIMING
+# Reduced maximum message length (1 MiB), so that test_message_too_long does
+# not need to send a message longer than the default 16 MiB
+CPP_USER_FLAGS += -DVS_MSG_MAX_LEN=1048576
 
 # Design prefix
 VM_PREFIX = Vmain

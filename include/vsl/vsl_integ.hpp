@@ -598,12 +598,12 @@ Main finite state-machine - Waiting for command
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_wait() {
-    char read_buffer[4096];
+    char *read_buffer = nullptr;
     int msg_len;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
-    msg_len = vs_msg_read(
-        fd_client_socket, read_buffer, sizeof(read_buffer), &msg_info);
+    msg_len = vs_msg_read_alloc(
+        fd_client_socket, &read_buffer, VS_MSG_MAX_LEN, &msg_info);
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
@@ -618,23 +618,20 @@ void VslInteg<T>::main_wait() {
     if (uuid.valid) {
         memcpy(uuid.value, msg_info.uuid.value, VS_UUID_LEN);
     }
-    if (msg_len >= (int) sizeof(read_buffer)) {
-        read_buffer[sizeof(read_buffer) - 1] = '\0';
+    if (nullptr == read_buffer) {
         vs_log_mod_warning(
             __MOD__,
-            "Received message longer than RX buffer, discarding it"
+            "Received message longer than maximum length, discarding it"
         );
         VSL_MSG_RETURN_VX("error", "Message too long - Discarding");
         return;
-    }
-    else {
-        read_buffer[msg_len] = '\0';
     }
     vs_log_mod_debug(__MOD__, "Message: %s", &read_buffer[2]);
     if (nullptr != p_cmd) {
         cJSON_Delete(p_cmd);
     }
     p_cmd = vs_msg_read_json(read_buffer, &msg_info);
+    free(read_buffer);
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;

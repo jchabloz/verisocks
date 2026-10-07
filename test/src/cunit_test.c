@@ -72,7 +72,13 @@ int main(void)
             test_vs_msg_read_write_loopback)) ||
         (NULL == CU_add_test(pSuite,
             "Tests reading a message longer than the read buffer",
-            test_vs_msg_read_too_long))
+            test_vs_msg_read_too_long)) ||
+        (NULL == CU_add_test(pSuite,
+            "Tests reading messages into allocated buffers",
+            test_vs_msg_read_alloc)) ||
+        (NULL == CU_add_test(pSuite,
+            "Tests reading a long message received in many partial reads",
+            test_vs_msg_read_alloc_partial_reads))
     ) {
         CU_cleanup_registry();
         return CU_get_error();

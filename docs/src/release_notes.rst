@@ -40,6 +40,10 @@ Releases of documentation and code are using the same version numbers.
     rejected, but its remaining content was left unread, which corrupted the
     following messages and typically lost the connection. It is now discarded
     and the connection remains usable.
+  * Bug fix: received messages were limited to 4096 bytes (e.g. preventing
+    to set large arrays in one command). Messages are now received in buffers
+    sized according to their header, up to a maximum length of 16 MiB
+    (``VS_MSG_MAX_LEN``, which can be overridden at compile time).
 
 * Verilator integration
 
