@@ -225,8 +225,17 @@ public:
     inline vsl_time_t get_period_high(void) const {return period_high;};
     inline bool is_waiting_disable(void) const {return b_wait_dis;};
 
+    /**
+     * @brief Check that the clock has been successfully constructed, i.e.
+     * that its period and duty cycle are valid
+     *
+     * @return true if valid, false otherwise
+     */
+    inline bool is_valid(void) const {return b_is_valid;};
+
 private:
 
+    bool b_is_valid {false};         // Valid construction flag
     bool b_is_enabled {false};       // Enabled flag
     bool b_wait_dis {false};         // Flag: waiting to get disabled
     uint32_t cycles_counter {0u};    // Number of cycles that occured since last enable
@@ -251,8 +260,10 @@ public:
      *
      * @param namep Name of the clock
      * @param datap Pointer to the corresponding Verilator variable.
+     * @return 0 if successful, -1 if the clock could not be added (invalid
+     * period or duty cycle)
      */
-    void add_clock(const char* namep, std::any datap);
+    int add_clock(const char* namep, std::any datap);
 
     /**
      * @brief Add (register) a clock variable
@@ -261,8 +272,10 @@ public:
      * @param datap Pointer to the corresponding Verilator variable.
      * @param period Period of the clock given (in simulation time)
      * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
+     * @return 0 if successful, -1 if the clock could not be added (invalid
+     * period or duty cycle)
      */
-    void add_clock(const char* namep, std::any datap, const vsl_time_t period,
+    int add_clock(const char* namep, std::any datap, const vsl_time_t period,
         const double duty_cycle);
 
     /**
@@ -274,8 +287,10 @@ public:
      * @param unit Time unit used for the clock period parameter
      * @param duty_cycle Clock duty cycle (has to be > 0 and < 1)
      * @param p_context Pointer to Verilator simulation context
+     * @return 0 if successful, -1 if the clock could not be added (invalid
+     * period or duty cycle)
      */
-    void add_clock(const char* namep, std::any datap, const double period,
+    int add_clock(const char* namep, std::any datap, const double period,
         const char* unit, const double duty_cycle,
         VerilatedContext* const p_context, const bool enable);
 
@@ -354,6 +369,13 @@ public:
     int add_clocks_to_msg(cJSON* p_msg, const char* key);
 
 private:
+
+    /**
+     * @brief Add a clock to the list if it is valid
+     *
+     * @return 0 if successful, -1 if the clock is not valid
+     */
+    int add_clock(VslClock clock);
 
     /* Clock list */
     std::list<VslClock> clock_list;

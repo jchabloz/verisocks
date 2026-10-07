@@ -162,14 +162,18 @@ public:
      * @param period Period of the clock
      * @param unit Time unit used for the clock period parameter
      * @param duty_cycle Clock duty cycle
+     * @param enable Enable the clock
+     * @return 0 if successful, -1 if the clock could not be registered
+     * (invalid period, time unit or duty cycle)
      */
-    inline void register_clock(const char* name, std::any datap,
+    inline int register_clock(const char* name, std::any datap,
         const double period, const char* unit, const double duty_cycle,
         const bool enable = false) {
-            clock_map.add_clock(
+            if (0 > clock_map.add_clock(
                 name, datap, period, unit, duty_cycle, p_context, enable
-            );
+            )) {return -1;}
             register_variable(name, datap, VLVT_UINT8, VSL_TYPE_SCALAR, 1u);
+            return 0;
     }
 
     /**

@@ -196,15 +196,15 @@ int main(int argc, char** argv, char**) {
     % if 'clocks' in variables:
     // Clocks
     % for clk in variables['clocks']:
-    vslx.register_clock("${get_var_name(clk)}",
+    if (0 > vslx.register_clock("${get_var_name(clk)}",
         &topp->${clk['path'].replace(".", "->")},
         ${clk['period']}, "${clk['unit']}", ${get_clk_dc(clk)}\
 % if 'enable' in clk:
 , ${bool_py2c(clk['enable'])}
-    );
+    )) {return EXIT_FAILURE;}
 % else:
 , false
-    );
+    )) {return EXIT_FAILURE;}
     % endif
     % endfor
     % endif

@@ -48,8 +48,8 @@ namespace vsl{
         const vsl_time_t period, const double duty_cycle) :
         VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
         {
-            if (0 > set_period(period, duty_cycle)) {return;}
-            if (0 > set_value(0)) {return;}
+            b_is_valid = (0 == set_period(period, duty_cycle)) &&
+                         (0 == set_value(0));
         };
 
     VslClock::VslClock(const char* namep, std::any datap, const double period,
@@ -57,8 +57,8 @@ namespace vsl{
         VerilatedContext* const p_context) :
         VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
         {
-            if (0 > set_period(period, unit, duty_cycle, p_context)) {return;}
-            if (0 > set_value(0)) {return;}
+            b_is_valid = (0 == set_period(period, unit, duty_cycle, p_context)) &&
+                         (0 == set_value(0));
         };
 
     VslClock::VslClock(const char* namep, std::any datap, const double period,
@@ -66,9 +66,9 @@ namespace vsl{
         VerilatedContext* const p_context, const bool enable) :
         VslVar(namep, datap, VLVT_UINT8, VSL_TYPE_CLOCK, 0, 0, 0)
         {
-            if (0 > set_period(period, unit, duty_cycle, p_context)) {return;}
-            if (0 > set_value(0)) {return;}
-            if (enable) this->enable(p_context);
+            b_is_valid = (0 == set_period(period, unit, duty_cycle, p_context)) &&
+                         (0 == set_value(0));
+            if (b_is_valid && enable) this->enable(p_context);
         };
 
     /***************************************************************************
@@ -195,27 +195,35 @@ namespace vsl{
     /***************************************************************************
     VslClockMap class methods
     ***************************************************************************/
-    void VslClockMap::add_clock(const char* namep, std::any datap) {
-        clock_list.push_front(VslClock {namep, datap, 2ul, 0.5});
-        sort_clocks();
+    int VslClockMap::add_clock(const char* namep, std::any datap) {
+        return add_clock(VslClock {namep, datap, 2ul, 0.5});
     }
 
-    void VslClockMap::add_clock(const char* namep, std::any datap,
+    int VslClockMap::add_clock(const char* namep, std::any datap,
         const vsl_time_t period, const double duty_cycle)
     {
-        clock_list.push_front(
-            VslClock {namep, datap, period, duty_cycle});
-        sort_clocks();
+        return add_clock(VslClock {namep, datap, period, duty_cycle});
     }
 
-    void VslClockMap::add_clock(const char* namep, std::any datap,
+    int VslClockMap::add_clock(const char* namep, std::any datap,
         const double period, const char* unit, const double duty_cycle,
         VerilatedContext* const p_context, const bool enable)
     {
-        clock_list.push_front(
+        return add_clock(
             VslClock {namep, datap, period, unit, duty_cycle, p_context,
                       enable});
+    }
+
+    int VslClockMap::add_clock(VslClock clock) {
+        if (!clock.is_valid()) {
+            vs_log_mod_error(__MOD__,
+                "Invalid period or duty cycle for clock %s - Not added",
+                clock.get_name().c_str());
+            return -1;
+        }
+        clock_list.push_front(clock);
         sort_clocks();
+        return 0;
     }
 
     const bool VslClockMap::has_next_event(void) const {

@@ -104,14 +104,14 @@ int main(int argc, char** argv, char**) {
 
     // Register public variables
     // Clocks
-    vslx.register_clock("clk1",
+    if (0 > vslx.register_clock("clk1",
         &topp->clk1,
         1.4, "us", 0.4, true
-    );
-    vslx.register_clock("clk2",
+    )) {return EXIT_FAILURE;}
+    if (0 > vslx.register_clock("clk2",
         &topp->clk2,
         20.0, "us", 0.6, true
-    );
+    )) {return EXIT_FAILURE;}
     // Scalar variables
     vslx.register_scalar("arstb",
         &topp->arstb,

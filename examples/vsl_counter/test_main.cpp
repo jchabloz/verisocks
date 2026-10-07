@@ -101,10 +101,10 @@ int main(int argc, char** argv, char**) {
 
     // Register public variables
     // Clocks
-    vslx.register_clock("clk",
+    if (0 > vslx.register_clock("clk",
         &topp->clk,
         1.4, "us", 0.6, true
-    );
+    )) {return EXIT_FAILURE;}
     // Scalar variables
     vslx.register_scalar("resetb",
         &topp->arst_b,
