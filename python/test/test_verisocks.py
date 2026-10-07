@@ -399,6 +399,23 @@ def test_sc_errors(vs):
         vs.set_value("main.no_such_variable", 1)
 
 
+def test_run_wrong_time_unit(vs):
+    """Tests that a wrong time unit is rejected without running the
+    simulation"""
+    vs.run_for(10, "us")
+    sim_time = vs.get("sim_time")["time"]
+    with pytest.raises(VerisocksError):
+        vs.run_for(1, "uss")
+    with pytest.raises(VerisocksError):
+        vs.run_until(20, "uss")
+    with pytest.raises(VerisocksError):
+        vs.run_until_change("main.count", 300, 10, "uss")
+    assert vs.get("sim_time")["time"] == sim_time
+    # Simulation still under control
+    vs.run_for(10, "us")
+    assert vs.get("sim_time")["time"] == pytest.approx(sim_time + 10e-6)
+
+
 @pytest.mark.parametrize("shortcut, args", [
     ("run_for", (1, "us")),
     ("run_until", (1, "us")),

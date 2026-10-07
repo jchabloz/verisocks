@@ -23,6 +23,16 @@ Releases of documentation and code are using the same version numbers.
 1.7.1 - Ongoing
 ***************
 
+* TCP protocol
+
+  * Bug fix: with the VPI integration, an invalid ``time_unit`` field in the
+    :ref:`run <sec_tcp_cmd_run>` command was only logged and the time value
+    interpreted in seconds (typically running the simulation to its end); the
+    command is now rejected with an error return message
+  * Bug fix: with the Verilator integration, an invalid ``unit`` field in the
+    :ref:`set(sel=clk_cfg) <sec_tcp_cmd_set>` command is now rejected with an
+    error return message
+
 * Python client
 
   * Bug fix: :py:func:`Verisocks.run_until_change()

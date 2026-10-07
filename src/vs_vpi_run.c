@@ -75,6 +75,10 @@ VS_VPI_CMD_HANDLER(run_for_time)
     /* Get the time field from the JSON message content */
     VS_MSG_READ_NUM(p_data->p_cmd, time);
     VS_MSG_READ_STR(p_data->p_cmd, time_unit);
+    if (!vs_utils_check_time_unit(str_time_unit)) {
+        vs_vpi_log_error("Wrong time unit identifier: %s", str_time_unit);
+        goto error;
+    }
 
     vs_vpi_log_info("Command \"run(cb=for_time, time=%f %s)\" received.",
         time_value, str_time_unit);
@@ -122,6 +126,10 @@ VS_VPI_CMD_HANDLER(run_until_time)
 
     VS_MSG_READ_NUM(p_data->p_cmd, time);
     VS_MSG_READ_STR(p_data->p_cmd, time_unit);
+    if (!vs_utils_check_time_unit(str_time_unit)) {
+        vs_vpi_log_error("Wrong time unit identifier: %s", str_time_unit);
+        goto error;
+    }
 
     vs_vpi_log_info(
         "Command \"run(cb=until_time, time=%f %s)\" received.",
@@ -192,6 +200,10 @@ VS_VPI_CMD_HANDLER(run_until_change)
     char *str_time_unit;
     if (NULL != p_item_sim_timeout) {
         VS_MSG_READ_STR_NO_DECL(p_data->p_cmd, time_unit, str_time_unit);
+        if (!vs_utils_check_time_unit(str_time_unit)) {
+            vs_vpi_log_error("Wrong time unit identifier: %s", str_time_unit);
+            goto error;
+        }
         cb_timeout = vs_utils_double_to_time(sim_timeout_value, str_time_unit);
     }
 

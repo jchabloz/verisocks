@@ -264,6 +264,11 @@ void VslInteg<T>::VSL_CMD_HANDLER(set_clk_cfg) {
 
     VSL_MSG_READ_NUM(vx.p_cmd, period);
     VSL_MSG_READ_STR(vx.p_cmd, unit);
+    if (!check_time_unit(str_unit)) {
+        vs_log_mod_error(__MOD__, "Wrong time unit identifier: %s", cstr_unit);
+        handle_error();
+        return;
+    }
     VSL_MSG_READ_NUM(vx.p_cmd, dc);
 
     vx.clock_map.get_clock(str_path).set_period(
