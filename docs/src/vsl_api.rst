@@ -132,7 +132,7 @@ using a dedicated verilator configuration file.
     scope in order to register a named event variable to be accessible with
     Verisocks commands.
 
-.. cpp:function:: void register_clock(const char* name, std::any datap, \
+.. cpp:function:: int register_clock(const char* name, std::any datap, \
     const double period, const char* unit, const double duty_cycle, \
     const bool enable=false)
 
@@ -144,6 +144,10 @@ using a dedicated verilator configuration file.
     :param duty_cycle: Clock duty cycle (between 0.0 and 1.0)
     :param enable: If true, the clock is enabled from the beginning. If not, it
         has to be explicitely enabled
+
+    :returns: Exit code. A normal execution results in an exit code value of
+        ``0``. A value of ``-1`` indicates that the provided configuration is
+        invalid and the clock has not been registered.
 
     This function shall be used from within the top-level C++ testbench code
     scope in order to register a clock variable to be accessible with Verisocks
