@@ -74,6 +74,10 @@ SOFTWARE.
 #undef __MOD__
 #define __MOD__ "vsl"
 
+/* Events codes definition - To be used in hook function */
+#define VSL_EVT_PRE_EVAL  0
+#define VSL_EVT_POST_EVAL 1
+
 /**
  * @brief Helper macro to declare a command handler function prototype
  *
@@ -150,6 +154,18 @@ public:
      * testbench simulation.
      */
     int run();
+
+    /* Hooks */
+    using Hook = void(*)(const int code, VslInteg<T>* p_vx);
+
+    /**
+     * @brief Register hook function
+     * 
+     * @param hook Hook function pointer
+     */
+    void set_hook(Hook hook) {
+        this->hook = hook;
+    };
 
     /**
      * @brief Register a clock variable
@@ -283,6 +299,9 @@ private:
     bool _is_connected {false};    //Socket connection status
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
     std::string sim_user_info;     //User-provided info provided as sim info
+
+    /* Evaluation hooks */
+    Hook hook = nullptr;
 
     /* Simulation time representation for timestamps*/
     VslTimeDef time_def{0, nullptr, 0, nullptr}; //Sim time definition
@@ -800,8 +819,10 @@ Wrapper simulation management functions
 template<typename T>
 void VslInteg<T>::eval() {
     if (b_eval_required) {
+        if (hook) hook(VSL_EVT_PRE_EVAL, this);
         clock_map.eval(p_context->time());
         p_model->eval();
+        if (hook) hook(VSL_EVT_POST_EVAL, this);
         b_eval_required = false;
     }
     //#ifdef DUMP_FILE

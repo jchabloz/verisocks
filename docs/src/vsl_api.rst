@@ -153,3 +153,25 @@ using a dedicated verilator configuration file.
     scope in order to register a clock variable to be accessible with Verisocks
     commands.
 
+.. cpp:function:: void set_hook(Hook hook)
+
+    :param hook: Hook function pointer 
+
+    This method can be used to register a hook function that will be executed
+    when specific events are fired. This can be taken advantage of in the
+    top-level C++ testbench code, for example to execute external models.
+
+    The format for the hook function shall be according the following definition:
+
+    .. code:: cpp
+
+        using Hook = void(*)(const int code, VslInteg<T>* p_vx);
+
+    The integer code can be used to distinguish which event has been fired
+    within the model. The possible values are declared as macros in the
+    :file:`vsl_integ.h` header file and can be:
+
+    - :cpp:any:`VSL_EVT_PRE_EVAL`: Fired from within the :cpp:func:`eval()`
+      method, *prior* the evaluation of the model
+    - :cpp:any:`VSL_EVT_POST_EVAL`: Fired from within the :cpp:func:`eval()`
+      method, *after* the evaluation of the model

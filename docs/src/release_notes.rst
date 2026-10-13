@@ -20,7 +20,7 @@ Releases of documentation and code are using the same version numbers.
     3. ``PATCH`` version when you make backward compatible bug fixes
 
 
-1.7.1 - Ongoing
+1.8.0 - Ongoing
 ***************
 
 * TCP protocol
@@ -55,6 +55,8 @@ Releases of documentation and code are using the same version numbers.
 
 * Verilator integration
 
+  * New: Added :cpp:func:`vsl::VslInteg::set_hook` method that may be used to
+    register an external hook function.
   * Bug fix: a clock registered with an invalid period, time unit or duty
     cycle was silently left unconfigured. :cpp:func:`vsl::VslInteg::register_clock`
     now returns -1 and does not register such a clock, and the testbench
