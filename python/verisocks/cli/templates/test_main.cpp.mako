@@ -152,6 +152,10 @@ static const struct argp argp = {argp_options, argp_parse_opt, 0, argp_doc};
 static const struct argp argp = {argp_options, argp_parse_opt, 0, 0};
 % endif
 
+// Optional hook function
+// Uncomment and edit according to your needs
+//void hook (const int code, vsl::VslInteg<${prefix}>* p_vx) {}
+
 //======================
 
 int main(int argc, char** argv, char**) {
@@ -191,6 +195,9 @@ int main(int argc, char** argv, char**) {
     vslx.set_user_sim_info("${user_sim_info}");
 
     % endif
+    // Optional hook function - Uncomment to use
+    //vslx.set_hook(hook);
+
     % if variables:
     // Register public variables
     % if 'clocks' in variables:

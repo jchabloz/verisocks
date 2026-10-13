@@ -70,6 +70,10 @@ static error_t argp_parse_opt (int key, char* arg, struct argp_state* state) {
 
 static const struct argp argp = {argp_options, argp_parse_opt, 0, 0};
 
+// Optional hook function
+// Uncomment and edit according to your needs
+//void hook (const int code, vsl::VslInteg<Vcounter>* p_vx) {}
+
 //======================
 
 int main(int argc, char** argv, char**) {
@@ -98,6 +102,9 @@ int main(int argc, char** argv, char**) {
     // Create top VSL instance
     vsl::VslInteg<Vcounter> vslx{
         topp.get(), arguments.port_number, arguments.timeout};
+
+    // Optional hook function - Uncomment to use
+    //vslx.set_hook(hook);
 
     // Register public variables
     // Clocks

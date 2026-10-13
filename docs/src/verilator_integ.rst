@@ -25,6 +25,10 @@ From version 1.5 and above, the API has been completed such that:
   then be controlled (enabled, disabled, configured) using the :ref:`set
   <sec_tcp_cmd_set>` Verisocks command using the appropriate fields.
 
+From version 1.8, the API has been completed with a *hook function registering*
+method :cpp:func:`set_hook <vsl:: VslInteg::set_hook>` functionality that makes
+it easier to integrate with other executable models within the top-level C++
+testbench file.
 
 .. toctree::
     :maxdepth: 1
