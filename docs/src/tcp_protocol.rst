@@ -275,7 +275,11 @@ gets back to Verisocks.
     the callback to be executed. If this argument is missing, the callback
     shall be executed as soon as the value of the object changes to any newer
     value. This argument is also not required if the path corresponds to a
-    named event.
+    named event. The callback is only executed upon a *change* of the
+    variable value: if the variable already has the specified value when the
+    command is received, the simulation runs until the variable changes and
+    gets back to that value (same behavior for both the VPI and the Verilator
+    integrations).
   * :json:`"sim_timeout":` (number, optional): Time duration defining a
     timeout. If the timeout duration expires before the defined condition is
     met, the simulation pauses and a *timeout* message is returned.
@@ -326,6 +330,15 @@ This command can be used to get pieces of information from the simulator.
   :json:`"<path_to_array>[4]"`. The Verilator integration API even supports
   sub-ranges, such as e.g. :json:`"<path_to_array>[6:3]"` or
   :json:`"<path_to_array>[3:6]"`.
+
+  .. note::
+
+    For a sub-range :code:`[a:b]`, the values are ordered starting from the
+    *right-hand* index :code:`b`, towards the left-hand index :code:`a`. For
+    example, :json:`"<path_to_array>[6:3]"` corresponds to the elements at
+    indexes 3, 4, 5 and 6, in this order (i.e. the same order as when reading
+    the full array), while :json:`"<path_to_array>[3:6]"` corresponds to the
+    elements at indexes 6, 5, 4 and 3, in this order.
 
 * Returned frame (for :json:`"sel": "sim_info"`):
 
@@ -409,6 +422,15 @@ This command can be used to forcefully set the value of a simulator variable.
     :code:`[]` operator, e.g. :json:`"<path_to_array>[4]"`. The Verilator
     integration API even supports sub-ranges, such as e.g.
     :json:`"<path_to_array>[6:3]"` or :json:`"<path_to_array>[3:6]"`.
+
+    .. note::
+
+      For a sub-range :code:`[a:b]`, the values are ordered starting from the
+      *right-hand* index :code:`b`, towards the left-hand index :code:`a`. For
+      example, setting :json:`"<path_to_array>[6:3]"` to :json:`[1, 2, 3, 4]`
+      sets the elements at indexes 3, 4, 5 and 6 to 1, 2, 3 and 4
+      respectively, while setting :json:`"<path_to_array>[3:6]"` to the same
+      value sets them to 4, 3, 2 and 1 respectively.
 
   For :json:`"sel": "value"`, the field ``"value"`` shall be defined as
   follows:

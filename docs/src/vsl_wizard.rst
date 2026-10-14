@@ -36,10 +36,13 @@ such that the wizard script can simply be evoked as follows:
 .. code:: text
 
     usage: vsl-wizard [-h] [--build-dir BUILD_DIR]
-        [--templates-dir TEMPLATES_DIR] [--makefile-top MAKEFILE_TOP]
-        [--makefile MAKEFILE] [--testbench-file TESTBENCH_FILE]
-        [--variables-file VARIABLES_FILE] [--makefile-only] [--tb-only]
-        [--vlt-only] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] config
+        [--templates-dir TEMPLATES_DIR] [--mkfile-template MKFILE_TEMPLATE]
+        [--cpp-template CPP_TEMPLATE] [--vlt-template VLT_TEMPLATE]
+        [--makefile-top MAKEFILE_TOP] [--makefile MAKEFILE]
+        [--testbench-file TESTBENCH_FILE] [--variables-file VARIABLES_FILE]
+        [--makefile-only] [--tb-only] [--vlt-only]
+        [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+        config
 
 .. program:: vsl-wizard
 
@@ -166,6 +169,23 @@ Optional arguments
 
     Path to templates directory if alternatives templates shall be used instead
     of the default ones
+
+    This option is *deprecated* and shall be removed without notice in a future
+    release! Prefer setting individual templates paths with the ``--*-template``
+    options instead.
+
+.. option:: --mkfile-template <MKFILE_TEMPLATE>
+
+    Path to alternative Mako template for the rendered makefile.
+
+.. option:: --cpp-template <MKFILE_TEMPLATE>
+
+    Path to alternative Mako template for the rendered C++ testbench file.
+
+.. option:: --vlt-template <MKFILE_TEMPLATE>
+
+    Path to alternative Mako template for the rendered Verilator configuration
+    file for public variables declaration.
 
 .. option:: --makefile-top <MAKEFILE_TOP>
 

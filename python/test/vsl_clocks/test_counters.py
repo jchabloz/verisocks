@@ -1,4 +1,4 @@
-from verisocks.verisocks import Verisocks
+from verisocks.verisocks import Verisocks, VerisocksError
 from verisocks.utils import setup_sim_run, find_free_port
 import logging
 import pytest
@@ -83,6 +83,18 @@ def test_clk_config(vs):
 
     # Test configuring clock
     vs.configure_clock("clk1", 1.6, "us", 0.56)
+    vs.run("for_time", time=10, time_unit="us")
+    answer = vs.get(sel="value", path="clk1_period")
+    assert answer['value'] == 1600
+    answer = vs.get(sel="value", path="clk1_dc")
+    assert answer['value'] == 0.56
+
+    # Invalid configurations are rejected, configuration unchanged: wrong time
+    # unit, duty cycle out of ]0, 1[, period not > 1 simulation time step
+    for args in [(2.0, "uss", 0.5), (2.0, "us", 1.5), (2.0, "us", 0.0),
+                 (1e-6, "us", 0.5), (0.0, "us", 0.5)]:
+        with pytest.raises(VerisocksError):
+            vs.configure_clock("clk1", *args)
     vs.run("for_time", time=10, time_unit="us")
     answer = vs.get(sel="value", path="clk1_period")
     assert answer['value'] == 1600

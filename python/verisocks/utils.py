@@ -70,8 +70,8 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True,
             command is mandatory and cannot be None.
         capture_output (bool): Defines if stdout and stderr output
             are "captured" (i.e. not visible).
-        capture_logfile (int): Valid file descriptor to capture stdout and
-            stderr
+        capture_logfile (io.IOBase): Valid file descriptor to capture stdout
+            and stderr
 
     Returns:
         subprocess.Popen: Process object of the launched simulation
@@ -112,6 +112,9 @@ def setup_sim_run(elab_cmd, sim_cmd, capture_output=True,
         pop = subprocess.Popen(sim_cmd)
 
     logging.info(f"Launched simulation with PID {pop.pid}")
+    if capture_logfile:
+        logging.info(
+            f"Simulation outputs captured in logfile {capture_logfile.name}")
     return pop
 
 

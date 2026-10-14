@@ -86,6 +86,17 @@ static PLI_INT32 get_time_factor(const char *time_unit)
     return 0;
 }
 
+int vs_utils_check_time_unit(const char *time_unit)
+{
+    const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE;
+    if (NULL == time_unit) return 0;
+    while(ptr_tdef->name != NULL) {
+        if (strcmp(ptr_tdef->name, time_unit) == 0) return 1;
+        ptr_tdef++;
+    }
+    return 0;
+}
+
 const vs_time_def_t* vs_utils_get_time_def(const PLI_INT32 time_factor)
 {
     const vs_time_def_t *ptr_tdef = TIME_DEF_TABLE_FULL;

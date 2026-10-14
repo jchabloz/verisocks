@@ -73,6 +73,10 @@ static error_t argp_parse_opt (int key, char* arg, struct argp_state* state) {
 
 static const struct argp argp = {argp_options, argp_parse_opt, 0, argp_doc};
 
+// Optional hook function
+// Uncomment and edit according to your needs
+//void hook (const int code, vsl::VslInteg<hello_world>* p_vx) {}
+
 //======================
 
 int main(int argc, char** argv, char**) {
@@ -107,6 +111,9 @@ int main(int argc, char** argv, char**) {
 
     // User sim info
     vslx.set_user_sim_info("User information for Hello world");
+
+    // Optional hook function - Uncomment to use
+    //vslx.set_hook(hook);
 
     // Run simulation
     int retval = vslx.run();

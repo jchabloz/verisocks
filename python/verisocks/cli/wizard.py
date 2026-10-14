@@ -31,7 +31,7 @@ from mako.template import Template
 
 
 cwd = abspath(dirname(__file__))
-tmpl_path = join(cwd, "templates")
+TEMPLATES_PATH = join(cwd, "templates")
 
 
 def render_template(template_file, output_file, **kwargs):
@@ -42,6 +42,7 @@ def render_template(template_file, output_file, **kwargs):
         output_file (str): Path to rendered output file
         kwargs: Keyword arguments required by the template
     """
+    logging.debug(f"Template file path: {template_file}")
     outdir = dirname(output_file)
     if outdir and not exists(outdir):
         mkdir(outdir)
@@ -66,32 +67,38 @@ templates and a YAML configuration file.
     parser.add_argument('--build-dir', '-b', type=pathlib.Path,
                         help="Build directory (default=build)")
     parser.add_argument('--templates-dir', '-t', type=pathlib.Path,
-                        default=tmpl_path,
-                        help="Templates directory if alternative \
-templates shall be used")
+                        help="Templates directory if alternative"
+                             " templates shall be used")
+    parser.add_argument('--mkfile-template', type=pathlib.Path,
+                        help="Path to alternative Makefile template")
+    parser.add_argument('--cpp-template', type=pathlib.Path,
+                        help="Path to alternative C++ testbench file template")
+    parser.add_argument('--vlt-template', type=pathlib.Path,
+                        help="Path to alternative Verilator configuration file"
+                        " template")
     parser.add_argument('--makefile-top', type=pathlib.Path,
                         default="Makefile",
                         help="Rendered top makefile name (default: Makefile)")
     parser.add_argument('--makefile', type=pathlib.Path, default="Makefile",
-                        help="Rendered makefile name in BUILD_DIR \
-(default: Makefile)")
+                        help="Rendered makefile name in BUILD_DIR"
+                             " (default: Makefile)")
     parser.add_argument('--testbench-file', type=pathlib.Path,
                         default="test_main.cpp",
-                        help="Rendered C++ testbench file (default: \
-test_main.cpp)")
+                        help="Rendered C++ testbench file"
+                             " (default: test_main.cpp)")
     parser.add_argument('--variables-file', type=pathlib.Path,
                         default="variables.vlt",
-                        help="Rendered Verilator configuration file for \
-public variables (default:variables.vlt)")
+                        help="Rendered Verilator configuration file for"
+                             " public variables (default:variables.vlt)")
     parser.add_argument('--makefile-only', action='store_true',
-                        help="Render makefile(s) only (unless any other \
-*-only option is being used)")
+                        help="Render makefile(s) only (unless any other"
+                             " *-only option is being used)")
     parser.add_argument('--tb-only', action='store_true',
-                        help="Render tesbench file only (unless any other \
-*-only option is being used)")
+                        help="Render tesbench file only (unless any other"
+                             " *-only option is being used)")
     parser.add_argument('--vlt-only', action='store_true',
-                        help="Render variables file only (unless any other \
-*-only option is being used)")
+                        help="Render variables file only (unless any other"
+                             " *-only option is being used)")
     parser.add_argument(
         '--log-level', type=str,
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -120,10 +127,20 @@ public variables (default:variables.vlt)")
         not args.makefile_only and not args.tb_only)
 
     # Format paths to templates relative to this file
-    template_top_mk = join(args.templates_dir, "Makefile_top.mako")
-    template_mk = join(args.templates_dir, "Makefile.mako")
-    template_cpp = join(args.templates_dir, "test_main.cpp.mako")
-    template_vlt = join(args.templates_dir, "variables.vlt.mako")
+    tmpl_dir = TEMPLATES_PATH
+    if args.templates_dir:
+        tmpl_dir = args.templates_dir
+    logging.debug(f"Templates directory: {tmpl_dir}")
+    template_top_mk = join(tmpl_dir, "Makefile_top.mako")
+    template_mk = join(tmpl_dir, "Makefile.mako")
+    template_cpp = join(tmpl_dir, "test_main.cpp.mako")
+    template_vlt = join(tmpl_dir, "variables.vlt.mako")
+    if args.mkfile_template:
+        template_mk = args.mkfile_template
+    if args.cpp_template:
+        template_cpp = args.cpp_template
+    if args.vlt_template:
+        template_vlt = args.vlt_template
 
     # Load YAML configuration file
     logging.info(f"Loading configuration file {args.config}")

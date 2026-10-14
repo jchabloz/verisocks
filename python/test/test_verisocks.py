@@ -76,6 +76,25 @@ def test_connect_error():
     vs.close()
 
 
+def test_write_failure():
+    """Tests that a message that cannot be completely sent raises a
+    ConnectionError, without leaving it queued nor expecting an answer (no
+    simulation needed: the peer is a plain socket which never reads)"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+        server.bind((HOST, 0))
+        server.listen(1)
+        vs = Verisocks(HOST, server.getsockname()[1], timeout=0.5)
+        vs.connect()
+        conn, _ = server.accept()
+        with pytest.raises(ConnectionError):
+            vs.send_cmd("info", value="x" * (64 * 1024 * 1024))
+        assert vs._tx_buffer == b""
+        assert vs._tx_msg_len == []
+        assert vs._rx_expected == 0
+        assert not vs._connected
+        conn.close()
+
+
 def test_info(vs):
     """Tests the info command"""
     answer = vs.info("This is a test")
@@ -372,6 +391,18 @@ def test_run_until_change(vs):
     assert answer["value"] == 10
 
 
+def test_run_until_change_already_equal(vs):
+    """Tests that run(until_change) with a value the variable already has
+    waits for the next change to that value, rather than returning
+    immediately (here: until the 8-bit counter wraps around)"""
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    t0 = vs.get("sim_time")["time"]
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    assert vs.get("sim_time")["time"] - t0 > 200e-6
+
+
 def test_sc_run_until_change(vs):
     """Tests Verisocks run_until_change shorcut function"""
 
@@ -385,6 +416,55 @@ def test_sc_run_until_change(vs):
     answer = vs.run_until_change("main.count", 300, 15, "us")
     assert answer["type"] == "timeout"
     assert answer["sim_time"] - prev_time == 15e6
+
+    # A zero value is a condition, not "any change" (count wraps to 0)
+    vs.run_until_change("main.count", 0)
+    assert vs.get_value("main.count") == 0
+
+
+def test_sc_errors(vs):
+    """Tests that shortcut functions raise VerisocksError on error answers"""
+    with pytest.raises(VerisocksError):
+        vs.run_until_change("main.no_such_variable")
+    with pytest.raises(VerisocksError):
+        vs.set_value("main.no_such_variable", 1)
+
+
+def test_run_wrong_time_unit(vs):
+    """Tests that a wrong time unit is rejected without running the
+    simulation"""
+    vs.run_for(10, "us")
+    sim_time = vs.get("sim_time")["time"]
+    with pytest.raises(VerisocksError):
+        vs.run_for(1, "uss")
+    with pytest.raises(VerisocksError):
+        vs.run_until(20, "uss")
+    with pytest.raises(VerisocksError):
+        vs.run_until_change("main.count", 300, 10, "uss")
+    assert vs.get("sim_time")["time"] == sim_time
+    # Simulation still under control
+    vs.run_for(10, "us")
+    assert vs.get("sim_time")["time"] == pytest.approx(sim_time + 10e-6)
+
+
+@pytest.mark.parametrize("shortcut, args", [
+    ("run_for", (1, "us")),
+    ("run_until", (1, "us")),
+    ("run_until_change", ("main.count",)),
+    ("set_value", ("main.count", 1)),
+    ("enable_clock", ("main.clk",)),
+    ("disable_clock", ("main.clk",)),
+    ("configure_clock", ("main.clk", 1.0)),
+])
+@pytest.mark.parametrize("answer_type", ["result", "error"])
+def test_sc_unexpected_answer(shortcut, args, answer_type):
+    """Tests that shortcut functions raise VerisocksError on unexpected
+    answers (no simulation needed: send() is stubbed)"""
+    vs = Verisocks(HOST, find_free_port())
+    vs.send = lambda **cmd: {"type": answer_type, "value": "unexpected"}
+    with pytest.raises(VerisocksError):
+        getattr(vs, shortcut)(*args)
+    vs.close()
 
 
 def test_set(vs):
@@ -421,6 +501,21 @@ def test_read_not_expected(vs):
     messages expected.
     """
     assert vs.read() is False
+
+
+def test_message_long(vs):
+    """Tests that long messages (well beyond a few kB) are accepted"""
+    answer = vs.info("x" * 100000)
+    assert answer["type"] == "ack"
+
+
+def test_message_too_long(vs):
+    """Tests that a message longer than the server maximum message length
+    (16 MiB by default) is rejected without breaking the connection"""
+    with pytest.raises(VerisocksError, match="Message too long"):
+        vs.info("x" * (17 * 1024 * 1024))
+    vs.run_for(1, "us")
+    assert vs.get_value("main.count") > 0
 
 
 def test_sim_finishes(vs):

@@ -10,7 +10,6 @@ VSL_DIR ?= ../..
 # Using FST traceing (slower due to compression)
 CPP_USER_FLAGS += -DDUMP_FILE -DDUMP_FST
 VL_USER_FLAGS += --trace-fst
-USER_LDLIBS = -lz
 
 # Design prefix
 VM_PREFIX = Vcounter

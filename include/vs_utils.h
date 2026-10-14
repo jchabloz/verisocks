@@ -72,6 +72,15 @@ double vs_utils_time_to_double(s_vpi_time time, const char *time_unit);
 s_vpi_time vs_utils_double_to_time(double time_value, const char *time_unit);
 
 /**
+ * @brief Check the validity of a time unit identifier
+ *
+ * @param time_unit Time unit identifier
+ * @return 1 if the time unit is one of "s", "ms", "us", "ns", "ps" or "fs"
+ * (case sensitive), 0 otherwise (including NULL)
+ */
+int vs_utils_check_time_unit(const char *time_unit);
+
+/**
  * @brief Get current simulation time in seconds
  * 
  * @return Simulation time in seconds

@@ -74,6 +74,10 @@ SOFTWARE.
 #undef __MOD__
 #define __MOD__ "vsl"
 
+/* Events codes definition - To be used in hook function */
+#define VSL_EVT_PRE_EVAL  0
+#define VSL_EVT_POST_EVAL 1
+
 /**
  * @brief Helper macro to declare a command handler function prototype
  *
@@ -151,6 +155,18 @@ public:
      */
     int run();
 
+    /* Hooks */
+    using Hook = void(*)(const int code, VslInteg<T>* p_vx);
+
+    /**
+     * @brief Register hook function
+     * 
+     * @param hook Hook function pointer
+     */
+    void set_hook(Hook hook) {
+        this->hook = hook;
+    };
+
     /**
      * @brief Register a clock variable
      *
@@ -162,14 +178,18 @@ public:
      * @param period Period of the clock
      * @param unit Time unit used for the clock period parameter
      * @param duty_cycle Clock duty cycle
+     * @param enable Enable the clock
+     * @return 0 if successful, -1 if the clock could not be registered
+     * (invalid period, time unit or duty cycle)
      */
-    inline void register_clock(const char* name, std::any datap,
+    inline int register_clock(const char* name, std::any datap,
         const double period, const char* unit, const double duty_cycle,
         const bool enable = false) {
-            clock_map.add_clock(
+            if (0 > clock_map.add_clock(
                 name, datap, period, unit, duty_cycle, p_context, enable
-            );
+            )) {return -1;}
             register_variable(name, datap, VLVT_UINT8, VSL_TYPE_SCALAR, 1u);
+            return 0;
     }
 
     /**
@@ -280,6 +300,9 @@ private:
     vs_uuid_t uuid {0u, VS_UUID_NULL};  //Transaction UUID
     std::string sim_user_info;     //User-provided info provided as sim info
 
+    /* Evaluation hooks */
+    Hook hook = nullptr;
+
     /* Simulation time representation for timestamps*/
     VslTimeDef time_def{0, nullptr, 0, nullptr}; //Sim time definition
     inline const uint64_t sim_time(void) {
@@ -302,6 +325,7 @@ private:
     vsl_time_t cb_time {0ull};
     std::string cb_value_path;
     double cb_value {0.0};
+    double cb_prev_value {0.0};  // Variable value at previous check
 
     /* Model evaluation state */
     bool b_eval_required {true};
@@ -594,12 +618,12 @@ Main finite state-machine - Waiting for command
 ******************************************************************************/
 template<typename T>
 void VslInteg<T>::main_wait() {
-    char read_buffer[4096];
+    char *read_buffer = nullptr;
     int msg_len;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
-    msg_len = vs_msg_read(
-        fd_client_socket, read_buffer, sizeof(read_buffer), &msg_info);
+    msg_len = vs_msg_read_alloc(
+        fd_client_socket, &read_buffer, VS_MSG_MAX_LEN, &msg_info);
     if (0 > msg_len) {
         vs_server_close_socket(fd_client_socket);
         fd_client_socket = -1;
@@ -614,23 +638,20 @@ void VslInteg<T>::main_wait() {
     if (uuid.valid) {
         memcpy(uuid.value, msg_info.uuid.value, VS_UUID_LEN);
     }
-    if (msg_len >= (int) sizeof(read_buffer)) {
-        read_buffer[sizeof(read_buffer) - 1] = '\0';
+    if (nullptr == read_buffer) {
         vs_log_mod_warning(
             __MOD__,
-            "Received message longer than RX buffer, discarding it"
+            "Received message longer than maximum length, discarding it"
         );
         VSL_MSG_RETURN_VX("error", "Message too long - Discarding");
         return;
-    }
-    else {
-        read_buffer[msg_len] = '\0';
     }
     vs_log_mod_debug(__MOD__, "Message: %s", &read_buffer[2]);
     if (nullptr != p_cmd) {
         cJSON_Delete(p_cmd);
     }
     p_cmd = vs_msg_read_json(read_buffer, &msg_info);
+    free(read_buffer);
     if (nullptr != p_cmd) {
         _state = VSL_STATE_PROCESSING;
         return;
@@ -798,8 +819,10 @@ Wrapper simulation management functions
 template<typename T>
 void VslInteg<T>::eval() {
     if (b_eval_required) {
+        if (hook) hook(VSL_EVT_PRE_EVAL, this);
         clock_map.eval(p_context->time());
         p_model->eval();
+        if (hook) hook(VSL_EVT_POST_EVAL, this);
         b_eval_required = false;
     }
     //#ifdef DUMP_FILE
@@ -848,6 +871,7 @@ Path not found in registered variables - Discarding");
         return -1;
     }
     cb_value = value;
+    cb_prev_value = get_registered_variable(cb_value_path)->get_value();
     b_has_value_callback = true;
     b_has_change_only_callback = false;
     return 0;
@@ -876,10 +900,17 @@ const bool VslInteg<T>::check_value_callback() {
     if (has_value_callback()) {
         auto p_var = get_registered_variable(cb_value_path);
         switch (p_var->get_type()) {
-            case VSL_TYPE_SCALAR:
-                if (p_var->get_value() == cb_value)
-                    return !b_has_change_only_callback;
-                return b_has_change_only_callback;
+            case VSL_TYPE_SCALAR: {
+                /* Only a change of value can trigger the callback, as with
+                the VPI cbValueChange callback reason: a variable which
+                already has the target value at registration time has to
+                change and come back to it */
+                const double value = p_var->get_value();
+                const bool changed = (value != cb_prev_value);
+                cb_prev_value = value;
+                if (b_has_change_only_callback) return changed;
+                return changed && (value == cb_value);
+            }
             case VSL_TYPE_EVENT:
                 if (p_var->get_value() == 1.0f) return true;
                 return false;

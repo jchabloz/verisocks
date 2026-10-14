@@ -340,6 +340,18 @@ def test_run_until_change(vs):
     assert answer["value"] == 10
 
 
+def test_run_until_change_already_equal(vs):
+    """Tests that run(until_change) with a value the variable already has
+    waits for the next change to that value, rather than returning
+    immediately (here: until the 8-bit counter wraps around)"""
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    t0 = vs.get("sim_time")["time"]
+    vs.run_until_change("main.count", 7)
+    assert vs.get_value("main.count") == 7
+    assert vs.get("sim_time")["time"] - t0 > 200e-6
+
+
 def test_set(vs):
     """Tests Verisocks set() function"""
     # Set a reg
@@ -369,6 +381,8 @@ def test_set(vs):
     answer = vs.get(sel="value", path="main.count_memory[6:4]")
     assert answer["type"] == "result"
     assert answer["value"] == [17, 234, 126]
+    # The first value maps to the right-hand index of the sub-range
+    assert vs.get_value("main.count_memory[4]") == 17
 
     answer = vs.set(
         sel="value", path="main.count_memory[4:6]", value=[17, 234, 126])
@@ -387,6 +401,22 @@ def test_read_not_expected(vs):
     messages expected.
     """
     assert vs.read() is False
+
+
+def test_message_long(vs):
+    """Tests that long messages (well beyond a few kB) are accepted"""
+    answer = vs.info("x" * 100000)
+    assert answer["type"] == "ack"
+
+
+def test_message_too_long(vs):
+    """Tests that a message longer than the server maximum message length
+    (reduced to 1 MiB for this test build, see Makefile) is rejected without
+    breaking the connection"""
+    with pytest.raises(VerisocksError, match="Message too long"):
+        vs.info("x" * (1200 * 1024))
+    vs.run_for(1, "us")
+    assert vs.get_value("main.count") > 0
 
 
 def test_sim_finishes(vs):

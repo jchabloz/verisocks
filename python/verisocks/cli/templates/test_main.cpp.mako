@@ -152,6 +152,10 @@ static const struct argp argp = {argp_options, argp_parse_opt, 0, argp_doc};
 static const struct argp argp = {argp_options, argp_parse_opt, 0, 0};
 % endif
 
+// Optional hook function
+// Uncomment and edit according to your needs
+//void hook (const int code, vsl::VslInteg<${prefix}>* p_vx) {}
+
 //======================
 
 int main(int argc, char** argv, char**) {
@@ -191,20 +195,23 @@ int main(int argc, char** argv, char**) {
     vslx.set_user_sim_info("${user_sim_info}");
 
     % endif
+    // Optional hook function - Uncomment to use
+    //vslx.set_hook(hook);
+
     % if variables:
     // Register public variables
     % if 'clocks' in variables:
     // Clocks
     % for clk in variables['clocks']:
-    vslx.register_clock("${get_var_name(clk)}",
+    if (0 > vslx.register_clock("${get_var_name(clk)}",
         &topp->${clk['path'].replace(".", "->")},
         ${clk['period']}, "${clk['unit']}", ${get_clk_dc(clk)}\
 % if 'enable' in clk:
 , ${bool_py2c(clk['enable'])}
-    );
+    )) {return EXIT_FAILURE;}
 % else:
 , false
-    );
+    )) {return EXIT_FAILURE;}
     % endif
     % endfor
     % endif

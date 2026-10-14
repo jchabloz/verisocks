@@ -42,6 +42,12 @@ extern "C" {
 #define VS_MSG_MAX_READ_TRIALS  10u //Defines how many read trials should be attempted
 #define VS_MSG_MAX_WRITE_TRIALS 10u //Defines how many write trials should be attempted
 
+/* Maximum length of a received message (pre-header, header and content),
+for vs_msg_read_alloc(). Can be overridden at compile time. */
+#ifndef VS_MSG_MAX_LEN
+#define VS_MSG_MAX_LEN (16u * 1024u * 1024u)
+#endif
+
 /**
  * @brief Message content type enumeration
  */
@@ -214,6 +220,25 @@ int vs_msg_return(int fd, const char *str_type, const char *str_value,
  * if successful or -1 if an error occurred.
  */
 int vs_msg_read(int fd, char *buffer, size_t len, vs_msg_info_t *p_msg_info);
+
+/**
+ * @brief Reads formatted message from the given descriptor into a
+ * dynamically allocated buffer, sized according to the message header.
+ *
+ * @param fd I/O descriptor
+ * @param pp_buffer Pointer to the buffer pointer. If a message is returned,
+ * *pp_buffer points to the null-terminated message (pre-header, header and
+ * content), which the caller has to free. It is set to NULL otherwise.
+ * @param max_len Maximum accepted message length (typically VS_MSG_MAX_LEN).
+ * A longer message is read and discarded.
+ * @param p_msg_info Pointer to a vs_msg_info_t struct. The function will
+ * populate the structure with information from the message header.
+ * @return Returns the message length if successful, 0 if the message was
+ * discarded because longer than max_len or -1 if an error occurred (e.g. the
+ * connection was lost).
+ */
+int vs_msg_read_alloc(int fd, char **pp_buffer, size_t max_len,
+                      vs_msg_info_t *p_msg_info);
 
 /**
  * @brief Checks (non-blocking) if there is anything to read from the socket

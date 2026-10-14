@@ -41,7 +41,6 @@ SOFTWARE.
 #include "vs_msg.h"
 #include "vs_vpi.h"
 
-#define READ_BUFFER_SIZE 4096
 
 /* Prototypes for some static functions */
 static PLI_INT32 verisocks_main(vs_vpi_data_t *p_vpi_data);
@@ -638,14 +637,14 @@ static PLI_INT32 verisocks_main_connect(vs_vpi_data_t *p_vpi_data)
  */
 static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
 {
-    char read_buffer[READ_BUFFER_SIZE];
+    char *read_buffer = NULL;
     int msg_len;
     vs_msg_info_t msg_info = VS_MSG_INFO_INIT_UNDEF;
 
-    msg_len = vs_msg_read(p_vpi_data->fd_client_socket,
-                          read_buffer,
-                          sizeof(read_buffer),
-                          &msg_info);
+    msg_len = vs_msg_read_alloc(p_vpi_data->fd_client_socket,
+                                &read_buffer,
+                                VS_MSG_MAX_LEN,
+                                &msg_info);
 
     if (0 > msg_len) {
         close(p_vpi_data->fd_client_socket);
@@ -663,20 +662,17 @@ static PLI_INT32 verisocks_main_waiting(vs_vpi_data_t *p_vpi_data)
         memcpy(p_vpi_data->uuid.value, msg_info.uuid.value, VS_UUID_LEN);
     }
 
-    if (msg_len >= (int) sizeof(read_buffer)) {
-        read_buffer[sizeof(read_buffer) - 1] = '\0';
+    if (NULL == read_buffer) {
         vs_vpi_log_warning(
-            "Received message longer than RX buffer, discarding it"
+            "Received message longer than maximum length, discarding it"
         );
         VS_VPI_RETURN(p_vpi_data, "error", "Message too long - Discarding");
         return -1;
     }
-    else {
-        read_buffer[msg_len] = '\0';
-    }
     vs_vpi_log_debug("Message: %s", &read_buffer[2]);
     if (NULL != p_vpi_data->p_cmd) cJSON_Delete(p_vpi_data->p_cmd);
     p_vpi_data->p_cmd = vs_msg_read_json(read_buffer, &msg_info);
+    free(read_buffer);
     if (NULL != p_vpi_data->p_cmd) {
         p_vpi_data->state = VS_VPI_STATE_PROCESSING;
         return 0;

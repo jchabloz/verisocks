@@ -9,7 +9,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 #include <CUnit/Basic.h>
 #include <CUnit/Automated.h>
 
@@ -176,6 +179,7 @@ void test_vs_msg_create_json_message_from_string(void)
     CU_ASSERT_PTR_NOT_NULL(str_msg);
 
     vs_msg_info_t msg_info_read;
+    CU_ASSERT_EQUAL(0, vs_msg_read_info(str_msg, &msg_info_read));
 
     char *str_msg_read = vs_msg_read_content(str_msg, &msg_info_read);
     CU_ASSERT_PTR_NOT_NULL(str_msg_read);
@@ -217,4 +221,154 @@ void test_vs_msg_read_write_loopback(void)
 
     free(str_msg);
     close(fd_test);
+}
+
+void test_vs_msg_read_too_long(void)
+{
+    /* A message longer than the read buffer is truncated, and its remaining
+    content discarded so that the next message can still be read */
+    int fd_test = open("./test_long.txt",
+        O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+    CU_ASSERT(fd_test != -1);
+
+    char long_value[3 * 1024];
+    memset(long_value, 'x', sizeof(long_value) - 1);
+    long_value[sizeof(long_value) - 1] = '\0';
+    cJSON *p_msg_long = cJSON_CreateObject();
+    CU_ASSERT_PTR_NOT_NULL(
+        cJSON_AddStringToObject(p_msg_long, "value", long_value));
+
+    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_UUID_NULL}};
+    char *str_msg_long = vs_msg_create_message(p_msg_long, &msg_info);
+    CU_ASSERT_PTR_NOT_NULL(str_msg_long);
+    msg_info.len = 0u;
+    char *str_msg = vs_msg_create_message(p_msg_json, &msg_info);
+    CU_ASSERT_PTR_NOT_NULL(str_msg);
+    CU_ASSERT_EQUAL(0, vs_msg_write(fd_test, str_msg_long));
+    CU_ASSERT_EQUAL(0, vs_msg_write(fd_test, str_msg));
+    CU_ASSERT_EQUAL(0, (int) lseek(fd_test, 0, SEEK_SET));
+
+    /* First message: too long for the buffer */
+    int retval = vs_msg_read(fd_test, read_buffer, read_buffer_len,
+        &msg_info);
+    CU_ASSERT(retval > (int) read_buffer_len);
+
+    /* Second message: read correctly (only parsed if read correctly, as
+    msg_info would otherwise be inconsistent with the buffer) */
+    retval = vs_msg_read(fd_test, read_buffer, read_buffer_len, &msg_info);
+    CU_ASSERT(0 < retval && retval < (int) read_buffer_len);
+    if (0 < retval && retval < (int) read_buffer_len) {
+        cJSON *p_msg_read = vs_msg_read_json(read_buffer, &msg_info);
+        CU_ASSERT_PTR_NOT_NULL(p_msg_read);
+        CU_ASSERT(cJSON_Compare(p_msg_json, p_msg_read, cJSON_True));
+        cJSON_Delete(p_msg_read);
+    }
+
+    cJSON_Delete(p_msg_long);
+    free(str_msg);
+    free(str_msg_long);
+    close(fd_test);
+}
+
+/* Write a message as a JSON object with a string value of the given length,
+in chunks of chunk_len bytes (all at once if 0). Returns 0 if successful. */
+static int write_long_msg(int fd, size_t value_len, size_t chunk_len)
+{
+    char *value = (char*) malloc(value_len + 1);
+    if (NULL == value) return -1;
+    memset(value, 'x', value_len);
+    value[value_len] = '\0';
+    cJSON *p_msg = cJSON_CreateObject();
+    cJSON_AddStringToObject(p_msg, "value", value);
+    free(value);
+    vs_msg_info_t msg_info = {VS_MSG_TXT_JSON, 0u, {0u, VS_UUID_NULL}};
+    char *str_msg = vs_msg_create_message(p_msg, &msg_info);
+    cJSON_Delete(p_msg);
+    if (NULL == str_msg) return -1;
+    size_t len = 2 + vs_msg_read_header_length(str_msg) + msg_info.len;
+    int retval = 0;
+    if (0 == chunk_len) chunk_len = len;
+    for (size_t k = 0; k < len && 0 == retval; k += chunk_len) {
+        size_t n = (len - k < chunk_len) ? len - k : chunk_len;
+        if ((ssize_t) n != write(fd, str_msg + k, n)) retval = -1;
+    }
+    free(str_msg);
+    return retval;
+}
+
+void test_vs_msg_read_alloc(void)
+{
+    /* Messages longer than max_len are discarded (returns 0), the others are
+    returned in an allocated buffer, whatever their length */
+    int fd_test = open("./test_alloc.txt",
+        O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+    CU_ASSERT(fd_test != -1);
+    CU_ASSERT_EQUAL(0, write_long_msg(fd_test, 100u * 1024u, 0u));
+    CU_ASSERT_EQUAL(0, write_long_msg(fd_test, 10u * 1024u, 0u));
+    CU_ASSERT_EQUAL(0, write_long_msg(fd_test, 10u, 0u));
+    CU_ASSERT_EQUAL(0, (int) lseek(fd_test, 0, SEEK_SET));
+
+    char *buffer = NULL;
+    vs_msg_info_t msg_info;
+    const size_t max_len = 64u * 1024u;
+
+    /* 100 kB message: too long, discarded */
+    CU_ASSERT_EQUAL(0, vs_msg_read_alloc(fd_test, &buffer, max_len,
+        &msg_info));
+    CU_ASSERT_PTR_NULL(buffer);
+
+    /* 10 kB and 10 B messages: read */
+    size_t expected_len[] = {10u * 1024u, 10u};
+    for (int k = 0; k < 2; k++) {
+        int retval = vs_msg_read_alloc(fd_test, &buffer, max_len, &msg_info);
+        CU_ASSERT(0 < retval);
+        CU_ASSERT_PTR_NOT_NULL_FATAL(buffer);
+        cJSON *p_msg = vs_msg_read_json(buffer, &msg_info);
+        CU_ASSERT_PTR_NOT_NULL(p_msg);
+        const char *value = cJSON_GetStringValue(
+            cJSON_GetObjectItem(p_msg, "value"));
+        CU_ASSERT(NULL != value && strlen(value) == expected_len[k]);
+        cJSON_Delete(p_msg);
+        free(buffer);
+    }
+
+    /* Nothing left to read */
+    CU_ASSERT_EQUAL(-1, vs_msg_read_alloc(fd_test, &buffer, max_len,
+        &msg_info));
+    close(fd_test);
+}
+
+void test_vs_msg_read_alloc_partial_reads(void)
+{
+    /* A long message arriving in many small chunks (i.e. many partial reads
+    on the receiver side) is read completely */
+    int fds[2];
+    CU_ASSERT_FATAL(0 == socketpair(AF_UNIX, SOCK_STREAM, 0, fds));
+    pid_t pid = fork();
+    CU_ASSERT_FATAL(pid >= 0);
+    if (0 == pid) {
+        close(fds[0]);
+        int retval = write_long_msg(fds[1], 32u * 1024u, 100u);
+        close(fds[1]);
+        _exit(retval == 0 ? 0 : 1);
+    }
+    close(fds[1]);
+    char *buffer = NULL;
+    vs_msg_info_t msg_info;
+    int retval = vs_msg_read_alloc(fds[0], &buffer, VS_MSG_MAX_LEN,
+        &msg_info);
+    CU_ASSERT(0 < retval);
+    CU_ASSERT_PTR_NOT_NULL(buffer);
+    if (NULL != buffer) {
+        cJSON *p_msg = vs_msg_read_json(buffer, &msg_info);
+        const char *value = cJSON_GetStringValue(
+            cJSON_GetObjectItem(p_msg, "value"));
+        CU_ASSERT(NULL != value && strlen(value) == 32u * 1024u);
+        cJSON_Delete(p_msg);
+        free(buffer);
+    }
+    close(fds[0]);
+    int status;
+    waitpid(pid, &status, 0);
+    CU_ASSERT(WIFEXITED(status) && 0 == WEXITSTATUS(status));
 }
